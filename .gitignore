@@ -1,4 +1,4 @@
-# pixi (root env only; tests/conversion ships its own pinned lock intentionally)
+# pixi (lockfile stays local, not committed)
 /.pixi/
 /pixi.lock
 /.pixi-bin/

@@ -18,7 +18,7 @@ needed to run it.
 ## Run
 
 ```sh
-pixi run comparisons              # formatted tables (run_comparisons.py)
+pixi run hs3                      # formatted tables (run_comparisons.py)
 pixi run test                     # pytest, incl. this corpus via its shim
 ```
 
