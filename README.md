@@ -51,12 +51,13 @@ comparisons, and the 2DeltaNLL math are all engine-agnostic.
 
 Everything runs through pixi.
 
-The **converter** (`flatppl-rust`) is installed by `pixi run setup`, which runs
-`cargo install --git …/flatppl-rust --branch <ref> flatppl-cli`; bump
-`FLATPPL_RUST_REF` and re-run to pull changes. The default **engine**
-(`flatppl-js`) is resolved at scoring time from a checkout named by `FLATPPL_JS_DIR`
-(default: sibling `../flatppl-js`), whose `.ts` Node 24 loads directly — point it at
-a pinned clone for reproducibility. The **oracles**, ROOT (conda-forge `root`) and
+`pixi run setup` provisions both. The **converter** (`flatppl-rust`) is installed
+via `cargo install --git …/flatppl-rust --branch <ref> --features hs3 flatppl-cli`;
+bump `FLATPPL_RUST_REF` and re-run to pull changes. The default **engine**
+(`flatppl-js`) is resolved at scoring time from `FLATPPL_JS_DIR` (default: sibling
+`../flatppl-js`), whose `.ts` Node 24 loads directly. Setup clones that location at
+`FLATPPL_JS_REF` when it is missing and leaves an existing checkout untouched — so a
+co-development checkout with your own engine changes is never clobbered. The **oracles**, ROOT (conda-forge `root`) and
 pyHS3 (pip `pyhs3`), live in their own pixi environments (`-e root`, `-e pyhs3`) and
 subprocess the upstream HS3TestSuite checkout named by `HS3SUITE`.
 
