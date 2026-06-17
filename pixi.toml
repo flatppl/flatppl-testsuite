@@ -1,0 +1,59 @@
+[workspace]
+name = "flatppl-testsuite"
+version = "0.0.0"
+description = "Test FlatPPL engines against corpora of converted foreign models (HS3 is the first corpus)."
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+# ---------------------------------------------------------------------------
+# Base environment: the Python runner, the rust converter toolchain, and Node
+# for the JS scorer. The JS engine itself is resolved from a flatppl-js checkout
+# (FLATPPL_JS_DIR, default ../flatppl-js) rather than a package dependency.
+# ---------------------------------------------------------------------------
+[dependencies]
+python = ">=3.11"
+# Node 24 specifically: the scorer consumes flatppl-js's raw .ts via runtime
+# type-stripping, which needs Node >=24.
+nodejs = "24.*"
+# rust provides cargo, used to install the flatppl CLI from git at a pinned rev.
+rust = ">=1.75"
+
+[pypi-dependencies]
+pytest = ">=8"
+
+[activation.env]
+# The flatppl CLI is installed here by `pixi run setup`; src/ holds the package;
+# the JS engine is resolved from a sibling flatppl-js checkout by default.
+PATH = "$PIXI_PROJECT_ROOT/.pixi-bin/bin:$PATH"
+PYTHONPATH = "$PIXI_PROJECT_ROOT/src"
+FLATPPL_JS_DIR = "$PIXI_PROJECT_ROOT/../flatppl-js"
+
+[tasks]
+# One-time setup: install the pinned converter binary.
+setup = { cmd = "bash scripts/setup.sh" }
+# Run the conversion test suite the repo owner drops into tests/.
+# `python -m pytest` (not the bare `pytest` console script) is robust when the
+# env exposes pytest as a module but not on PATH.
+test = "python -m pytest -q"
+# Convert one fixture (debugging aid): pixi run convert <hs3.json> <out.flatppl>
+convert = ".pixi-bin/bin/flatppl convert --from hs3"
+# Full numeric harness over the HS3TestSuite fixtures.
+harness = "python -m flatppl_testsuite"
+# Reproduce the vendored HS3 conversion set (FlatPPL JS vs ROOT oracle).
+repro = "bash corpora/hs3/conversions/repro_hs3.sh"
+# Run the HS3 corpus and print formatted tables (fixtures 2DeltaNLL + conversions).
+hs3 = "python corpora/hs3/run_comparisons.py"
+
+# ---------------------------------------------------------------------------
+# Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
+# kept in separate features so the base environment stays light.
+# ---------------------------------------------------------------------------
+[feature.root.dependencies]
+root = ">=6.30"
+
+[feature.pyhs3.pypi-dependencies]
+pyhs3 = "*"
+
+[environments]
+root = ["root"]
+pyhs3 = ["pyhs3"]

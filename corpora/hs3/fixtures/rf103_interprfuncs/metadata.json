@@ -1,0 +1,10 @@
+{
+  "description": "Generic interpreted PDF plus a Gaussian with formula-driven mean.",
+  "modified_from_source": false,
+  "notes": [],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf103_interprfuncs.py",
+  "test_id": "rf103_interprfuncs",
+  "title": "RooFit rf103 interpreted functions"
+}

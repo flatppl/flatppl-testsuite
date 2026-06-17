@@ -1,0 +1,5 @@
+{
+  "venvPath": ".pixi/envs",
+  "venv": "default",
+  "extraPaths": [".", "src"]
+}

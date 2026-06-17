@@ -1,0 +1,9 @@
+mean = elementof(reals)
+sigma = elementof(posreals)
+gauss = relabel(Normal(mu = mean, sigma = sigma), ["x"])
+default_domain = cartprod(
+  mean = interval(-10.0, 10.0),
+  sigma = interval(0.1, 10.0),
+  x = interval(-10.0, 10.0),
+)
+default_values = record(x = 0.0, mean = 1.0, sigma = 3.0)

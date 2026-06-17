@@ -1,0 +1,82 @@
+{
+  "fixtures": [
+    {
+      "checks": [
+        "static_integrity",
+        "structure_import",
+        "twice_delta_nll_scan"
+      ],
+      "conformance": [
+        "basic"
+      ],
+      "features": {
+        "sections": [
+          "data",
+          "distributions",
+          "domains",
+          "parameter_points"
+        ],
+        "semantic": [
+          "gaussian",
+          "unbinned"
+        ],
+        "types": [
+          "gaussian_dist",
+          "product_domain",
+          "unbinned"
+        ]
+      },
+      "hashes": {
+        "canonical_sha256": "99cbfec67c5c5e55acececcb189e0646e217bf52ec1aeef30725ed7eab2aac16",
+        "sha256": "286f05a2f73a5468a626d030135a030502c3c3ef8fc01254d8840ae543402fb6"
+      },
+      "path": "fixtures/rf101_basics",
+      "tags": [
+        "roofit_tutorial"
+      ],
+      "test_id": "rf101_basics"
+    },
+    {
+      "checks": [
+        "static_integrity",
+        "structure_import",
+        "twice_delta_nll_scan"
+      ],
+      "conformance": [
+        "basic"
+      ],
+      "features": {
+        "sections": [
+          "data",
+          "distributions",
+          "domains",
+          "functions",
+          "parameter_points"
+        ],
+        "semantic": [
+          "generic_expression",
+          "unbinned"
+        ],
+        "types": [
+          "gaussian_dist",
+          "generic_dist",
+          "generic_function",
+          "product_domain",
+          "unbinned"
+        ]
+      },
+      "hashes": {
+        "canonical_sha256": "ab66b0af2e0c5cb7374101157857a8d6ca2947e544122fdee049c3e02cede482",
+        "sha256": "e6ceec54c9636211039d3271abcaed216de35c19b41d104c07a7a836bf9b4ad5"
+      },
+      "path": "fixtures/rf103_interprfuncs",
+      "tags": [
+        "roofit_tutorial"
+      ],
+      "test_id": "rf103_interprfuncs"
+    }
+  ],
+  "generated_by": "tools/build_manifest_and_expected.py",
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1
+}

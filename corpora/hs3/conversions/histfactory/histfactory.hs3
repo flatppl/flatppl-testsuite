@@ -1,0 +1,86 @@
+{
+    "distributions": [
+        {
+            "name": "model_channel1",
+            "type": "histfactory_dist",
+            "axes": [
+                { "name": "obs_x_channel1", "min": 1.0, "max": 2.0, "nbins": 2 }
+            ],
+            "samples": [
+                {
+                    "name": "signal",
+                    "data": { "contents": [20.0, 10.0], "errors": [0.0, 0.0] },
+                    "modifiers": [
+                        { "parameter": "syst1", "type": "normsys", "data": { "hi": 1.05, "lo": 0.95 } },
+                        { "parameter": "mu", "type": "normfactor" }
+                    ]
+                },
+                {
+                    "name": "background1",
+                    "data": { "contents": [100.0, 0.0], "errors": [5.0, 0.0] },
+                    "modifiers": [
+                        { "parameter": "syst2", "type": "normsys", "data": { "hi": 1.05, "lo": 0.95 } },
+                        { "type": "staterror", "parameters": ["mcstat_0", "mcstat_1"] }
+                    ]
+                },
+                {
+                    "name": "background2",
+                    "data": { "contents": [0.0, 100.0], "errors": [0.0, 10.0] },
+                    "modifiers": [
+                        { "parameter": "syst3", "type": "normsys", "data": { "hi": 1.05, "lo": 0.95 } },
+                        { "type": "staterror", "parameters": ["mcstat_0", "mcstat_1"] }
+                    ]
+                }
+            ]
+        }
+    ],
+    "likelihoods": [
+        { "name": "main_likelihood", "distributions": ["model_channel1"], "data": ["observed_channel1"] }
+    ],
+    "data": [
+        {
+            "name": "observed_channel1",
+            "type": "binned",
+            "axes": [
+                { "name": "obs_x_channel1", "min": 1.0, "max": 2.0, "nbins": 2 }
+            ],
+            "contents": [122.0, 112.0]
+        }
+    ],
+    "domains": [
+        {
+            "name": "default_domain",
+            "type": "product_domain",
+            "axes": [
+                { "name": "mu", "min": 0.0, "max": 10.0 },
+                { "name": "syst1", "min": -5.0, "max": 5.0 },
+                { "name": "syst2", "min": -5.0, "max": 5.0 },
+                { "name": "syst3", "min": -5.0, "max": 5.0 },
+                { "name": "mcstat_0", "min": 0.0, "max": 10.0 },
+                { "name": "mcstat_1", "min": 0.0, "max": 10.0 }
+            ]
+        }
+    ],
+    "parameter_points": [
+        {
+            "name": "default_values",
+            "parameters": [
+                { "name": "mu", "value": 1.0 },
+                { "name": "syst1", "value": 0.0 },
+                { "name": "syst2", "value": 0.0 },
+                { "name": "syst3", "value": 0.0 },
+                { "name": "mcstat_0", "value": 1.0 },
+                { "name": "mcstat_1", "value": 1.0 }
+            ]
+        }
+    ],
+    "analyses": [
+        {
+            "name": "main",
+            "likelihood": "main_likelihood",
+            "parameters_of_interest": ["mu"],
+            "domains": ["default_domain"]
+        }
+    ],
+    "metadata": { "hs3_version": "0.2" }
+}

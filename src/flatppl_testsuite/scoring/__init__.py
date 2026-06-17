@@ -1,0 +1,1 @@
+"""Format-agnostic scoring primitives."""

@@ -1,11 +1,54 @@
-# Editor files
-*~
-*.swp
-*.swo
-.vscode/
-.idea/
-.claude/
+# pixi (root env only; tests/conversion ships its own pinned lock intentionally)
+/.pixi/
+/pixi.lock
+/.pixi-bin/
 
-# OS files
-.DS_Store
-Thumbs.db
+# node
+node_modules/
+
+# scratch
+/tmp-fixtures/
+*.flatppl.out
+
+# ---------------------------------------------------------------------------
+# Python (GitHub-standard)
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# environments
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# tooling / caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/

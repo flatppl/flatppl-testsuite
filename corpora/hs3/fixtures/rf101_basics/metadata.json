@@ -1,0 +1,10 @@
+{
+  "description": "Single Gaussian PDF with an unbinned toy dataset.",
+  "modified_from_source": false,
+  "notes": [],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf101_basics.py",
+  "test_id": "rf101_basics",
+  "title": "RooFit rf101 basic Gaussian"
+}
