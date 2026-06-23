@@ -9,6 +9,8 @@ node_modules/
 # scratch
 /tmp-fixtures/
 *.flatppl.out
+# generated report (script is tracked, its output is not)
+/corpora/hs3/report.html
 
 # ---------------------------------------------------------------------------
 # Python (GitHub-standard)

@@ -41,6 +41,8 @@ convert = ".pixi-bin/bin/flatppl convert --from hs3"
 harness = "python -m flatppl_testsuite"
 # Run the HS3 corpus and print formatted tables (fixtures 2DeltaNLL + conversions).
 hs3 = "python corpora/hs3/run_comparisons.py"
+# Render the HS3 scoring results as a self-contained HTML report.
+report = "python corpora/hs3/report.py"
 # Regenerate the conversions' frozen ROOT 2DeltaNLL vectors (needs the root env):
 #   pixi run -e root python corpora/hs3/conversions/gen_expected.py
 gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
