@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate histfactory.hs3 with ROOT/RooFit.
+"""Evaluate histfactory.hs3.json with ROOT/RooFit.
 
 Requires ROOT >= 6.30 with RooFit JSON support.
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import ROOT
 
-HS3 = str(Path(__file__).resolve().with_name("histfactory.hs3"))
+HS3 = str(Path(__file__).resolve().with_name("histfactory.hs3.json"))
 
 PARAMS = ["mu", "syst1", "syst2", "syst3", "mcstat_0", "mcstat_1"]
 

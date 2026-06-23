@@ -110,7 +110,7 @@ def root_logL(hs3: Path, pdf_name: str, data_name: str, globals_: list[str]):
 
 
 def gen(model: str, cfg: dict) -> None:
-    hs3 = HERE / model / f"{model}.hs3"
+    hs3 = HERE / model / f"{model}.hs3.json"
     logL = root_logL(hs3, cfg["pdf"], cfg["data"], cfg["globals"])
     ref = logL(cfg["points"][0]["root"])
     # `+ 0.0` normalises the reference point's -0.0 to 0.0 for a clean diff.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate gaussian.hs3 with ROOT/RooFit.
+"""Evaluate gaussian.hs3.json with ROOT/RooFit.
 
 Requires ROOT >= 6.30 with RooFit JSON support.
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import ROOT
 
-HS3 = str(Path(__file__).resolve().with_name("gaussian.hs3"))
+HS3 = str(Path(__file__).resolve().with_name("gaussian.hs3.json"))
 
 COL_MODEL, COL_LABEL, COL_VALUE = 10, 36, 16
 SEP = '-' * (COL_MODEL + COL_LABEL + COL_VALUE + 10)

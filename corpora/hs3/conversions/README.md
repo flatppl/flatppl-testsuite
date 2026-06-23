@@ -6,13 +6,13 @@ reproduced in FlatPPL and verified against ROOT/RooFit.
 
 #### Models
 
-**Gaussian** (`gaussian.hs3`) — single observation $x = 1.27$ from $\mathrm{Normal}(\mu, \sigma)$.
+**Gaussian** (`gaussian.hs3.json`) — single observation $x = 1.27$ from $\mathrm{Normal}(\mu, \sigma)$.
 
-**Product** (`product.hs3`) — 10-point toy dataset from a normalized product of two Gaussians:
+**Product** (`product.hs3.json`) — 10-point toy dataset from a normalized product of two Gaussians:
 
 $$p(x) \propto \mathrm{Normal}(x;\,\mu_1,\sigma_1)\cdot\mathrm{Normal}(x;\,\mu_2,\sigma_2)$$
 
-**HistFactory** (`histfactory.hs3`) — 2-bin likelihood with signal, two backgrounds, three
+**HistFactory** (`histfactory.hs3.json`) — 2-bin likelihood with signal, two backgrounds, three
 normalization systematics (`normsys`), and two Barlow–Beeston MC-stat parameters (`staterror`):
 
 $$
@@ -26,9 +26,9 @@ data-only, so $\Delta(\log L)$ matches exactly.
 
 #### Representations
 
-- [`gaussian.hs3`](gaussian/gaussian.hs3) / [`gaussian.flatppl`](gaussian/gaussian.flatppl)
-- [`product.hs3`](product/product.hs3) / [`product.flatppl`](product/product.flatppl)
-- [`histfactory.hs3`](histfactory/histfactory.hs3) / [`histfactory.flatppl`](histfactory/histfactory.flatppl)
+- [`gaussian.hs3.json`](gaussian/gaussian.hs3.json) / [`gaussian.flatppl`](gaussian/gaussian.flatppl)
+- [`product.hs3.json`](product/product.hs3.json) / [`product.flatppl`](product/product.flatppl)
+- [`histfactory.hs3.json`](histfactory/histfactory.hs3.json) / [`histfactory.flatppl`](histfactory/histfactory.flatppl)
 
 #### Verification
 
@@ -52,5 +52,5 @@ pixi run -e root gen-conversions
 | Script | Purpose |
 |--------|---------|
 | `gen_expected.py` | Regenerate each `expected.json` from the ROOT/RooFit oracle |
-| `regen.py` | Regenerate each `<model>.flatppl` from `<model>.hs3` via the converter |
+| `regen.py` | Regenerate each `<model>.flatppl` from `<model>.hs3.json` via the converter |
 | `<model>/<model>_root.py` | Standalone ROOT/RooFit oracle table (ROOT ≥ 6.30) |
