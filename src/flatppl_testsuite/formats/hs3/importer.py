@@ -76,16 +76,18 @@ def convert(hs3_json: Path) -> str:
 # ---------------------------------------------------------------------------
 # Stage 2: assemble a scoreable FlatPPL source from converter output + a check.
 #
-# Takes the converter's emitted module and a check `target` (pdf, data), reads
-# the observed dataset from the HS3 fixture, and appends an iid likelihood over
-# the converter's emitted pdf measure:
+# Takes the converter's emitted module and a check `target` (pdf, data), and
+# appends an iid likelihood over the converter's emitted pdf measure, observed
+# against the converter's embedded data TABLE column:
 #
-#     __obs__ = [ ... ]                     # observations from the HS3 data block
+#     __obs__ = get(<data>, "<axis>")       # the embedded `<data> = table(...)` column
 #     __M__   = normalize(truncate(<pdf>, interval(lo, hi)))
 #     __L__   = likelihoodof(iid(__M__, lengthof(__obs__)), __obs__)
 #
-# The pdf binding is referenced BY NAME; the engine accepts relabel'd measures
-# directly in truncate/iid/normalize (PR #38). No RHS extraction is required.
+# Both the pdf and the observations are referenced BY NAME out of the converter's
+# own output — the data is no longer re-read from the HS3 JSON. The engine accepts
+# relabel'd measures directly in truncate/iid/normalize (PR #38), and a table
+# column is a vector (spec §03). No RHS extraction is required.
 #
 # Scoring `logdensityof(__L__, record(<free params>))` reproduces the suite's
 # frozen 2DeltaNLL vector.
@@ -118,13 +120,36 @@ def _observable_interval(src: str, observable: str) -> tuple[float, float] | Non
     return float(m.group(1)), float(m.group(2))
 
 
-def assemble(flatppl_src: str, pdf: str, obs: list[float],
+def data_columns(hs3_json: Path, data_name: str) -> list[str]:
+    """Column names of the converter's embedded `<data_name> = table(...)`.
+
+    The converter names each table column after the dataset's observable axis;
+    an axisless dataset gets positional `c1, c2, …` (matching the converter's
+    synthesized names). The list order is the coordinate order.
+    """
+    doc = json.loads(Path(hs3_json).read_text())
+    for d in doc.get("data", []):
+        if d.get("name") == data_name:
+            axes = [a["name"] for a in d.get("axes", [])]
+            if axes:
+                return axes
+            arity = len(d["entries"][0]) if d.get("entries") else 0
+            return [f"c{i + 1}" for i in range(arity)]
+    raise KeyError(f"dataset {data_name!r} not in {hs3_json}")
+
+
+def assemble(flatppl_src: str, pdf: str, data_name: str, column: str,
              observables: set[str], prenormalized: bool = False) -> tuple[str, str]:
     """Return (scoreable_source, binding_name) for an iid likelihood over `pdf`.
 
     `pdf` is the name of the converter's emitted pdf binding; the engine
     accepts relabel'd measures directly in `truncate`/`iid`/`normalize`, so the
     binding is referenced by name rather than by extracting its RHS.
+
+    The observation is the converter's embedded data table column
+    `get(<data_name>, "<column>")` — the data lives in the emitted FlatPPL, not
+    re-inlined from the HS3 JSON. A table column is a vector (spec §03), so
+    `lengthof`/`iid` behave exactly as over a bare array.
 
     A raw distribution (e.g. gaussian) is range-normalized here —
     `normalize(truncate(pdf, interval))` over the observable's declared domain —
@@ -152,10 +177,8 @@ def assemble(flatppl_src: str, pdf: str, obs: list[float],
             # No declared range → score the bare (full-support) measure.
             measure = pdf
 
-    arr = "[" + ", ".join(repr(float(v)) for v in obs) + "]"
-
     extra = (
-        f"\n__obs__ = {arr}"
+        f'\n__obs__ = get({data_name}, "{column}")'
         f"\n__M__ = {measure}"
         f"\n__L__ = likelihoodof(iid(__M__, lengthof(__obs__)), __obs__)\n"
     )

@@ -1,22 +1,67 @@
+flatppl_compat = "0.1"
 hepphys = standard_module("particle-physics", "0.1")
 syst1 = elementof(reals)
 mu = elementof(reals)
 syst2 = elementof(reals)
 mcstat = elementof(cartpow(posreals, 2))
 syst3 = elementof(reals)
-% HS3 histfactory channel 'model_channel1': samples × modifiers → broadcast(Poisson, expected)
-obs_model_model_channel1 = Poisson.(
-  [20.0, 10.0] .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst1) .* mu
-  .+ [100.0, 0.0] .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst2) .* mcstat
-  .+ [0.0, 100.0] .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst3) .* mcstat,
+% Observed event counts for channel "model_channel1".
+model_channel1_observed = [122.0, 112.0]
+% Nominal yields for sample "signal".
+model_channel1_signal_nominal = [20.0, 10.0]
+% Expected yields for sample "signal" (nominal x modifiers).
+model_channel1_signal_expected = mul.(
+  model_channel1_signal_nominal .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst1),
+  mu,
 )
-% HS3 histfactory likelihood: main Poisson term + auxiliary constraint terms (joint_likelihood)
-L_model_channel1 = joint_likelihood(
-  likelihoodof(obs_model_model_channel1, [122.0, 112.0]),
-  likelihoodof(hepphys.ContinuedPoisson.(mcstat .* [400.0, 100.0]), [400.0, 100.0]),
-  likelihoodof(Normal(mu = syst1, sigma = 1.0), 0.0),
-  likelihoodof(Normal(mu = syst2, sigma = 1.0), 0.0),
-  likelihoodof(Normal(mu = syst3, sigma = 1.0), 0.0),
+% Nominal yields for sample "background1".
+model_channel1_background1_nominal = [100.0, 0.0]
+% Expected yields for sample "background1" (nominal x modifiers).
+model_channel1_background1_expected = mul.(
+  model_channel1_background1_nominal .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst2),
+  mcstat,
+)
+% Nominal yields for sample "background2".
+model_channel1_background2_nominal = [0.0, 100.0]
+% Expected yields for sample "background2" (nominal x modifiers).
+model_channel1_background2_expected = mul.(
+  model_channel1_background2_nominal .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst3),
+  mcstat,
+)
+% Total expected counts per bin (sum over samples).
+model_channel1_expected = add.(
+  model_channel1_signal_expected .+ model_channel1_background1_expected,
+  model_channel1_background2_expected,
+)
+% Per-bin Poisson observation model for channel "model_channel1".
+model_channel1_model = functionof(Poisson.(model_channel1_expected))
+% Observation likelihood term for channel "model_channel1".
+model_channel1_likelihood = likelihoodof(model_channel1_model, model_channel1_observed)
+% Auxiliary Gaussian constraint on the nuisance parameter.
+syst1_constraint = functionof(Normal(mu = syst1, sigma = 1.0))
+% Constraint likelihood term (observed at 0).
+syst1_constraint_likelihood = likelihoodof(syst1_constraint, 0.0)
+% Auxiliary Gaussian constraint on the nuisance parameter.
+syst2_constraint = functionof(Normal(mu = syst2, sigma = 1.0))
+% Constraint likelihood term (observed at 0).
+syst2_constraint_likelihood = likelihoodof(syst2_constraint, 0.0)
+% Auxiliary Gaussian constraint on the nuisance parameter.
+syst3_constraint = functionof(Normal(mu = syst3, sigma = 1.0))
+% Constraint likelihood term (observed at 0).
+syst3_constraint_likelihood = likelihoodof(syst3_constraint, 0.0)
+% Effective event counts: the Poisson constraint's observed aux data.
+mcstat_tau = [400.0, 100.0]
+% Auxiliary Poisson (MC-stat) constraint on the nuisance parameter.
+mcstat_constraint = functionof(hepphys.ContinuedPoisson.(mcstat .* mcstat_tau))
+% staterror constraint likelihood term.
+mcstat_constraint_likelihood = likelihoodof(mcstat_constraint, mcstat_tau)
+% Full likelihood: observation and constraint terms.
+likelihood = joint_likelihood(
+  model_channel1_likelihood,
+  syst1_constraint_likelihood,
+  syst2_constraint_likelihood,
+  syst3_constraint_likelihood,
+  mcstat_constraint_likelihood,
 )
 default_domain = cartprod(
   mu = interval(0.0, 10.0),
@@ -34,3 +79,9 @@ default_values = record(
   mcstat_0 = 1.0,
   mcstat_1 = 1.0,
 )
+observed_channel1 = table(counts = [122.0, 112.0])
+observed_channel1_domain = cartprod(obs_x_channel1 = interval(1.0, 2.0))
+
+% === scoring ===
+% Evaluate the root likelihood at the nominal parameter point.
+log_likelihood = logdensityof(likelihood, record(syst1 = 0.0, mu = 1.0, syst2 = 0.0, mcstat = [1.0, 1.0], syst3 = 0.0))

@@ -10,13 +10,22 @@ def _strip_header(text: str) -> str:
     body = [ln for ln in text.splitlines() if not ln.lstrip().startswith("%")]
     return "\n".join(ln for ln in body if ln.strip()) + "\n"
 
+
+SCORING_MARKER = "% === scoring ==="
+
+
+def _conversion_part(text: str) -> str:
+    # The golden ends with a mechanically-appended scoring section (regen.py);
+    # the converter only emits the part above the marker.
+    return text.split(SCORING_MARKER, 1)[0]
+
 @pytest.mark.parametrize("model", MODELS)
 def test_known_good_conversion(model, tmp_path):
     hs3 = HERE / model / f"{model}.hs3"
-    expected = _strip_header((HERE / model / f"{model}.flatppl").read_text())
+    expected = _strip_header(_conversion_part((HERE / model / f"{model}.flatppl").read_text()))
     out = tmp_path / f"{model}.flatppl"
     subprocess.run([str(CONFIG.flatppl_bin), "convert", "--from", "hs3",
-                    str(hs3), str(out)], check=True)
+                    str(hs3), str(out), "--no-header"], check=True)
     assert _strip_header(out.read_text()) == expected
 
 
@@ -33,5 +42,5 @@ def test_fixture_converted_flatppl(fixture, tmp_path):
     expected = _strip_header((fdir / "model.flatppl").read_text())
     out = tmp_path / "model.flatppl"
     subprocess.run([str(CONFIG.flatppl_bin), "convert", "--from", "hs3",
-                    str(fdir / "hs3.json"), str(out)], check=True)
+                    str(fdir / "hs3.json"), str(out), "--no-header"], check=True)
     assert _strip_header(out.read_text()) == expected
