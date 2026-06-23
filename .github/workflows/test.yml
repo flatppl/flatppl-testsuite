@@ -1,0 +1,45 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Gate the FlatPPL engine against the frozen, ROOT-verified values only. The
+# live ROOT/pyHS3 oracle (heavy conda stacks) is never run in CI — FLATPPL_NO_ORACLE
+# short-circuits it so the oracle envs are never solved or installed; those tests
+# skip. The frozen expected.json vectors were produced by ROOT offline.
+env:
+  FLATPPL_NO_ORACLE: "1"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          # pixi.lock is intentionally not committed; solve on the fly.
+          locked: false
+          # Install only the base env (python + node 24 + rust); never the
+          # root/pyhs3 oracle environments.
+          environments: default
+
+      # Cache the cargo registry/git so the converter's dependencies are not
+      # re-downloaded each run. The converter binary itself is rebuilt from
+      # flatppl-rust@main every run, on purpose — that is what catches converter
+      # regressions against the frozen values.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-${{ hashFiles('pixi.toml') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - name: Install pinned converter + JS engine (no ROOT)
+        run: pixi run setup
+
+      - name: Run FlatPPL tests against frozen ROOT-verified values
+        run: pixi run test

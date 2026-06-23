@@ -126,6 +126,13 @@ def run_oracle(backend: str, test_id: str) -> list[float]:
             f"choose from {sorted(_BACKEND_MAP)}"
         )
 
+    # Kill switch: set FLATPPL_NO_ORACLE to forbid the heavy ROOT/pyHS3 oracle
+    # envs entirely (CI runs the FlatPPL engine against the frozen, oracle-verified
+    # values only). Short-circuits before any pixi/-e subprocess so the oracle
+    # environment is never solved or installed. Callers treat this as a skip.
+    if os.environ.get("FLATPPL_NO_ORACLE"):
+        raise RuntimeError("oracle disabled (FLATPPL_NO_ORACLE set)")
+
     if shutil.which("pixi") is None:
         raise RuntimeError("pixi not found on PATH; oracle unavailable")
 
