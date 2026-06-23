@@ -29,7 +29,7 @@ src/flatppl_testsuite/
 corpora/hs3/                     vendored, self-contained HS3 corpus
   manifest.json  ATTRIBUTION.md
   fixtures/<id>/                 hs3.json, expected.json, metadata.json, model.flatppl
-  conversions/<model>/           <model>.hs3, .flatppl, _root.py
+  conversions/<model>/           <model>.hs3.json, .flatppl, _root.py
   run_comparisons.py             formatted comparison tables
   tests/                         the corpus's own pytest definitions
 tests/

@@ -33,7 +33,7 @@ To run against the full upstream suite instead of this vendored subset, set
 ## `conversions/` — HS3 paper Appendix A
 
 `conversions/` holds three models from **Appendix A of the HS3 paper**, each as an
-HS3 input (`<model>.hs3`), its golden FlatPPL conversion (`<model>.flatppl`), a RooFit/ROOT
+HS3 input (`<model>.hs3.json`), its golden FlatPPL conversion (`<model>.flatppl`), a RooFit/ROOT
 oracle (`<model>_root.py`), and a frozen ROOT 2ΔNLL vector (`expected.json`, written by
 `gen_expected.py`). The harness scores `<model>.flatppl` against that frozen vector via
 `scoring/score_js.cjs`, the single-point JS scorer.
