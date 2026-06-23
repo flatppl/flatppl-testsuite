@@ -12,8 +12,8 @@ def test_observations_count():
 
 def test_rf101_reproduces_frozen_expected(tmp_path):
     src = convert(RF101 / "hs3.json")
-    obs = observations(RF101 / "hs3.json", "gaussData")
-    scoreable, binding = assemble(src, "gauss", obs, {"x"})
+    # Observe the converter's embedded `gaussData = table(x = [...])` column.
+    scoreable, binding = assemble(src, "gauss", "gaussData", "x", {"x"})
     model = tmp_path / "rf101.flatppl"
     model.write_text(scoreable)
     vec = twice_delta_nll(model, binding, "mean",

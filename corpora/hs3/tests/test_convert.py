@@ -14,13 +14,12 @@ def test_convert_gaussian_emits_likelihood():
 
 
 def test_convert_unimplemented_raises(tmp_path):
-    # Synthetic input: an unimplemented HS3 distribution type triggers
-    # SkipUnimplemented, independent of any vendored fixture.
+    # A genuinely-unmapped HS3 distribution type triggers SkipUnimplemented.
+    # (chebychev/polynomial/etc. are implemented now; landau_dist is not.)
     doc = {"distributions": [
-        {"name": "c", "type": "chebychev_dist", "x": "obs",
-         "coefficients": ["a1", "a2"]}]}
+        {"name": "l", "type": "landau_dist", "x": "obs"}]}
     p = tmp_path / "hs3.json"
     p.write_text(json.dumps(doc))
     with pytest.raises(SkipUnimplemented) as e:
         convert(p)
-    assert e.value.hs3_type == "chebychev_dist"
+    assert e.value.hs3_type == "landau_dist"

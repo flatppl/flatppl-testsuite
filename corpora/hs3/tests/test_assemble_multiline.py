@@ -13,6 +13,7 @@ _RF101_LIKE_SRC = (
     "mean = elementof(reals)\n"
     "sigma = elementof(posreals)\n"
     'gauss = relabel(Normal(mu = mean, sigma = sigma), ["x"])\n'
+    "gaussData = table(x = [1.0, -2.0, 3.0])\n"
     "default_domain = cartprod(\n"
     "  mean = interval(-10.0, 10.0),\n"
     "  sigma = interval(0.1, 10.0),\n"
@@ -23,7 +24,7 @@ _RF101_LIKE_SRC = (
 
 
 def test_assemble_references_pdf_by_name_with_interval():
-    scoreable, binding = assemble(_RF101_LIKE_SRC, "gauss", [1.0, -2.0, 3.0], {"x"})
+    scoreable, binding = assemble(_RF101_LIKE_SRC, "gauss", "gaussData", "x", {"x"})
     m_line = next(ln for ln in scoreable.splitlines() if ln.startswith("__M__"))
     # The pdf name "gauss" must appear as the truncate argument — not expanded
     # to relabel(...) or Normal(...).
@@ -41,8 +42,9 @@ def test_assemble_no_interval_emits_bare_pdf():
         "mean = elementof(reals)\n"
         "sigma = elementof(posreals)\n"
         'gauss = relabel(Normal(mu = mean, sigma = sigma), ["x"])\n'
+        "gaussData = table(x = [1.0, 2.0])\n"
     )
-    scoreable, binding = assemble(src_no_range, "gauss", [1.0, 2.0], {"x"})
+    scoreable, binding = assemble(src_no_range, "gauss", "gaussData", "x", {"x"})
     m_line = next(ln for ln in scoreable.splitlines() if ln.startswith("__M__"))
     # No interval in scope → bare reference.
     assert m_line == "__M__ = gauss"
@@ -52,9 +54,7 @@ def test_assemble_no_interval_emits_bare_pdf():
 def test_assemble_rf101_by_name_uses_real_converter():
     """The real converter output also produces a by-name measure reference."""
     src = convert(RF101 / "hs3.json")
-    from flatppl_testsuite.formats.hs3.importer import observations
-    obs = observations(RF101 / "hs3.json", "gaussData")
-    scoreable, binding = assemble(src, "gauss", obs, {"x"})
+    scoreable, binding = assemble(src, "gauss", "gaussData", "x", {"x"})
     m_line = next(ln for ln in scoreable.splitlines() if ln.startswith("__M__"))
     # The binding name "gauss" must appear literally as the truncate argument.
     assert "gauss" in m_line

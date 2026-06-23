@@ -36,7 +36,7 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
     runner and the comparison-table script.
     """
     from ..formats.hs3.importer import (
-        convert, SkipUnimplemented, observations, assemble)
+        convert, SkipUnimplemented, data_columns, assemble)
     from ..scoring.flatppl_engine import twice_delta_nll
 
     target = check.get("target", {})
@@ -64,9 +64,12 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
                  if d.get("name") == pdf_name), None)
             prenormalized = pdf_type in (
                 "generic_dist", "density_function_dist", "log_density_function_dist")
-            obs = observations(hs3_path, data_name)
+            # Single observable for the 1-D scoring path; the converter names the
+            # embedded table column after the dataset's observable axis.
+            column = data_columns(hs3_path, data_name)[0]
             scoreable_src, binding = assemble(
-                src, pdf_name, obs, data_observable_names, prenormalized=prenormalized)
+                src, pdf_name, data_name, column, data_observable_names,
+                prenormalized=prenormalized)
     except Exception as e:
         raise RuntimeError(f"assemble: {e}") from e
 

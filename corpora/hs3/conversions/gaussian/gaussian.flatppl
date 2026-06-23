@@ -1,8 +1,15 @@
+flatppl_compat = "0.1"
 mu = elementof(reals)
 sigma = elementof(posreals)
-gauss_x = relabel(Normal(mu = mu, sigma = sigma), ["x"])
+% observable: x
+gauss_x = Normal(mu = mu, sigma = sigma)
 obs_parameters_of_interest = cartprod(mu = interval(-10.0, 10.0))
 default_domain = cartprod(mu = interval(-10.0, 10.0), x = interval(-10.0, 10.0))
 default_values = record(x = 1.27, mu = 0.0, sigma = fixed(1.0))
-obs_gaussian_channel = record(x = 1.27)
-obs = likelihoodof(gauss_x, obs_gaussian_channel)
+obs_gaussian_channel = table(x = [1.27])
+obs_gaussian_channel_domain = cartprod(x = interval(-inf, inf))
+obs = likelihoodof(iid(gauss_x, 1), obs_gaussian_channel.x)
+
+% === scoring ===
+% Evaluate the root likelihood at the nominal parameter point.
+log_likelihood = logdensityof(obs, record(mu = 0.0, sigma = 1.0))
