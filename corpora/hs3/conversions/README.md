@@ -30,19 +30,27 @@ data-only, so $\Delta(\log L)$ matches exactly.
 - [`product.hs3`](product/product.hs3) / [`product.flatppl`](product/product.flatppl)
 - [`histfactory.hs3`](histfactory/histfactory.hs3) / [`histfactory.flatppl`](histfactory/histfactory.flatppl)
 
-#### Reproduction
+#### Verification
 
-Requires [pixi](https://pixi.sh). From this directory:
+Each model ships a frozen ROOT 2ΔNLL vector in `<model>/expected.json` (check kind
+`twice_delta_nll_points`). The harness scores the committed `<model>.flatppl` with the FlatPPL
+engine over the same θ points and compares — the same score+compare loop as the `fixtures/`
+corpus, with no hand-copied numbers. Run from the repo root:
 
 ```
-pixi run repro
+pixi run hs3                 # score every fixture + conversion, print comparison tables
+pixi run test                # the same checks, gated by pytest
 ```
 
-Clones [flatppl-js](https://github.com/flatppl/flatppl-js) into `~/.cache/flatppl-js` on first
-run. ROOT oracle steps are skipped if PyROOT is unavailable.
+The frozen vectors are **generated from ROOT**, not the sibling engine. To regenerate after a
+converter change (requires ROOT ≥ 6.30):
+
+```
+pixi run -e root gen-conversions
+```
 
 | Script | Purpose |
 |--------|---------|
-| `repro_hs3.sh` | Driver: engine setup, JS harness, ROOT oracle |
-| `repro_hs3_js.cjs` | FlatPPL JS checks against ROOT oracle values |
-| `<model>/<model>_root.py` | ROOT/RooFit oracle (ROOT ≥ 6.30) |
+| `gen_expected.py` | Regenerate each `expected.json` from the ROOT/RooFit oracle |
+| `regen.py` | Regenerate each `<model>.flatppl` from `<model>.hs3` via the converter |
+| `<model>/<model>_root.py` | Standalone ROOT/RooFit oracle table (ROOT ≥ 6.30) |

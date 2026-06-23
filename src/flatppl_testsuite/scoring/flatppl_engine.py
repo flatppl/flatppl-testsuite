@@ -30,3 +30,19 @@ def twice_delta_nll(model: Path, binding: str, scan_param: str,
         theta[scan_param] = p
         out.append(-2.0 * (log_density(model, binding, theta) - ref))
     return out
+
+
+def twice_delta_nll_points(model: Path, binding: str,
+                           reference: dict[str, object],
+                           points: list[dict[str, object]]) -> list[float]:
+    """Return the 2DeltaNLL vector over arbitrary multi-parameter theta points.
+
+    Like ``twice_delta_nll`` but each point is a full theta record rather than a
+    single scanned parameter, so multi-parameter clouds (e.g. HistFactory, where
+    ``mu`` and several systematics move together) are scored directly. The
+    parameter-independent additive constant cancels in the difference, so the
+    comparison is offset-invariant — this is what makes HistFactory's ROOT
+    ``Sum log(n_k!)`` convention offset drop out.
+    """
+    ref = log_density(model, binding, reference)
+    return [-2.0 * (log_density(model, binding, p) - ref) for p in points]

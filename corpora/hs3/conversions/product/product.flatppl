@@ -44,5 +44,6 @@ toy_domain = cartprod(x = interval(-10.0, 10.0))
 likelihood = likelihoodof(iid(prod, 10), toy.x)
 
 % === scoring ===
+
 % Evaluate the root likelihood at the nominal parameter point.
 log_likelihood = logdensityof(likelihood, record(mu1 = 0.0, sigma1 = 1.0, mu2 = 1.0, sigma2 = 2.0))

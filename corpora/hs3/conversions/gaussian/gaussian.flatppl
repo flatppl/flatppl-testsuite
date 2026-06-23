@@ -11,5 +11,6 @@ obs_gaussian_channel_domain = cartprod(x = interval(-inf, inf))
 obs = likelihoodof(iid(gauss_x, 1), obs_gaussian_channel.x)
 
 % === scoring ===
+
 % Evaluate the root likelihood at the nominal parameter point.
 log_likelihood = logdensityof(obs, record(mu = 0.0, sigma = 1.0))

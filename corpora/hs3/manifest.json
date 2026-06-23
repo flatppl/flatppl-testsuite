@@ -76,6 +76,29 @@
       "test_id": "rf103_interprfuncs"
     }
   ],
+  "conversions": [
+    {
+      "test_id": "conv_gaussian",
+      "path": "conversions/gaussian",
+      "tags": [
+        "hs3_paper"
+      ]
+    },
+    {
+      "test_id": "conv_product",
+      "path": "conversions/product",
+      "tags": [
+        "hs3_paper"
+      ]
+    },
+    {
+      "test_id": "conv_histfactory",
+      "path": "conversions/histfactory",
+      "tags": [
+        "hs3_paper"
+      ]
+    }
+  ],
   "generated_by": "tools/build_manifest_and_expected.py",
   "reference_backend": "roofit 6.41.01",
   "schema_version": 1

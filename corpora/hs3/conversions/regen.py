@@ -99,8 +99,11 @@ def regen(hs3_path: Path) -> None:
     hs3 = json.loads(hs3_path.read_text())
     binding = root_likelihood(src)
     rec = render_record(theta(src, hs3))
+    # A blank line after the marker detaches it from the binding, so only the
+    # single `% Evaluate ...` line is the binding's doc comment (the engine
+    # rejects two doc comments stacked above one binding).
     out_path.write_text(
-        f"{src}\n\n{MARKER}\n"
+        f"{src}\n\n{MARKER}\n\n"
         f"% Evaluate the root likelihood at the nominal parameter point.\n"
         f"log_likelihood = logdensityof({binding}, {rec})\n"
     )

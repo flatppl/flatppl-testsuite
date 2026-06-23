@@ -13,9 +13,9 @@
 //              and prints the resulting per-atom log-density to stdout.
 //
 // Engine resolution (first that exists): --engine <dir>, then $FLATPPL_JS_DIR
-// (its packages/engine), then the cache clone at ~/.cache/flatppl-js (created
-// by repro_hs3.sh on first run). Requires Node >= 24 — the engine modules are
-// TypeScript, loaded via Node's native type stripping.
+// (its packages/engine), then the cache clone at ~/.cache/flatppl-js. Requires
+// Node >= 24 — the engine modules are TypeScript, loaded via Node's native type
+// stripping.
 //
 // ---------------------------------------------------------------------------
 // Reproduce the ROOT / closed-form comparison for the bundled HS3 examples.

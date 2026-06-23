@@ -87,6 +87,24 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
         model_path.unlink(missing_ok=True)
 
 
+def score_points(model_file: Path, check: dict) -> list[float]:
+    """Score a `twice_delta_nll_points` check against the committed FlatPPL model.
+
+    The conversions corpus (HS3 paper examples) ships a worked `<model>.flatppl`;
+    this scores its likelihood binding directly over the check's multi-parameter
+    theta points and returns the 2DeltaNLL vector (offset-invariant, so it lines
+    up with the frozen ROOT vector regardless of normalization conventions).
+    Single scoring path shared by the suite runner and the comparison-table
+    script. Raises `RuntimeError` (stage-prefixed) on failure.
+    """
+    from ..scoring.flatppl_engine import twice_delta_nll_points
+    try:
+        return twice_delta_nll_points(
+            model_file, check["binding"], check["reference_point"], check["points"])
+    except Exception as e:
+        raise RuntimeError(f"score: {e}") from e
+
+
 class HS3ImportSuite(Suite):
     name = "hs3_import"
 
@@ -225,6 +243,42 @@ class HS3ImportSuite(Suite):
                         test_id=test_id, check_id=check_id, status="passed",
                         message="; ".join(oracle_notes),
                     ))
+
+        # Conversions corpus (HS3 paper examples): score the committed
+        # <model>.flatppl directly against its frozen ROOT 2DeltaNLL vector. No
+        # convert/assemble — the worked example is the unit under test, re-pinned
+        # structurally elsewhere (tests/test_conversions.py).
+        for conv in manifest.get("conversions", []):
+            test_id = conv["test_id"]
+            if selected is not None and test_id not in selected:
+                continue
+            conv_dir = HS3_CORPUS / conv["path"]
+            expected_doc = json.loads((conv_dir / "expected.json").read_text())
+            model_file = conv_dir / expected_doc["model"]
+
+            for check in expected_doc["checks"]:
+                check_id = check["id"]
+                if check["kind"] != "twice_delta_nll_points":
+                    continue
+                try:
+                    actual_vec = score_points(model_file, check)
+                except Exception as e:  # noqa: BLE001
+                    results.append(CheckResult(
+                        test_id=test_id, check_id=check_id,
+                        status="failed", tag=UNSCOREABLE, message=str(e),
+                    ))
+                    continue
+                try:
+                    compare_vectors(actual_vec, check["expected"], check["tolerance"])
+                except AssertionError as e:
+                    results.append(CheckResult(
+                        test_id=test_id, check_id=check_id,
+                        status="failed", tag=NUMERIC_MISMATCH, message=str(e),
+                    ))
+                    continue
+                results.append(CheckResult(
+                    test_id=test_id, check_id=check_id, status="passed",
+                ))
 
         return results
 
