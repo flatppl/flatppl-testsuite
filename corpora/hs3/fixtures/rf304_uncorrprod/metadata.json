@@ -1,0 +1,10 @@
+{
+  "description": "Two-dimensional product of independent Gaussian PDFs.",
+  "modified_from_source": false,
+  "notes": [],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf304_uncorrprod.py",
+  "test_id": "rf304_uncorrprod",
+  "title": "RooFit rf304 uncorrelated product"
+}

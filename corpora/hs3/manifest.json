@@ -1,4 +1,27 @@
 {
+  "conversions": [
+    {
+      "path": "conversions/gaussian",
+      "tags": [
+        "hs3_paper"
+      ],
+      "test_id": "conv_gaussian"
+    },
+    {
+      "path": "conversions/product",
+      "tags": [
+        "hs3_paper"
+      ],
+      "test_id": "conv_product"
+    },
+    {
+      "path": "conversions/histfactory",
+      "tags": [
+        "hs3_paper"
+      ],
+      "test_id": "conv_histfactory"
+    }
+  ],
   "fixtures": [
     {
       "checks": [
@@ -74,6 +97,44 @@
         "roofit_tutorial"
       ],
       "test_id": "rf103_interprfuncs"
+    },
+    {
+      "checks": [
+        "static_integrity",
+        "structure_import",
+        "twice_delta_nll_scan"
+      ],
+      "conformance": [
+        "basic"
+      ],
+      "features": {
+        "sections": [
+          "data",
+          "distributions",
+          "domains",
+          "parameter_points"
+        ],
+        "semantic": [
+          "gaussian",
+          "product",
+          "unbinned"
+        ],
+        "types": [
+          "gaussian_dist",
+          "product_dist",
+          "product_domain",
+          "unbinned"
+        ]
+      },
+      "hashes": {
+        "canonical_sha256": "2ca8bd7a18203b89674d4677ab55a133a2484ca57f0a8be13ae1e2cdf1d9115b",
+        "sha256": "b64af18ec14528ce4c10dcb503b23227cd8c4ed3773fab89efc697234dbc5d3d"
+      },
+      "path": "fixtures/rf304_uncorrprod",
+      "tags": [
+        "roofit_tutorial"
+      ],
+      "test_id": "rf304_uncorrprod"
     }
   ],
   "generated_by": "tools/build_manifest_and_expected.py",

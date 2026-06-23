@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "test_id": "conv_gaussian",
+  "model": "gaussian.flatppl",
+  "reference_backend": "root 6.40.02",
+  "checks": [
+    {
+      "id": "twice_delta_nll_points",
+      "kind": "twice_delta_nll_points",
+      "binding": "obs",
+      "reference_point": {
+        "mu": 0.0,
+        "sigma": 1.0
+      },
+      "points": [
+        {
+          "mu": 0.0,
+          "sigma": 1.0
+        },
+        {
+          "mu": 0.5,
+          "sigma": 1.0
+        },
+        {
+          "mu": 1.27,
+          "sigma": 1.0
+        }
+      ],
+      "expected": [
+        0.0,
+        -1.0199999999999996,
+        -1.6128999999999998
+      ],
+      "tolerance": {
+        "atol": 1e-07,
+        "rtol": 1e-08
+      }
+    }
+  ]
+}

@@ -83,5 +83,6 @@ observed_channel1 = table(counts = [122.0, 112.0])
 observed_channel1_domain = cartprod(obs_x_channel1 = interval(1.0, 2.0))
 
 % === scoring ===
+
 % Evaluate the root likelihood at the nominal parameter point.
 log_likelihood = logdensityof(likelihood, record(syst1 = 0.0, mu = 1.0, syst2 = 0.0, mcstat = [1.0, 1.0], syst3 = 0.0))

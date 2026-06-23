@@ -7,3 +7,4 @@ from corpora.hs3.tests.test_oracle import *       # noqa: F401,F403
 from corpora.hs3.tests.test_runner import *       # noqa: F401,F403
 from corpora.hs3.tests.test_breadth import *      # noqa: F401,F403
 from corpora.hs3.tests.test_conversions import *  # noqa: F401,F403
+from corpora.hs3.tests.test_corpus_gate import *  # noqa: F401,F403

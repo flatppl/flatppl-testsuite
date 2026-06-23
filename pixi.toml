@@ -39,10 +39,13 @@ test = "python -m pytest -q"
 convert = ".pixi-bin/bin/flatppl convert --from hs3"
 # Full numeric harness over the HS3TestSuite fixtures.
 harness = "python -m flatppl_testsuite"
-# Reproduce the vendored HS3 conversion set (FlatPPL JS vs ROOT oracle).
-repro = "bash corpora/hs3/conversions/repro_hs3.sh"
 # Run the HS3 corpus and print formatted tables (fixtures 2DeltaNLL + conversions).
 hs3 = "python corpora/hs3/run_comparisons.py"
+# Render the HS3 scoring results as a Markdown report.
+report = "python corpora/hs3/report.py"
+# Regenerate the conversions' frozen ROOT 2DeltaNLL vectors (needs the root env):
+#   pixi run -e root python corpora/hs3/conversions/gen_expected.py
+gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
