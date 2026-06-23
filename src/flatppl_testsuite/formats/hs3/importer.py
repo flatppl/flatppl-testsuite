@@ -112,12 +112,30 @@ def _strip_provenance(src: str) -> str:
 # The observable's declared range lives in a `cartprod(..., x = interval(lo, hi))`
 # domain binding. Match the interval keyed by the observable label.
 def _observable_interval(src: str, observable: str) -> tuple[float, float] | None:
+    # Word-bounded: `x` must not match the tail of `sigmax = interval(...)`.
     m = re.search(
-        rf"{re.escape(observable)}\s*=\s*interval\(\s*([-+0-9.eE]+)\s*,\s*([-+0-9.eE]+)\s*\)",
+        rf"(?<![A-Za-z0-9_]){re.escape(observable)}\s*=\s*interval\(\s*([-+0-9.eE]+)\s*,\s*([-+0-9.eE]+)\s*\)",
         src)
     if not m:
         return None
     return float(m.group(1)), float(m.group(2))
+
+
+# A product over DISTINCT variates is emitted as `<pdf> = joint(x = gx, y = gy)`
+# (keyword form ≡ a product measure over named axes). Parse the axis → sub-pdf
+# map so a multi-dim observation can be scored as the product of per-axis
+# likelihoods (the factorization an uncorrelated product allows).
+def _parse_joint(src: str, pdf: str) -> list[tuple[str, str]] | None:
+    m = re.search(rf"(?m)^{re.escape(pdf)}\s*=\s*joint\(([^)]*)\)", src)
+    if not m:
+        return None
+    axes: list[tuple[str, str]] = []
+    for part in m.group(1).split(","):
+        if "=" not in part:
+            return None  # positional joint — no axis labels to map to columns
+        axis, sub = part.split("=", 1)
+        axes.append((axis.strip(), sub.strip()))
+    return axes or None
 
 
 def data_columns(hs3_json: Path, data_name: str) -> list[str]:
@@ -159,6 +177,27 @@ def assemble(flatppl_src: str, pdf: str, data_name: str, column: str,
     cannot resolve a `normalize(...)` node as a truncate base.
     """
     body = _strip_provenance(flatppl_src)
+
+    # A product over distinct variates (`<pdf> = joint(x = gx, y = gy)`) is an
+    # uncorrelated multi-dim density: its likelihood factorizes into one iid
+    # likelihood per axis, recombined with `joint_likelihood`. Each axis factor
+    # is range-normalized over its own declared interval, exactly as a 1-D raw
+    # dist is. (The 1-D scan parameter only moves one factor; the rest are
+    # constant and cancel in the 2DeltaNLL, but scoring the full product keeps
+    # the absolute density correct too.)
+    joint_axes = None if prenormalized else _parse_joint(body, pdf)
+    if joint_axes:
+        terms = []
+        for i, (axis, sub) in enumerate(joint_axes):
+            iv = _observable_interval(body, axis)
+            meas = (f"normalize(truncate({sub}, interval({iv[0]!r}, {iv[1]!r})))"
+                    if iv is not None else sub)
+            obs = f'get({data_name}, "{axis}")'
+            terms.append(
+                f"__L{i}__ = likelihoodof(iid({meas}, lengthof({obs})), {obs})")
+        joined = "joint_likelihood(" + ", ".join(f"__L{i}__" for i in range(len(joint_axes))) + ")"
+        extra = "\n" + "\n".join(terms) + f"\n__L__ = {joined}\n"
+        return body + extra, "__L__"
 
     if prenormalized:
         measure = pdf
