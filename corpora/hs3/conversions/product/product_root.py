@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate product.hs3 with ROOT/RooFit.
+"""Evaluate product.hs3.json with ROOT/RooFit.
 
 Requires ROOT >= 6.30 with RooFit JSON support.
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import ROOT
 
-HS3 = str(Path(__file__).resolve().with_name("product.hs3"))
+HS3 = str(Path(__file__).resolve().with_name("product.hs3.json"))
 
 DEFAULT = dict(mu1=0.0, sigma1=1.0, mu2=1.0, sigma2=2.0)
 PERT    = dict(mu1=0.5, sigma1=1.0, mu2=1.0, sigma2=2.0)

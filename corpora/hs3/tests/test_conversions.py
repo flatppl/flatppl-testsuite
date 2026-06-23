@@ -21,7 +21,7 @@ def _conversion_part(text: str) -> str:
 
 @pytest.mark.parametrize("model", MODELS)
 def test_known_good_conversion(model, tmp_path):
-    hs3 = HERE / model / f"{model}.hs3"
+    hs3 = HERE / model / f"{model}.hs3.json"
     expected = _strip_header(_conversion_part((HERE / model / f"{model}.flatppl").read_text()))
     out = tmp_path / f"{model}.flatppl"
     subprocess.run([str(CONFIG.flatppl_bin), "convert", "--from", "hs3",

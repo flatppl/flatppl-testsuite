@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """Regenerate the HS3 conversion examples and append a scoring line.
 
-For each ``*.hs3`` under a target directory (default: this ``conversions/`` dir;
-pass another such as ``flatppl-examples/examples/hs3``):
+For each ``*.hs3.json`` under a target directory (default: this ``conversions/`` dir):
 
-  1. convert ``<model>.hs3`` → ``<model>.flatppl`` via the flatppl converter
+  1. convert ``<model>.hs3.json`` → ``<model>.flatppl`` via the flatppl converter
      (honours ``FLATPPL_BIN``);
   2. append a scoring section that evaluates the root likelihood at the model's
      nominal parameter point:
@@ -18,7 +17,7 @@ is derived mechanically — the root likelihood binding and the nominal θ — s
 hand editing is required.
 
     pixi run python corpora/hs3/conversions/regen.py                  # this dir
-    pixi run python corpora/hs3/conversions/regen.py <dir-of-hs3>      # e.g. examples
+    pixi run python corpora/hs3/conversions/regen.py <dir>             # any dir of .hs3.json
     FLATPPL_BIN=/path/to/flatppl pixi run python .../regen.py [<dir>]
 """
 from __future__ import annotations
@@ -89,7 +88,7 @@ def theta(src: str, hs3: dict) -> dict:
 
 
 def regen(hs3_path: Path) -> None:
-    out_path = hs3_path.with_suffix(".flatppl")
+    out_path = hs3_path.with_suffix("").with_suffix(".flatppl")
     subprocess.run(
         [str(CONFIG.flatppl_bin), "convert", "--from", "hs3",
          str(hs3_path), str(out_path), "--no-header"],
@@ -111,12 +110,10 @@ def regen(hs3_path: Path) -> None:
 
 
 if __name__ == "__main__":
-    # Scan a target directory for `*.hs3` (default: this conversions/ dir).
-    # Works for both the per-model-subdir layout here and the flat layout in
-    # flatppl-examples/examples/hs3.
+    # Scan a target directory for `*.hs3.json` (default: this conversions/ dir).
     root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else HERE
-    hs3_files = sorted(root.rglob("*.hs3"))
+    hs3_files = sorted(root.rglob("*.hs3.json"))
     if not hs3_files:
-        raise SystemExit(f"no .hs3 files under {root}")
+        raise SystemExit(f"no .hs3.json files under {root}")
     for hs3_path in hs3_files:
         regen(hs3_path)
