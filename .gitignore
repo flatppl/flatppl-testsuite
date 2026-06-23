@@ -10,7 +10,7 @@ node_modules/
 /tmp-fixtures/
 *.flatppl.out
 # generated report (script is tracked, its output is not)
-/corpora/hs3/report.html
+/corpora/hs3/report.md
 
 # ---------------------------------------------------------------------------
 # Python (GitHub-standard)
