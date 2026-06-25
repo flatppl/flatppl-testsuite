@@ -104,9 +104,29 @@ def observations(hs3_json: Path, data_name: str) -> list[float]:
 
 
 def _strip_provenance(src: str) -> str:
-    """Drop the converter's leading `%`-comment provenance header."""
-    return "\n".join(ln for ln in src.splitlines()
-                     if not ln.lstrip().startswith("%"))
+    """Drop `%` line comments and `%%%` block doc-comments (fences + content).
+
+    A `%%%` line (optionally `%%%md`/`%%%typ` at the opening fence) toggles
+    block mode; lines inside are dropped verbatim. Without this, the block
+    *content* lines (which do not start with `%`) survive as orphaned text and
+    are parsed as code (e.g. a doc-comment `→` → `Unexpected character '→'`).
+    """
+    out, in_block = [], False
+    for ln in src.splitlines():
+        t = ln.strip()
+        if t.startswith("%%%"):
+            in_block = not in_block
+            continue
+        if in_block or t.startswith("%"):
+            continue
+        out.append(ln)
+    if in_block:
+        # An unterminated block would otherwise silently swallow every line from
+        # the opening fence to EOF — including real model code. Fail loudly.
+        raise ValueError(
+            "_strip_provenance: unterminated %%% block doc-comment (missing "
+            "closing fence) in converter output")
+    return "\n".join(out)
 
 
 # The observable's declared range lives in a `cartprod(..., x = interval(lo, hi))`

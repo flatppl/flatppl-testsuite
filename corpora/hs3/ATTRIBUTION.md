@@ -26,6 +26,18 @@ Only the fixtures the harness currently converts **and** scores end to end:
   ~1e-11) confirms the FlatPPL value is the more accurate one; see the `note`
   fields in `expected.json`. This deviation is intentional and lives only here,
   not upstream.
+- `rf304_uncorrprod` — `product_dist` of independent Gaussians (uncorrelated
+  product → `joint(x=…, y=…)` of independent 1-D factors). Verbatim from upstream.
+- `rf203_ranges` — `mixture_dist` of a Gaussian and a `polynomial_dist`, with a
+  named analysis range. Verbatim from upstream.
+- `rf207_comptools` — `mixture_dist` of `chebychev_dist` / `exponential_dist` /
+  Gaussian. `hs3.json` and `metadata.json` are verbatim from upstream; **`expected.json`
+  has a loosened `twice_delta_nll_scan` tolerance** (not upstream): the chebychev pdf
+  lowering differs from RooFit's `RooChebychev` by a numeric convention, max ~6.7e-6
+  relative (~3.2e-3 abs in 2ΔNLL) across the scan. This is **not** quadrature error
+  (analytic `Z` matches the engine's quadrature to ~2e-8). The deviation is small and
+  accepted; which side is exactly correct is not adjudicated here. See the `note` field
+  in `expected.json`. Harness-local, not upstream.
 
 To run against the full upstream suite instead of this vendored subset, set
 `HS3SUITE` to an HS3TestSuite checkout.

@@ -16,6 +16,15 @@ HS3_CORPUS: Path = Path(os.environ.get("HS3SUITE", _HS3_MODULE_ROOT / "corpora" 
 HS3_MANIFEST: Path = HS3_CORPUS / "manifest.json"
 
 
+def _binding_is_prenormalized(src: str, pdf_name: str) -> bool:
+    """True if the converted `<pdf_name> = ...` RHS starts with `normalize(` —
+    an already range-normalized pdf (mixture / chebychev / polynomial / generic).
+    Such a pdf is iid'd directly; `assemble` must not re-wrap it in another
+    normalize (which makes a `normalize` node the truncate base — unscoreable)."""
+    m = re.search(rf"(?m)^{re.escape(pdf_name)}\s*=\s*(.*)$", src)
+    return bool(m) and m.group(1).lstrip().startswith("normalize(")
+
+
 def _names_in_source(src: str) -> set[str]:
     """Return the set of binding names defined in FlatPPL source."""
     names: set[str] = set()
@@ -59,11 +68,7 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
         if hs3_doc.get("likelihoods"):
             scoreable_src, binding = src, pdf_name
         else:
-            pdf_type = next(
-                (d.get("type") for d in hs3_doc.get("distributions", [])
-                 if d.get("name") == pdf_name), None)
-            prenormalized = pdf_type in (
-                "generic_dist", "density_function_dist", "log_density_function_dist")
+            prenormalized = _binding_is_prenormalized(src, pdf_name)
             # Single observable for the 1-D scoring path; the converter names the
             # embedded table column after the dataset's observable axis.
             column = data_columns(hs3_path, data_name)[0]
