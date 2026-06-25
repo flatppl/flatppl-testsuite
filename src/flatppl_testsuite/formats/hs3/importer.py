@@ -120,6 +120,12 @@ def _strip_provenance(src: str) -> str:
         if in_block or t.startswith("%"):
             continue
         out.append(ln)
+    if in_block:
+        # An unterminated block would otherwise silently swallow every line from
+        # the opening fence to EOF — including real model code. Fail loudly.
+        raise ValueError(
+            "_strip_provenance: unterminated %%% block doc-comment (missing "
+            "closing fence) in converter output")
     return "\n".join(out)
 
 
