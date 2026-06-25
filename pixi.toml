@@ -23,10 +23,12 @@ pytest = ">=8"
 
 [activation.env]
 # The flatppl CLI is installed here by `pixi run setup`; src/ holds the package;
-# the JS engine is resolved from a sibling flatppl-js checkout by default.
+# the JS engine is resolved from a sibling flatppl-js checkout by default, but
+# an inherited FLATPPL_JS_DIR wins (e.g. `FLATPPL_JS_DIR=… pixi run …` to point
+# at a worktree / alternate engine build) — the default only fills the unset case.
 PATH = "$PIXI_PROJECT_ROOT/.pixi-bin/bin:$PATH"
 PYTHONPATH = "$PIXI_PROJECT_ROOT/src"
-FLATPPL_JS_DIR = "$PIXI_PROJECT_ROOT/../flatppl-js"
+FLATPPL_JS_DIR = "${FLATPPL_JS_DIR:-$PIXI_PROJECT_ROOT/../flatppl-js}"
 
 [tasks]
 # One-time setup: install the pinned converter binary.
