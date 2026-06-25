@@ -135,6 +135,87 @@
         "roofit_tutorial"
       ],
       "test_id": "rf304_uncorrprod"
+    },
+    {
+      "checks": [
+        "static_integrity",
+        "structure_import",
+        "twice_delta_nll_scan"
+      ],
+      "conformance": [
+        "basic"
+      ],
+      "features": {
+        "sections": [
+          "data",
+          "distributions",
+          "domains",
+          "parameter_points"
+        ],
+        "semantic": [
+          "mixture",
+          "ranges",
+          "unbinned"
+        ],
+        "types": [
+          "gaussian_dist",
+          "mixture_dist",
+          "polynomial_dist",
+          "product_domain",
+          "unbinned"
+        ]
+      },
+      "hashes": {
+        "canonical_sha256": "fcee32411760a04fd97f14e201f1d7a411cf49ccba43dfaad1bbbcb66714365b",
+        "sha256": "fcee32411760a04fd97f14e201f1d7a411cf49ccba43dfaad1bbbcb66714365b"
+      },
+      "path": "fixtures/rf203_ranges",
+      "tags": [
+        "roofit_tutorial"
+      ],
+      "test_id": "rf203_ranges"
+    },
+    {
+      "checks": [
+        "static_integrity",
+        "structure_import",
+        "twice_delta_nll_scan"
+      ],
+      "conformance": [
+        "basic"
+      ],
+      "features": {
+        "sections": [
+          "data",
+          "distributions",
+          "domains",
+          "functions",
+          "parameter_points"
+        ],
+        "semantic": [
+          "composition",
+          "customizer",
+          "unbinned"
+        ],
+        "types": [
+          "chebychev_dist",
+          "exponential_dist",
+          "gaussian_dist",
+          "generic_function",
+          "mixture_dist",
+          "product_domain",
+          "unbinned"
+        ]
+      },
+      "hashes": {
+        "canonical_sha256": "daefce0ebc9b63b6b6104eb5f902b0be1a0b431545c91f1d17293b184370cae5",
+        "sha256": "cd104014e6bdbce3b36fb68d4489570983eb08458ce2ed3b57c9338c90d73254"
+      },
+      "path": "fixtures/rf207_comptools",
+      "tags": [
+        "roofit_tutorial"
+      ],
+      "test_id": "rf207_comptools"
     }
   ],
   "generated_by": "tools/build_manifest_and_expected.py",

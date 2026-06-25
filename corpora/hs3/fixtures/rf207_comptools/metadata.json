@@ -1,0 +1,12 @@
+{
+  "description": "Composite signal/background model with customized component clone.",
+  "modified_from_source": true,
+  "notes": [
+    "The original tutorial stored an empty dataset; this fixture samples the model."
+  ],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf207_comptools.py",
+  "test_id": "rf207_comptools",
+  "title": "RooFit rf207 component tools"
+}
