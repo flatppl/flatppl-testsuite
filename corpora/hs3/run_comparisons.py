@@ -26,6 +26,7 @@ sys.path.insert(0, str(REPO / "src"))
 from flatppl_testsuite.suites.hs3_import import (  # noqa: E402
     score_scan, score_points, HS3_CORPUS, HS3_MANIFEST)
 from flatppl_testsuite.formats.hs3.importer import SkipUnimplemented  # noqa: E402
+from flatppl_testsuite.scoring.engine import DeterminizeRefused  # noqa: E402
 
 
 def _fixtures_tables() -> bool:
@@ -49,6 +50,9 @@ def _fixtures_tables() -> bool:
                 got = score_scan(hs3_doc, hs3_path, check)
             except SkipUnimplemented as e:
                 print(f"  SKIPPED — unimplemented HS3 construct: {e.hs3_type}")
+                continue
+            except DeterminizeRefused as e:
+                print(f"  SKIPPED — determinizer refused: {e}")
                 continue
             except Exception as e:  # noqa: BLE001
                 print(f"  UNSCOREABLE — {e}")
@@ -86,6 +90,9 @@ def _conversions_tables() -> bool:
             print(f"\n{conv['test_id']} :: {check['id']}   (binding {check['binding']})")
             try:
                 got = score_points(model_file, check)
+            except DeterminizeRefused as e:
+                print(f"  SKIPPED — determinizer refused: {e}")
+                continue
             except Exception as e:  # noqa: BLE001
                 print(f"  UNSCOREABLE — {e}")
                 ok_all = False

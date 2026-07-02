@@ -40,12 +40,15 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
     binding (fixtures WITH a `likelihoods` block) or build the check-time iid
     likelihood (generic-family dists are already range-normalized, so they are
     iid'd directly; raw dists are range-normalized). Propagates
-    `SkipUnimplemented`; raises `RuntimeError` (stage-prefixed) on
-    convert/assemble/score failure. Single scoring path shared by the suite
-    runner and the comparison-table script.
+    `SkipUnimplemented` and `DeterminizeRefused` (the latter only surfaces
+    under the `det-js` engine, when the model can't be legalized to FlatPDL);
+    raises `RuntimeError` (stage-prefixed) on convert/assemble/score failure.
+    Single scoring path shared by the suite runner and the comparison-table
+    script.
     """
     from ..formats.hs3.importer import (
         convert, SkipUnimplemented, data_columns, assemble)
+    from ..scoring.engine import DeterminizeRefused
     from ..scoring.flatppl_engine import twice_delta_nll
 
     target = check.get("target", {})
@@ -86,6 +89,8 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
     try:
         return twice_delta_nll(
             model_path, binding, check["scan_parameter"], check["scan_points"], reference)
+    except DeterminizeRefused:
+        raise
     except Exception as e:
         raise RuntimeError(f"score: {e}") from e
     finally:
@@ -100,12 +105,16 @@ def score_points(model_file: Path, check: dict) -> list[float]:
     theta points and returns the 2DeltaNLL vector (offset-invariant, so it lines
     up with the frozen ROOT vector regardless of normalization conventions).
     Single scoring path shared by the suite runner and the comparison-table
-    script. Raises `RuntimeError` (stage-prefixed) on failure.
+    script. Propagates `DeterminizeRefused` (only under the `det-js` engine);
+    raises `RuntimeError` (stage-prefixed) on other failure.
     """
+    from ..scoring.engine import DeterminizeRefused
     from ..scoring.flatppl_engine import twice_delta_nll_points
     try:
         return twice_delta_nll_points(
             model_file, check["binding"], check["reference_point"], check["points"])
+    except DeterminizeRefused:
+        raise
     except Exception as e:
         raise RuntimeError(f"score: {e}") from e
 
@@ -119,7 +128,9 @@ class HS3ImportSuite(Suite):
         from ..formats.hs3.importer import convert, SkipUnimplemented
         from ..formats.hs3 import engines as _oracle_mod
         from ..scoring.compare import compare_vectors
-        from ..scoring.result import CheckResult, CONVERT_SKIP, UNSCOREABLE, NUMERIC_MISMATCH
+        from ..scoring.engine import DeterminizeRefused
+        from ..scoring.result import (
+            CheckResult, CONVERT_SKIP, UNSCOREABLE, NUMERIC_MISMATCH, DETERMINIZE_SKIP)
 
         manifest = json.loads(HS3_MANIFEST.read_text())
         results: list[CheckResult] = []
@@ -209,6 +220,12 @@ class HS3ImportSuite(Suite):
                             status="skipped", tag=CONVERT_SKIP, message=e.hs3_type,
                         ))
                         continue
+                    except DeterminizeRefused as e:
+                        results.append(CheckResult(
+                            test_id=test_id, check_id=check_id,
+                            status="skipped", tag=DETERMINIZE_SKIP, message=str(e),
+                        ))
+                        continue
                     except Exception as e:
                         results.append(CheckResult(
                             test_id=test_id, check_id=check_id,
@@ -267,6 +284,12 @@ class HS3ImportSuite(Suite):
                     continue
                 try:
                     actual_vec = score_points(model_file, check)
+                except DeterminizeRefused as e:
+                    results.append(CheckResult(
+                        test_id=test_id, check_id=check_id,
+                        status="skipped", tag=DETERMINIZE_SKIP, message=str(e),
+                    ))
+                    continue
                 except Exception as e:  # noqa: BLE001
                     results.append(CheckResult(
                         test_id=test_id, check_id=check_id,
