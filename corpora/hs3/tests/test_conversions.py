@@ -11,7 +11,7 @@ def _strip_header(text: str) -> str:
     return "\n".join(ln for ln in body if ln.strip()) + "\n"
 
 
-SCORING_MARKER = "% === scoring ==="
+SCORING_MARKER = "# === scoring ==="
 
 
 def _conversion_part(text: str) -> str:
