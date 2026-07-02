@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -57,6 +58,63 @@ class JsScoreEngine(FlatpplEngine):
         return float(proc.stdout.strip())
 
 
+class DeterminizeRefused(Exception):
+    """``flatppl determinize`` refused a construct (exit 3).
+
+    Not a hard error: it means the model (or the appended score query) uses a
+    construct outside the determiniser's current density fragment — e.g. a
+    continuous-latent marginal with no closed form. Callers should treat this
+    like ``SkipUnimplemented``/``CONVERT_SKIP`` (tag ``DETERMINIZE_SKIP``), not
+    fail the run.
+    """
+
+
+class DetJsScoreEngine(FlatpplEngine):
+    """convert-free det-js path.
+
+    Appends ``__score__ = logdensityof(binding, theta)`` to the model, runs
+    ``flatppl determinize`` to lower the whole thing to the deterministic
+    FlatPDL profile (eliminating the measure layer), then evaluates the
+    resulting ``__score__`` binding via ``score_flatpdl.cjs``. Raises
+    ``DeterminizeRefused`` if the determiniser can't legalize the model
+    (exit 3); any other nonzero exit from either subprocess is a hard
+    ``RuntimeError``.
+    """
+
+    name = "det-js"
+
+    def log_density(self, model: Path, binding: str, theta: dict) -> float:
+        src = model.read_text() + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n"
+        with tempfile.NamedTemporaryFile(
+            suffix=".flatppl", mode="w", delete=False
+        ) as tf:
+            tf.write(src)
+            in_path = Path(tf.name)
+        out_path = in_path.with_suffix(".flatpdl.flatppl")
+        try:
+            det = subprocess.run(
+                [str(CONFIG.flatppl_bin), "determinize", str(in_path), "-o", str(out_path)],
+                capture_output=True, text=True,
+            )
+            if det.returncode == 3:
+                raise DeterminizeRefused(det.stderr.strip())
+            if det.returncode != 0:
+                raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
+            proc = subprocess.run(
+                [
+                    CONFIG.node_bin, str(CONFIG.flatpdl_scorer), str(out_path), "__score__",
+                    "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
+                ],
+                capture_output=True, text=True,
+            )
+            if proc.returncode != 0:
+                raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
+            return float(proc.stdout.strip())
+        finally:
+            in_path.unlink(missing_ok=True)
+            out_path.unlink(missing_ok=True)
+
+
 _REGISTRY: dict[str, FlatpplEngine] = {}
 
 
@@ -77,3 +135,4 @@ def get_engine(name: str | None = None) -> FlatpplEngine:
 
 
 register_engine(JsScoreEngine())
+register_engine(DetJsScoreEngine())

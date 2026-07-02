@@ -25,6 +25,9 @@ class Config:
     node_bin: str = os.environ.get("NODE_BIN", "node")
     # Generic JS scorer for any FlatPPL model; used by scoring/flatppl_engine.py.
     scorer: Path = _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_js.cjs"
+    # Scorer for a deterministic binding in a determinized FlatPDL model; used
+    # by scoring/engine.py's DetJsScoreEngine.
+    flatpdl_scorer: Path = _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_flatpdl.cjs"
 
 
 CONFIG = Config()

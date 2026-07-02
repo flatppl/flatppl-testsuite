@@ -22,7 +22,11 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 FLATPPL_RUST_REF="${FLATPPL_RUST_REF:-main}"
 
-echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (with hs3 feature)"
+echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + default verbs incl. determinize)"
+# `--features hs3` ADDS to the default feature set (no --no-default-features), so
+# the installed binary carries the default verbs — including `determinize`, which
+# the det-js scoring engine (scoring/engine.py) shells out to. The `determinize`
+# verb landed in flatppl-rust #61; `FLATPPL_RUST_REF=main` (the default) tracks it.
 cargo install \
   --git https://github.com/flatppl/flatppl-rust \
   --branch "${FLATPPL_RUST_REF}" \
