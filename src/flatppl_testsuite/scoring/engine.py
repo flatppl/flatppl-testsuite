@@ -10,6 +10,7 @@ Add an engine by subclassing ``FlatpplEngine`` and calling ``register_engine``.
 """
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import tempfile
@@ -146,6 +147,45 @@ def score_binding(model_path: Path, binding: str) -> float:
         if proc.returncode != 0:
             raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
         return float(proc.stdout.strip())
+
+
+def sample_sweep(model_path: Path, n: int, bindings: list[str], base: int = 0) -> list[dict]:
+    """Determinize a self-contained FlatPPL model whose last binding is
+    ``rand(rng, lawof(record(...)))`` (the sample-path determinizer's
+    target construct), then seed-sweep the resulting FlatPDL over N distinct
+    seeds via ``sample_sweep.cjs`` — ONE Node process for the whole sweep,
+    not a subprocess per seed (see that script's header comment) — returning
+    N realizations of the requested bindings as an empirical sample set:
+    ``[{binding: value, ...}, ...]``.
+
+    A fixed seed gives ONE deterministic realization; sweeping seeds is how
+    ``suites/sample_gate.py`` builds a distribution to check empirical
+    moments against a closed-form oracle. Raises ``DeterminizeRefused`` if
+    the determinizer can't legalize the model (exit 3); any other nonzero
+    exit from either subprocess is a hard ``RuntimeError``.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        out_path = Path(tmp) / (model_path.stem + ".flatpdl.flatppl")
+        det = subprocess.run(
+            [str(CONFIG.flatppl_bin), "determinize", str(model_path), "-o", str(out_path)],
+            capture_output=True, text=True,
+        )
+        if det.returncode == 3:
+            raise DeterminizeRefused(det.stderr.strip())
+        if det.returncode != 0:
+            raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
+        proc = subprocess.run(
+            [
+                CONFIG.node_bin, str(CONFIG.sample_sweep_scorer), str(out_path),
+                str(n), ",".join(bindings),
+                "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
+                "--base", str(base),
+            ],
+            capture_output=True, text=True,
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(f"sample_sweep failed: {proc.stderr.strip()}")
+        return json.loads(proc.stdout)
 
 
 _REGISTRY: dict[str, FlatpplEngine] = {}
