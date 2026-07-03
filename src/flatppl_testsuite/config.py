@@ -28,6 +28,12 @@ class Config:
     # Scorer for a deterministic binding in a determinized FlatPDL model; used
     # by scoring/engine.py's DetJsScoreEngine.
     flatpdl_scorer: Path = _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_flatpdl.cjs"
+    # Seed-sweep scorer for a determinized FlatPDL sample-path model (one
+    # `rnginit([...])` byte-vector substituted per seed, all in one Node
+    # process); used by scoring/engine.py's sample_sweep().
+    sample_sweep_scorer: Path = (
+        _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "sample_sweep.cjs"
+    )
 
 
 CONFIG = Config()

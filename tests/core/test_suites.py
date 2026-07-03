@@ -7,11 +7,16 @@ test_fragment_suite_registered: get_suites() must also include a
     FragmentGateSuite instance (the fragment numeric gate, see
     flatppl_testsuite/suites/fragment_gate.py); its own scoring behaviour
     is exercised end-to-end by corpora/fragment/tests/test_fragment_gate.py.
+test_sample_suite_registered: get_suites() must also include a
+    SampleGateSuite instance (the FlatPDL sample-path seed-sweep numeric
+    gate, see flatppl_testsuite/suites/sample_gate.py); its own scoring
+    behaviour is exercised end-to-end by corpora/sample/tests/test_sample_gate.py.
 """
 
 from flatppl_testsuite.suites.base import Suite, get_suites
 from flatppl_testsuite.suites.hs3_import import HS3ImportSuite
 from flatppl_testsuite.suites.fragment_gate import FragmentGateSuite
+from flatppl_testsuite.suites.sample_gate import SampleGateSuite
 
 
 def test_hs3_suite_registered():
@@ -29,3 +34,8 @@ def test_hs3_suite_runs_rf101():
 def test_fragment_suite_registered():
     suites = get_suites()
     assert any(isinstance(s, FragmentGateSuite) for s in suites)
+
+
+def test_sample_suite_registered():
+    suites = get_suites()
+    assert any(isinstance(s, SampleGateSuite) for s in suites)

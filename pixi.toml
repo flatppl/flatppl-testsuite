@@ -57,6 +57,10 @@ gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
 # Run the fragment corpus under the det-js engine (determinize -> score, no
 # convert-time measure algebra) and print a test_id -> PASS/SKIP/MISMATCH table.
 fragment = "python corpora/fragment/gate.py"
+# Run the sample corpus under the det-js engine (determinize -> seed-sweep ->
+# empirical stats vs closed-form oracle) and print a
+# test_id::check -> PASS/SKIP/MISMATCH table.
+sample = "python corpora/sample/gate.py"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
