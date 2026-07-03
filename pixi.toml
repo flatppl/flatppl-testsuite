@@ -17,6 +17,9 @@ python = ">=3.11"
 nodejs = "24.*"
 # rust provides cargo, used to install the flatppl CLI from git at a pinned rev.
 rust = ">=1.75"
+# INDEPENDENT oracle for corpora/fragment/gen_expected.py (closed-form
+# Normal/mixture/truncation/log-normal densities) — never the sibling engine.
+scipy = ">=1.11"
 
 [pypi-dependencies]
 pytest = ">=8"
@@ -45,9 +48,15 @@ harness = "python -m flatppl_testsuite"
 hs3 = "python corpora/hs3/run_comparisons.py"
 # Render the HS3 scoring results as a Markdown report.
 report = "python corpora/hs3/report.py"
+# Run the HS3 corpus under the det-js engine (determinize -> score, no
+# convert-time measure algebra) and print a model -> PASS/SKIP/MISMATCH table.
+gate = "python corpora/hs3/gate.py"
 # Regenerate the conversions' frozen ROOT 2DeltaNLL vectors (needs the root env):
 #   pixi run -e root python corpora/hs3/conversions/gen_expected.py
 gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
+# Run the fragment corpus under the det-js engine (determinize -> score, no
+# convert-time measure algebra) and print a test_id -> PASS/SKIP/MISMATCH table.
+fragment = "python corpora/fragment/gate.py"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,

@@ -1,6 +1,29 @@
-"""Pointwise vector comparison for twice_delta_nll checks."""
+"""Pointwise vector comparison for twice_delta_nll checks, and a scalar
+counterpart for fragment corpus logdensity_value checks."""
 
 from __future__ import annotations
+
+import math
+
+
+def compare_scalar(actual: float, expected: float,
+                   tolerance: dict[str, float]) -> None:
+    """|actual - expected| <= atol + rtol * |expected|; raise on mismatch.
+
+    An infinite `expected` (a truncation gate scored out of support) has no
+    finite tolerance band, so it is compared with exact `==` instead.
+    """
+    if math.isinf(expected):
+        if actual != expected:
+            raise AssertionError(f"got {actual!r}, expected {expected!r}")
+        return
+    atol = tolerance["atol"]
+    rtol = tolerance["rtol"]
+    if abs(actual - expected) > atol + rtol * abs(expected):
+        raise AssertionError(
+            f"got {actual!r}, expected {expected!r} "
+            f"(diff={abs(actual - expected)!r}, tol={atol + rtol * abs(expected)!r})"
+        )
 
 
 def compare_vectors(actual: list[float], expected: list[float],

@@ -8,10 +8,10 @@ For each ``*.hs3.json`` under a target directory (default: this ``conversions/``
   2. append a scoring section that evaluates the root likelihood at the model's
      nominal parameter point:
 
-         % === scoring ===
+         # === scoring ===
          log_likelihood = logdensityof(<L>, record(<free params at nominal>))
 
-Everything above the ``% === scoring ===`` marker is exactly the converter's
+Everything above the ``# === scoring ===`` marker is exactly the converter's
 output, so ``test_known_good_conversion`` re-pins against it; the scoring part
 is derived mechanically — the root likelihood binding and the nominal θ — so no
 hand editing is required.
@@ -34,7 +34,9 @@ from flatppl_testsuite.config import CONFIG  # noqa: E402
 from flatppl_testsuite.scoring.engine import render_record  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-MARKER = "% === scoring ==="
+# A PLAIN `#` comment (discarded on parse), NOT a `%` doc-comment — see the note
+# in `regen` on why the divider must not be `%`.
+MARKER = "# === scoring ==="
 
 
 def root_likelihood(src: str) -> str:
@@ -98,9 +100,13 @@ def regen(hs3_path: Path) -> None:
     hs3 = json.loads(hs3_path.read_text())
     binding = root_likelihood(src)
     rec = render_record(theta(src, hs3))
-    # A blank line after the marker detaches it from the binding, so only the
-    # single `% Evaluate ...` line is the binding's doc comment (the engine
-    # rejects two doc comments stacked above one binding).
+    # The divider MUST be a plain `#` comment, not a `%` doc-comment: a blank line
+    # does NOT detach a leading `%` doc-comment (spec §04 "Documentation" allows
+    # whitespace/newlines between a leading doc-comment and its binding), so a `%`
+    # divider would stack as a SECOND leading doc-comment above `log_likelihood`
+    # — which the parser correctly rejects ("at most one doc-comment per binding").
+    # As a `#` comment it is discarded, leaving the single `% Evaluate ...` line
+    # as the binding's only doc-comment.
     out_path.write_text(
         f"{src}\n\n{MARKER}\n\n"
         f"% Evaluate the root likelihood at the nominal parameter point.\n"

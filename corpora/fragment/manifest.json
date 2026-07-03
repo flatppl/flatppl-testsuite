@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "fragments": [
+    {
+      "test_id": "frag_superpose",
+      "path": "superpose",
+      "features": ["superpose"]
+    },
+    {
+      "test_id": "frag_trunc_in",
+      "path": "trunc_in",
+      "features": ["truncate"]
+    },
+    {
+      "test_id": "frag_trunc_out",
+      "path": "trunc_out",
+      "features": ["truncate", "out_of_support"]
+    },
+    {
+      "test_id": "frag_norm_trunc",
+      "path": "norm_trunc",
+      "features": ["truncate", "normalize"]
+    },
+    {
+      "test_id": "frag_pushfwd_affine",
+      "path": "pushfwd_affine",
+      "features": ["pushfwd", "bijection"]
+    },
+    {
+      "test_id": "frag_pushfwd_exp",
+      "path": "pushfwd_exp",
+      "features": ["pushfwd", "bijection"]
+    },
+    {
+      "test_id": "frag_kchain_bern",
+      "path": "kchain_bern",
+      "features": ["kchain", "kernelof", "discrete_latent"]
+    },
+    {
+      "test_id": "frag_kchain_cat",
+      "path": "kchain_cat",
+      "features": ["kchain", "kernelof", "discrete_latent"]
+    }
+  ]
+}

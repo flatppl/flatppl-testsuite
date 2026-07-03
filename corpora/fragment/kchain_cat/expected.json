@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "test_id": "frag_kchain_cat",
+  "model": "kchain_cat.flatppl",
+  "reference_backend": "julia Distributions.jl 0.25",
+  "checks": [
+    {
+      "id": "logdensity_value",
+      "kind": "logdensity_value",
+      "binding": "lp",
+      "expected": -2.1367953170065803,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}
