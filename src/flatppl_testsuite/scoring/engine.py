@@ -115,6 +115,39 @@ class DetJsScoreEngine(FlatpplEngine):
             out_path.unlink(missing_ok=True)
 
 
+def score_binding(model_path: Path, binding: str) -> float:
+    """Determinize a self-contained FlatPPL model and score a binding it
+    already defines, with no ``__score__`` append.
+
+    Unlike ``DetJsScoreEngine.log_density`` (which scores a *measure* at a
+    theta point it appends itself), this is for fragment-corpus models that
+    already end in a fixed-point binding, e.g. ``lp = logdensityof(m, 0.5)``
+    — the model IS the query. Raises ``DeterminizeRefused`` if the
+    determiniser can't legalize the model (exit 3); any other nonzero exit
+    from either subprocess is a hard ``RuntimeError``.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        out_path = Path(tmp) / (model_path.stem + ".flatpdl.flatppl")
+        det = subprocess.run(
+            [str(CONFIG.flatppl_bin), "determinize", str(model_path), "-o", str(out_path)],
+            capture_output=True, text=True,
+        )
+        if det.returncode == 3:
+            raise DeterminizeRefused(det.stderr.strip())
+        if det.returncode != 0:
+            raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
+        proc = subprocess.run(
+            [
+                CONFIG.node_bin, str(CONFIG.flatpdl_scorer), str(out_path), binding,
+                "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
+            ],
+            capture_output=True, text=True,
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
+        return float(proc.stdout.strip())
+
+
 _REGISTRY: dict[str, FlatpplEngine] = {}
 
 

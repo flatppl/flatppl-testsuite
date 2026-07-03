@@ -1,0 +1,2 @@
+m = superpose(Normal(mu = 0.0, sigma = 1.0), Normal(mu = 1.0, sigma = 2.0))
+lp = logdensityof(m, 0.5)

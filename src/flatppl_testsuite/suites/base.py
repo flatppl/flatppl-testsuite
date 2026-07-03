@@ -23,4 +23,5 @@ def register(suite: "Suite") -> None:
 
 def get_suites(names: set[str] | None = None) -> list["Suite"]:
     import flatppl_testsuite.suites.hs3_import  # noqa: F401  (ensure registration)
+    import flatppl_testsuite.suites.fragment_gate  # noqa: F401  (ensure registration)
     return [s for n, s in REGISTRY.items() if names is None or n in names]

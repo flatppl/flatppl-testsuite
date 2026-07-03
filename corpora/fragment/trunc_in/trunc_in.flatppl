@@ -1,0 +1,2 @@
+m = truncate(Normal(mu = 0.0, sigma = 1.0), interval(-1.0, 2.0))
+lp = logdensityof(m, 0.5)
