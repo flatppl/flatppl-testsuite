@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "test_id": "frag_gamma_poisson_marginal",
+  "model": "gamma_poisson_marginal.flatppl",
+  "reference_backend": "scipy.stats.nbinom",
+  "checks": [
+    {
+      "id": "logdensity_value",
+      "kind": "logdensity_value",
+      "binding": "lp",
+      "expected": -4.511103676949024,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}

@@ -57,5 +57,5 @@ def test_all_fragments_are_gated():
     assert ids == {
         "frag_superpose", "frag_trunc_in", "frag_trunc_out", "frag_norm_trunc",
         "frag_pushfwd_affine", "frag_pushfwd_exp", "frag_kchain_bern", "frag_kchain_cat",
-        "frag_broadcast_poisson",
+        "frag_broadcast_poisson", "frag_normal_normal_marginal", "frag_gamma_poisson_marginal",
     }
