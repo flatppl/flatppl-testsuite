@@ -1,0 +1,4 @@
+z = draw(Normal(mu = 0.0, sigma = 1.0))
+k = kernelof(record(y = draw(Normal(mu = z, sigma = 2.0))), z = z)
+pp = kchain(lawof(record(z = z)), k)
+lp = logdensityof(pp, record(y = 1.5))

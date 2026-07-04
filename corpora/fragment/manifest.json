@@ -45,6 +45,16 @@
       "test_id": "frag_broadcast_poisson",
       "path": "broadcast_poisson",
       "features": ["broadcast"]
+    },
+    {
+      "test_id": "frag_normal_normal_marginal",
+      "path": "normal_normal_marginal",
+      "features": ["kchain", "kernelof", "conjugate_marginal"]
+    },
+    {
+      "test_id": "frag_gamma_poisson_marginal",
+      "path": "gamma_poisson_marginal",
+      "features": ["kchain", "kernelof", "conjugate_marginal"]
     }
   ]
 }

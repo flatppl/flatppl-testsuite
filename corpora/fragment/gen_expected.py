@@ -48,9 +48,10 @@ FROZEN = {
     "frag_kchain_cat": -2.1367953170065803,
 }
 
-# frag_broadcast_poisson has no Julia predecessor — scipy IS its canonical
-# oracle (see its expected.json reference_backend) — so it is deliberately
-# absent from FROZEN; main()'s cross-check loop skips the
+# frag_broadcast_poisson, frag_normal_normal_marginal, and
+# frag_gamma_poisson_marginal have no Julia predecessor — scipy IS their
+# canonical oracle (see each's expected.json reference_backend) — so they are
+# deliberately absent from FROZEN; main()'s cross-check loop skips the
 # reproduce-to-1e-12 assertion for any test_id not in this dict and just
 # writes the scipy value directly.
 
@@ -130,6 +131,27 @@ def oracle_broadcast_poisson() -> float:
     return sum(poisson.logpmf(k, lam) for k, lam in zip(ks, lambdas))
 
 
+def oracle_normal_normal_marginal() -> float:
+    """`z ~ Normal(mu=0.0, sigma=1.0)`, `y | z ~ Normal(mu=z, sigma=2.0)`; the
+    Normal-Normal conjugate marginal of y is `Normal(mu=0.0,
+    sigma=sqrt(1.0^2 + 2.0^2))`, scored at y=1.5."""
+    return norm.logpdf(1.5, loc=0.0, scale=math.sqrt(1.0**2 + 2.0**2))
+
+
+def oracle_gamma_poisson_marginal() -> float:
+    """`z ~ Gamma(shape=2.0, rate=3.0)`, `y | z ~ Poisson(rate=z)`; the
+    Gamma-Poisson conjugate marginal of y is `NegativeBinomial(alpha=2.0,
+    beta=3.0)` (§08), scored at y=4. scipy's `nbinom(n, p)` pmf is
+    `C(k+n-1, k) p^n (1-p)^k`; matching against the §08 pmf
+    `C(k+alpha-1, alpha-1) (beta/(beta+1))^alpha (1/(beta+1))^k` gives
+    n=alpha, p=beta/(beta+1) (checked by hand: both give -4.511103676949024
+    for alpha=2, beta=3, k=4)."""
+    from scipy.stats import nbinom
+
+    alpha, beta = 2.0, 3.0
+    return nbinom.logpmf(4, n=alpha, p=beta / (beta + 1.0))
+
+
 ORACLES = {
     "frag_superpose": ("superpose", oracle_superpose, "julia Distributions.jl 0.25"),
     "frag_trunc_in": ("trunc_in", oracle_trunc_in, "julia Distributions.jl 0.25"),
@@ -140,6 +162,10 @@ ORACLES = {
     "frag_kchain_bern": ("kchain_bern", oracle_kchain_bern, "julia Distributions.jl 0.25"),
     "frag_kchain_cat": ("kchain_cat", oracle_kchain_cat, "julia Distributions.jl 0.25"),
     "frag_broadcast_poisson": ("broadcast_poisson", oracle_broadcast_poisson, "scipy.stats.poisson"),
+    "frag_normal_normal_marginal": (
+        "normal_normal_marginal", oracle_normal_normal_marginal, "scipy.stats.norm"),
+    "frag_gamma_poisson_marginal": (
+        "gamma_poisson_marginal", oracle_gamma_poisson_marginal, "scipy.stats.nbinom"),
 }
 
 
