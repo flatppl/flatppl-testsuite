@@ -48,6 +48,12 @@ FROZEN = {
     "frag_kchain_cat": -2.1367953170065803,
 }
 
+# frag_broadcast_poisson has no Julia predecessor — scipy IS its canonical
+# oracle (see its expected.json reference_backend) — so it is deliberately
+# absent from FROZEN; main()'s cross-check loop skips the
+# reproduce-to-1e-12 assertion for any test_id not in this dict and just
+# writes the scipy value directly.
+
 
 def oracle_superpose() -> float:
     """`m = superpose(Normal(0,1), Normal(1,2))`; superpose is measure
@@ -112,15 +118,28 @@ def oracle_kchain_cat() -> float:
     return math.log(sum(w * norm.pdf(0.5, mu, 1) for w, mu in zip(weights, mus)))
 
 
+def oracle_broadcast_poisson() -> float:
+    """`broadcast(Poisson, [2.0, 3.5, 1.0])` is an array-of-kernels measure
+    over the length-3 observation array (spec §04 broadcasting); its
+    log-density at `[1, 4, 2]` is the SUM of independent per-cell Poisson
+    log-pmfs, `Σᵢ Poisson.logpmf(kᵢ; λᵢ)` for λ=[2.0, 3.5, 1.0], k=[1, 4, 2]."""
+    from scipy.stats import poisson
+
+    lambdas = [2.0, 3.5, 1.0]
+    ks = [1, 4, 2]
+    return sum(poisson.logpmf(k, lam) for k, lam in zip(ks, lambdas))
+
+
 ORACLES = {
-    "frag_superpose": ("superpose", oracle_superpose),
-    "frag_trunc_in": ("trunc_in", oracle_trunc_in),
-    "frag_trunc_out": ("trunc_out", oracle_trunc_out),
-    "frag_norm_trunc": ("norm_trunc", oracle_norm_trunc),
-    "frag_pushfwd_affine": ("pushfwd_affine", oracle_pushfwd_affine),
-    "frag_pushfwd_exp": ("pushfwd_exp", oracle_pushfwd_exp),
-    "frag_kchain_bern": ("kchain_bern", oracle_kchain_bern),
-    "frag_kchain_cat": ("kchain_cat", oracle_kchain_cat),
+    "frag_superpose": ("superpose", oracle_superpose, "julia Distributions.jl 0.25"),
+    "frag_trunc_in": ("trunc_in", oracle_trunc_in, "julia Distributions.jl 0.25"),
+    "frag_trunc_out": ("trunc_out", oracle_trunc_out, "julia Distributions.jl 0.25"),
+    "frag_norm_trunc": ("norm_trunc", oracle_norm_trunc, "julia Distributions.jl 0.25"),
+    "frag_pushfwd_affine": ("pushfwd_affine", oracle_pushfwd_affine, "julia Distributions.jl 0.25"),
+    "frag_pushfwd_exp": ("pushfwd_exp", oracle_pushfwd_exp, "julia Distributions.jl 0.25"),
+    "frag_kchain_bern": ("kchain_bern", oracle_kchain_bern, "julia Distributions.jl 0.25"),
+    "frag_kchain_cat": ("kchain_cat", oracle_kchain_cat, "julia Distributions.jl 0.25"),
+    "frag_broadcast_poisson": ("broadcast_poisson", oracle_broadcast_poisson, "scipy.stats.poisson"),
 }
 
 
@@ -131,12 +150,12 @@ def _json_expected(value: float) -> float | str:
     return value
 
 
-def gen(test_id: str, dirname: str, value: float) -> None:
+def gen(test_id: str, dirname: str, value: float, reference_backend: str) -> None:
     doc = {
         "schema_version": 1,
         "test_id": test_id,
         "model": f"{dirname}.flatppl",
-        "reference_backend": "julia Distributions.jl 0.25",
+        "reference_backend": reference_backend,
         "checks": [
             {
                 "id": "logdensity_value",
@@ -153,17 +172,18 @@ def gen(test_id: str, dirname: str, value: float) -> None:
 
 
 def main() -> None:
-    for test_id, (dirname, oracle_fn) in ORACLES.items():
+    for test_id, (dirname, oracle_fn, reference_backend) in ORACLES.items():
         value = oracle_fn()
-        frozen = FROZEN[test_id]
-        if math.isinf(frozen):
-            assert value == frozen, f"{test_id}: scipy={value!r} frozen={frozen!r}"
-        else:
-            diff = abs(value - frozen)
-            assert diff <= 1e-12, (
-                f"{test_id}: scipy={value!r} frozen={frozen!r} diff={diff!r} > 1e-12"
-            )
-        gen(test_id, dirname, value)
+        frozen = FROZEN.get(test_id)
+        if frozen is not None:
+            if math.isinf(frozen):
+                assert value == frozen, f"{test_id}: scipy={value!r} frozen={frozen!r}"
+            else:
+                diff = abs(value - frozen)
+                assert diff <= 1e-12, (
+                    f"{test_id}: scipy={value!r} frozen={frozen!r} diff={diff!r} > 1e-12"
+                )
+        gen(test_id, dirname, value, reference_backend)
 
 
 if __name__ == "__main__":

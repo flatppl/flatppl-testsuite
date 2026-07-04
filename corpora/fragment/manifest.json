@@ -40,6 +40,11 @@
       "test_id": "frag_kchain_cat",
       "path": "kchain_cat",
       "features": ["kchain", "kernelof", "discrete_latent"]
+    },
+    {
+      "test_id": "frag_broadcast_poisson",
+      "path": "broadcast_poisson",
+      "features": ["broadcast"]
     }
   ]
 }
