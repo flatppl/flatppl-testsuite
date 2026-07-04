@@ -1,0 +1,1 @@
+lp = logdensityof(broadcast(Poisson, [2.0, 3.5, 1.0]), [1, 4, 2])
