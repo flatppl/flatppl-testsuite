@@ -1,0 +1,4 @@
+a = draw(Normal(mu = 0.0, sigma = 1.0))
+k = kernelof(record(b = draw(Normal(mu = a, sigma = 0.5))), a = a)
+j = jointchain(lawof(record(a = a)), k)
+lp = logdensityof(j, record(a = 0.3, b = 0.7))
