@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "key": "poisson",
+  "distribution": "Poisson(rate)",
+  "model": "poisson.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "scipy.stats.poisson.logpmf(3, rate) [CHLO lgamma]",
+  "params": {
+    "rate": 2.5
+  },
+  "variate": 3,
+  "logdensity_value": -1.5428872736055896,
+  "gradient": {
+    "rate": 0.20000006399989445
+  },
+  "grad_params": [
+    "rate"
+  ],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}

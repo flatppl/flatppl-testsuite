@@ -1,0 +1,4 @@
+alpha = elementof(cartpow(posreals, 3))
+s = rnginit(0)
+x = draw(Dirichlet(alpha = alpha))
+draws = rand(s, lawof(x))

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "key": "gamma",
+  "distribution": "Gamma(shape, rate)",
+  "model": "gamma.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "scipy.stats.gamma.logpdf(0.5, a=shape, scale=1/rate) [CHLO lgamma]",
+  "params": {
+    "shape": 2.5,
+    "rate": 1.5
+  },
+  "variate": 0.5,
+  "logdensity_value": -1.0607408710424262,
+  "gradient": {
+    "shape": -0.9908386737296215,
+    "rate": 1.1666669135801389
+  },
+  "grad_params": [
+    "shape",
+    "rate"
+  ],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}

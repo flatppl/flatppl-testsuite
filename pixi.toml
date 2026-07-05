@@ -72,6 +72,46 @@ root = ">=6.30"
 [feature.pyhs3.pypi-dependencies]
 pyhs3 = "*"
 
+# ---------------------------------------------------------------------------
+# StableHLO numeric-execution gate. Executes emitted StableHLO with Enzyme-JAX
+# (`enzyme_ad.jax.hlo_call`) so the emitted density modules are checked as
+# NUMBERS and GRADIENTS, not just structurally. The enzyme 0.0.14 wheel is
+# built against a specific (older) jaxlib ABI and its code still calls the
+# 1-arg `jax_mlir.aval_to_ir_types(aval)`, so jax/jaxlib are pinned to the era
+# that matches (newer jax made it 2-arg and broke the wheel). The wheel is
+# CPython 3.12-only, so this feature pins python 3.12 (disjoint from the base
+# env's `>=3.11`), which is why it lives in its own environment.
+[feature.stablehlo.dependencies]
+python = "3.12.*"
+# INDEPENDENT oracle (scipy) + numpy; kept <2.1 for the enzyme/jaxlib ABI era.
+scipy = ">=1.11"
+numpy = "<2.1"
+
+[feature.stablehlo.pypi-dependencies]
+# enzyme_ad.jax.hlo_call imports emitted StableHLO (@main) as a jit-able +
+# differentiable jax callable — the executor for value AND gradient checks.
+# jax/jaxlib are pypi (NOT conda-forge): the enzyme 0.0.14 wheel bundles a
+# jaxlib-ABI extension, so jaxlib must be the matching pypi build — a conda
+# jaxlib installs a dist-info but no importable package here and breaks import.
+# 0.4.36 is the matched era (newer jax made `aval_to_ir_types` 2-arg, breaking
+# the wheel). The wheel is CPython 3.12-only, hence the python 3.12 pin above
+# (disjoint from the base env's >=3.11), which is why this is its own env.
+enzyme-ad = "==0.0.14"
+jax = "==0.4.36"
+jaxlib = "==0.4.36"
+pytest = ">=8"
+
+# The gate task lives on the feature (the `stablehlo` env is no-default-feature,
+# so the base `[tasks]` are not in scope). Emit StableHLO from the local
+# `flatppl stablehlo` binary, execute under Enzyme-JAX, check value + jax.grad
+# gradient vs the scipy oracle, plus @sample distribution and multi-rng
+# independence. Point FLATPPL_BIN at a `flatppl` built with the `stablehlo`
+# feature (the subcommand is feature-gated):
+#   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo shlo
+[feature.stablehlo.tasks]
+shlo = "python corpora/stablehlo/gate.py"
+
 [environments]
 root = ["root"]
 pyhs3 = ["pyhs3"]
+stablehlo = { features = ["stablehlo"], no-default-feature = true }

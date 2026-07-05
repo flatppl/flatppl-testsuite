@@ -22,9 +22,10 @@ jobs:
         with:
           # pixi.lock is intentionally not committed; solve on the fly.
           locked: false
-          # Install only the base env (python + node 24 + rust); never the
+          # Base env (python + node 24 + rust) + the stablehlo gate env
+          # (python 3.12 + enzyme-ad/jax pins + scipy). Never the heavy
           # root/pyhs3 oracle environments.
-          environments: default
+          environments: default stablehlo
 
       # Cache the cargo registry/git so the converter's dependencies are not
       # re-downloaded each run. The converter binary itself is rebuilt from
@@ -43,3 +44,10 @@ jobs:
 
       - name: Run FlatPPL tests against frozen ROOT-verified values
         run: pixi run test
+
+      # StableHLO numeric-execution gate: emit via the setup-built `flatppl
+      # stablehlo` verb, execute under Enzyme-JAX, check value + jax.grad
+      # gradient vs the scipy oracle, plus @sample distribution + multi-rng
+      # independence. Separate env (python 3.12 / enzyme pins), so a separate step.
+      - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
+        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo shlo

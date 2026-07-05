@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "key": "dirichlet",
+  "distribution": "Dirichlet(alpha[3])",
+  "model": "dirichlet.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "scipy.stats.dirichlet.logpdf([0.2,0.3,0.5], alpha=[2,3,5]) [CHLO lgamma]",
+  "params": {
+    "alpha": [
+      2.0,
+      3.0,
+      5.0
+    ]
+  },
+  "variate": [
+    0.2,
+    0.3,
+    0.5
+  ],
+  "logdensity_value": 2.1406542258478254,
+  "gradient": {
+    "alpha": [
+      0.21953040704314475,
+      0.12499547348543416,
+      0.0524877463670137
+    ]
+  },
+  "grad_params": [
+    "alpha"
+  ],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "description": "StableHLO numeric-EXECUTION gate: emitted StableHLO run under Enzyme-JAX, checked as numbers + gradients vs the scipy oracle. Each fixture documents (distribution, params, variate) for a lineage-independent Julia Distributions.jl cross-check.",
+  "tolerances": {
+    "value_atol_f32": 0.0001,
+    "gradient_atol": 0.001,
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  },
+  "sample_N": 100000,
+  "fixtures": [
+    {
+      "key": "normal",
+      "distribution": "Normal(mu, sigma)",
+      "params": {
+        "mu": 0.3,
+        "sigma": 1.2
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.norm.logpdf(0.5, loc=mu, scale=sigma)",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "mu",
+        "sigma"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": ""
+    },
+    {
+      "key": "exponential",
+      "distribution": "Exponential(rate)",
+      "params": {
+        "rate": 1.5
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.expon.logpdf(0.5, scale=1/rate)",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "rate"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": ""
+    },
+    {
+      "key": "gamma",
+      "distribution": "Gamma(shape, rate)",
+      "params": {
+        "shape": 2.5,
+        "rate": 1.5
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.gamma.logpdf(0.5, a=shape, scale=1/rate) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "shape",
+        "rate"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": "exercises chlo.lgamma"
+    },
+    {
+      "key": "lognormal",
+      "distribution": "LogNormal(mu, sigma)",
+      "params": {
+        "mu": 0.0,
+        "sigma": 0.75
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.lognorm.logpdf(0.5, s=sigma, scale=exp(mu))",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "mu",
+        "sigma"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": ""
+    },
+    {
+      "key": "uniform",
+      "distribution": "Uniform(support = interval(-1, 3))",
+      "params": {},
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.uniform.logpdf(0.5, loc=-1, scale=4) = -log(4)",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": ""
+    },
+    {
+      "key": "beta",
+      "distribution": "Beta(alpha, beta)",
+      "params": {
+        "alpha": 2.0,
+        "beta": 3.0
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.beta.logpdf(0.5, alpha, beta) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "alpha",
+        "beta"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": "beta",
+      "notes": "exercises chlo.lgamma; @sample uses two internal Gamma rng streams"
+    },
+    {
+      "key": "studentt",
+      "distribution": "StudentT(nu)",
+      "params": {
+        "nu": 4.0
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.t.logpdf(0.5, df=nu) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "nu"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": "exercises chlo.lgamma"
+    },
+    {
+      "key": "bernoulli",
+      "distribution": "Bernoulli(p)",
+      "params": {
+        "p": 0.3
+      },
+      "variate": "a = 1",
+      "scipy_oracle": "scipy.stats.bernoulli.logpmf(1, p) = log(p)",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "p"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "notes": ""
+    },
+    {
+      "key": "poisson",
+      "distribution": "Poisson(rate)",
+      "params": {
+        "rate": 2.5
+      },
+      "variate": "a = 3",
+      "scipy_oracle": "scipy.stats.poisson.logpmf(3, rate) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "rate"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "notes": "exercises chlo.lgamma (log factorial)"
+    },
+    {
+      "key": "binomial",
+      "distribution": "Binomial(n, p)",
+      "params": {
+        "n": 10.0,
+        "p": 0.4
+      },
+      "variate": "a = 2",
+      "scipy_oracle": "scipy.stats.binom.logpmf(2, n=10, p=0.4) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "p"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "notes": "n is a count parameter (arg0), differentiated only w.r.t. p (arg1)"
+    },
+    {
+      "key": "mvnormal",
+      "distribution": "MvNormal(mu[2], cov[2x2])",
+      "params": {
+        "mu": [
+          0.5,
+          -0.3
+        ],
+        "cov": [
+          [
+            1.2,
+            0.3
+          ],
+          [
+            0.3,
+            0.8
+          ]
+        ]
+      },
+      "variate": "a = [0.2, 0.1]",
+      "scipy_oracle": "scipy.stats.multivariate_normal.logpdf([0.2,0.1], mean=mu, cov=cov)",
+      "modes": [
+        "logdensity"
+      ],
+      "grad_params": [],
+      "sample_distributional": false,
+      "sample_discrete": false,
+      "independence": null,
+      "notes": "matrix path: stablehlo.cholesky + triangular_solve. VALUE-only: Enzyme-JAX cannot compute the adjoint of triangular_solve, so the gradient is not executable here (executor limitation, not an emitter bug)."
+    },
+    {
+      "key": "dirichlet",
+      "distribution": "Dirichlet(alpha[3])",
+      "params": {
+        "alpha": [
+          2.0,
+          3.0,
+          5.0
+        ]
+      },
+      "variate": "a = [0.2, 0.3, 0.5]",
+      "scipy_oracle": "scipy.stats.dirichlet.logpdf([0.2,0.3,0.5], alpha=[2,3,5]) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "alpha"
+      ],
+      "sample_distributional": false,
+      "sample_discrete": false,
+      "independence": "dirichlet",
+      "notes": "vector path + chlo.lgamma; @sample uses one Gamma rng stream per component"
+    }
+  ]
+}

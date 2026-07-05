@@ -1,0 +1,4 @@
+mu = elementof(reals)
+sigma = elementof(posreals)
+a = draw(Normal(mu = mu, sigma = sigma))
+lp = logdensityof(lawof(record(a = a)), record(a = 0.5))

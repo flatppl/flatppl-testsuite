@@ -22,15 +22,16 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 FLATPPL_RUST_REF="${FLATPPL_RUST_REF:-main}"
 
-echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + default verbs incl. determinize)"
-# `--features hs3` ADDS to the default feature set (no --no-default-features), so
-# the installed binary carries the default verbs — including `determinize`, which
-# the det-js scoring engine (scoring/engine.py) shells out to. The `determinize`
-# verb landed in flatppl-rust #61; `FLATPPL_RUST_REF=main` (the default) tracks it.
+echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + stablehlo + default verbs incl. determinize)"
+# `--features hs3,stablehlo` ADDS to the default feature set (no --no-default-features),
+# so the installed binary carries the default verbs — including `determinize` (which
+# the det-js scoring engine shells out to) and `stablehlo` (which the StableHLO
+# numeric-execution gate emits with). The `determinize` verb landed in flatppl-rust
+# #61, `stablehlo` in #70; `FLATPPL_RUST_REF=main` (the default) tracks both.
 cargo install \
   --git https://github.com/flatppl/flatppl-rust \
   --branch "${FLATPPL_RUST_REF}" \
-  --features hs3 \
+  --features hs3,stablehlo \
   --root .pixi-bin \
   --locked \
   flatppl-cli

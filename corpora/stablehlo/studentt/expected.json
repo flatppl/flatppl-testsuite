@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "key": "studentt",
+  "distribution": "StudentT(nu)",
+  "model": "studentt.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "scipy.stats.t.logpdf(0.5, df=nu) [CHLO lgamma]",
+  "params": {
+    "nu": 4.0
+  },
+  "variate": 0.5,
+  "logdensity_value": -1.1323908075528133,
+  "gradient": {
+    "nu": 0.021638549022484632
+  },
+  "grad_params": [
+    "nu"
+  ],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}
