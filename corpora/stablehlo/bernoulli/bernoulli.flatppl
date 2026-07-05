@@ -1,0 +1,3 @@
+p = elementof(unitinterval)
+a = draw(Bernoulli(p = p))
+lp = logdensityof(lawof(record(a = a)), record(a = 1))

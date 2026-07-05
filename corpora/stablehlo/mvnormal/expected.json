@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "key": "mvnormal",
+  "distribution": "MvNormal(mu[2], cov[2x2])",
+  "model": "mvnormal.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "scipy.stats.multivariate_normal.logpdf([0.2,0.1], mean=mu, cov=cov)",
+  "params": {
+    "mu": [
+      0.5,
+      -0.3
+    ],
+    "cov": [
+      [
+        1.2,
+        0.3
+      ],
+      [
+        0.3,
+        0.8
+      ]
+    ]
+  },
+  "variate": [
+    0.2,
+    0.1
+  ],
+  "logdensity_value": -1.9613494810184535,
+  "gradient": {},
+  "grad_params": [],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}

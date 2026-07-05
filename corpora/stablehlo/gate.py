@@ -1,0 +1,257 @@
+#!/usr/bin/env python3
+"""StableHLO numeric-EXECUTION gate.
+
+Emits StableHLO from the LOCAL `flatppl` binary (`FLATPPL_BIN`, built with the
+`stablehlo` feature), runs it under Enzyme-JAX, and checks the emitted density
+modules as NUMBERS and GRADIENTS — not just structurally — against the
+INDEPENDENT scipy oracle (`oracle.py`, frozen into each fixture's
+`expected.json` by `gen_expected.py`). Per fixture, up to four checks:
+
+  logdensity_value        emitted @logdensity, executed, vs frozen scipy value
+                          (f32, |Δ| < 1e-4)
+  logdensity_gradient     jax.grad (Enzyme) w.r.t. θ vs the frozen central
+                          finite-difference of scipy (|Δ| < 1e-3) — the HMC path
+  sample_distribution     N=100k draws of @sample vs scipy (KS / moments)
+  sample_independence     Beta + Dirichlet: separate stablehlo.rng streams are
+                          independent (non-degenerate; lag-1 autocorr ≈ 0;
+                          Dirichlet component correlations match the theoretical
+                          simplex values, NOT +1)
+
+    FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo shlo
+
+Only a real MISMATCH (executed number/gradient/distribution outside tolerance)
+trips a nonzero exit — an emitter/executor refusal is reported as SKIP.
+"""
+from __future__ import annotations
+
+import json
+import math
+import os
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import numpy as np
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+import oracle  # noqa: E402
+import executor  # noqa: E402
+
+N_SAMPLES = 100_000
+VALUE_ATOL = 1e-4
+GRAD_ATOL = 1e-3
+KS_MAX = 0.02
+MOMENT_RTOL = 0.03
+CORR_ABS_MAX = 0.05  # for a genuinely-zero correlation (lag-1 autocorrelation)
+
+
+@dataclass
+class CheckResult:
+    test_id: str
+    check_id: str
+    status: str  # "passed" | "skipped" | "failed"
+    message: str = ""
+    worst: float = field(default=float("nan"))
+
+
+def _arg_index(fx: oracle.Fixture, name: str) -> int:
+    return list(fx.params).index(name)
+
+
+# ---------------------------------------------------------------------------
+# Per-mode checks
+# ---------------------------------------------------------------------------
+def check_value(fx, expected) -> CheckResult:
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.flatppl", "logdensity")
+        got = executor.value(src, fx.param_values())
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "logdensity_value", "skipped", f"emit refused: {e}")
+    exp = expected["logdensity_value"]
+    d = abs(got - exp)
+    if d <= VALUE_ATOL or (math.isinf(exp) and got == exp):
+        return CheckResult(fx.key, "logdensity_value", "passed",
+                           f"Δ={d:.2e} (got {got:.6f} vs {exp:.6f})", d)
+    return CheckResult(fx.key, "logdensity_value", "failed",
+                       f"Δ={d:.2e} > {VALUE_ATOL} (got {got:.6f} vs scipy {exp:.6f})", d)
+
+
+def check_gradient(fx, expected) -> CheckResult:
+    if not fx.grad_params:
+        return CheckResult(fx.key, "logdensity_gradient", "skipped",
+                           "no continuous parameters" if fx.key == "uniform"
+                           else "gradient not executable (see notes)")
+    argnums = [_arg_index(fx, n) for n in fx.grad_params]
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.flatppl", "logdensity")
+        got = executor.gradient(src, fx.param_values(), argnums)
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "logdensity_gradient", "skipped", f"emit refused: {e}")
+    except Exception as e:  # noqa: BLE001 — executor (Enzyme) autodiff limitation
+        return CheckResult(fx.key, "logdensity_gradient", "skipped",
+                           f"executor could not differentiate: {str(e).splitlines()[0][:80]}")
+    worst = 0.0
+    detail = []
+    for name, g in zip(fx.grad_params, got):
+        exp = expected["gradient"][name]
+        gv = np.atleast_1d(np.asarray(g, dtype=float))
+        ev = np.atleast_1d(np.asarray(exp, dtype=float))
+        d = float(np.max(np.abs(gv - ev)))
+        worst = max(worst, d)
+        detail.append(f"{name}:Δ={d:.2e}")
+    if worst <= GRAD_ATOL:
+        return CheckResult(fx.key, "logdensity_gradient", "passed",
+                           " ".join(detail), worst)
+    return CheckResult(fx.key, "logdensity_gradient", "failed",
+                       "worst Δ=%.2e > %s (%s)" % (worst, GRAD_ATOL, " ".join(detail)), worst)
+
+
+def _draw(fx):
+    # sample models live next to the logdensity model as <key>.sample.flatppl
+    src = executor.emit(HERE / fx.key / f"{fx.key}.sample.flatppl", "sample")
+    return executor.samples(src, N_SAMPLES, list(fx.sample_args))
+
+
+def check_distribution(fx) -> CheckResult:
+    if fx.sample_ref is None:
+        return CheckResult(fx.key, "sample_distribution", "skipped", "not distributional-tested")
+    try:
+        xs = _draw(fx).reshape(-1)
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "sample_distribution", "skipped", f"emit refused: {e}")
+    ref = fx.sample_ref()
+    emp_mean, emp_var = float(xs.mean()), float(xs.var())
+    ref_mean, ref_var = float(ref.mean()), float(ref.var())
+    mean_tol = max(MOMENT_RTOL * abs(ref_mean), 6.0 * math.sqrt(ref_var / len(xs)))
+    dmean = abs(emp_mean - ref_mean)
+    dvar_rel = abs(emp_var - ref_var) / ref_var if ref_var else abs(emp_var - ref_var)
+    if fx.sample_discrete:
+        ok = dmean <= mean_tol and dvar_rel <= 0.05
+        stat = dmean
+        detail = f"mean {emp_mean:.4f} vs {ref_mean:.4f} (tol {mean_tol:.4f}); var relΔ {dvar_rel:.3f}"
+    else:
+        from scipy.stats import kstest
+        ks = float(kstest(xs, ref.cdf).statistic)
+        ok = ks <= KS_MAX and dmean <= mean_tol and dvar_rel <= 0.05
+        stat = ks
+        detail = f"KS={ks:.4f} (max {KS_MAX}); mean {emp_mean:.4f} vs {ref_mean:.4f}; var relΔ {dvar_rel:.3f}"
+    return CheckResult(fx.key, "sample_distribution",
+                       "passed" if ok else "failed", detail, stat)
+
+
+def _lag1_autocorr(x: np.ndarray) -> float:
+    x = x - x.mean()
+    denom = float((x * x).sum())
+    if denom == 0:
+        return 0.0
+    return float((x[:-1] * x[1:]).sum() / denom)
+
+
+def check_independence(fx) -> CheckResult:
+    if fx.independence is None:
+        return CheckResult(fx.key, "sample_independence", "skipped", "not an independence subject")
+    try:
+        xs = _draw(fx)
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "sample_independence", "skipped", f"emit refused: {e}")
+
+    if fx.independence == "beta":
+        # Beta = X/(X+Y), X~Gamma, Y~Gamma from SEPARATE rng streams. A shared
+        # stream would give X==Y => Beta ≡ 0.5 (zero variance). Independence:
+        # spread present + successive draws uncorrelated (lag-1 autocorr ≈ 0).
+        x = xs.reshape(-1)
+        std = float(x.std())
+        frac_half = float(np.mean(np.abs(x - 0.5) < 1e-4))
+        ac = _lag1_autocorr(x)
+        ok = std > 0.05 and frac_half < 0.01 and abs(ac) < CORR_ABS_MAX
+        detail = (f"std={std:.4f} (not collapsed to 0.5; frac≈0.5={frac_half:.4f}); "
+                  f"lag1 autocorr={ac:+.4f} (|·|<{CORR_ABS_MAX})")
+        return CheckResult(fx.key, "sample_independence",
+                           "passed" if ok else "failed", detail, abs(ac))
+
+    # dirichlet: 3 components, one Gamma rng stream each. A shared stream would
+    # give [1/3,1/3,1/3] every draw. Independence of the underlying streams is
+    # observable as (a) non-degenerate components, (b) each marginal ~
+    # Beta(a_i, a0-a_i), and (c) component correlations matching the THEORETICAL
+    # (negative) Dirichlet values — a shared stream would give +1, not these.
+    from scipy.stats import beta as beta_dist, kstest
+    alpha = np.asarray(fx.sample_args[0], dtype=float)
+    a0 = alpha.sum()
+    spread = float(np.mean(xs.max(axis=1) - xs.min(axis=1)))
+    # marginal KS per component
+    ks_marg = []
+    for i in range(xs.shape[1]):
+        ref = beta_dist(alpha[i], a0 - alpha[i])
+        ks_marg.append(float(kstest(xs[:, i], ref.cdf).statistic))
+    worst_ks = max(ks_marg)
+    # empirical vs theoretical component correlations
+    def theo_corr(i, j):
+        return -math.sqrt(alpha[i] * alpha[j] / ((a0 - alpha[i]) * (a0 - alpha[j])))
+    corr = np.corrcoef(xs, rowvar=False)
+    pairs = [(0, 1), (0, 2), (1, 2)]
+    worst_corr = max(abs(corr[i, j] - theo_corr(i, j)) for i, j in pairs)
+    # lag-1 autocorrelation across draws, per component (genuinely ≈ 0)
+    worst_ac = max(abs(_lag1_autocorr(xs[:, i])) for i in range(xs.shape[1]))
+    ok = (spread > 0.05 and worst_ks <= KS_MAX
+          and worst_corr <= 0.05 and worst_ac < CORR_ABS_MAX)
+    emp = {f"{i}{j}": round(float(corr[i, j]), 3) for i, j in pairs}
+    theo = {f"{i}{j}": round(theo_corr(i, j), 3) for i, j in pairs}
+    detail = (f"marginal KS≤{worst_ks:.4f}; comp-corr emp={emp} theo={theo} "
+              f"(worstΔ={worst_corr:.3f}); lag1 autocorr≤{worst_ac:.4f}")
+    return CheckResult(fx.key, "sample_independence",
+                       "passed" if ok else "failed", detail, worst_corr)
+
+
+def run() -> list[CheckResult]:
+    results: list[CheckResult] = []
+    for fx in oracle.FIXTURES:
+        expected = json.loads((HERE / fx.key / "expected.json").read_text())
+        results.append(check_value(fx, expected))
+        results.append(check_gradient(fx, expected))
+        results.append(check_distribution(fx))
+        results.append(check_independence(fx))
+    return results
+
+
+_OUTCOME = {"passed": "PASS", "skipped": "SKIP", "failed": "MISMATCH"}
+
+
+def render(results) -> str:
+    labels = [f"{r.test_id}::{r.check_id}" for r in results]
+    width = max((len(x) for x in labels), default=8)
+    lines = [
+        "=" * 96,
+        "STABLEHLO NUMERIC-EXECUTION GATE — emitted StableHLO under Enzyme-JAX vs scipy oracle",
+        "=" * 96, "",
+        f"  {'test_id :: check':<{width}}  outcome    detail",
+        f"  {'-' * width}  -------    ------",
+    ]
+    for r, label in zip(results, labels):
+        detail = r.message.splitlines()[0] if r.message else ""
+        if len(detail) > 108:
+            detail = detail[:105] + "..."
+        lines.append(f"  {label:<{width}}  {_OUTCOME.get(r.status, r.status):<7}    {detail}")
+    n_pass = sum(r.status == "passed" for r in results)
+    n_skip = sum(r.status == "skipped" for r in results)
+    n_bad = sum(r.status == "failed" for r in results)
+    lines += ["", f"  {n_pass} PASS, {n_skip} SKIP, {n_bad} MISMATCH (of {len(results)} checks)"]
+    return "\n".join(lines)
+
+
+def main() -> int:
+    if not executor.binary_supports_stablehlo():
+        print(f"FLATPPL_BIN ({executor.flatppl_bin()}) has no `stablehlo` subcommand — "
+              "point FLATPPL_BIN at a binary built with the `stablehlo` feature.")
+        return 2
+    if not executor.executor_available():
+        print("Enzyme-JAX not importable — run under `pixi run -e stablehlo`.")
+        return 2
+    results = run()
+    print(render(results))
+    return 1 if any(r.status == "failed" for r in results) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

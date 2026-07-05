@@ -1,0 +1,3 @@
+s = rnginit(0)
+x = draw(Poisson(rate = 2.5))
+draws = rand(s, lawof(x))
