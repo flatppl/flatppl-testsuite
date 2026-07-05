@@ -25,9 +25,7 @@ jobs:
           # Base env (python + node 24 + rust) + the stablehlo gate env
           # (python 3.12 + enzyme-ad/jax pins + scipy). Never the heavy
           # root/pyhs3 oracle environments.
-          environments: |
-            default
-            stablehlo
+          environments: default stablehlo
 
       # Cache the cargo registry/git so the converter's dependencies are not
       # re-downloaded each run. The converter binary itself is rebuilt from
