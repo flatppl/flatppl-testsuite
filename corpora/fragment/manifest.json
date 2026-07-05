@@ -55,6 +55,21 @@
       "test_id": "frag_gamma_poisson_marginal",
       "path": "gamma_poisson_marginal",
       "features": ["kchain", "kernelof", "conjugate_marginal"]
+    },
+    {
+      "test_id": "frag_jointchain_normal",
+      "path": "jointchain_normal",
+      "features": ["jointchain", "kernelof"]
+    },
+    {
+      "test_id": "frag_jointchain_chain3",
+      "path": "jointchain_chain3",
+      "features": ["jointchain", "kernelof"]
+    },
+    {
+      "test_id": "frag_jointchain_scalar",
+      "path": "jointchain_scalar",
+      "features": ["jointchain", "kernelof"]
     }
   ]
 }

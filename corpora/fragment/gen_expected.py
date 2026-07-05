@@ -152,6 +152,36 @@ def oracle_gamma_poisson_marginal() -> float:
     return nbinom.logpmf(4, n=alpha, p=beta / (beta + 1.0))
 
 
+def oracle_jointchain_normal() -> float:
+    """`a ~ Normal(mu=0.0, sigma=1.0)`, `b | a ~ Normal(mu=a, sigma=0.5)`
+    joined via `jointchain(lawof(record(a=a)), k)` (§06); the joint
+    log-density at `record(a=0.3, b=0.7)` is the SUM of the marginal-of-a
+    log-pdf and the kernel's conditional log-pdf (chain rule, one step, no
+    extra normalizing constant)."""
+    return norm.logpdf(0.3, loc=0.0, scale=1.0) + norm.logpdf(0.7, loc=0.3, scale=0.5)
+
+
+def oracle_jointchain_chain3() -> float:
+    """3-step jointchain `a -> b -> c`, each step `Normal(mu=<prev>,
+    sigma=...)`, joined via `jointchain(lawof(record(a=a)), k1, k2)` (§06);
+    the joint log-density at `record(a=0.3, b=0.7, c=1.1)` is the sum of all
+    three per-step log-pdfs (chain rule extended to 3 steps)."""
+    return (
+        norm.logpdf(0.3, loc=0.0, scale=1.0)
+        + norm.logpdf(0.7, loc=0.3, scale=0.5)
+        + norm.logpdf(1.1, loc=0.7, scale=0.25)
+    )
+
+
+def oracle_jointchain_scalar() -> float:
+    """Same maths as `oracle_jointchain_normal`, but the jointchain is built
+    over a SCALAR variate (`lawof(a)` / `kernelof(Normal(...), a=a)`) rather
+    than a record, and scored at the vector point `[0.3, 0.7]` instead of a
+    record -- exercises the scalar/vector-variate jointchain lowering path;
+    numerically identical to the record-valued version."""
+    return oracle_jointchain_normal()
+
+
 ORACLES = {
     "frag_superpose": ("superpose", oracle_superpose, "julia Distributions.jl 0.25"),
     "frag_trunc_in": ("trunc_in", oracle_trunc_in, "julia Distributions.jl 0.25"),
@@ -166,6 +196,9 @@ ORACLES = {
         "normal_normal_marginal", oracle_normal_normal_marginal, "scipy.stats.norm"),
     "frag_gamma_poisson_marginal": (
         "gamma_poisson_marginal", oracle_gamma_poisson_marginal, "scipy.stats.nbinom"),
+    "frag_jointchain_normal": ("jointchain_normal", oracle_jointchain_normal, "scipy.stats.norm"),
+    "frag_jointchain_chain3": ("jointchain_chain3", oracle_jointchain_chain3, "scipy.stats.norm"),
+    "frag_jointchain_scalar": ("jointchain_scalar", oracle_jointchain_scalar, "scipy.stats.norm"),
 }
 
 
