@@ -69,12 +69,13 @@ def gen() -> None:
             "variate": fx.variate_repr,
             "scipy_oracle": fx.scipy_note,
             "modes": ["logdensity"]
-            + (["sample"] if fx.sample_ref or fx.independence else []),
+            + (["sample"] if fx.sample_ref or fx.independence or fx.fanout_flatppl else []),
             "grad_params": list(fx.grad_params),
             "sample_distributional": bool(fx.sample_ref),
             "sample_discrete": fx.sample_discrete,
             "independence": fx.independence,
             "fanout_n": fx.fanout_n or None,
+            "fanout_dim": fx.fanout_dim or None,
             "notes": fx.notes,
         })
         print(f"{fx.key}: value={val!r}"

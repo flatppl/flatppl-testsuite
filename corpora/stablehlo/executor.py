@@ -191,6 +191,27 @@ def samples_fanned(
     return np.concatenate(draws)[:n]
 
 
+def samples_fanned_multivariate(
+    src: str, n: int, d: int, arg_values: list | None = None, key: tuple = DEFAULT_KEY
+) -> np.ndarray:
+    """Like `samples_fanned`, but for a Tier-2 MULTIVARIATE fanned ``@sample``
+    (``iid(MvNormal(mu, cov), m)``) whose single call returns an ``[m, d]``
+    batch of iid d-vectors from ONE ``rng_bit_generator`` advance. Each call's
+    draw is reshaped to ``(-1, d)`` — preserving the per-row d-vector, unlike
+    `samples_fanned`'s elementwise flatten, which would scramble rows across
+    components — and stacked along axis 0 until at least ``n`` rows are
+    collected, then trimmed to exactly ``n``. Returns shape ``(n, d)``."""
+    draws: list[np.ndarray] = []
+    cur = key
+    total = 0
+    while total < n:
+        v, cur = sample_call(src, cur, arg_values)
+        rows = np.asarray(v).reshape(-1, d)
+        draws.append(rows)
+        total += rows.shape[0]
+    return np.concatenate(draws, axis=0)[:n]
+
+
 @lru_cache(maxsize=1)
 def executor_available() -> bool:
     """True if jax + enzyme_ad import (so the gate can run at all)."""

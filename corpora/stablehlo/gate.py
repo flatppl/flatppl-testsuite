@@ -24,11 +24,17 @@ INDEPENDENT scipy oracle (`oracle.py`, frozen into each fixture's
                               rng_bit_generator, checked independently of
                               whether the DECODED value happens to coincide —
                               common for a low-cardinality discrete dist)
-  sample_fanout_distribution  Tier-1 `iid(K, n)` fanned draw (Normal /
-                              Exponential / Uniform — the straight-line
-                              kernels with a landed fan-out lowering) vs
-                              scipy, built by chaining the key across `[n]`-
-                              batched calls
+  sample_fanout_distribution  `iid(K, n)` fanned draw vs scipy, built by
+                              chaining the key across `[n]`-batched calls.
+                              Tier 1 (Normal/Exponential/Uniform, straight-
+                              line): KS + moments vs scipy. Tier 2 batched
+                              rejection (Gamma/Beta/StudentT): same KS +
+                              moments check, over the `[n]` batch produced by
+                              the masked-`while` rejection loop. Tier 2 batched
+                              multivariate (MvNormal, `[n, d]`): per-component
+                              mean AND full sample covariance vs mu/cov (a
+                              wrong `dot_general` contraction would show up
+                              as a wrong covariance, not just a wrong mean).
 
 Plus one standalone check not tied to a distribution fixture:
 
@@ -300,6 +306,51 @@ def check_fanout_distribution(fx) -> CheckResult:
                        "passed" if ok else "failed", detail, ks)
 
 
+def check_mvnormal_fanout_distribution(fx) -> CheckResult:
+    """Tier-2 MULTIVARIATE fan-out (MvNormal, `iid(K, n)` -> `[n, d]`): unlike
+    the scalar `check_fanout_distribution`, there is no 1-d `sample_ref.cdf`
+    to KS-test against — the correctness signal is the per-component mean AND
+    the full sample covariance of the `[n, d]` draw vs the fixture's mu/cov.
+    This is the check that would catch a wrong `dot_general` contraction
+    (e.g. `z @ L` instead of `z @ L^T`): that bug leaves the marginal means
+    and even the per-component variances alone (L and L^T share a diagonal
+    and the same row/column norms up to a permutation for this 2x2 case) but
+    corrupts the off-diagonal covariance entries, which THIS check reads
+    directly from `np.cov`, not from a KS test on a flattened 1-d sample."""
+    if not fx.fanout_flatppl:
+        return CheckResult(fx.key, "sample_fanout_distribution", "skipped",
+                           "no Tier-2 multivariate fan-out lowering for this kernel")
+    d = fx.fanout_dim
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.iid.sample.flatppl", "sample")
+        xs = executor.samples_fanned_multivariate(src, fx.fanout_n, d, fx.param_values())
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "sample_fanout_distribution", "skipped", f"emit refused: {e}")
+    mu = np.asarray(fx.params["mu"], dtype=float)
+    cov = np.asarray(fx.params["cov"], dtype=float)
+    n = len(xs)
+    emp_mean = xs.mean(axis=0)
+    emp_cov = np.cov(xs, rowvar=False)
+    # 6-sigma bands from the standard asymptotic sampling distributions: the
+    # mean estimator has var Var(X_i)/n; the covariance estimator (for a
+    # jointly-normal X) has var (Var(X_i)*Var(X_j) + Cov(X_i,X_j)^2)/n. Not
+    # loosened ad hoc — these are the textbook standard errors, same style as
+    # `check_distribution`'s `6.0 * sqrt(ref_var/len(xs))`.
+    mean_se = np.sqrt(np.diag(cov) / n)
+    cov_se = np.sqrt((np.outer(np.diag(cov), np.diag(cov)) + cov**2) / n)
+    mean_z = np.abs(emp_mean - mu) / np.maximum(mean_se, 1e-12)
+    cov_z = np.abs(emp_cov - cov) / np.maximum(cov_se, 1e-12)
+    worst_z = float(max(mean_z.max(), cov_z.max()))
+    ok = worst_z <= 6.0
+    detail = (
+        f"n={n} [n,{d}] fanned draws; mean {emp_mean.tolist()} vs {mu.tolist()} "
+        f"(max {mean_z.max():.2f}sigma); cov {emp_cov.tolist()} vs {cov.tolist()} "
+        f"(max {cov_z.max():.2f}sigma); worst {worst_z:.2f}sigma (max 6.00sigma)"
+    )
+    return CheckResult(fx.key, "sample_fanout_distribution",
+                       "passed" if ok else "failed", detail, worst_z)
+
+
 def check_chaining_independent_draws() -> CheckResult:
     """Two SEPARATE destructured `rand`s drawing from the IDENTICAL
     Normal(0,1) kernel (`corpora/stablehlo/chaining/{d1,d2}.sample.flatppl`,
@@ -341,7 +392,10 @@ def run() -> list[CheckResult]:
         results.append(check_independence(fx))
         results.append(check_sample_key_reproducibility(fx))
         results.append(check_sample_key_advance(fx))
-        results.append(check_fanout_distribution(fx))
+        results.append(
+            check_mvnormal_fanout_distribution(fx) if fx.fanout_dim
+            else check_fanout_distribution(fx)
+        )
     results.append(check_chaining_independent_draws())
     return results
 
