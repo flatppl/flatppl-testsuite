@@ -1,0 +1,3 @@
+s = rnginit(0)
+xs ~ iid(Normal(mu = 0.3, sigma = 1.2), 200)
+draws = rand(s, lawof(xs))

@@ -82,6 +82,13 @@ class Fixture:
     sample_args: tuple = ()
     # @sample independence subject ("beta" | "dirichlet" | None).
     independence: str | None = None
+    # Tier-1 fan-out (`iid(K, n)`, straight-line kernels only): a SEPARATE
+    # `.iid.sample.flatppl` model baking the same params into a fixed-size
+    # batched draw, one rng_bit_generator advance per call. Empty for dists
+    # without a landed fan-out lowering (rejection/multivariate kernels are
+    # Tier 2, not yet emitted).
+    fanout_flatppl: str = ""
+    fanout_n: int = 0
     notes: str = ""
 
     def param_values(self) -> list:
@@ -178,6 +185,12 @@ s = rnginit(0)
 x = draw(Normal(mu = 0.3, sigma = 1.2))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Normal(mu = 0.3, sigma = 1.2), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
     ),
     Fixture(
         key="exponential",
@@ -198,6 +211,12 @@ s = rnginit(0)
 x = draw(Exponential(rate = 1.5))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Exponential(rate = 1.5), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
     ),
     Fixture(
         key="gamma",
@@ -260,6 +279,12 @@ s = rnginit(0)
 x = draw(Uniform(support = interval(-1.0, 3.0)))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Uniform(support = interval(-1.0, 3.0)), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
     ),
     Fixture(
         key="beta",

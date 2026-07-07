@@ -6,15 +6,23 @@ module (entry ``@main``) as a jit-able + differentiable JAX callable. This
 module is the *only* place the gate touches the executor; everything else
 compares its output to the independent scipy oracle.
 
-Two facts about the wheel drive the API here:
+Facts about the wheel that drive the API here:
 
 * the call MUST run under ``jax.jit`` (Enzyme raises "must be JIT'ed"
   otherwise), so both value and gradient are wrapped in ``jax.jit``;
 * the emitter names the entry ``@logdensity`` / ``@sample``, but ``hlo_call``
   binds ``@main`` — so we rename the entry symbol before handing the text over.
+* ``@sample`` is a THREADED-KEY pure function (spec §07's `rand(rstate, m) ->
+  (value, new_rstate)` contract): it takes a leading ``%key: tensor<2xui64>``
+  and returns ``(value, new_key)``. A ``tensor<2xui64>`` argument silently
+  truncates to ``uint32`` unless ``jax.config.update("jax_enable_x64", True)``
+  runs BEFORE the key array is constructed — ``hlo_call`` then asserts on the
+  dtype mismatch. Reproducibility (same key -> same draw) replaces the old
+  ABI's reliance on XLA's per-call stateless nondeterminism.
 
 Everything is single-precision (``tensor<f32>``): the emitted modules are f32,
-so oracle comparisons use an f32-appropriate tolerance.
+so oracle comparisons use an f32-appropriate tolerance. The key itself is
+``uint64`` regardless (dtype-independent, per the emitter's `MlirTy::Key`).
 """
 from __future__ import annotations
 
@@ -69,7 +77,14 @@ def _jax():
     import jax.numpy as jnp
     from enzyme_ad.jax import hlo_call
 
+    # MUST happen before any tensor<2xui64> key array is constructed, else it
+    # silently truncates to uint32 and hlo_call asserts on the dtype mismatch
+    # (see the module docstring). Idempotent, so safe to call on every import.
+    jax.config.update("jax_enable_x64", True)
     return jax, jnp, hlo_call
+
+
+DEFAULT_KEY = (0, 0)
 
 
 def _to_arg(jnp, v):
@@ -108,23 +123,72 @@ def gradient(src: str, arg_values: list, argnums: list[int]) -> list:
     return out
 
 
-def samples(src: str, n: int, arg_values: list | None = None) -> np.ndarray:
-    """Draw ``n`` independent realisations of ``@sample``.
+@lru_cache(maxsize=64)
+def _jitted_sample(src: str):
+    """The `jax.jit`-compiled ``(key, *free_params) -> (value, new_key)``
+    callable for ``src``, cached by source text. Chaining calls a threaded
+    `@sample` many times (reproducibility/advance/distribution checks all
+    do); without this cache each call would define + trace + XLA-compile a
+    fresh closure, which is the classic "jit inside a loop" antipattern and
+    makes a 100k-draw chain many times slower than compiling once."""
+    jax, _, hlo_call = _jax()
 
-    The emitted ``@sample`` bakes the seed and lowers each draw to a
-    nondeterministic ``stablehlo.rng``; XLA advances its state per execution,
-    so calling the jitted function ``n`` times yields ``n`` independent draws
-    (verified: repeated calls differ). Returns an array of shape ``(n,)`` for a
-    scalar variate or ``(n, k)`` for a length-``k`` vector variate."""
-    jax, jnp, hlo_call = _jax()
+    def f(k, *a):
+        return hlo_call(k, *a, source=src)
+
+    return jax.jit(f)
+
+
+def sample_call(
+    src: str, key: tuple | np.ndarray, arg_values: list | None = None
+) -> tuple[np.ndarray, np.ndarray]:
+    """Execute a threaded-key ``@sample`` ONCE at ``key`` (+ any free params).
+
+    Returns ``(value, new_key)`` as numpy arrays — the raw building block for
+    reproducibility/advance/chaining/distribution checks. ``key`` is a
+    length-2 ``(lo, hi)`` pair (or an existing ``tensor<2xui64>``-shaped
+    array, e.g. a previous call's ``new_key``, to chain draws)."""
+    _, jnp, _ = _jax()
+    jit_f = _jitted_sample(src)
+    key_arr = jnp.asarray(np.asarray(key, dtype=np.uint64))
     args = [_to_arg(jnp, v) for v in (arg_values or [])]
+    value, new_key = jit_f(key_arr, *args)
+    return np.asarray(value), np.asarray(new_key)
 
-    def f(*a):
-        return hlo_call(*a, source=src)[0]
 
-    jf = jax.jit(f)
-    draws = [np.asarray(jf(*args)) for _ in range(n)]
+def samples(
+    src: str, n: int, arg_values: list | None = None, key: tuple = DEFAULT_KEY
+) -> np.ndarray:
+    """Draw ``n`` independent realisations of a threaded-key ``@sample`` by
+    CHAINING the key forward: call 1 uses ``key``, call ``i+1`` uses call
+    ``i``'s returned ``new_key`` — the reproducible-ABI replacement for the
+    old approach of calling one stateless jitted function ``n`` times and
+    relying on XLA's per-call nondeterminism. One call = one draw (scalar or
+    length-``k`` vector variate). Returns shape ``(n,)`` or ``(n, k)``."""
+    draws = []
+    cur = key
+    for _ in range(n):
+        v, cur = sample_call(src, cur, arg_values)
+        draws.append(v)
     return np.stack(draws)
+
+
+def samples_fanned(
+    src: str, n: int, arg_values: list | None = None, key: tuple = DEFAULT_KEY
+) -> np.ndarray:
+    """Like `samples`, but for a Tier-1 FANNED ``@sample`` (``iid(K, m)``)
+    whose single call already returns an ``[m]`` batch of iid draws from ONE
+    ``rng_bit_generator`` advance. Chains calls (each advancing the key once)
+    until at least ``n`` draws are collected, then trims to exactly ``n``."""
+    draws: list[np.ndarray] = []
+    cur = key
+    total = 0
+    while total < n:
+        v, cur = sample_call(src, cur, arg_values)
+        flat = v.reshape(-1)
+        draws.append(flat)
+        total += flat.size
+    return np.concatenate(draws)[:n]
 
 
 @lru_cache(maxsize=1)

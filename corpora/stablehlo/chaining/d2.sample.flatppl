@@ -1,0 +1,6 @@
+s = rnginit(0)
+x = draw(Normal(mu = 0.0, sigma = 1.0))
+y = draw(Normal(mu = 0.0, sigma = 1.0))
+d1, s2 = rand(s, lawof(x))
+d2, s3 = rand(s2, lawof(y))
+out = d2

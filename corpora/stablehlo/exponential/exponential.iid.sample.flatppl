@@ -1,0 +1,3 @@
+s = rnginit(0)
+xs ~ iid(Exponential(rate = 1.5), 200)
+draws = rand(s, lawof(xs))

@@ -5,22 +5,46 @@ Emits StableHLO from the LOCAL `flatppl` binary (`FLATPPL_BIN`, built with the
 `stablehlo` feature), runs it under Enzyme-JAX, and checks the emitted density
 modules as NUMBERS and GRADIENTS — not just structurally — against the
 INDEPENDENT scipy oracle (`oracle.py`, frozen into each fixture's
-`expected.json` by `gen_expected.py`). Per fixture, up to four checks:
+`expected.json` by `gen_expected.py`). Per fixture, up to seven checks:
 
-  logdensity_value        emitted @logdensity, executed, vs frozen scipy value
-                          (f32, |Δ| < 1e-4)
-  logdensity_gradient     jax.grad (Enzyme) w.r.t. θ vs the frozen central
-                          finite-difference of scipy (|Δ| < 1e-3) — the HMC path
-  sample_distribution     N=100k draws of @sample vs scipy (KS / moments)
-  sample_independence     Beta + Dirichlet: separate stablehlo.rng streams are
-                          independent (non-degenerate; lag-1 autocorr ≈ 0;
-                          Dirichlet component correlations match the theoretical
-                          simplex values, NOT +1)
+  logdensity_value            emitted @logdensity, executed, vs frozen scipy
+                              value (f32, |Δ| < 1e-4)
+  logdensity_gradient         jax.grad (Enzyme) w.r.t. θ vs the frozen central
+                              finite-difference of scipy (|Δ| < 1e-3) — the
+                              HMC path
+  sample_distribution         N=100k draws of the threaded-key @sample (key
+                              chained call-to-call) vs scipy (KS / moments)
+  sample_independence         Beta + Dirichlet: separate internal rng streams
+                              are independent (non-degenerate; lag-1 autocorr
+                              ≈ 0; Dirichlet component correlations match the
+                              theoretical simplex values, NOT +1)
+  sample_key_reproducibility  same %key -> bit-identical (value, new_key)
+  sample_key_advance          chaining a short run of draws never repeats a
+                              key (a mechanical property of a counter-based
+                              rng_bit_generator, checked independently of
+                              whether the DECODED value happens to coincide —
+                              common for a low-cardinality discrete dist)
+  sample_fanout_distribution  Tier-1 `iid(K, n)` fanned draw (Normal /
+                              Exponential / Uniform — the straight-line
+                              kernels with a landed fan-out lowering) vs
+                              scipy, built by chaining the key across `[n]`-
+                              batched calls
+
+Plus one standalone check not tied to a distribution fixture:
+
+  chaining_independent_draws  two SEPARATE destructured `rand`s over the
+                              IDENTICAL Normal(0,1) kernel, chained
+                              `d1,s2=rand(k,·); d2,s3=rand(s2,·)` — the second
+                              draw must differ from the first for a shared
+                              key (a threading bug that reused the first
+                              draw's bits for the second would show up as
+                              d1 == d2)
 
     FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo shlo
 
-Only a real MISMATCH (executed number/gradient/distribution outside tolerance)
-trips a nonzero exit — an emitter/executor refusal is reported as SKIP.
+Only a real MISMATCH (executed number/gradient/distribution/key-threading
+outside tolerance) trips a nonzero exit — an emitter/executor refusal is
+reported as SKIP.
 """
 from __future__ import annotations
 
@@ -40,6 +64,10 @@ import oracle  # noqa: E402
 import executor  # noqa: E402
 
 N_SAMPLES = 100_000
+# Fan-out distribution check: fewer total draws (still ample for a KS test)
+# since each call already costs a full jit dispatch AND the fixture chains
+# `[fanout_n]`-batched calls (`FANOUT_N // fx.fanout_n` calls, not N_SAMPLES).
+FANOUT_N = 20_000
 VALUE_ATOL = 1e-4
 GRAD_ATOL = 1e-3
 KS_MAX = 0.02
@@ -204,6 +232,105 @@ def check_independence(fx) -> CheckResult:
                        "passed" if ok else "failed", detail, worst_corr)
 
 
+# ---------------------------------------------------------------------------
+# rng-threaded rand: key-ABI checks (reproducibility / advance / chaining /
+# fan-out). None of these need the scipy oracle — they check the THREADING
+# contract of `@sample(%key) -> (value, new_key)` itself.
+# ---------------------------------------------------------------------------
+def check_sample_key_reproducibility(fx) -> CheckResult:
+    if not fx.sample_flatppl:
+        return CheckResult(fx.key, "sample_key_reproducibility", "skipped",
+                           "not @sample-tested")
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.sample.flatppl", "sample")
+        v1, k1 = executor.sample_call(src, executor.DEFAULT_KEY, list(fx.sample_args))
+        v2, k2 = executor.sample_call(src, executor.DEFAULT_KEY, list(fx.sample_args))
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "sample_key_reproducibility", "skipped", f"emit refused: {e}")
+    ok = np.array_equal(v1, v2) and np.array_equal(k1, k2)
+    detail = f"same key -> value bit-identical={np.array_equal(v1, v2)}, new_key identical={np.array_equal(k1, k2)}"
+    return CheckResult(fx.key, "sample_key_reproducibility", "passed" if ok else "failed", detail)
+
+
+def check_sample_key_advance(fx) -> CheckResult:
+    if not fx.sample_flatppl:
+        return CheckResult(fx.key, "sample_key_advance", "skipped", "not @sample-tested")
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.sample.flatppl", "sample")
+        keys = [np.asarray(executor.DEFAULT_KEY, dtype=np.uint64)]
+        cur = executor.DEFAULT_KEY
+        for _ in range(5):
+            _, cur = executor.sample_call(src, cur, list(fx.sample_args))
+            keys.append(np.asarray(cur))
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "sample_key_advance", "skipped", f"emit refused: {e}")
+    # A real counter-based rng_bit_generator advance is never expected to
+    # repeat within a short chain — a purely MECHANICAL property of the key,
+    # independent of whether the DECODED draw happens to coincide (which is
+    # common and not a bug for a low-cardinality discrete distribution, e.g.
+    # Bernoulli(0.3) repeats its outcome ~58% of the time by chance).
+    seen = {tuple(int(x) for x in k) for k in keys}
+    ok = len(seen) == len(keys)
+    detail = f"{len(keys)} chained keys, {len(seen)} distinct (want all distinct)"
+    return CheckResult(fx.key, "sample_key_advance", "passed" if ok else "failed", detail)
+
+
+def check_fanout_distribution(fx) -> CheckResult:
+    if not fx.fanout_flatppl:
+        return CheckResult(fx.key, "sample_fanout_distribution", "skipped",
+                           "no Tier-1 fan-out lowering for this kernel")
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.iid.sample.flatppl", "sample")
+        xs = executor.samples_fanned(src, FANOUT_N, list(fx.sample_args))
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "sample_fanout_distribution", "skipped", f"emit refused: {e}")
+    ref = fx.sample_ref()
+    emp_mean, emp_var = float(xs.mean()), float(xs.var())
+    ref_mean, ref_var = float(ref.mean()), float(ref.var())
+    mean_tol = max(MOMENT_RTOL * abs(ref_mean), 6.0 * math.sqrt(ref_var / len(xs)))
+    dmean = abs(emp_mean - ref_mean)
+    dvar_rel = abs(emp_var - ref_var) / ref_var if ref_var else abs(emp_var - ref_var)
+    from scipy.stats import kstest
+    ks = float(kstest(xs, ref.cdf).statistic)
+    ok = ks <= KS_MAX and dmean <= mean_tol and dvar_rel <= 0.05
+    detail = (f"n={len(xs)} (batch {fx.fanout_n}, one rng_bit_generator/call); "
+              f"KS={ks:.4f} (max {KS_MAX}); mean {emp_mean:.4f} vs {ref_mean:.4f}; "
+              f"var relΔ {dvar_rel:.3f}")
+    return CheckResult(fx.key, "sample_fanout_distribution",
+                       "passed" if ok else "failed", detail, ks)
+
+
+def check_chaining_independent_draws() -> CheckResult:
+    """Two SEPARATE destructured `rand`s drawing from the IDENTICAL
+    Normal(0,1) kernel (`corpora/stablehlo/chaining/{d1,d2}.sample.flatppl`,
+    otherwise byte-identical source): `d1,s2=rand(k,lawof(x)); d2,s3=rand(s2,
+    lawof(y))`. Not a distribution check — since the kernel is shared, the
+    ONLY way `d1` and `d2` can differ is if the second draw actually consumed
+    the first's ADVANCED key rather than re-reading the source key or
+    somehow reusing the first draw's bits (a threading bug would show up as
+    d1 == d2 for every key, since both would be the same op sequence over the
+    same random bits)."""
+    d1_path = HERE / "chaining" / "d1.sample.flatppl"
+    d2_path = HERE / "chaining" / "d2.sample.flatppl"
+    try:
+        src1 = executor.emit(d1_path, "sample")
+        src2 = executor.emit(d2_path, "sample")
+        v1a, k1a = executor.sample_call(src1, executor.DEFAULT_KEY)
+        v1b, k1b = executor.sample_call(src1, executor.DEFAULT_KEY)
+        v2a, k2a = executor.sample_call(src2, executor.DEFAULT_KEY)
+        v2b, k2b = executor.sample_call(src2, executor.DEFAULT_KEY)
+    except executor.EmitRefused as e:
+        return CheckResult("chaining", "chaining_independent_draws", "skipped", f"emit refused: {e}")
+    d1_repro = bool(np.array_equal(v1a, v1b) and np.array_equal(k1a, k1b))
+    d2_repro = bool(np.array_equal(v2a, v2b) and np.array_equal(k2a, k2b))
+    independent = not np.array_equal(v1a, v2a)
+    ok = d1_repro and d2_repro and independent
+    detail = (f"d1 reproducible={d1_repro}; d2 reproducible={d2_repro}; "
+              f"d1={float(v1a):.6f} vs d2={float(v2a):.6f} (independent={independent})")
+    return CheckResult("chaining", "chaining_independent_draws",
+                       "passed" if ok else "failed", detail)
+
+
 def run() -> list[CheckResult]:
     results: list[CheckResult] = []
     for fx in oracle.FIXTURES:
@@ -212,6 +339,10 @@ def run() -> list[CheckResult]:
         results.append(check_gradient(fx, expected))
         results.append(check_distribution(fx))
         results.append(check_independence(fx))
+        results.append(check_sample_key_reproducibility(fx))
+        results.append(check_sample_key_advance(fx))
+        results.append(check_fanout_distribution(fx))
+    results.append(check_chaining_independent_draws())
     return results
 
 
