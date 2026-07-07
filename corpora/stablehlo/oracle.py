@@ -447,10 +447,17 @@ lp = logdensityof(lawof(record(a = a)), record(a = [0.2, 0.1]))
 mu = elementof(cartpow(reals, 2))
 cov = elementof(cartpow(reals, [2, 2]))
 s = rnginit(0)
-xs ~ iid(MvNormal(mu = mu, cov = cov), 5000)
+xs ~ iid(MvNormal(mu = mu, cov = cov), 20000)
 draws = rand(s, lawof(xs))
 """),
-        fanout_n=5000,
+        # 20000, not the Tier-1/rejection fixtures' 5000: the covariance
+        # check's asymptotic SE shrinks as 1/sqrt(n), and at n=5000 the
+        # z@L-vs-z@L^T transpose bug's worst-entry z-score (~5sigma) sits too
+        # close to a naive 6sigma gate to reliably trip it (Monte Carlo:
+        # ~85% pass rate for the BUGGY sampler). At n=20000 the buggy
+        # worst-z clears 7.5sigma in every trial while the correct sampler
+        # never exceeds ~4sigma — see check_mvnormal_fanout_distribution.
+        fanout_n=20000,
         fanout_dim=2,
         notes=(
             "matrix path: stablehlo.cholesky + triangular_solve. VALUE-only: "

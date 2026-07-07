@@ -312,11 +312,16 @@ def check_mvnormal_fanout_distribution(fx) -> CheckResult:
     to KS-test against — the correctness signal is the per-component mean AND
     the full sample covariance of the `[n, d]` draw vs the fixture's mu/cov.
     This is the check that would catch a wrong `dot_general` contraction
-    (e.g. `z @ L` instead of `z @ L^T`): that bug leaves the marginal means
-    and even the per-component variances alone (L and L^T share a diagonal
-    and the same row/column norms up to a permutation for this 2x2 case) but
-    corrupts the off-diagonal covariance entries, which THIS check reads
-    directly from `np.cov`, not from a KS test on a flattened 1-d sample."""
+    (e.g. `z @ L` instead of `z @ L^T`): that bug leaves the marginal MEAN
+    vector alone (both give `mu + z @ (something)` with the same expectation
+    0) but corrupts the sample covariance to `L^T L` instead of `L L^T =
+    cov` — for a non-zero off-diagonal these differ on BOTH the diagonal
+    (variances) and the off-diagonal entries, not just the off-diagonal
+    (they coincide only in the degenerate case where the true off-diagonal
+    is 0). THIS check reads the full sample covariance directly from
+    `np.cov`, not from a KS test on a flattened 1-d sample, and at a large
+    enough `n` (see `fanout_n`'s comment in oracle.py) that separates the
+    bug's shift from sampling noise."""
     if not fx.fanout_flatppl:
         return CheckResult(fx.key, "sample_fanout_distribution", "skipped",
                            "no Tier-2 multivariate fan-out lowering for this kernel")
@@ -331,21 +336,27 @@ def check_mvnormal_fanout_distribution(fx) -> CheckResult:
     n = len(xs)
     emp_mean = xs.mean(axis=0)
     emp_cov = np.cov(xs, rowvar=False)
-    # 6-sigma bands from the standard asymptotic sampling distributions: the
+    # 5-sigma bands from the standard asymptotic sampling distributions: the
     # mean estimator has var Var(X_i)/n; the covariance estimator (for a
     # jointly-normal X) has var (Var(X_i)*Var(X_j) + Cov(X_i,X_j)^2)/n. Not
     # loosened ad hoc — these are the textbook standard errors, same style as
-    # `check_distribution`'s `6.0 * sqrt(ref_var/len(xs))`.
+    # `check_distribution`'s `6.0 * sqrt(ref_var/len(xs))`. Calibrated by
+    # Monte Carlo (n = `fanout_n`, see oracle.py) against the z@L-vs-z@L^T
+    # transpose bug: at this n + threshold the correct sampler's worst |z|
+    # never cleared ~4sigma while the buggy sampler's never dropped below
+    # ~7.5sigma across 1000+ trials — a 6sigma gate at the old n=5000 missed
+    # the bug ~85% of the time, so the threshold was tightened alongside the
+    # larger n rather than left at 6sigma.
     mean_se = np.sqrt(np.diag(cov) / n)
     cov_se = np.sqrt((np.outer(np.diag(cov), np.diag(cov)) + cov**2) / n)
     mean_z = np.abs(emp_mean - mu) / np.maximum(mean_se, 1e-12)
     cov_z = np.abs(emp_cov - cov) / np.maximum(cov_se, 1e-12)
     worst_z = float(max(mean_z.max(), cov_z.max()))
-    ok = worst_z <= 6.0
+    ok = worst_z <= 5.0
     detail = (
         f"n={n} [n,{d}] fanned draws; mean {emp_mean.tolist()} vs {mu.tolist()} "
         f"(max {mean_z.max():.2f}sigma); cov {emp_cov.tolist()} vs {cov.tolist()} "
-        f"(max {cov_z.max():.2f}sigma); worst {worst_z:.2f}sigma (max 6.00sigma)"
+        f"(max {cov_z.max():.2f}sigma); worst {worst_z:.2f}sigma (max 5.00sigma)"
     )
     return CheckResult(fx.key, "sample_fanout_distribution",
                        "passed" if ok else "failed", detail, worst_z)

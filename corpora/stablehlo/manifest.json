@@ -264,7 +264,7 @@
       "sample_distributional": false,
       "sample_discrete": false,
       "independence": null,
-      "fanout_n": 5000,
+      "fanout_n": 20000,
       "fanout_dim": 2,
       "notes": "matrix path: stablehlo.cholesky + triangular_solve. VALUE-only: Enzyme-JAX cannot compute the adjoint of triangular_solve, so the gradient is not executable here (executor limitation, not an emitter bug). Fan-out exercises the batched [n,d] cholesky-affine draw (one shared cholesky, one rng_bit_generator advance, a batched dot_general for the row-wise mu + L.z)."
     },
