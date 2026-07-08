@@ -1,0 +1,4 @@
+s = rnginit(0)
+n = 10
+xs ~ iid(Binomial(n = n, p = 0.4), 200)
+draws = rand(s, lawof(xs))
