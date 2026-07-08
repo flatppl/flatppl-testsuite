@@ -30,6 +30,8 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
       "notes": ""
     },
     {
@@ -50,6 +52,8 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
       "notes": ""
     },
     {
@@ -72,7 +76,9 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": null,
-      "notes": "exercises chlo.lgamma"
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "exercises chlo.lgamma; fan-out exercises the batched Marsaglia-Tsang rejection while"
     },
     {
       "key": "lognormal",
@@ -94,6 +100,8 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": null,
+      "fanout_n": null,
+      "fanout_dim": null,
       "notes": ""
     },
     {
@@ -110,6 +118,8 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
       "notes": ""
     },
     {
@@ -132,7 +142,9 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": "beta",
-      "notes": "exercises chlo.lgamma; @sample uses two internal Gamma rng streams"
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "exercises chlo.lgamma; @sample uses two internal Gamma rng streams; fan-out exercises TWO batched Marsaglia-Tsang rejection whiles (X/(X+Y))"
     },
     {
       "key": "studentt",
@@ -152,7 +164,9 @@
       "sample_distributional": true,
       "sample_discrete": false,
       "independence": null,
-      "notes": "exercises chlo.lgamma"
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "exercises chlo.lgamma; fan-out exercises the reducer composing batched Gamma rejection"
     },
     {
       "key": "bernoulli",
@@ -172,6 +186,8 @@
       "sample_distributional": true,
       "sample_discrete": true,
       "independence": null,
+      "fanout_n": null,
+      "fanout_dim": null,
       "notes": ""
     },
     {
@@ -192,6 +208,8 @@
       "sample_distributional": true,
       "sample_discrete": true,
       "independence": null,
+      "fanout_n": null,
+      "fanout_dim": null,
       "notes": "exercises chlo.lgamma (log factorial)"
     },
     {
@@ -213,6 +231,8 @@
       "sample_distributional": true,
       "sample_discrete": true,
       "independence": null,
+      "fanout_n": null,
+      "fanout_dim": null,
       "notes": "n is a count parameter (arg0), differentiated only w.r.t. p (arg1)"
     },
     {
@@ -237,13 +257,16 @@
       "variate": "a = [0.2, 0.1]",
       "scipy_oracle": "scipy.stats.multivariate_normal.logpdf([0.2,0.1], mean=mu, cov=cov)",
       "modes": [
-        "logdensity"
+        "logdensity",
+        "sample"
       ],
       "grad_params": [],
       "sample_distributional": false,
       "sample_discrete": false,
       "independence": null,
-      "notes": "matrix path: stablehlo.cholesky + triangular_solve. VALUE-only: Enzyme-JAX cannot compute the adjoint of triangular_solve, so the gradient is not executable here (executor limitation, not an emitter bug)."
+      "fanout_n": 20000,
+      "fanout_dim": 2,
+      "notes": "matrix path: stablehlo.cholesky + triangular_solve. VALUE-only: Enzyme-JAX cannot compute the adjoint of triangular_solve, so the gradient is not executable here (executor limitation, not an emitter bug). Fan-out exercises the batched [n,d] cholesky-affine draw (one shared cholesky, one rng_bit_generator advance, a batched dot_general for the row-wise mu + L.z)."
     },
     {
       "key": "dirichlet",
@@ -267,6 +290,8 @@
       "sample_distributional": false,
       "sample_discrete": false,
       "independence": "dirichlet",
+      "fanout_n": null,
+      "fanout_dim": null,
       "notes": "vector path + chlo.lgamma; @sample uses one Gamma rng stream per component"
     }
   ]

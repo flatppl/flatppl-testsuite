@@ -40,6 +40,8 @@ def gen() -> None:
         (d / f"{fx.key}.flatppl").write_text(fx.flatppl)
         if fx.sample_flatppl:
             (d / f"{fx.key}.sample.flatppl").write_text(fx.sample_flatppl)
+        if fx.fanout_flatppl:
+            (d / f"{fx.key}.iid.sample.flatppl").write_text(fx.fanout_flatppl)
 
         val = oracle.value(fx)
         grad = oracle.fd_gradient(fx) if fx.grad_params else {}
@@ -67,11 +69,13 @@ def gen() -> None:
             "variate": fx.variate_repr,
             "scipy_oracle": fx.scipy_note,
             "modes": ["logdensity"]
-            + (["sample"] if fx.sample_ref or fx.independence else []),
+            + (["sample"] if fx.sample_ref or fx.independence or fx.fanout_flatppl else []),
             "grad_params": list(fx.grad_params),
             "sample_distributional": bool(fx.sample_ref),
             "sample_discrete": fx.sample_discrete,
             "independence": fx.independence,
+            "fanout_n": fx.fanout_n or None,
+            "fanout_dim": fx.fanout_dim or None,
             "notes": fx.notes,
         })
         print(f"{fx.key}: value={val!r}"

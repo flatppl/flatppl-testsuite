@@ -82,6 +82,19 @@ class Fixture:
     sample_args: tuple = ()
     # @sample independence subject ("beta" | "dirichlet" | None).
     independence: str | None = None
+    # Fan-out (`iid(K, n)`): a SEPARATE `.iid.sample.flatppl` model baking (or,
+    # for a free-param kernel like MvNormal, threading) the same params into a
+    # fixed-size batched draw, one rng_bit_generator advance per call. Covers
+    # Tier 1 (straight-line: Normal/Exponential/Uniform) AND Tier 2 (batched
+    # rejection: Gamma/Beta/StudentT; batched multivariate: MvNormal). Empty
+    # for dists without a landed fan-out lowering.
+    fanout_flatppl: str = ""
+    fanout_n: int = 0
+    # 0 for a scalar-lane fan-out (Tier 1 + Tier 2 rejection: draws [n]); the
+    # per-draw dimension `d` for a Tier-2 MULTIVARIATE fan-out (draws [n, d],
+    # e.g. MvNormal) — tells the gate to reshape+check mean/covariance instead
+    # of running the scalar KS/moment check against a 1-d `sample_ref.cdf`.
+    fanout_dim: int = 0
     notes: str = ""
 
     def param_values(self) -> list:
@@ -178,6 +191,12 @@ s = rnginit(0)
 x = draw(Normal(mu = 0.3, sigma = 1.2))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Normal(mu = 0.3, sigma = 1.2), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
     ),
     Fixture(
         key="exponential",
@@ -198,6 +217,12 @@ s = rnginit(0)
 x = draw(Exponential(rate = 1.5))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Exponential(rate = 1.5), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
     ),
     Fixture(
         key="gamma",
@@ -219,7 +244,13 @@ s = rnginit(0)
 x = draw(Gamma(shape = 2.5, rate = 1.5))
 draws = rand(s, lawof(x))
 """),
-        notes="exercises chlo.lgamma",
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Gamma(shape = 2.5, rate = 1.5), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        notes="exercises chlo.lgamma; fan-out exercises the batched Marsaglia-Tsang rejection while",
     ),
     Fixture(
         key="lognormal",
@@ -260,6 +291,12 @@ s = rnginit(0)
 x = draw(Uniform(support = interval(-1.0, 3.0)))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Uniform(support = interval(-1.0, 3.0)), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
     ),
     Fixture(
         key="beta",
@@ -281,8 +318,17 @@ s = rnginit(0)
 x = draw(Beta(alpha = 2.0, beta = 3.0))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Beta(alpha = 2.0, beta = 3.0), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
         independence="beta",
-        notes="exercises chlo.lgamma; @sample uses two internal Gamma rng streams",
+        notes=(
+            "exercises chlo.lgamma; @sample uses two internal Gamma rng streams; "
+            "fan-out exercises TWO batched Marsaglia-Tsang rejection whiles (X/(X+Y))"
+        ),
     ),
     Fixture(
         key="studentt",
@@ -303,7 +349,13 @@ s = rnginit(0)
 x = draw(StudentT(nu = 4.0))
 draws = rand(s, lawof(x))
 """),
-        notes="exercises chlo.lgamma",
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(StudentT(nu = 4.0), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        notes="exercises chlo.lgamma; fan-out exercises the reducer composing batched Gamma rejection",
     ),
     Fixture(
         key="bernoulli",
@@ -385,11 +437,35 @@ lp = logdensityof(lawof(record(a = a)), record(a = [0.2, 0.1]))
         logdensity=_mvnormal,
         scipy_note="scipy.stats.multivariate_normal.logpdf([0.2,0.1], mean=mu, cov=cov)",
         grad_params=(),  # Enzyme cannot differentiate stablehlo.triangular_solve
+        # Tier-2 multivariate fan-out: mu/cov stay FREE params (elementof), fed
+        # as the @sample func args in `param_values()` order — matching the
+        # emitter's `@sample(%key, %arg0=mu, %arg1=cov)` layout. Draws [n, d];
+        # the gate checks the per-component mean AND the full sample covariance
+        # against these SAME mu/cov (a wrong `dot_general` contraction, e.g.
+        # z.L instead of z.L^T, would show up as a wrong covariance here).
+        fanout_flatppl=_src("""
+mu = elementof(cartpow(reals, 2))
+cov = elementof(cartpow(reals, [2, 2]))
+s = rnginit(0)
+xs ~ iid(MvNormal(mu = mu, cov = cov), 20000)
+draws = rand(s, lawof(xs))
+"""),
+        # 20000, not the Tier-1/rejection fixtures' 5000: the covariance
+        # check's asymptotic SE shrinks as 1/sqrt(n), and at n=5000 the
+        # z@L-vs-z@L^T transpose bug's worst-entry z-score (~5sigma) sits too
+        # close to a naive 6sigma gate to reliably trip it (Monte Carlo:
+        # ~85% pass rate for the BUGGY sampler). At n=20000 the buggy
+        # worst-z clears 7.5sigma in every trial while the correct sampler
+        # never exceeds ~4sigma — see check_mvnormal_fanout_distribution.
+        fanout_n=20000,
+        fanout_dim=2,
         notes=(
             "matrix path: stablehlo.cholesky + triangular_solve. VALUE-only: "
             "Enzyme-JAX cannot compute the adjoint of triangular_solve, so the "
             "gradient is not executable here (executor limitation, not an "
-            "emitter bug)."
+            "emitter bug). Fan-out exercises the batched [n,d] cholesky-affine "
+            "draw (one shared cholesky, one rng_bit_generator advance, a "
+            "batched dot_general for the row-wise mu + L.z)."
         ),
     ),
     Fixture(

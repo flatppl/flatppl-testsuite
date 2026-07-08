@@ -1,0 +1,3 @@
+s = rnginit(0)
+xs ~ iid(Uniform(support = interval(-1.0, 3.0)), 200)
+draws = rand(s, lawof(xs))
