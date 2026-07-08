@@ -492,10 +492,10 @@ def check_dirichlet_fanout_distribution(fx) -> CheckResult:
 
     ref_mean = alpha / a0
     emp_mean = xs.mean(axis=0)
-    mean_tol = np.maximum(MOMENT_RTOL * ref_mean, 6.0 * np.sqrt(ref_mean * (1 - ref_mean) / n))
+    ref_var = alpha * (a0 - alpha) / (a0 ** 2 * (a0 + 1))
+    mean_tol = np.maximum(MOMENT_RTOL * ref_mean, 6.0 * np.sqrt(ref_var / n))
     mean_ok = bool(np.all(np.abs(emp_mean - ref_mean) <= mean_tol))
 
-    ref_var = alpha * (a0 - alpha) / (a0 ** 2 * (a0 + 1))
     emp_var = xs.var(axis=0)
     dvar_rel = np.abs(emp_var - ref_var) / ref_var
     worst_dvar_rel = float(dvar_rel.max())
