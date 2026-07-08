@@ -186,9 +186,9 @@
       "sample_distributional": true,
       "sample_discrete": true,
       "independence": null,
-      "fanout_n": null,
+      "fanout_n": 200,
       "fanout_dim": null,
-      "notes": ""
+      "notes": "elementwise select(U < p, 1, 0) fan-out \u2014 no while, no new primitive"
     },
     {
       "key": "poisson",
@@ -208,9 +208,9 @@
       "sample_distributional": true,
       "sample_discrete": true,
       "independence": null,
-      "fanout_n": null,
+      "fanout_n": 200,
       "fanout_dim": null,
-      "notes": "exercises chlo.lgamma (log factorial)"
+      "notes": "exercises chlo.lgamma (log factorial); fan-out exercises the batched inverse-CDF while"
     },
     {
       "key": "binomial",
@@ -231,9 +231,9 @@
       "sample_distributional": true,
       "sample_discrete": true,
       "independence": null,
-      "fanout_n": null,
+      "fanout_n": 200,
       "fanout_dim": null,
-      "notes": "n is a count parameter (arg0), differentiated only w.r.t. p (arg1)"
+      "notes": "n is a count parameter (arg0), differentiated only w.r.t. p (arg1); fan-out exercises the rank-2 [200, 10] uniform + inner-axis reduce"
     },
     {
       "key": "mvnormal",
@@ -290,9 +290,139 @@
       "sample_distributional": false,
       "sample_discrete": false,
       "independence": "dirichlet",
-      "fanout_n": null,
-      "fanout_dim": null,
+      "fanout_n": 20000,
+      "fanout_dim": 3,
       "notes": "vector path + chlo.lgamma; @sample uses one Gamma rng stream per component"
+    },
+    {
+      "key": "laplace",
+      "distribution": "Laplace(location, scale)",
+      "params": {
+        "location": 0.0,
+        "scale": 1.0
+      },
+      "variate": "a = 0.5",
+      "scipy_oracle": "scipy.stats.laplace.logpdf(0.5, loc=location, scale=scale)",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "location",
+        "scale"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": false,
+      "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "elementwise compare/select sgn(U-1/2) fan-out \u2014 no while, no new primitive"
+    },
+    {
+      "key": "geometric",
+      "distribution": "Geometric(p)",
+      "params": {
+        "p": 0.3
+      },
+      "variate": "a = 3",
+      "scipy_oracle": "scipy.stats.geom.logpmf(3+1, p) [FlatPPL counts failures, scipy counts trials]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "p"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "elementwise floor(log(U)/log(1-p)) fan-out \u2014 no while, no new primitive"
+    },
+    {
+      "key": "categorical",
+      "distribution": "Categorical(p)",
+      "params": {},
+      "variate": "a = 2",
+      "scipy_oracle": "closed-form rv_discrete(values=([1,2,3],[0.2,0.3,0.5])).logpmf(2) [1-based]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "inverse-CDF compare/select unroll fan-out \u2014 no while, no new primitive"
+    },
+    {
+      "key": "categorical0",
+      "distribution": "Categorical0(p)",
+      "params": {},
+      "variate": "a = 1",
+      "scipy_oracle": "closed-form rv_discrete(values=([0,1,2],[0.2,0.3,0.5])).logpmf(1) [0-based]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "same inverse-CDF unroll as Categorical, only the initial count constant differs"
+    },
+    {
+      "key": "negativebinomial",
+      "distribution": "NegativeBinomial(alpha, beta)",
+      "params": {
+        "alpha": 5.0,
+        "beta": 2.0
+      },
+      "variate": "a = 4",
+      "scipy_oracle": "scipy.stats.nbinom.logpmf(4, n=alpha, p=beta/(beta+1)) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "alpha",
+        "beta"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "Gamma(shape=alpha, rate=beta) mixed into Poisson; fan-out exercises the batched Gamma while feeding the batched Poisson while (two whiles)"
+    },
+    {
+      "key": "negativebinomial2",
+      "distribution": "NegativeBinomial2(mu, psi)",
+      "params": {
+        "mu": 3.0,
+        "psi": 5.0
+      },
+      "variate": "a = 4",
+      "scipy_oracle": "scipy.stats.nbinom.logpmf(4, n=psi, p=psi/(mu+psi)) [CHLO lgamma]",
+      "modes": [
+        "logdensity",
+        "sample"
+      ],
+      "grad_params": [
+        "mu",
+        "psi"
+      ],
+      "sample_distributional": true,
+      "sample_discrete": true,
+      "independence": null,
+      "fanout_n": 200,
+      "fanout_dim": null,
+      "notes": "Gamma(shape=psi, rate=psi/mu) mixed into Poisson (mean mu); fan-out exercises the batched Gamma while feeding the batched Poisson while"
     }
   ]
 }

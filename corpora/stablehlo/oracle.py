@@ -37,10 +37,14 @@ from scipy.stats import (
     dirichlet,
     expon,
     gamma as gamma_dist,
+    geom,
+    laplace as laplace_dist,
     lognorm,
     multivariate_normal,
+    nbinom,
     norm,
     poisson,
+    rv_discrete,
     t as studentt_dist,
     uniform,
 )
@@ -95,6 +99,16 @@ class Fixture:
     # e.g. MvNormal) — tells the gate to reshape+check mean/covariance instead
     # of running the scalar KS/moment check against a 1-d `sample_ref.cdf`.
     fanout_dim: int = 0
+    # True for a SIMPLEX-valued multivariate fan-out (Dirichlet): like
+    # `fanout_dim`, draws [n, d], but the gate's simplex check (row-sum==1 +
+    # per-component mean/variance + component correlations) replaces the
+    # Gaussian mean/covariance check `fanout_dim` alone selects.
+    fanout_simplex: bool = False
+    # The minimum integer in a discrete kernel's support (0 for every
+    # zero-based counting distribution; 1 for 1-based `Categorical`) — the
+    # gate's discrete fan-out check bins a chi-square goodness-of-fit from
+    # here upward against `sample_ref`'s pmf.
+    fanout_discrete_kmin: int = 0
     notes: str = ""
 
     def param_values(self) -> list:
@@ -160,6 +174,64 @@ def _mvnormal(mu, cov):
 
 def _dirichlet(alpha):
     return float(dirichlet.logpdf([0.2, 0.3, 0.5], alpha))
+
+
+def dirichlet_theo_corr(alpha, a0, i, j):
+    """The closed-form Dirichlet component correlation `Corr(X_i, X_j) =
+    -sqrt(alpha_i*alpha_j / ((a0-alpha_i)*(a0-alpha_j)))` (always negative —
+    components of a simplex-valued draw trade off against each other). Shared
+    by the scalar `@sample` independence check and the fanned `iid` simplex
+    check in ``gate.py``, both of which validate the SAME closed form against
+    two different samplers (one draw per rng stream vs. one batched draw)."""
+    return -math.sqrt(alpha[i] * alpha[j] / ((a0 - alpha[i]) * (a0 - alpha[j])))
+
+
+def _laplace(location, scale):
+    return float(laplace_dist.logpdf(_X, loc=location, scale=scale))
+
+
+def _geometric(p):
+    # FlatPPL Geometric(p): pmf = p*(1-p)^k for k in {0,1,...} (# FAILURES
+    # before a success). scipy.stats.geom counts TRIALS (k in {1,2,...}) with
+    # pmf = p*(1-p)^(k-1); geom(p, loc=-1) shifts that back to the {0,1,...}
+    # failure-count convention (geom(p, loc=-1).pmf(k) = geom.pmf(k+1, p) =
+    # p*(1-p)^k, matching the spec exactly).
+    return float(geom.logpmf(3, p, loc=-1))  # observed a = 3
+
+
+def _categorical_ref(p, base):
+    """A closed-form `rv_discrete` built directly from `p` over
+    `{base, ..., base+len(p)-1}` — scipy ships no built-in categorical
+    distribution, so this constructs one directly from the same `p` the
+    FlatPPL model is baked with (an honest closed-form reference, not a
+    library call, matching this module's `_uniform`-style bespoke oracles)."""
+    n = len(p)
+    return rv_discrete(values=(list(range(base, base + n)), p))
+
+
+def _categorical(p, base):
+    return float(_categorical_ref(p, base).logpmf(2))  # observed a = 2 (1-based)
+
+
+def _categorical0(p, base):
+    return float(_categorical_ref(p, base).logpmf(1))  # observed a = 1 (0-based)
+
+
+def _negbinomial(alpha, beta):
+    # FlatPPL NegativeBinomial(alpha, beta): pmf = C(k+alpha-1,alpha-1) *
+    # (beta/(beta+1))^alpha * (1/(beta+1))^k. Matching term-by-term against
+    # scipy.stats.nbinom.pmf(k,n,p) = C(k+n-1,k) p^n (1-p)^k (C(k+n-1,k) =
+    # C(k+n-1,n-1)): n = alpha, p = beta/(beta+1) (so 1-p = 1/(beta+1),
+    # exactly the spec's k-exponent factor).
+    return float(nbinom.logpmf(4, alpha, beta / (beta + 1.0)))  # observed a = 4
+
+
+def _negbinomial2(mu, psi):
+    # FlatPPL NegativeBinomial2(mu, psi): pmf = C(k+psi-1,k) *
+    # (mu/(mu+psi))^k * (psi/(mu+psi))^psi. Matching against scipy's
+    # nbinom.pmf(k,n,p) = C(k+n-1,k) p^n (1-p)^k: n = psi, p = psi/(mu+psi)
+    # (1-p = mu/(mu+psi), the spec's k-exponent factor).
+    return float(nbinom.logpmf(4, psi, psi / (mu + psi)))  # observed a = 4
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +449,13 @@ s = rnginit(0)
 x = draw(Bernoulli(p = 0.3))
 draws = rand(s, lawof(x))
 """),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Bernoulli(p = 0.3), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        notes="elementwise select(U < p, 1, 0) fan-out — no while, no new primitive",
     ),
     Fixture(
         key="poisson",
@@ -398,7 +477,13 @@ s = rnginit(0)
 x = draw(Poisson(rate = 2.5))
 draws = rand(s, lawof(x))
 """),
-        notes="exercises chlo.lgamma (log factorial)",
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Poisson(rate = 2.5), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        notes="exercises chlo.lgamma (log factorial); fan-out exercises the batched inverse-CDF while",
     ),
     Fixture(
         key="binomial",
@@ -421,7 +506,22 @@ s = rnginit(0)
 x = draw(Binomial(n = 10, p = 0.4))
 draws = rand(s, lawof(x))
 """),
-        notes="n is a count parameter (arg0), differentiated only w.r.t. p (arg1)",
+        # n MUST be a compile-time-known local constant here (not an
+        # `elementof` free param, unlike the logdensity model above): the
+        # fanned draw's inner axis (n Bernoulli trials per lane) has to be a
+        # STATIC shape, so this is a deliberately separate model, not a
+        # baked-literal copy of `flatppl` above.
+        fanout_flatppl=_src("""
+s = rnginit(0)
+n = 10
+xs ~ iid(Binomial(n = n, p = 0.4), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        notes=(
+            "n is a count parameter (arg0), differentiated only w.r.t. p (arg1); "
+            "fan-out exercises the rank-2 [200, 10] uniform + inner-axis reduce"
+        ),
     ),
     Fixture(
         key="mvnormal",
@@ -491,7 +591,204 @@ draws = rand(s, lawof(x))
 """),
         sample_args=([2.0, 3.0, 5.0],),
         independence="dirichlet",
+        # Simplex fan-out: alpha stays a FREE param (elementof), matching
+        # MvNormal's Tier-2 approach, so the gate can feed it via
+        # `fx.param_values()` — one rng_bit_generator advance drawing the
+        # WHOLE [20000, 3] batch (one call, not chained), the same n as
+        # MvNormal's covariance check for the same statistical-power reason
+        # (see fanout_n's comment there).
+        fanout_flatppl=_src("""
+alpha = elementof(cartpow(posreals, 3))
+s = rnginit(0)
+xs ~ iid(Dirichlet(alpha = alpha), 20000)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=20000,
+        fanout_dim=3,
+        fanout_simplex=True,
         notes="vector path + chlo.lgamma; @sample uses one Gamma rng stream per component",
+    ),
+    Fixture(
+        key="laplace",
+        distribution="Laplace(location, scale)",
+        flatppl=_src("""
+location = elementof(reals)
+scale = elementof(posreals)
+a = draw(Laplace(location = location, scale = scale))
+lp = logdensityof(lawof(record(a = a)), record(a = 0.5))
+"""),
+        params={"location": 0.0, "scale": 1.0},
+        variate=0.5, variate_repr="a = 0.5",
+        logdensity=_laplace,
+        scipy_note="scipy.stats.laplace.logpdf(0.5, loc=location, scale=scale)",
+        grad_params=("location", "scale"),
+        sample_ref=lambda: laplace_dist(loc=0.0, scale=1.0),
+        sample_flatppl=_src("""
+s = rnginit(0)
+x = draw(Laplace(location = 0.0, scale = 1.0))
+draws = rand(s, lawof(x))
+"""),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Laplace(location = 0.0, scale = 1.0), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        notes="elementwise compare/select sgn(U-1/2) fan-out — no while, no new primitive",
+    ),
+    Fixture(
+        key="geometric",
+        distribution="Geometric(p)",
+        flatppl=_src("""
+p = elementof(unitinterval)
+a = draw(Geometric(p = p))
+lp = logdensityof(lawof(record(a = a)), record(a = 3))
+"""),
+        params={"p": 0.3},
+        variate=3, variate_repr="a = 3",
+        logdensity=_geometric,
+        scipy_note="scipy.stats.geom.logpmf(3+1, p) [FlatPPL counts failures, scipy counts trials]",
+        grad_params=("p",),
+        sample_ref=lambda: geom(0.3, loc=-1),
+        sample_discrete=True,
+        sample_flatppl=_src("""
+s = rnginit(0)
+x = draw(Geometric(p = 0.3))
+draws = rand(s, lawof(x))
+"""),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Geometric(p = 0.3), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        fanout_discrete_kmin=0,
+        notes="elementwise floor(log(U)/log(1-p)) fan-out — no while, no new primitive",
+    ),
+    Fixture(
+        key="categorical",
+        distribution="Categorical(p)",
+        # p is baked as a literal (no `elementof(stdsimplex(3))` free param,
+        # same no-free-param shape as the `uniform` fixture above) — the fixed
+        # p is what both the logdensity oracle and the fan-out sampler share.
+        flatppl=_src("""
+a = draw(Categorical(p = [0.2, 0.3, 0.5]))
+lp = logdensityof(lawof(record(a = a)), record(a = 2))
+"""),
+        params={},
+        variate=2, variate_repr="a = 2",
+        logdensity=lambda: _categorical([0.2, 0.3, 0.5], base=1),
+        scipy_note="closed-form rv_discrete(values=([1,2,3],[0.2,0.3,0.5])).logpmf(2) [1-based]",
+        grad_params=(),  # p is a fixed literal vector, not a free continuous param
+        sample_ref=lambda: _categorical_ref([0.2, 0.3, 0.5], base=1),
+        sample_discrete=True,
+        sample_flatppl=_src("""
+s = rnginit(0)
+x = draw(Categorical(p = [0.2, 0.3, 0.5]))
+draws = rand(s, lawof(x))
+"""),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Categorical(p = [0.2, 0.3, 0.5]), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        fanout_discrete_kmin=1,
+        notes="inverse-CDF compare/select unroll fan-out — no while, no new primitive",
+    ),
+    Fixture(
+        key="categorical0",
+        distribution="Categorical0(p)",
+        flatppl=_src("""
+a = draw(Categorical0(p = [0.2, 0.3, 0.5]))
+lp = logdensityof(lawof(record(a = a)), record(a = 1))
+"""),
+        params={},
+        variate=1, variate_repr="a = 1",
+        logdensity=lambda: _categorical0([0.2, 0.3, 0.5], base=0),
+        scipy_note="closed-form rv_discrete(values=([0,1,2],[0.2,0.3,0.5])).logpmf(1) [0-based]",
+        grad_params=(),
+        sample_ref=lambda: _categorical_ref([0.2, 0.3, 0.5], base=0),
+        sample_discrete=True,
+        sample_flatppl=_src("""
+s = rnginit(0)
+x = draw(Categorical0(p = [0.2, 0.3, 0.5]))
+draws = rand(s, lawof(x))
+"""),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(Categorical0(p = [0.2, 0.3, 0.5]), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        fanout_discrete_kmin=0,
+        notes="same inverse-CDF unroll as Categorical, only the initial count constant differs",
+    ),
+    Fixture(
+        key="negativebinomial",
+        distribution="NegativeBinomial(alpha, beta)",
+        flatppl=_src("""
+alpha = elementof(posreals)
+beta = elementof(posreals)
+a = draw(NegativeBinomial(alpha = alpha, beta = beta))
+lp = logdensityof(lawof(record(a = a)), record(a = 4))
+"""),
+        params={"alpha": 5.0, "beta": 2.0},
+        variate=4, variate_repr="a = 4",
+        logdensity=_negbinomial,
+        scipy_note="scipy.stats.nbinom.logpmf(4, n=alpha, p=beta/(beta+1)) [CHLO lgamma]",
+        grad_params=("alpha", "beta"),
+        sample_ref=lambda: nbinom(5.0, 2.0 / 3.0),
+        sample_discrete=True,
+        sample_flatppl=_src("""
+s = rnginit(0)
+x = draw(NegativeBinomial(alpha = 5.0, beta = 2.0))
+draws = rand(s, lawof(x))
+"""),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(NegativeBinomial(alpha = 5.0, beta = 2.0), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        fanout_discrete_kmin=0,
+        notes=(
+            "Gamma(shape=alpha, rate=beta) mixed into Poisson; fan-out exercises "
+            "the batched Gamma while feeding the batched Poisson while (two whiles)"
+        ),
+    ),
+    Fixture(
+        key="negativebinomial2",
+        distribution="NegativeBinomial2(mu, psi)",
+        flatppl=_src("""
+mu = elementof(posreals)
+psi = elementof(posreals)
+a = draw(NegativeBinomial2(mu = mu, psi = psi))
+lp = logdensityof(lawof(record(a = a)), record(a = 4))
+"""),
+        params={"mu": 3.0, "psi": 5.0},
+        variate=4, variate_repr="a = 4",
+        logdensity=_negbinomial2,
+        scipy_note="scipy.stats.nbinom.logpmf(4, n=psi, p=psi/(mu+psi)) [CHLO lgamma]",
+        grad_params=("mu", "psi"),
+        sample_ref=lambda: nbinom(5.0, 5.0 / 8.0),
+        sample_discrete=True,
+        sample_flatppl=_src("""
+s = rnginit(0)
+x = draw(NegativeBinomial2(mu = 3.0, psi = 5.0))
+draws = rand(s, lawof(x))
+"""),
+        fanout_flatppl=_src("""
+s = rnginit(0)
+xs ~ iid(NegativeBinomial2(mu = 3.0, psi = 5.0), 200)
+draws = rand(s, lawof(xs))
+"""),
+        fanout_n=200,
+        fanout_discrete_kmin=0,
+        notes=(
+            "Gamma(shape=psi, rate=psi/mu) mixed into Poisson (mean mu); "
+            "fan-out exercises the batched Gamma while feeding the batched Poisson while"
+        ),
     ),
 ]
 

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "key": "negativebinomial",
+  "distribution": "NegativeBinomial(alpha, beta)",
+  "model": "negativebinomial.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "scipy.stats.nbinom.logpmf(4, n=alpha, p=beta/(beta+1)) [CHLO lgamma]",
+  "params": {
+    "alpha": 5.0,
+    "beta": 2.0
+  },
+  "variate": 4,
+  "logdensity_value": -2.1732794531639,
+  "gradient": {
+    "alpha": 0.22905870724976296,
+    "beta": -0.4999999027774926
+  },
+  "grad_params": [
+    "alpha",
+    "beta"
+  ],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}

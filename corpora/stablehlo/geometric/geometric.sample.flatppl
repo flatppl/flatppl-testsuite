@@ -1,0 +1,3 @@
+s = rnginit(0)
+x = draw(Geometric(p = 0.3))
+draws = rand(s, lawof(x))
