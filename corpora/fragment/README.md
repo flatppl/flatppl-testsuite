@@ -38,6 +38,13 @@ pixi run test                                  # pytest, incl. this corpus via i
 pixi run python corpora/fragment/gen_expected.py   # regenerate + verify expected.json
 ```
 
+Three later additions — `densityof_normal`, `pushfwd_projection_iid`,
+`pushfwd_log_exp` — numerically verify determiniser lowerings for
+`densityof`, `pushfwd` structural projection, and `pushfwd`
+positive-support log-bijection; their frozen values were confirmed
+end-to-end against the det-js engine and cross-checked with scipy directly
+(`reference_backend: "scipy 1.18"`), with no Julia predecessor.
+
 ## Numeric gate status
 
 This corpus's numeric gate (`corpora/fragment/tests/test_fragment_gate.py`)

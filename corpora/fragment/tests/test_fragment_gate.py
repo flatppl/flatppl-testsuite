@@ -59,4 +59,5 @@ def test_all_fragments_are_gated():
         "frag_pushfwd_affine", "frag_pushfwd_exp", "frag_kchain_bern", "frag_kchain_cat",
         "frag_broadcast_poisson", "frag_normal_normal_marginal", "frag_gamma_poisson_marginal",
         "frag_jointchain_normal", "frag_jointchain_chain3", "frag_jointchain_scalar",
+        "frag_densityof_normal", "frag_pushfwd_projection_iid", "frag_pushfwd_log_exp",
     }
