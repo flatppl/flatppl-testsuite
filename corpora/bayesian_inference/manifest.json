@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "posteriors": [
+    {
+      "test_id": "post_bi1",
+      "path": "bi1_posterior",
+      "features": ["bayesupdate", "joint", "elementof", "derived_params"]
+    },
+    {
+      "test_id": "post_bi2",
+      "path": "bi2_posterior",
+      "features": ["bayesupdate", "lawof", "derived_params"]
+    },
+    {
+      "test_id": "post_bi3",
+      "path": "bi3_posterior",
+      "features": ["disintegrate", "bayesupdate"]
+    },
+    {
+      "test_id": "post_bi4",
+      "path": "bi4_posterior",
+      "features": ["restrict", "bayesupdate"]
+    },
+    {
+      "test_id": "post_eight_schools",
+      "path": "eight_schools_posterior",
+      "features": ["bayesupdate", "lawof", "hierarchical", "half_cauchy"]
+    }
+  ]
+}
