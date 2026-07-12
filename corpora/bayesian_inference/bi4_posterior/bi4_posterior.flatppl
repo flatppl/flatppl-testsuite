@@ -1,0 +1,13 @@
+flatppl_compat = "0.1"
+theta1 ~ Normal(0, 1)
+theta2 ~ Exponential(1)
+c = 5
+f_a = par -> c * par
+f_b = fn(abs(_) * _)
+a = f_a(theta2)
+b = f_b(theta1, theta2)
+obs ~ iid(Normal(mu = a, sigma = b), 10)
+joint_model = lawof(record(theta1 = theta1, theta2 = theta2, obs = obs))
+observed_data = [1.2, 3.4, 5.1, 2.8, 4.0, 3.7, 5.5, 2.1, 4.3, 3.9]
+posterior = restrict(joint_model, record(obs = observed_data))
+lp = logdensityof(posterior, record(theta1 = 0.5, theta2 = 1.0))

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "test_id": "post_eight_schools",
+  "model": "eight_schools_posterior.flatppl",
+  "reference_backend": "scipy 1.18",
+  "checks": [
+    {
+      "id": "logdensity_value",
+      "kind": "logdensity_value",
+      "binding": "lp",
+      "expected": -43.43563727714813,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}
