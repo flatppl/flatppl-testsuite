@@ -1,0 +1,1 @@
+lp = logdensityof(pushfwd(fn(log(_)), Exponential(1.0)), 0.5)

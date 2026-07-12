@@ -1,0 +1,2 @@
+m = relabel(iid(Normal(mu = 0.0, sigma = 1.0), 3), ["a", "b", "c"])
+lp = logdensityof(pushfwd(fn(get(_, ["a", "c"])), m), record(a = 0.1, c = 0.3))

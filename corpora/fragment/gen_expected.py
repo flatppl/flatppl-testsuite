@@ -13,7 +13,8 @@ second, different oracle picked to make the gate pass.
 
 Each fragment already ends in ``lp = logdensityof(m, <point>)`` at a FIXED
 point, so there is no theta scan here (unlike the HS3 corpus) — one scalar
-check per model, kind ``logdensity_value``, binding ``lp``.
+check per model, kind ``logdensity_value``, binding ``lp`` (``frag_densityof_normal``
+binds the plain, non-log density to ``d`` instead — see ``BINDING`` below).
 
 Not on the default test path (``pixi run test`` does not import this module).
 Run it manually to verify / regenerate:
@@ -46,6 +47,15 @@ FROZEN = {
     "frag_pushfwd_exp": -1.4066046182594198,
     "frag_kchain_bern": -1.6282033113610439,
     "frag_kchain_cat": -2.1367953170065803,
+    # The three below were originally frozen by running the det-js
+    # determiniser lowerings (densityof, pushfwd structural projection,
+    # pushfwd positive-support log-bijection) end-to-end and confirming
+    # against scipy to machine precision -- same freeze-then-reproduce role
+    # as the Julia-derived values above, just with a different original
+    # oracle run.
+    "frag_densityof_normal": 0.3520653267642995,
+    "frag_pushfwd_projection_iid": -1.8878770664093454,
+    "frag_pushfwd_log_exp": -1.1487212707001282,
 }
 
 # frag_broadcast_poisson, frag_normal_normal_marginal, and
@@ -173,6 +183,33 @@ def oracle_jointchain_chain3() -> float:
     )
 
 
+def oracle_densityof_normal() -> float:
+    """`d = densityof(lawof(record(a=draw(Normal(0,1)))), record(a=0.5))`;
+    `densityof` returns the density itself (not its log), so this is simply
+    `exp(norm.logpdf(0.5, 0, 1))`."""
+    return math.exp(norm.logpdf(0.5, 0, 1))
+
+
+def oracle_pushfwd_projection_iid() -> float:
+    """`m` is a 3-way iid `Normal(0,1)` relabelled to fields a/b/c;
+    `pushfwd(fn(get(_, ["a", "c"])), m)` is the structural projection onto
+    coordinates a and c, dropping b. Because the components are independent,
+    the marginal log-density at `record(a=0.1, c=0.3)` is just the sum of the
+    two kept coordinates' log-pdfs (the dropped b integrates to 1)."""
+    return norm.logpdf(0.1, 0, 1) + norm.logpdf(0.3, 0, 1)
+
+
+def oracle_pushfwd_log_exp() -> float:
+    """Y = log(X) for X ~ Exponential(rate=1): the pushforward log-density at
+    y=0.5 is `logpdf_Exp(exp(y)) + y` (change of variables, Jacobian
+    `|dx/dy| = exp(y)`); `scipy.stats.expon.logpdf(x, scale=1) = -x`, so this
+    is exactly `-exp(0.5) + 0.5`."""
+    from scipy.stats import expon
+
+    y = 0.5
+    return expon.logpdf(math.exp(y), scale=1.0) + y
+
+
 def oracle_jointchain_scalar() -> float:
     """Same maths as `oracle_jointchain_normal`, but the jointchain is built
     over a SCALAR variate (`lawof(a)` / `kernelof(Normal(...), a=a)`) rather
@@ -199,6 +236,10 @@ ORACLES = {
     "frag_jointchain_normal": ("jointchain_normal", oracle_jointchain_normal, "scipy.stats.norm"),
     "frag_jointchain_chain3": ("jointchain_chain3", oracle_jointchain_chain3, "scipy.stats.norm"),
     "frag_jointchain_scalar": ("jointchain_scalar", oracle_jointchain_scalar, "scipy.stats.norm"),
+    "frag_densityof_normal": ("densityof_normal", oracle_densityof_normal, "scipy 1.18"),
+    "frag_pushfwd_projection_iid": (
+        "pushfwd_projection_iid", oracle_pushfwd_projection_iid, "scipy 1.18"),
+    "frag_pushfwd_log_exp": ("pushfwd_log_exp", oracle_pushfwd_log_exp, "scipy 1.18"),
 }
 
 
@@ -209,7 +250,15 @@ def _json_expected(value: float) -> float | str:
     return value
 
 
+# Every fragment ends in `lp = logdensityof(...)` EXCEPT frag_densityof_normal,
+# whose model binds the plain (non-log) density to `d` (see its .flatppl).
+BINDING = {
+    "frag_densityof_normal": "d",
+}
+
+
 def gen(test_id: str, dirname: str, value: float, reference_backend: str) -> None:
+    binding = BINDING.get(test_id, "lp")
     doc = {
         "schema_version": 1,
         "test_id": test_id,
@@ -219,7 +268,7 @@ def gen(test_id: str, dirname: str, value: float, reference_backend: str) -> Non
             {
                 "id": "logdensity_value",
                 "kind": "logdensity_value",
-                "binding": "lp",
+                "binding": binding,
                 "expected": _json_expected(value),
                 "tolerance": {"atol": 1e-9, "rtol": 1e-9},
             }

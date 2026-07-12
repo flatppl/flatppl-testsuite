@@ -70,6 +70,21 @@
       "test_id": "frag_jointchain_scalar",
       "path": "jointchain_scalar",
       "features": ["jointchain", "kernelof"]
+    },
+    {
+      "test_id": "frag_densityof_normal",
+      "path": "densityof_normal",
+      "features": ["densityof"]
+    },
+    {
+      "test_id": "frag_pushfwd_projection_iid",
+      "path": "pushfwd_projection_iid",
+      "features": ["pushfwd", "projection", "marginal"]
+    },
+    {
+      "test_id": "frag_pushfwd_log_exp",
+      "path": "pushfwd_log_exp",
+      "features": ["pushfwd", "bijection", "log", "positive_support"]
     }
   ]
 }
