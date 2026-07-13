@@ -65,6 +65,10 @@ sample = "python corpora/sample/gate.py"
 # score, no convert-time measure algebra) and print a
 # test_id -> PASS/SKIP/MISMATCH table.
 bayesian_inference = "python corpora/bayesian_inference/gate.py"
+# Run the examples corpus under the det-js engine (determinize a constructed
+# posterior query -> score vs a frozen oracle, or assert refusal) and print a
+# test_id::check -> LOWERS/REFUSE/MISMATCH table.
+examples = "python corpora/examples/gate.py"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
