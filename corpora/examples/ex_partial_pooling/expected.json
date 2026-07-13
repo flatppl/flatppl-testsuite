@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "test_id": "ex_partial_pooling",
+  "model": "partial-pooling.flatppl",
+  "reference_backend": "scipy 1.18",
+  "checks": [
+    {
+      "id": "theta_0",
+      "kind": "logdensity_value",
+      "index": 0,
+      "binding": "posterior",
+      "expected": -80.35566358637037,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    },
+    {
+      "id": "theta_1",
+      "kind": "logdensity_value",
+      "index": 1,
+      "binding": "posterior",
+      "expected": -32.17783165600062,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "test_id": "ex_best_estimation",
+  "model": "best-estimation.flatppl",
+  "reference_backend": "scipy 1.18",
+  "checks": [
+    {
+      "id": "theta_0",
+      "kind": "logdensity_value",
+      "index": 0,
+      "binding": "posterior",
+      "expected": -53.82562036678366,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    },
+    {
+      "id": "theta_1",
+      "kind": "logdensity_value",
+      "index": 1,
+      "binding": "posterior",
+      "expected": -50.908393725676376,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}

@@ -26,4 +26,5 @@ def get_suites(names: set[str] | None = None) -> list["Suite"]:
     import flatppl_testsuite.suites.fragment_gate  # noqa: F401  (ensure registration)
     import flatppl_testsuite.suites.sample_gate  # noqa: F401  (ensure registration)
     import flatppl_testsuite.suites.bayesian_inference_gate  # noqa: F401  (ensure registration)
+    import flatppl_testsuite.suites.examples_gate  # noqa: F401  (ensure registration)
     return [s for n, s in REGISTRY.items() if names is None or n in names]

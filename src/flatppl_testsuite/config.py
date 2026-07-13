@@ -21,6 +21,9 @@ class Config:
     flatppl_bin: Path = Path(os.environ.get("FLATPPL_BIN", _REPO_ROOT / ".pixi-bin" / "bin" / "flatppl"))
     # The flatppl-js checkout whose packages/engine is loaded by the scorer.
     flatppl_js_dir: Path = Path(os.environ.get("FLATPPL_JS_DIR", _PARENT / "flatppl-js"))
+    # The flatppl-examples checkout; its models live at
+    # `examples_dir / "examples" / "<file>.flatppl"` (see corpora/examples/).
+    examples_dir: Path = Path(os.environ.get("FLATPPL_EXAMPLES_DIR", _PARENT / "flatppl-examples"))
     # Node 24, provided by pixi on PATH.
     node_bin: str = os.environ.get("NODE_BIN", "node")
     # Generic JS scorer for any FlatPPL model; used by scoring/flatppl_engine.py.

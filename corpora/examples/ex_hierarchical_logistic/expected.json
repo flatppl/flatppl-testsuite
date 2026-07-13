@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "test_id": "ex_hierarchical_logistic",
+  "model": "hierarchical-logistic.flatppl",
+  "reference_backend": "scipy 1.18",
+  "checks": [
+    {
+      "id": "theta_0",
+      "kind": "logdensity_value",
+      "index": 0,
+      "binding": "posterior",
+      "expected": -10.770987544664301,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    },
+    {
+      "id": "theta_1",
+      "kind": "logdensity_value",
+      "index": 1,
+      "binding": "posterior",
+      "expected": -11.164337828046966,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}
