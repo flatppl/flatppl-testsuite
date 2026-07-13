@@ -15,8 +15,25 @@ An entry's `status` says what should happen: `"lowers"` means the query is
 expected to determinize and score, compared to a frozen INDEPENDENT oracle;
 `"refuses"` means the determinizer is expected to reject the query (exit 3,
 `DeterminizeRefused`), with `reason` naming a required substring of the
-refusal message. `minimal` (no `posterior` binding) is excluded from the
-manifest entirely — see its top-level `excluded` list.
+refusal message (the whole `reason` string must be a substring, so any
+human-facing categorization lives in the sibling `category`/`note` fields the
+Suite ignores, not in `reason`). Models that carry no scoreable `posterior`
+query are excluded from the manifest entirely — see the top-level `excluded`
+list.
+
+## Excluded models
+
+The top-level `excluded` list names the flatppl-examples models this corpus
+does not score, with the reason:
+
+| Model | Why excluded |
+|-------|--------------|
+| `minimal` | No `posterior` binding — ends in a kernel application, no query to construct. |
+| `aggregates` | No `posterior` binding — a purely deterministic showcase of the `aggregate` array primitive (no random variables). |
+| `bayesian_inference_common` | Module include (loaded by variants 3/4), not a standalone model — no `posterior`. |
+| `bayesian_inference_priors` | Module include (loaded by `bayesian_inference_common`), not a standalone model — no `posterior`. |
+| `bayesian_inference_3` | Uses `load_module(...)`. `DetJsScoreEngine` determinizes a temp-file COPY of the appended source in a system temp dir, and `load_module` resolves relative to that input file's directory — so the sibling module cannot be found and the model is unscoreable by this harness as written. (With the module co-located the determiniser still REFUSES: a `~` draw from a module-namespaced distribution — `common.theta1_dist` — is not resolved to a built-in constructor, unlike a local alias. Determiniser gap; see the sweep notes.) |
+| `bayesian_inference_4` | Same as `bayesian_inference_3` (`load_module` unresolvable from the temp dir; module-namespaced draw distribution refuse). |
 
 ## Contents
 
@@ -46,8 +63,14 @@ pixi run python corpora/examples/gen_expected.py     # regenerate + verify expec
 
 ## Status
 
-Scaffold only (Task 1): `manifest.json` has zero entries, so `pixi run
-examples` prints an empty table and exits 0, and the pytest parametrization
-over manifest entries is empty. Task 2 populates the manifest (and adds
-`<test_id>/expected.json` for each `"lowers"` entry); Task 3 fills in
-`gen_expected.py`'s oracle functions.
+Manifest populated (Task 2): 14 scored entries — 11 `"lowers"`, 3
+`"refuses"` — plus 6 `excluded` models. The `"refuses"` entries verify
+cleanly through the gate today (each raises `DeterminizeRefused` with its
+`reason` substring). The `"lowers"` entries have **no `expected.json` yet**
+(Task 3), and the Task-1 Suite cannot represent a "lowers, oracle-pending"
+entry: `ExamplesGateSuite.run` reads each `"lowers"` entry's
+`<test_id>/expected.json` unconditionally, so `pixi run examples` currently
+raises `FileNotFoundError` on the first `"lowers"` entry until Task 3 freezes
+the oracles (or the Suite is taught to skip an entry whose `expected.json` is
+absent). Task 3 fills in `gen_expected.py`'s per-model oracle functions and
+writes the `expected.json` files.
