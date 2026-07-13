@@ -4,15 +4,18 @@ Every entry in `corpora/examples/manifest.json` names a flatppl-examples
 model, a binding to query (typically `posterior`), and a theta grid; this
 test builds `logdensityof(binding, theta_i)` for each grid point via the
 convert-free det-js path (`flatppl determinize` -> `score_flatpdl.cjs`) and
-either compares it to a frozen oracle (`status: "lowers"`) or asserts the
-determinizer refuses it (`status: "refuses"`) — see
+either compares it to a frozen oracle (`status: "lowers"`), asserts the
+determinizer refuses it (`status: "refuses"`), or — for a query that DOES
+determinize but crashes at the score stage on a named, documented
+engine/determiniser gap — asserts just the lowering half and checks the
+crash matches the documented one (`status: "unscoreable"`) — see
 `flatppl_testsuite.suites.examples_gate` for the full schema and outcome
-mapping.
-
-Scaffold only (Task 1): `manifest.json` has zero entries, so the
-parametrization below is empty (no-op — an empty parametrize collects zero
-tests, not a failure) and `test_all_examples_are_gated` is a placeholder.
-Task 2 populates the manifest.
+mapping. All three statuses are represented in `ExamplesGateSuite.run`'s
+results by `CheckResult.status`, so `test_example_numeric_check_passes`
+below needs no per-status branching: a documented `unscoreable` crash is
+`"passed"`, exactly like a matched `"lowers"` oracle or an expected
+`"refuses"` refusal — only a regression or an unexpected change reports
+`"failed"`.
 """
 from __future__ import annotations
 
@@ -41,6 +44,28 @@ pytestmark = pytest.mark.skipif(
 _MANIFEST = json.loads(EXAMPLES_MANIFEST.read_text())
 _TEST_IDS = [ex["test_id"] for ex in _MANIFEST.get("examples", [])]
 
+# The full current manifest roster (7 "lowers", 4 "unscoreable", 3
+# "refuses") — a literal set, not derived from `_MANIFEST` itself, so
+# `test_all_examples_are_gated` actually guards against a flatppl-examples
+# posterior silently dropping out of (or an extra one sneaking into) the
+# manifest, rather than trivially checking the manifest against itself.
+_EXPECTED_TEST_IDS = {
+    "ex_bayesian_inference_1",
+    "ex_bayesian_inference_2",
+    "ex_best_estimation",
+    "ex_capture_recapture",
+    "ex_eight_schools",
+    "ex_gamma_reparam",
+    "ex_hierarchical_logistic",
+    "ex_partial_pooling",
+    "ex_poisson_glm_link",
+    "ex_poisson_model",
+    "ex_rasch_1pl",
+    "ex_dissimilar_mixture",
+    "ex_linear_regression",
+    "ex_zero_inflated_binomial",
+}
+
 
 @pytest.mark.parametrize("test_id", _TEST_IDS)
 def test_example_numeric_check_passes(test_id):
@@ -52,14 +77,7 @@ def test_example_numeric_check_passes(test_id):
 
 def test_all_examples_are_gated():
     """Guard against a flatppl-examples posterior silently dropping out of
-    the manifest.
-
-    The manifest is empty until Task 2 populates it with every
-    non-excluded flatppl-examples model that defines a `posterior` binding
-    — there is no roster to check yet, so this just documents the
-    intent and stays green on the empty manifest.
-    """
+    the manifest (or an extra, un-triaged one sneaking in)."""
     if not _TEST_IDS:
         pytest.skip("manifest.json has no examples yet (Task 2 populates it)")
-    ids = {ex["test_id"] for ex in _MANIFEST["examples"]}
-    assert ids == set(_TEST_IDS)
+    assert set(_TEST_IDS) == _EXPECTED_TEST_IDS

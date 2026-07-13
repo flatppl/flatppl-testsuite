@@ -78,7 +78,11 @@
           "nu": 29.0
         }
       ],
-      "status": "lowers",
+      "status": "unscoreable",
+      "reason": "no derivation for '__score__'",
+      "category": "engine-gap",
+      "note": "flatppl determinize lowers this cleanly (the emitted flatpdl is a plain builtin_logdensityof(Uniform, record(support = interval(a, b)), x) call for the sigma1/sigma2 priors, structurally correct) but flatppl-js's fixed-value evaluator (fixed-eval.ts) marks that Uniform-interval call op 'not evaluable in sampler context' and returns UNSUPPORTED; materialiser.ts (around the buildDerivations fallback) then reports the generic 'no derivation' for '__score__' instead of that reason. A flatppl-js engine gap, not a determiniser gap (Buffy #248). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
+      "pending_oracle": true,
       "theta_source": "synthesized (canonical valid point)",
       "features": [
         "locscale",
@@ -100,7 +104,11 @@
           "rcp": 0.4
         }
       ],
-      "status": "lowers",
+      "status": "unscoreable",
+      "reason": "no derivation for '__score__'",
+      "category": "engine-gap",
+      "note": "flatppl determinize lowers this cleanly (the emitted flatpdl is a plain builtin_logdensityof(Uniform, record(support = interval(0, rcp_max)), x) call for the rcp prior, structurally correct) but flatppl-js's fixed-value evaluator (fixed-eval.ts) marks that Uniform-interval call op 'not evaluable in sampler context' and returns UNSUPPORTED; materialiser.ts then reports the generic 'no derivation' for '__score__' instead of that reason. A flatppl-js engine gap, not a determiniser gap (Buffy #248). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
+      "pending_oracle": true,
       "theta_source": "synthesized (rcp in interval(0, 0.5))",
       "features": [
         "Uniform-interval",
@@ -167,7 +175,11 @@
           "sigma": 2.0
         }
       ],
-      "status": "lowers",
+      "status": "unscoreable",
+      "reason": "no derivation for '__score__'",
+      "category": "determiniser-gap",
+      "note": "flatppl determinize succeeds but the emitted flatpdl is malformed: gamma_shape_rate is a multi-output function (its body is record(shape = ..., rate = ...)) called inline as Gamma(...)'s shape argument; the auto-splat that should distribute a multi-output call's record fields across the enclosing record's keyword arguments doesn't fire here, so the emitted record(shape = gamma_shape_rate(mu, sigma)) leaves 'shape' holding the whole two-field record and 'rate' is dropped entirely -- flatppl-js can't derive '__score__' from it. Determiniser gap (Buffy #247). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
+      "pending_oracle": true,
       "theta_source": "synthesized (canonical valid point)",
       "features": [
         "multi-output-fn",
@@ -247,7 +259,11 @@
           ]
         }
       ],
-      "status": "lowers",
+      "status": "unscoreable",
+      "reason": "no derivation for '__score__'",
+      "category": "engine-gap",
+      "note": "flatppl determinize lowers this cleanly (the emitted flatpdl is a plain builtin_logdensityof(Uniform, record(support = interval(0.0, 1.0)), x) call for the phi prior, structurally correct) but flatppl-js's fixed-value evaluator (fixed-eval.ts) marks that Uniform-interval call op 'not evaluable in sampler context' and returns UNSUPPORTED; materialiser.ts then reports the generic 'no derivation' for '__score__' instead of that reason. A flatppl-js engine gap, not a determiniser gap (Buffy #248). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
+      "pending_oracle": true,
       "theta_source": "synthesized (unit-interval rates over N=8)",
       "features": [
         "iid",
