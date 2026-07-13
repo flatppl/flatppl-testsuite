@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "test_id": "ex_rasch_1pl",
+  "model": "rasch-1pl.flatppl",
+  "reference_backend": "scipy 1.18",
+  "checks": [
+    {
+      "id": "theta_0",
+      "kind": "logdensity_value",
+      "index": 0,
+      "binding": "posterior",
+      "expected": -25.782576383014415,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    },
+    {
+      "id": "theta_1",
+      "kind": "logdensity_value",
+      "index": 1,
+      "binding": "posterior",
+      "expected": -30.926401673418287,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}

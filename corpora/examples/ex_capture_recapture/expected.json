@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "test_id": "ex_capture_recapture",
+  "model": "capture-recapture.flatppl",
+  "reference_backend": "scipy 1.18",
+  "checks": [
+    {
+      "id": "theta_0",
+      "kind": "logdensity_value",
+      "index": 0,
+      "binding": "posterior",
+      "expected": -1.1077782815739887,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    },
+    {
+      "id": "theta_1",
+      "kind": "logdensity_value",
+      "index": 1,
+      "binding": "posterior",
+      "expected": -0.9891956484874084,
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 1e-09
+      }
+    }
+  ]
+}
