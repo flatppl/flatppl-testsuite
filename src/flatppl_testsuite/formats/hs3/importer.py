@@ -5,8 +5,10 @@ Classifies the converter's exit into one of:
   - SkipUnimplemented: the converter refused an unimplemented HS3 construct;
     the harness reports this as SKIP, naming the construct.
 
-Unimplemented-type detection is based on the observed converter stderr:
+Unimplemented-type detection is based on the observed converter stderr prefixes:
     flatppl: hs3: unsupported HS3 distribution type: <typename>
+    flatppl: hs3: unsupported histfactory modifier: <typename>
+    flatppl: hs3: unimplemented HS3 construct: <description>
 
 Also provides Stage 2: assemble a scoreable FlatPPL source from converter
 output + a check (observations, assemble).
@@ -24,12 +26,21 @@ from pathlib import Path
 from ...config import CONFIG
 from ..base import Importer
 
-# Substring that identifies an out-of-scope HS3 construct in the converter's
-# stderr (observed from flatppl convert on rf207_comptools/hs3.json).
-_UNIMPL_MARKER = "unsupported HS3 distribution type:"
+# Stderr prefixes that identify a NOT-YET-IMPLEMENTED HS3 construct (a clean
+# SKIP). The converter's error taxonomy guarantees these never fire for an
+# invalid document — `unsupported HS3 construct:` (Error::Unsupported) means
+# malformed input and deliberately stays a hard failure.
+_UNIMPL_MARKERS = (
+    "unsupported HS3 distribution type:",   # Error::UnknownDistType
+    "unsupported histfactory modifier:",    # Error::UnknownModifier
+    "unimplemented HS3 construct:",         # Error::Unimplemented
+)
 
-# Captures the HS3 type name following the marker.
-_TYPE_RE = re.compile(r"unsupported HS3 distribution type:\s+(\S+)")
+# Captures the token following any marker (a type name for the first two; the
+# first word of the construct description for the third — a label, not a parse).
+_TYPE_RE = re.compile(
+    r"(?:unsupported HS3 distribution type|unsupported histfactory modifier|"
+    r"unimplemented HS3 construct):\s+(\S+)")
 
 
 @dataclass
@@ -38,6 +49,17 @@ class SkipUnimplemented(Exception):
 
     hs3_type: str
     detail: str = ""
+
+
+def classify_unimplemented(stderr: str) -> SkipUnimplemented | None:
+    """Return a SkipUnimplemented for a not-yet-implemented construct, else None."""
+    if any(marker in stderr for marker in _UNIMPL_MARKERS):
+        m = _TYPE_RE.search(stderr)
+        return SkipUnimplemented(
+            hs3_type=m.group(1) if m else "unknown",
+            detail=stderr.strip(),
+        )
+    return None
 
 
 def convert(hs3_json: Path) -> str:
@@ -54,12 +76,9 @@ def convert(hs3_json: Path) -> str:
             capture_output=True, text=True)
         if proc.returncode != 0:
             stderr = proc.stderr
-            if _UNIMPL_MARKER in stderr:
-                m = _TYPE_RE.search(stderr)
-                raise SkipUnimplemented(
-                    hs3_type=m.group(1) if m else "unknown",
-                    detail=stderr.strip(),
-                )
+            skip = classify_unimplemented(stderr)
+            if skip is not None:
+                raise skip
             raise RuntimeError(f"convert failed: {stderr.strip()}")
         # The converter can emit an `error[...]`-level diagnostic (e.g. an
         # unresolved reference) yet still exit 0 and write a file. That file is
