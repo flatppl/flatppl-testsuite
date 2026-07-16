@@ -78,11 +78,8 @@
           "nu": 29.0
         }
       ],
-      "status": "unscoreable",
-      "reason": "no derivation for '__score__'",
-      "category": "engine-gap",
-      "note": "flatppl determinize lowers this cleanly (the emitted flatpdl is a plain builtin_logdensityof(Uniform, record(support = interval(a, b)), x) call for the sigma1/sigma2 priors, structurally correct) but flatppl-js's fixed-value evaluator (fixed-eval.ts) marks that Uniform-interval call op 'not evaluable in sampler context' and returns UNSUPPORTED; materialiser.ts (around the buildDerivations fallback) then reports the generic 'no derivation' for '__score__' instead of that reason. A flatppl-js engine gap, not a determiniser gap (Buffy #248). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
-      "pending_oracle": true,
+      "status": "lowers",
+      "note": "Previously unscoreable (flatppl-js engine gap, Buffy #248: fixed-eval.ts refused the Uniform-interval builtin_logdensityof call as 'not evaluable in sampler context'); fixed-eval.ts now evaluates it and det-js matches the frozen INDEPENDENT scipy oracle.",
       "theta_source": "synthesized (canonical valid point)",
       "features": [
         "locscale",
@@ -104,11 +101,8 @@
           "rcp": 0.4
         }
       ],
-      "status": "unscoreable",
-      "reason": "no derivation for '__score__'",
-      "category": "engine-gap",
-      "note": "flatppl determinize lowers this cleanly (the emitted flatpdl is a plain builtin_logdensityof(Uniform, record(support = interval(0, rcp_max)), x) call for the rcp prior, structurally correct) but flatppl-js's fixed-value evaluator (fixed-eval.ts) marks that Uniform-interval call op 'not evaluable in sampler context' and returns UNSUPPORTED; materialiser.ts then reports the generic 'no derivation' for '__score__' instead of that reason. A flatppl-js engine gap, not a determiniser gap (Buffy #248). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
-      "pending_oracle": true,
+      "status": "lowers",
+      "note": "Previously unscoreable (flatppl-js engine gap, Buffy #248: fixed-eval.ts refused the Uniform-interval builtin_logdensityof call as 'not evaluable in sampler context'); fixed-eval.ts now evaluates it and det-js matches the frozen INDEPENDENT scipy oracle.",
       "theta_source": "synthesized (rcp in interval(0, 0.5))",
       "features": [
         "Uniform-interval",
@@ -175,11 +169,8 @@
           "sigma": 2.0
         }
       ],
-      "status": "unscoreable",
-      "reason": "no derivation for '__score__'",
-      "category": "determiniser-gap",
-      "note": "flatppl determinize succeeds but the emitted flatpdl is malformed: gamma_shape_rate is a multi-output function (its body is record(shape = ..., rate = ...)) called inline as Gamma(...)'s shape argument; the auto-splat that should distribute a multi-output call's record fields across the enclosing record's keyword arguments doesn't fire here, so the emitted record(shape = gamma_shape_rate(mu, sigma)) leaves 'shape' holding the whole two-field record and 'rate' is dropped entirely -- flatppl-js can't derive '__score__' from it. Determiniser gap (Buffy #247). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
-      "pending_oracle": true,
+      "status": "lowers",
+      "note": "Previously unscoreable (determiniser gap, Buffy #247: auto-splat didn't distribute a multi-output call's record fields into the enclosing record, so gamma_shape_rate(mu, sigma) left 'rate' dropped); the determiniser now splats it correctly and det-js matches the frozen INDEPENDENT scipy oracle.",
       "theta_source": "synthesized (canonical valid point)",
       "features": [
         "multi-output-fn",
@@ -259,11 +250,8 @@
           ]
         }
       ],
-      "status": "unscoreable",
-      "reason": "no derivation for '__score__'",
-      "category": "engine-gap",
-      "note": "flatppl determinize lowers this cleanly (the emitted flatpdl is a plain builtin_logdensityof(Uniform, record(support = interval(0.0, 1.0)), x) call for the phi prior, structurally correct) but flatppl-js's fixed-value evaluator (fixed-eval.ts) marks that Uniform-interval call op 'not evaluable in sampler context' and returns UNSUPPORTED; materialiser.ts then reports the generic 'no derivation' for '__score__' instead of that reason. A flatppl-js engine gap, not a determiniser gap (Buffy #248). expected.json is a frozen INDEPENDENT-oracle value, unused until the gap is fixed and this flips back to \"lowers\".",
-      "pending_oracle": true,
+      "status": "lowers",
+      "note": "Previously unscoreable (flatppl-js engine gap, Buffy #248: fixed-eval.ts refused the Uniform-interval builtin_logdensityof call as 'not evaluable in sampler context'); fixed-eval.ts now evaluates it and det-js matches the frozen INDEPENDENT scipy oracle.",
       "theta_source": "synthesized (unit-interval rates over N=8)",
       "features": [
         "iid",
@@ -384,10 +372,8 @@
           "rate": 1.5
         }
       ],
-      "status": "refuses",
-      "reason": "field is not a draw or a reference to a draw",
-      "category": "determiniser-gap",
-      "note": "determiniser gap, NOT a spec-correct refuse: the record-of-draws prior path (resolve_component_draw) rejects a bijection-transformed draw field (sigma = sqrt(sigma2)) as 'not a draw' before reaching the bijection machinery. The machinery exists (pushfwd(fn(pow(_,0.5)),M) lowers via derive_pow), but (a) bare `sqrt` is not aliased to pow(_,0.5) in invert.rs::bare_bijection (only exp/log), and (b) the prior-record density path never invokes derive_bijection for a transformed-draw field. linear-regression additionally has a hierarchical prior (alpha ~ Normal(0, sigma*3) depends on sigma), needing dependent-prior handling. Tracked as a determiniser follow-up (Buffy #10).",
+      "status": "lowers",
+      "note": "Previously refuses (determiniser gap, Buffy #10: bare `sqrt` wasn't aliased to pow(_,0.5) in invert.rs::bare_bijection, and the record-of-draws prior path never invoked derive_bijection for a transformed-draw field (sigma = sqrt(sigma2))); both are fixed and det-js now matches the frozen INDEPENDENT scipy oracle (mixture logsumexp + sqrt-pushforward Jacobian).",
       "theta_source": "synthesized (canonical valid point)",
       "features": [
         "superpose-mixture",
@@ -414,10 +400,8 @@
           "sigma": 0.5
         }
       ],
-      "status": "refuses",
-      "reason": "field is not a draw or a reference to a draw",
-      "category": "determiniser-gap",
-      "note": "determiniser gap, NOT a spec-correct refuse: the record-of-draws prior path (resolve_component_draw) rejects a bijection-transformed draw field (sigma = sqrt(sigma2)) as 'not a draw' before reaching the bijection machinery. The machinery exists (pushfwd(fn(pow(_,0.5)),M) lowers via derive_pow), but (a) bare `sqrt` is not aliased to pow(_,0.5) in invert.rs::bare_bijection (only exp/log), and (b) the prior-record density path never invokes derive_bijection for a transformed-draw field. linear-regression additionally has a hierarchical prior (alpha ~ Normal(0, sigma*3) depends on sigma), needing dependent-prior handling. Tracked as a determiniser follow-up (Buffy #10).",
+      "status": "lowers",
+      "note": "Previously refuses (determiniser gap, Buffy #10: same bare-sqrt/transformed-draw-field gap as dissimilar-mixture, plus dependent-prior handling for alpha,beta ~ Normal(0, sigma*3)); both are fixed and det-js now matches the frozen INDEPENDENT scipy oracle.",
       "theta_source": "preset (L_input) + synthesized",
       "features": [
         "deterministic-reparam-field(sqrt)",
@@ -440,10 +424,8 @@
           "psi": 0.7
         }
       ],
-      "status": "refuses",
-      "reason": "primitive measure must be a built-in constructor call with well-formed positional or keyword arguments",
-      "category": "determiniser-gap",
-      "note": "Dirac(0) (positional) is refused; the keyword form Dirac(value = 0) lowers, so positional Dirac is unmapped.",
+      "status": "lowers",
+      "note": "Previously refuses (determiniser gap: positional Dirac(0) was unmapped, only the keyword form Dirac(value = 0) lowered); positional Dirac now lowers and det-js matches the frozen INDEPENDENT scipy oracle.",
       "theta_source": "synthesized (canonical valid point)",
       "features": [
         "superpose-mixture",
