@@ -44,8 +44,8 @@ pytestmark = pytest.mark.skipif(
 _MANIFEST = json.loads(EXAMPLES_MANIFEST.read_text())
 _TEST_IDS = [ex["test_id"] for ex in _MANIFEST.get("examples", [])]
 
-# The full current manifest roster (7 "lowers", 4 "unscoreable", 3
-# "refuses") — a literal set, not derived from `_MANIFEST` itself, so
+# The full current manifest roster (all 14 "lowers") — a literal set, not
+# derived from `_MANIFEST` itself, so
 # `test_all_examples_are_gated` actually guards against a flatppl-examples
 # posterior silently dropping out of (or an extra one sneaking into) the
 # manifest, rather than trivially checking the manifest against itself.
