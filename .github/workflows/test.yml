@@ -51,3 +51,16 @@ jobs:
       # independence. Separate env (python 3.12 / enzyme pins), so a separate step.
       - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
         run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo shlo
+
+      # Examples corpus under StableHLO: score each flatppl-examples posterior
+      # via a `load_module` query module, execute under Enzyme-JAX, compare to
+      # the frozen scipy oracle. Needs the flatppl-examples checkout (unlike the
+      # in-repo stablehlo corpus above) — clone it blobless and point the gate
+      # at it via FLATPPL_EXAMPLES_DIR. Placed AFTER `pixi run test` so that
+      # pytest path is unchanged (its det-js examples suite still skips when the
+      # checkout is absent at that point).
+      - name: Fetch flatppl-examples for the StableHLO examples gate
+        run: git clone --filter=blob:none https://github.com/flatppl/flatppl-examples "$HOME/flatppl-examples"
+
+      - name: Run StableHLO examples posterior-scoring gate (Enzyme-JAX)
+        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" FLATPPL_EXAMPLES_DIR="$HOME/flatppl-examples" PYTHONPATH="$PWD/src" pixi run -e stablehlo examples-shlo

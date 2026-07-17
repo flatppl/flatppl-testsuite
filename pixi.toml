@@ -118,6 +118,12 @@ pytest = ">=8"
 #   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo shlo
 [feature.stablehlo.tasks]
 shlo = "python corpora/stablehlo/gate.py"
+# Score every flatppl-examples posterior under StableHLO via a `load_module`
+# query module, execute under Enzyme-JAX, compare to the frozen scipy oracle.
+# Same FLATPPL_BIN requirement as `shlo`; resolves the flatppl-examples checkout
+# from FLATPPL_EXAMPLES_DIR (else the sibling `../flatppl-examples`):
+#   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo examples-shlo
+examples-shlo = "python corpora/examples/gate_stablehlo.py"
 
 [environments]
 root = ["root"]
