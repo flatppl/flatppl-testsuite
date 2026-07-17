@@ -241,6 +241,11 @@ def main() -> int:
     if not executor.executor_available():
         print("SKIP: jax + enzyme_ad not importable in this environment.")
         return 0
+    ex_root = examples_dir() / "examples"
+    if not ex_root.is_dir():
+        print(f"SKIP: no flatppl-examples checkout at {ex_root} "
+              "(set FLATPPL_EXAMPLES_DIR, or clone the sibling ../flatppl-examples).")
+        return 0
     results = run()
     print(render(results))
     # Coverage report: only a real MISMATCH (a number outside tolerance, or an
