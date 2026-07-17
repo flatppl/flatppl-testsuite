@@ -102,16 +102,22 @@ EXPECTED: dict[str, tuple[str, str | None]] = {
     "ex_bayesian_inference_2": ("scores", None),
     "ex_best_estimation": ("scores", None),
     "ex_capture_recapture": ("scores", None),
-    "ex_eight_schools": ("refuses", "builtin_touniform"),
+    "ex_eight_schools": ("scores", None),
     "ex_gamma_reparam": ("scores", None),
     "ex_hierarchical_logistic": ("scores", None),
     "ex_partial_pooling": ("scores", None),
-    "ex_poisson_glm_link": ("refuses", "callable must be a bare builtin name"),
+    "ex_poisson_glm_link": ("scores", None),
     "ex_poisson_model": ("scores", None),
     "ex_rasch_1pl": ("scores", None),
-    "ex_dissimilar_mixture": ("refuses", "builtin_touniform"),
+    # Emits under StableHLO (touniform now lowers) but executes to nan: a
+    # `superpose` mixand is evaluated off its own support and a positive-support
+    # builder returns nan there (Buffy #365). A documented downstream gap, not a
+    # refusal and not yet a match — reported XFAIL (fails the gate only if it
+    # regresses to an emit refusal, or if #365 is fixed and it starts matching,
+    # either of which is a re-triage signal).
+    "ex_dissimilar_mixture": ("known_gap", "#365 superpose mixand nan off-support"),
     "ex_linear_regression": ("scores", None),
-    "ex_zero_inflated_binomial": ("refuses", "no lowering for distribution 'Dirac'"),
+    "ex_zero_inflated_binomial": ("scores", None),
 }
 
 # Per-field FlatPPL domain expression, keyed by test_id then theta field name.
@@ -318,6 +324,9 @@ def _check_one(test_id, check_id, src, fields, theta_i, exp, expect, reason) -> 
                     return CheckResult(test_id, check_id, "failed", "REFUSE",
                                        f"refused, but reason changed: want {reason!r} in {detail!r}")
                 return CheckResult(test_id, check_id, "passed", "REFUSE", detail)
+            if expect == "known_gap":
+                return CheckResult(test_id, check_id, "failed", "REGRESSED",
+                                   f"known gap ({reason}) expected to emit but emit refused: {detail}")
             return CheckResult(test_id, check_id, "failed", "REGRESSED",
                                f"expected to score but emit refused: {detail}")
         return CheckResult(test_id, check_id, "failed", "ERROR",
@@ -334,6 +343,17 @@ def _check_one(test_id, check_id, src, fields, theta_i, exp, expect, reason) -> 
         return CheckResult(test_id, check_id, "failed", "IMPROVED",
                            f"expected to refuse ({reason!r}) but scored {got:.6f} — "
                            f"promote to 'scores' and check against the oracle")
+    if expect == "known_gap":
+        # A documented downstream defect: emits but does not match (typically
+        # nan). XFAIL — expected. If it now MATCHES, the gap is fixed → fail so
+        # it gets promoted to "scores" and its numbers start being checked.
+        tol = VALUE_ATOL + VALUE_RTOL * abs(exp)
+        if math.isnan(got) or abs(got - exp) > tol:
+            return CheckResult(test_id, check_id, "passed", "XFAIL",
+                               f"known gap ({reason}): got {got} vs {exp:.6f}")
+        return CheckResult(test_id, check_id, "failed", "FIXED",
+                           f"known gap ({reason}) now matches (got {got:.6f}) — "
+                           f"promote to 'scores'")
     d = abs(got - exp)
     tol = VALUE_ATOL + VALUE_RTOL * abs(exp)
     if d <= tol or (math.isinf(exp) and got == exp):
@@ -392,11 +412,12 @@ def render(results: list[CheckResult]) -> str:
         lines.append(f"  {label:<{width}}  {r.outcome:<{ow}}  {r.message}")
     n_scores = sum(r.outcome == "SCORES" for r in results)
     n_refuse = sum(r.outcome == "REFUSE" and r.status == "passed" for r in results)
+    n_xfail = sum(r.outcome == "XFAIL" for r in results)
     n_fail = sum(r.status == "failed" for r in results)
     lines += [
         "",
-        f"  {n_scores} SCORES, {n_refuse} REFUSE (expected), {n_fail} FAIL "
-        f"(of {len(results)} checks)",
+        f"  {n_scores} SCORES, {n_refuse} REFUSE (expected), {n_xfail} XFAIL "
+        f"(known gap), {n_fail} FAIL (of {len(results)} checks)",
     ]
     return "\n".join(lines)
 
