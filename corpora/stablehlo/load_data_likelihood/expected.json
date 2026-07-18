@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "key": "load_data_likelihood",
+  "distribution": "iid/broadcast Normal likelihood over a load_data observed vector (means = alpha .+ beta .* x_data; y ~ Normal.(means, sigma))",
+  "model": "load_data_likelihood.flatppl",
+  "reference_backend": "scipy",
+  "scipy_note": "sum(scipy.stats.norm.logpdf(y_data, loc=alpha + beta*x_data, scale=sigma))",
+  "params": {
+    "alpha": 0.55,
+    "beta": 2.34,
+    "sigma": 0.11,
+    "x_data": [
+      1.1,
+      1.5,
+      1.3,
+      1.4
+    ],
+    "y_data": [
+      3.2,
+      4.1,
+      3.4,
+      3.9
+    ]
+  },
+  "variate": [
+    3.2,
+    4.1,
+    3.4,
+    3.9
+  ],
+  "logdensity_value": 3.098965354650935,
+  "gradient": {},
+  "grad_params": [],
+  "tolerance": {
+    "value_atol": 0.0001,
+    "grad_atol": 0.001
+  }
+}

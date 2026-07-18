@@ -423,6 +423,39 @@
       "fanout_n": 200,
       "fanout_dim": null,
       "notes": "Gamma(shape=psi, rate=psi/mu) mixed into Poisson (mean mu); fan-out exercises the batched Gamma while feeding the batched Poisson while"
+    },
+    {
+      "key": "load_data_likelihood",
+      "distribution": "iid/broadcast Normal likelihood over a load_data observed vector (means = alpha .+ beta .* x_data; y ~ Normal.(means, sigma))",
+      "params": {
+        "alpha": 0.55,
+        "beta": 2.34,
+        "sigma": 0.11,
+        "x_data": [
+          1.1,
+          1.5,
+          1.3,
+          1.4
+        ],
+        "y_data": [
+          3.2,
+          4.1,
+          3.4,
+          3.9
+        ]
+      },
+      "variate": "y_data = [3.2, 4.1, 3.4, 3.9] (via load_data(\"y.csv\"))",
+      "scipy_oracle": "sum(scipy.stats.norm.logpdf(y_data, loc=alpha + beta*x_data, scale=sigma))",
+      "modes": [
+        "logdensity"
+      ],
+      "grad_params": [],
+      "sample_distributional": false,
+      "sample_discrete": false,
+      "independence": null,
+      "fanout_n": null,
+      "fanout_dim": null,
+      "notes": "broadcast iid Normal likelihood scored via the inputs/outputs StableHLO ABI with BOTH x_data and y_data as runtime tensor<4xf32> args (shape pinned from x.csv/y.csv's row count, values never baked); `check_load_data_likelihood_reuse` in gate.py emits this SAME model once and scores it against a second, disjoint y dataset (`oracle.LOAD_DATA_LIKELIHOOD_Y2`) to prove the emitted module is reusable across datasets"
     }
   ]
 }

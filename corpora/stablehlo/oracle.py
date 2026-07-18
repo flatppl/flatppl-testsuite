@@ -226,6 +226,27 @@ def _negbinomial(alpha, beta):
     return float(nbinom.logpmf(4, alpha, beta / (beta + 1.0)))  # observed a = 4
 
 
+def _load_data_likelihood(alpha, beta, sigma, x_data, y_data):
+    # FlatPPL: means = alpha .+ beta .* x_data; y ~ Normal.(means, sigma), an
+    # iid/broadcast Normal likelihood scored at the `load_data`-declared
+    # observed vector y_data. Closed form: the sum of the per-element scipy
+    # Normal log-densities (no vector scipy call needed — this IS the
+    # closed-form sum scipy.stats.norm.logpdf reduces to elementwise).
+    means = [alpha + beta * xi for xi in x_data]
+    return float(sum(norm.logpdf(yi, loc=mi, scale=sigma) for yi, mi in zip(y_data, means)))
+
+
+# A SECOND, disjoint observed-y dataset for the `load_data_likelihood` fixture
+# — used only by `gate.py`'s standalone `check_load_data_likelihood_reuse`,
+# which emits the model's StableHLO ONCE and scores it against y_data (above)
+# AND this vector, proving the emitted `@logdensity` module is a genuinely
+# reusable artifact across different `%arg4` runtime tensor args (data is
+# never baked at emission time — only its shape is, from x.csv/y.csv's row
+# count). Not itself a `load_data` source file: fed straight to the executor
+# as a runtime arg, exactly like `y_data` is.
+LOAD_DATA_LIKELIHOOD_Y2: list[float] = [2.9, 3.5, 3.1, 4.2]
+
+
 def _negbinomial2(mu, psi):
     # FlatPPL NegativeBinomial2(mu, psi): pmf = C(k+psi-1,k) *
     # (mu/(mu+psi))^k * (psi/(mu+psi))^psi. Matching against scipy's
@@ -788,6 +809,64 @@ draws = rand(s, lawof(xs))
         notes=(
             "Gamma(shape=psi, rate=psi/mu) mixed into Poisson (mean mu); "
             "fan-out exercises the batched Gamma while feeding the batched Poisson while"
+        ),
+    ),
+    Fixture(
+        key="load_data_likelihood",
+        distribution="iid/broadcast Normal likelihood over a load_data observed vector "
+        "(means = alpha .+ beta .* x_data; y ~ Normal.(means, sigma))",
+        # Both `x_data` and `y_data` are `load_data` bindings listed in `inputs`:
+        # the StableHLO ABI pins their SHAPE at emit time (read from the row
+        # count of x.csv/y.csv, `tensor<4xf32>`) but never bakes their VALUES —
+        # both arrive as ordinary runtime tensor args, exactly like `alpha`/
+        # `beta`/`sigma`. `kernelof`/`likelihoodof` build the likelihood over
+        # the record-valued `y`; `outputs` requests its log-density at the
+        # free params.
+        flatppl=_src("""
+flatppl_compat = "0.1"
+alpha = elementof(reals)
+beta = elementof(reals)
+sigma = elementof(posreals)
+x_data = load_data("x.csv", reals)
+y_data = load_data("y.csv", reals)
+means = alpha .+ beta .* x_data
+y ~ Normal.(means, sigma)
+k = kernelof(record(y = y), alpha = alpha, beta = beta, sigma = sigma)
+L = likelihoodof(k, record(y = y_data))
+inputs = (alpha, beta, sigma, x_data, y_data)
+outputs = logdensityof(L, record(alpha = alpha, beta = beta, sigma = sigma))
+"""),
+        params={
+            "alpha": 0.55,
+            "beta": 2.34,
+            "sigma": 0.11,
+            "x_data": [1.1, 1.5, 1.3, 1.4],
+            "y_data": [3.2, 4.1, 3.4, 3.9],
+        },
+        variate=[3.2, 4.1, 3.4, 3.9],
+        variate_repr='y_data = [3.2, 4.1, 3.4, 3.9] (via load_data("y.csv"))',
+        logdensity=_load_data_likelihood,
+        scipy_note="sum(scipy.stats.norm.logpdf(y_data, loc=alpha + beta*x_data, scale=sigma))",
+        # No gradient check here: at the gate's shared FD step (eps=1e-3),
+        # sigma's central finite difference has not yet converged against
+        # Enzyme's f32 jax.grad (the log-density's curvature in sigma is
+        # steep enough at this data scale that FD truncation error alone
+        # exceeds GRAD_ATOL=1e-3, independent of any executor bug) — verified
+        # by hand: the FD estimate keeps moving between eps=1e-3 and
+        # eps=1e-6, only settling once eps is much smaller than the gate's
+        # shared default. Rather than special-case a smaller eps for one
+        # fixture in the shared `fd_gradient` helper, this fixture stays
+        # value-only; the reuse property is covered instead by
+        # `check_load_data_likelihood_reuse` in gate.py.
+        grad_params=(),
+        notes=(
+            "broadcast iid Normal likelihood scored via the inputs/outputs "
+            "StableHLO ABI with BOTH x_data and y_data as runtime "
+            "tensor<4xf32> args (shape pinned from x.csv/y.csv's row count, "
+            "values never baked); `check_load_data_likelihood_reuse` in "
+            "gate.py emits this SAME model once and scores it against a "
+            "second, disjoint y dataset (`oracle.LOAD_DATA_LIKELIHOOD_Y2`) "
+            "to prove the emitted module is reusable across datasets"
         ),
     ),
 ]

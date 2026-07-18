@@ -54,7 +54,7 @@ INDEPENDENT scipy oracle (`oracle.py`, frozen into each fixture's
                               Dirichlet check, against the fanned sampler
                               instead of the per-call chained one).
 
-Plus one standalone check not tied to a distribution fixture:
+Plus two standalone checks not tied to the per-distribution table:
 
   chaining_independent_draws  two SEPARATE destructured `rand`s over the
                               IDENTICAL Normal(0,1) kernel, chained
@@ -63,6 +63,13 @@ Plus one standalone check not tied to a distribution fixture:
                               key (a threading bug that reused the first
                               draw's bits for the second would show up as
                               d1 == d2)
+  reuse_two_datasets          `load_data_likelihood`'s emitted `@logdensity`
+                              module (a broadcast Normal likelihood over a
+                              `load_data` observed vector, scored via the
+                              inputs/outputs ABI with x_data AND y_data as
+                              runtime tensor args), EMITTED ONCE, scored at
+                              two disjoint y datasets — proves the module is
+                              reusable across data, not baked at emit time
 
     FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo shlo
 
@@ -544,6 +551,38 @@ def check_chaining_independent_draws() -> CheckResult:
                        "passed" if ok else "failed", detail)
 
 
+def check_load_data_likelihood_reuse() -> CheckResult:
+    """The `load_data_likelihood` fixture's emitted `@logdensity` module,
+    EMITTED ONCE, scored at its own `y_data` (`corpora/stablehlo/
+    load_data_likelihood/y.csv`, pinning `%arg4`'s shape at emit time) AND at
+    a second, disjoint dataset (`oracle.LOAD_DATA_LIKELIHOOD_Y2`) fed as the
+    same runtime tensor arg — proving the module is a genuinely reusable
+    artifact across data, not something the emitter baked. Each score is
+    checked independently against the fixture's own closed-form oracle
+    (`fx.logdensity`, shared with `check_value` for the first dataset)."""
+    fx = oracle.FIXTURES_BY_KEY.get("load_data_likelihood")
+    if fx is None:
+        return CheckResult("load_data_likelihood", "reuse_two_datasets", "skipped",
+                           "fixture not present")
+    try:
+        src = executor.emit(HERE / fx.key / f"{fx.key}.flatppl", "logdensity")
+    except executor.EmitRefused as e:
+        return CheckResult(fx.key, "reuse_two_datasets", "skipped", f"emit refused: {e}")
+    alpha, beta, sigma, x_data, y1 = fx.param_values()
+    y2 = oracle.LOAD_DATA_LIKELIHOOD_Y2
+    got1 = executor.value(src, [alpha, beta, sigma, x_data, y1])
+    got2 = executor.value(src, [alpha, beta, sigma, x_data, y2])
+    exp1 = fx.logdensity(alpha, beta, sigma, x_data, y1)
+    exp2 = fx.logdensity(alpha, beta, sigma, x_data, y2)
+    d1, d2 = abs(got1 - exp1), abs(got2 - exp2)
+    worst = max(d1, d2)
+    ok = d1 <= VALUE_ATOL and d2 <= VALUE_ATOL
+    detail = (f"same emitted src; y.csv Δ={d1:.2e} (got {got1:.6f} vs {exp1:.6f}); "
+              f"y2 Δ={d2:.2e} (got {got2:.6f} vs {exp2:.6f})")
+    return CheckResult(fx.key, "reuse_two_datasets",
+                       "passed" if ok else "failed", detail, worst)
+
+
 def run() -> list[CheckResult]:
     results: list[CheckResult] = []
     for fx in oracle.FIXTURES:
@@ -563,6 +602,7 @@ def run() -> list[CheckResult]:
         else:
             results.append(check_fanout_distribution(fx))
     results.append(check_chaining_independent_draws())
+    results.append(check_load_data_likelihood_reuse())
     return results
 
 
