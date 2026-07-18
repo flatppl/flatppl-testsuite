@@ -109,13 +109,7 @@ EXPECTED: dict[str, tuple[str, str | None]] = {
     "ex_poisson_glm_link": ("scores", None),
     "ex_poisson_model": ("scores", None),
     "ex_rasch_1pl": ("scores", None),
-    # Emits under StableHLO (touniform now lowers) but executes to nan: a
-    # `superpose` mixand is evaluated off its own support and a positive-support
-    # builder returns nan there (Buffy #365). A documented downstream gap, not a
-    # refusal and not yet a match — reported XFAIL (fails the gate only if it
-    # regresses to an emit refusal, or if #365 is fixed and it starts matching,
-    # either of which is a re-triage signal).
-    "ex_dissimilar_mixture": ("known_gap", "#365 superpose mixand nan off-support"),
+    "ex_dissimilar_mixture": ("scores", None),
     "ex_linear_regression": ("scores", None),
     "ex_zero_inflated_binomial": ("scores", None),
 }
