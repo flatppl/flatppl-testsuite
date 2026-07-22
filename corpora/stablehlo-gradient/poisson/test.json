@@ -1,0 +1,86 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "rate"
+  ],
+  "grad_params": [
+    "rate"
+  ],
+  "points": [
+    {
+      "rate": 2.5
+    },
+    {
+      "rate": 0.1
+    },
+    {
+      "rate": 0.5
+    },
+    {
+      "rate": 1.0
+    },
+    {
+      "rate": 1.5
+    },
+    {
+      "rate": 2.0
+    },
+    {
+      "rate": 3.0
+    },
+    {
+      "rate": 4.0
+    },
+    {
+      "rate": 5.0
+    },
+    {
+      "rate": 8.0
+    },
+    {
+      "rate": 12.0
+    }
+  ],
+  "expected_grad": [
+    {
+      "rate": 0.19999999999999996
+    },
+    {
+      "rate": 29.0
+    },
+    {
+      "rate": 5.0
+    },
+    {
+      "rate": 2.0
+    },
+    {
+      "rate": 1.0
+    },
+    {
+      "rate": 0.5
+    },
+    {
+      "rate": 0.0
+    },
+    {
+      "rate": -0.25
+    },
+    {
+      "rate": -0.4
+    },
+    {
+      "rate": -0.625
+    },
+    {
+      "rate": -0.75
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.001
+  }
+}
