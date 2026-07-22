@@ -1,0 +1,3 @@
+n = elementof(posintegers)
+p = elementof(unitinterval)
+a = draw(Binomial(n = n, p = p))

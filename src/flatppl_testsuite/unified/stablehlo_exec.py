@@ -89,8 +89,12 @@ DEFAULT_KEY = (0, 0)
 
 def _to_arg(jnp, v):
     """A Python float / list / nested list -> an f32 JAX array of the shape the
-    emitted func arg expects (0-d for a scalar)."""
-    return jnp.asarray(np.asarray(v, dtype=np.float32))
+    emitted func arg expects (0-d for a scalar). A plain Python ``int`` (or a
+    list of them) becomes an i32 array instead -- the emitter lowers an
+    ``elementof(posintegers)`` ABI arg (e.g. Binomial's `n`) to `tensor<i32>`,
+    and `hlo_call` asserts on a dtype mismatch, not just a shape one."""
+    dtype = np.int32 if isinstance(v, int) and not isinstance(v, bool) else np.float32
+    return jnp.asarray(np.asarray(v, dtype=dtype))
 
 
 def value(src: str, arg_values: list) -> float:
