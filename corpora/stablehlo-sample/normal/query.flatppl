@@ -1,0 +1,4 @@
+s = rnginit(0)
+draws = rand(s, lawof(x))
+inputs = (mu, sigma)
+outputs = (draws)

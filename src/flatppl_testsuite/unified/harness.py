@@ -5,11 +5,12 @@ from pathlib import Path
 
 from flatppl_testsuite.scoring.result import CheckResult
 from flatppl_testsuite.unified.loader import TestSpec, load_test
-from flatppl_testsuite.unified.runners import logdensity_stablehlo
+from flatppl_testsuite.unified.runners import logdensity_stablehlo, sample_stablehlo
 
 # (test_type, engine) -> runner.run(spec, dir) -> list[CheckResult]
 _RUNNERS = {
     ("logdensity", "stablehlo"): logdensity_stablehlo.run,
+    ("sample", "stablehlo"): sample_stablehlo.run,
 }
 
 

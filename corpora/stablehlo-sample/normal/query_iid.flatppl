@@ -1,0 +1,5 @@
+s = rnginit(0)
+xs ~ iid(Normal(mu = mu, sigma = sigma), 200)
+draws = rand(s, lawof(xs))
+inputs = (mu, sigma)
+outputs = (draws)

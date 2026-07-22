@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-KNOWN_TEST_TYPES = {"logdensity"}  # extend as runners land (gradient, sample, convert)
+KNOWN_TEST_TYPES = {"logdensity", "sample"}  # extend as runners land (gradient, convert)
 
 
 @dataclass(frozen=True)
