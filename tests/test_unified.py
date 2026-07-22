@@ -31,7 +31,9 @@ _CORPORA = Path(__file__).resolve().parents[1] / "corpora"
 _DIRS = discover_test_dirs(_CORPORA)
 
 
-@pytest.mark.parametrize("test_dir", _DIRS, ids=[d.name for d in _DIRS])
+@pytest.mark.parametrize(
+    "test_dir", _DIRS, ids=[str(d.relative_to(_CORPORA)) for d in _DIRS]
+)
 def test_unified_dir(test_dir):
     results = run_test_dir(test_dir)
     assert results, f"{test_dir}: no results"
