@@ -1,0 +1,3 @@
+mu = elementof(cartpow(reals, 2))
+cov = elementof(cartpow(reals, [2, 2]))
+x = draw(MvNormal(mu = mu, cov = cov))
