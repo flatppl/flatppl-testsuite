@@ -109,20 +109,15 @@ jax = "==0.4.36"
 jaxlib = "==0.4.36"
 pytest = ">=8"
 
-# The gate task lives on the feature (the `stablehlo` env is no-default-feature,
-# so the base `[tasks]` are not in scope). Emit StableHLO from the local
-# `flatppl stablehlo` binary, execute under Enzyme-JAX, check value + jax.grad
-# gradient vs the scipy oracle, plus @sample distribution and multi-rng
-# independence. Point FLATPPL_BIN at a `flatppl` built with the `stablehlo`
-# feature (the subcommand is feature-gated):
-#   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo shlo
-[feature.stablehlo.tasks]
-shlo = "python corpora/stablehlo/gate.py"
+# The gate tasks live on the feature (the `stablehlo` env is no-default-feature,
+# so the base `[tasks]` are not in scope). Point FLATPPL_BIN at a `flatppl`
+# built with the `stablehlo` feature (the subcommand is feature-gated).
 # Score every flatppl-examples posterior under StableHLO via a `load_module`
 # query module, execute under Enzyme-JAX, compare to the frozen scipy oracle.
-# Same FLATPPL_BIN requirement as `shlo`; resolves the flatppl-examples checkout
-# from FLATPPL_EXAMPLES_DIR (else the sibling `../flatppl-examples`):
+# Resolves the flatppl-examples checkout from FLATPPL_EXAMPLES_DIR (else the
+# sibling `../flatppl-examples`):
 #   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo examples-shlo
+[feature.stablehlo.tasks]
 examples-shlo = "python corpora/examples/gate_stablehlo.py"
 # Regenerate a unified test dir's frozen `expected` from its test.py oracle:
 #   pixi run -e stablehlo regen corpora/stablehlo/linear_regression
