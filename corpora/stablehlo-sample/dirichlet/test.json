@@ -1,0 +1,37 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "alpha": [
+      2.0,
+      3.0,
+      5.0
+    ]
+  },
+  "inputs": [
+    "alpha"
+  ],
+  "draws": 100000,
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "fanout_distribution",
+    "independence",
+    "key_reproducibility",
+    "key_advance"
+  ],
+  "stat": {
+    "fanout_dim": 3,
+    "fanout_simplex": true,
+    "independence": "dirichlet"
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}
