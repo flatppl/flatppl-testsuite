@@ -1,3 +1,0 @@
-s = rnginit(0)
-x = draw(Categorical(p = [0.2, 0.3, 0.5]))
-draws = rand(s, lawof(x))

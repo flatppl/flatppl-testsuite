@@ -1,0 +1,122 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "location",
+    "scale",
+    "xobs"
+  ],
+  "grad_params": [
+    "location",
+    "scale"
+  ],
+  "points": [
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -10.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -5.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -2.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -1.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -0.3
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 0.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 0.5
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 1.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 2.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 5.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 10.0
+    }
+  ],
+  "expected_grad": [
+    {
+      "location": -1.0,
+      "scale": 9.0
+    },
+    {
+      "location": -1.0,
+      "scale": 4.0
+    },
+    {
+      "location": -1.0,
+      "scale": 1.0
+    },
+    {
+      "location": -1.0,
+      "scale": 0.0
+    },
+    {
+      "location": -1.0,
+      "scale": -0.7
+    },
+    {
+      "location": 1.0,
+      "scale": -1.0
+    },
+    {
+      "location": 1.0,
+      "scale": -0.5
+    },
+    {
+      "location": 1.0,
+      "scale": 0.0
+    },
+    {
+      "location": 1.0,
+      "scale": 1.0
+    },
+    {
+      "location": 1.0,
+      "scale": 4.0
+    },
+    {
+      "location": 1.0,
+      "scale": 9.0
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.001
+  }
+}

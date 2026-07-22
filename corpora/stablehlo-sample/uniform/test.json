@@ -1,0 +1,34 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {},
+  "inputs": [],
+  "draws": 100000,
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "distribution",
+    "key_reproducibility",
+    "key_advance",
+    "fanout_distribution"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "uniform",
+      "kwargs": {
+        "loc": -1,
+        "scale": 4
+      }
+    },
+    "discrete": false
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}

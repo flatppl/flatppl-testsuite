@@ -1,0 +1,3 @@
+shape = elementof(posreals)
+rate = elementof(posreals)
+a = draw(Gamma(shape = shape, rate = rate))

@@ -1,0 +1,2 @@
+alpha = elementof(cartpow(posreals, 3))
+x = draw(Dirichlet(alpha = alpha))

@@ -1,0 +1,3 @@
+alpha = elementof(posreals)
+beta = elementof(posreals)
+x = draw(NegativeBinomial(alpha = alpha, beta = beta))

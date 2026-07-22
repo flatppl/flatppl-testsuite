@@ -1,0 +1,3 @@
+n = 10
+p = elementof(unitinterval)
+x = draw(Binomial(n = n, p = p))

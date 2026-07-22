@@ -1,0 +1,53 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "p": [
+      0.2,
+      0.3,
+      0.5
+    ]
+  },
+  "inputs": [
+    "p"
+  ],
+  "draws": 100000,
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "distribution",
+    "key_reproducibility",
+    "key_advance",
+    "fanout_distribution"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "rv_discrete",
+      "kwargs": {
+        "values": [
+          [
+            1,
+            2,
+            3
+          ],
+          [
+            0.2,
+            0.3,
+            0.5
+          ]
+        ]
+      }
+    },
+    "discrete": true,
+    "fanout_discrete_kmin": 1
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}

@@ -1,3 +1,0 @@
-alpha = elementof(cartpow(posreals, 3))
-a = draw(Dirichlet(alpha = alpha))
-lp = logdensityof(lawof(record(a = a)), record(a = [0.2, 0.3, 0.5]))

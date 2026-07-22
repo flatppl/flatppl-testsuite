@@ -1,4 +1,0 @@
-location = elementof(reals)
-scale = elementof(posreals)
-a = draw(Laplace(location = location, scale = scale))
-lp = logdensityof(lawof(record(a = a)), record(a = 0.5))

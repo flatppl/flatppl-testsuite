@@ -1,0 +1,2 @@
+rate = elementof(nonnegreals)
+a = draw(Poisson(rate = rate))

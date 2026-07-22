@@ -1,5 +1,0 @@
-mu = elementof(cartpow(reals, 2))
-cov = elementof(cartpow(reals, [2, 2]))
-s = rnginit(0)
-xs ~ iid(MvNormal(mu = mu, cov = cov), 20000)
-draws = rand(s, lawof(xs))

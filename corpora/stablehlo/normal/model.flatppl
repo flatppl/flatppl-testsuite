@@ -1,0 +1,3 @@
+mu = elementof(reals)
+sigma = elementof(posreals)
+a = draw(Normal(mu = mu, sigma = sigma))

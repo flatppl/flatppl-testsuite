@@ -1,3 +1,0 @@
-s = rnginit(0)
-x = draw(NegativeBinomial(alpha = 5.0, beta = 2.0))
-draws = rand(s, lawof(x))

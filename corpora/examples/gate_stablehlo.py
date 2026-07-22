@@ -51,14 +51,14 @@ real MISMATCH (emitted a number outside the f32 tolerance) trips a nonzero exit.
 
     FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo examples-shlo
 
-Fallback coverage: the ABI is additive/opt-in (design doc "Fallback +
-migration") — a model with neither `inputs` nor `outputs` still emits via the
-legacy last-public-binding convention, with a one-line deprecation warning on
-stderr. `check_legacy_fallback_warns` below exercises that path directly
+Fallback coverage: the legacy last-public-binding convention has been purged
+(design doc "Fallback + migration") — a model with neither `inputs` nor
+`outputs` is now REFUSED (exit 3), not silently emitted with a deprecation
+warning. `check_legacy_no_abi_refused` below exercises that path directly
 (against the CLI, not through `executor.emit` which does not surface stderr
 on success) rather than duplicating a whole second concrete-point scoring
-path through every example — the warning is the cheaper, still-real signal
-that the fallback (not just the ABI path) stays live.
+path through every example — the refusal is the cheaper, still-real signal
+that a no-ABI model has no fallback left to fall back to.
 """
 from __future__ import annotations
 
@@ -73,9 +73,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent            # corpora/examples
 REPO = HERE.parents[1]                             # repo root
-sys.path.insert(0, str(REPO / "corpora" / "stablehlo"))
 
-import executor  # noqa: E402
+from flatppl_testsuite.unified import stablehlo_exec as executor
 
 # f32 execution tolerance (the emitted modules are single-precision; the frozen
 # oracle's own 1e-9 atol/rtol is a det-js/f64 figure and does not apply here).
@@ -357,14 +356,14 @@ def _check_one(test_id, check_id, src, fields, theta_i, exp, expect, reason) -> 
                        f"Δ={d:.2e} > {tol:.2e} (got {got:.6f} vs scipy {exp:.6f})")
 
 
-def check_legacy_fallback_warns() -> CheckResult:
+def check_legacy_no_abi_refused() -> CheckResult:
     """Fallback coverage (design doc "Fallback + migration"): a model with
-    neither `inputs` nor `outputs` must still emit via the legacy
-    last-public-binding convention, printing a one-line deprecation warning to
-    stderr. Probes the CLI directly (`executor.emit` only returns stdout on
-    success) with a legacy concrete-point query module built from the first
-    scoring example's first theta point — the exact form every check used
-    before this migration."""
+    neither `inputs` nor `outputs` must be REFUSED — the last-public-binding
+    query heuristic has been purged, so there is no fallback emission left to
+    warn about. Probes the CLI directly (`executor.emit` only returns stdout
+    on success) with a legacy concrete-point query module built from the
+    first scoring example's first theta point — the exact form every check
+    used before this migration."""
     manifest = json.loads((HERE / "manifest.json").read_text())
     ex = next(e for e in manifest["examples"] if e["test_id"] == "ex_linear_regression")
     model_path = examples_dir() / "examples" / ex["model"]
@@ -378,14 +377,13 @@ def check_legacy_fallback_warns() -> CheckResult:
             capture_output=True, text=True,
         )
     ok = (
-        proc.returncode == 0
-        and "no inputs/outputs bindings" in proc.stderr
-        and "declare inputs/outputs" in proc.stderr
+        proc.returncode == 3
+        and "no inputs/outputs ABI declared" in proc.stderr
     )
     if ok:
-        return CheckResult("fallback", "legacy_deprecation_warning", "passed", "WARNS",
-                           "legacy (no inputs/outputs) model still emits + warns on stderr")
-    return CheckResult("fallback", "legacy_deprecation_warning", "failed", "ERROR",
+        return CheckResult("fallback", "legacy_no_abi_refused", "passed", "REFUSES",
+                           "legacy (no inputs/outputs) model is refused (exit 3), no fallback emission")
+    return CheckResult("fallback", "legacy_no_abi_refused", "failed", "ERROR",
                        f"exit={proc.returncode} stderr={proc.stderr.strip()[:200]!r}")
 
 
@@ -430,7 +428,7 @@ def main() -> int:
               "(set FLATPPL_EXAMPLES_DIR, or clone the sibling ../flatppl-examples).")
         return 0
     results = run()
-    results.append(check_legacy_fallback_warns())
+    results.append(check_legacy_no_abi_refused())
     print(render(results))
     # Coverage report: only a real MISMATCH (a number outside tolerance, or an
     # executor error on a model that DID emit) is a hard failure. A REFUSE is an

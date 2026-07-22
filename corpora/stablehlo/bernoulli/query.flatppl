@@ -1,0 +1,3 @@
+lp = logdensityof(lawof(record(a = a)), record(a = 1))
+inputs = (p)
+outputs = (lp)

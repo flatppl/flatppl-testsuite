@@ -1,4 +1,0 @@
-shape = elementof(posreals)
-rate = elementof(posreals)
-a = draw(Gamma(shape = shape, rate = rate))
-lp = logdensityof(lawof(record(a = a)), record(a = 0.5))

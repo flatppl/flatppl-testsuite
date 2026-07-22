@@ -45,12 +45,15 @@ jobs:
       - name: Run FlatPPL tests against frozen ROOT-verified values
         run: pixi run test
 
-      # StableHLO numeric-execution gate: emit via the setup-built `flatppl
-      # stablehlo` verb, execute under Enzyme-JAX, check value + jax.grad
-      # gradient vs the scipy oracle, plus @sample distribution + multi-rng
-      # independence. Separate env (python 3.12 / enzyme pins), so a separate step.
+      # StableHLO numeric-execution gate: the unified per-test-dir suite (one
+      # dir per distribution/model under corpora/stablehlo/, each carrying its
+      # own model.flatppl/query.flatppl/test.json/test.py). Emits via the
+      # setup-built `flatppl stablehlo` verb, executes under Enzyme-JAX, checks
+      # value + jax.grad gradient vs each dir's frozen/oracle expectation, plus
+      # @sample distribution + multi-rng independence. Separate env (python
+      # 3.12 / enzyme pins), so a separate step.
       - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
-        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo shlo
+        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo python -m pytest tests/test_unified.py -q
 
       # Examples corpus under StableHLO: score each flatppl-examples posterior
       # via a `load_module` query module, execute under Enzyme-JAX, compare to

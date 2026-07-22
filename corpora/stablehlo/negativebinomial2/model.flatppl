@@ -1,0 +1,3 @@
+mu = elementof(posreals)
+psi = elementof(posreals)
+a = draw(NegativeBinomial2(mu = mu, psi = psi))

@@ -1,4 +1,0 @@
-alpha = elementof(posreals)
-beta = elementof(posreals)
-a = draw(Beta(alpha = alpha, beta = beta))
-lp = logdensityof(lawof(record(a = a)), record(a = 0.5))

@@ -1,4 +1,0 @@
-alpha = elementof(cartpow(posreals, 3))
-s = rnginit(0)
-xs ~ iid(Dirichlet(alpha = alpha), 20000)
-draws = rand(s, lawof(xs))

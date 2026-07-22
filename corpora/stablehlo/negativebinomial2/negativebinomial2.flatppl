@@ -1,4 +1,0 @@
-mu = elementof(posreals)
-psi = elementof(posreals)
-a = draw(NegativeBinomial2(mu = mu, psi = psi))
-lp = logdensityof(lawof(record(a = a)), record(a = 4))

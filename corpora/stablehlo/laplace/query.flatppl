@@ -1,0 +1,4 @@
+xobs = elementof(reals)
+lp = logdensityof(lawof(record(a = a)), record(a = xobs))
+inputs = (location, scale, xobs)
+outputs = (lp)

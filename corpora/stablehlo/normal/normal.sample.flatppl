@@ -1,3 +1,0 @@
-s = rnginit(0)
-x = draw(Normal(mu = 0.3, sigma = 1.2))
-draws = rand(s, lawof(x))

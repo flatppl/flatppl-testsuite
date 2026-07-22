@@ -1,0 +1,4 @@
+xobs = elementof(reals)
+lp = logdensityof(lawof(record(a = a)), record(a = xobs))
+inputs = (mu, sigma, xobs)
+outputs = (lp)

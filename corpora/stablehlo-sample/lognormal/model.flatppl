@@ -1,0 +1,3 @@
+mu = elementof(reals)
+sigma = elementof(posreals)
+x = draw(LogNormal(mu = mu, sigma = sigma))

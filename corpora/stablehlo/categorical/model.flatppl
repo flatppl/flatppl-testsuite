@@ -1,0 +1,2 @@
+p = elementof(cartpow(unitinterval, 3))
+a = draw(Categorical(p = p))

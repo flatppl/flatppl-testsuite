@@ -1,0 +1,5 @@
+s = rnginit(0)
+xs ~ iid(MvNormal(mu = mu, cov = cov), 20000)
+draws = rand(s, lawof(xs))
+inputs = (mu, cov)
+outputs = (draws)

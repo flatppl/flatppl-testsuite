@@ -1,3 +1,0 @@
-s = rnginit(0)
-x = draw(Binomial(n = 10, p = 0.4))
-draws = rand(s, lawof(x))
