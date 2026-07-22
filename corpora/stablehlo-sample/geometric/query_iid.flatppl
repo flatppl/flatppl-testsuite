@@ -1,0 +1,5 @@
+s = rnginit(0)
+xs ~ iid(Geometric(p = p), 200)
+draws = rand(s, lawof(xs))
+inputs = (p)
+outputs = (draws)
