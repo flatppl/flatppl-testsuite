@@ -18,27 +18,37 @@ def _load_module(dir: Path):
     return mod
 
 
-def regen_dir(dir: Path) -> list[float] | dict:
+def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
     dir = Path(dir)
     raw = json.loads((dir / "test.json").read_text())
     mod = _load_module(dir)
-    if raw.get("test_type") == "sample":
+    test_type = raw.get("test_type")
+    if test_type == "sample":
         stat = mod.stat()
         raw["stat"] = stat
         (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
         return stat
+    if test_type == "gradient":
+        expected_grad = [mod.grad_oracle(pt) for pt in raw["points"]]
+        raw["expected_grad"] = expected_grad
+        (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
+        return expected_grad
     expected = [float(mod.oracle(pt)) for pt in raw["points"]]
     raw["expected"] = expected
     (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
     return expected
 
 
+_KIND_BY_TEST_TYPE = {"sample": "stat keys", "gradient": "expected_grad entries"}
+
+
 def main(argv: list[str] | None = None) -> int:
     dirs = [Path(a) for a in (argv if argv is not None else sys.argv[1:])]
     for d in dirs:
+        test_type = json.loads((d / "test.json").read_text()).get("test_type")
         result = regen_dir(d)
-        n = len(result) if isinstance(result, list) else len(result)
-        kind = "expected values" if isinstance(result, list) else "stat keys"
+        n = len(result)
+        kind = _KIND_BY_TEST_TYPE.get(test_type, "expected values")
         print(f"{d}: wrote {n} {kind}")
     return 0
 
