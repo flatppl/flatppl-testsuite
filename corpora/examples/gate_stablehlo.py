@@ -73,9 +73,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent            # corpora/examples
 REPO = HERE.parents[1]                             # repo root
-sys.path.insert(0, str(REPO / "corpora" / "stablehlo"))
 
-import executor  # noqa: E402
+from flatppl_testsuite.unified import stablehlo_exec as executor
 
 # f32 execution tolerance (the emitted modules are single-precision; the frozen
 # oracle's own 1e-9 atol/rtol is a det-js/f64 figure and does not apply here).
