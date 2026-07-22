@@ -1,0 +1,6 @@
+alpha_v = elementof(reals)
+beta_v = elementof(reals)
+sigma_v = elementof(posreals)
+lp = logdensityof(posterior, record(alpha = alpha_v, beta = beta_v, sigma = sigma_v))
+inputs = (alpha_v, beta_v, sigma_v)
+outputs = (lp)

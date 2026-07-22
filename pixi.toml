@@ -124,6 +124,9 @@ shlo = "python corpora/stablehlo/gate.py"
 # from FLATPPL_EXAMPLES_DIR (else the sibling `../flatppl-examples`):
 #   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo examples-shlo
 examples-shlo = "python corpora/examples/gate_stablehlo.py"
+# Regenerate a unified test dir's frozen `expected` from its test.py oracle:
+#   pixi run -e stablehlo regen corpora/stablehlo/linear_regression
+regen = "python -m flatppl_testsuite.unified.regen"
 
 [environments]
 root = ["root"]

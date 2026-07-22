@@ -1,0 +1,85 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "posterior",
+  "inputs": [
+    "alpha_v",
+    "beta_v",
+    "sigma_v"
+  ],
+  "points": [
+    {
+      "alpha_v": 0.55,
+      "beta_v": 2.34,
+      "sigma_v": 0.11
+    },
+    {
+      "alpha_v": 0.0,
+      "beta_v": 2.5,
+      "sigma_v": 0.2
+    },
+    {
+      "alpha_v": 1.0,
+      "beta_v": 2.0,
+      "sigma_v": 0.15
+    },
+    {
+      "alpha_v": -0.5,
+      "beta_v": 3.0,
+      "sigma_v": 0.3
+    },
+    {
+      "alpha_v": 0.3,
+      "beta_v": 1.8,
+      "sigma_v": 0.5
+    },
+    {
+      "alpha_v": 0.8,
+      "beta_v": 2.2,
+      "sigma_v": 0.08
+    },
+    {
+      "alpha_v": 0.55,
+      "beta_v": 2.34,
+      "sigma_v": 0.4
+    },
+    {
+      "alpha_v": 1.5,
+      "beta_v": 1.5,
+      "sigma_v": 0.25
+    },
+    {
+      "alpha_v": -1.0,
+      "beta_v": 3.5,
+      "sigma_v": 0.6
+    },
+    {
+      "alpha_v": 0.2,
+      "beta_v": 2.7,
+      "sigma_v": 0.12
+    },
+    {
+      "alpha_v": 0.0,
+      "beta_v": 0.0,
+      "sigma_v": 1.0
+    }
+  ],
+  "expected": [
+    -406.431804757771,
+    -114.81243390835758,
+    -205.79876768902298,
+    -44.11313395607295,
+    -18.70587079466268,
+    -793.3743803553858,
+    -19.98327764454333,
+    -64.32156872514362,
+    -9.630818124357443,
+    -345.9771637364345,
+    -34.05857286418175
+  ],
+  "tolerance": {
+    "value_atol_f32": 0.0001
+  }
+}
