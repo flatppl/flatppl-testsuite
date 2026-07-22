@@ -1,0 +1,2 @@
+rate = elementof(posreals)
+a = draw(Exponential(rate = rate))
