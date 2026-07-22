@@ -92,7 +92,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import oracle  # noqa: E402
-import executor  # noqa: E402
+from flatppl_testsuite.unified import stablehlo_exec as executor  # noqa: E402
 
 N_SAMPLES = 100_000
 # Fan-out distribution check: fewer total draws (still ample for a KS test)

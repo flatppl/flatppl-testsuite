@@ -26,7 +26,7 @@ pytest.importorskip("enzyme_ad", reason="StableHLO gate needs Enzyme-JAX")
 _CORPUS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(_CORPUS))
 
-import executor  # noqa: E402
+from flatppl_testsuite.unified import stablehlo_exec as executor  # noqa: E402
 import gate  # noqa: E402
 import oracle  # noqa: E402
 
