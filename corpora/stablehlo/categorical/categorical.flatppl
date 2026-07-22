@@ -1,2 +1,0 @@
-a = draw(Categorical(p = [0.2, 0.3, 0.5]))
-lp = logdensityof(lawof(record(a = a)), record(a = 2))

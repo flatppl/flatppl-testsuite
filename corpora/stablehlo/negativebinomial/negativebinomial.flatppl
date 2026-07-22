@@ -1,4 +1,0 @@
-alpha = elementof(posreals)
-beta = elementof(posreals)
-a = draw(NegativeBinomial(alpha = alpha, beta = beta))
-lp = logdensityof(lawof(record(a = a)), record(a = 4))

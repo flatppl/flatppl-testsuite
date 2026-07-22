@@ -1,3 +1,0 @@
-rate = elementof(posreals)
-a = draw(Exponential(rate = rate))
-lp = logdensityof(lawof(record(a = a)), record(a = 0.5))

@@ -1,3 +1,0 @@
-nu = elementof(posreals)
-a = draw(StudentT(nu = nu))
-lp = logdensityof(lawof(record(a = a)), record(a = 0.5))

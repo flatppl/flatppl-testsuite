@@ -1,3 +1,0 @@
-s = rnginit(0)
-xs ~ iid(StudentT(nu = 4.0), 200)
-draws = rand(s, lawof(xs))

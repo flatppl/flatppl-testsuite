@@ -1,4 +1,0 @@
-n = elementof(posintegers)
-p = elementof(unitinterval)
-a = draw(Binomial(n = n, p = p))
-lp = logdensityof(lawof(record(a = a)), record(a = 2))

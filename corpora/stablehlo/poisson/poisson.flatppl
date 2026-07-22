@@ -1,3 +1,0 @@
-rate = elementof(nonnegreals)
-a = draw(Poisson(rate = rate))
-lp = logdensityof(lawof(record(a = a)), record(a = 3))

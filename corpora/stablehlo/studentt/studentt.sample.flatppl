@@ -1,3 +1,0 @@
-s = rnginit(0)
-x = draw(StudentT(nu = 4.0))
-draws = rand(s, lawof(x))
