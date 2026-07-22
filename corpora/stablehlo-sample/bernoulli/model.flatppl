@@ -1,0 +1,2 @@
+p = elementof(unitinterval)
+x = draw(Bernoulli(p = p))
