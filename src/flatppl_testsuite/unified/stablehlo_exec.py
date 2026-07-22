@@ -43,7 +43,11 @@ def flatppl_bin() -> Path:
     env = os.environ.get("FLATPPL_BIN")
     if env:
         return Path(env)
-    repo = Path(__file__).resolve().parents[2]
+    # This file lives at <repo>/src/flatppl_testsuite/unified/stablehlo_exec.py,
+    # so the repo root is parents[3] (parents[2] is `src`). Getting this wrong
+    # silently breaks the `.pixi-bin` fallback → binary_supports_stablehlo()
+    # returns False → the whole unified suite skips when FLATPPL_BIN is unset.
+    repo = Path(__file__).resolve().parents[3]
     return repo / ".pixi-bin" / "bin" / "flatppl"
 
 
