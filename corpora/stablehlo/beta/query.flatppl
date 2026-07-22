@@ -1,0 +1,4 @@
+xobs = elementof(unitinterval)
+lp = logdensityof(lawof(record(a = a)), record(a = xobs))
+inputs = (alpha, beta, xobs)
+outputs = (lp)
