@@ -1,0 +1,4 @@
+xobs = elementof(posreals)
+lp = logdensityof(lawof(record(a = a)), record(a = xobs))
+inputs = (rate, xobs)
+outputs = (lp)
