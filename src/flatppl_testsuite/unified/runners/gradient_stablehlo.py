@@ -6,12 +6,18 @@ derivative of the SAME emitted `@logdensity`), emit StableHLO (`flatppl
 stablehlo --mode logdensity`), and compare `stablehlo_exec.gradient`'s output
 at each authored point to the frozen ANALYTIC `expected_grad` within
 `grad_atol`. `grad_params` (a subset of `inputs`) names which ABI arguments to
-differentiate w.r.t.; their positions in `inputs` become `argnums`.
+differentiate w.r.t.; their positions in `inputs` become `argnums`. A
+`grad_param` may itself be vector-valued (e.g. dirichlet's `alpha`) — `got`
+and the frozen value are then both lists, compared elementwise via
+`np.atleast_1d` (same convention the old stablehlo gate's `check_gradient`
+used).
 """
 from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+
+import numpy as np
 
 from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSCOREABLE
 from flatppl_testsuite.unified import stablehlo_exec as ex
@@ -64,11 +70,14 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
             continue
         for param, g in zip(grad_params, got):
             w = want[param]
-            ok = abs(g - w) < atol
+            gv = np.atleast_1d(np.asarray(g, dtype=float))
+            wv = np.atleast_1d(np.asarray(w, dtype=float))
+            worst = float(np.max(np.abs(gv - wv))) if gv.shape == wv.shape else float("inf")
+            ok = gv.shape == wv.shape and worst < atol
             results.append(CheckResult(
                 tid, f"gradient[{i}].{param}",
                 "passed" if ok else "failed",
                 "" if ok else NUMERIC_MISMATCH,
-                "" if ok else f"point {pt}: got {g!r}, want {w!r} (atol {atol})",
+                "" if ok else f"point {pt}: got {g!r}, want {w!r} (worst |Δ|={worst:.3g}, atol {atol})",
             ))
     return results
