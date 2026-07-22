@@ -1,0 +1,85 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "location",
+    "scale",
+    "xobs"
+  ],
+  "points": [
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -10.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -5.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -2.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -1.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": -0.3
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 0.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 0.5
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 1.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 2.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 5.0
+    },
+    {
+      "location": 0.0,
+      "scale": 1.0,
+      "xobs": 10.0
+    }
+  ],
+  "expected": [
+    -10.693147180559945,
+    -5.693147180559945,
+    -2.6931471805599454,
+    -1.6931471805599452,
+    -0.9931471805599453,
+    -0.6931471805599453,
+    -1.1931471805599454,
+    -1.6931471805599452,
+    -2.6931471805599454,
+    -5.693147180559945,
+    -10.693147180559945
+  ],
+  "tolerance": {
+    "value_atol_f32": 0.0001
+  }
+}

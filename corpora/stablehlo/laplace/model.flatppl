@@ -1,0 +1,3 @@
+location = elementof(reals)
+scale = elementof(posreals)
+a = draw(Laplace(location = location, scale = scale))
