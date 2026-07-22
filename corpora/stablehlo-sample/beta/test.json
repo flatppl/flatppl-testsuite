@@ -1,0 +1,42 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "alpha": 2.0,
+    "beta": 3.0
+  },
+  "inputs": [
+    "alpha",
+    "beta"
+  ],
+  "draws": 100000,
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "distribution",
+    "independence",
+    "key_reproducibility",
+    "key_advance",
+    "fanout_distribution"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "beta",
+      "kwargs": {
+        "a": 2.0,
+        "b": 3.0
+      }
+    },
+    "discrete": false,
+    "independence": "beta"
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}
