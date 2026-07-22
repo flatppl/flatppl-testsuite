@@ -3,9 +3,9 @@ test_type — a faithful port of `corpora/stablehlo/gate.py`'s five sample
 checks (`check_distribution`, `check_independence`,
 `check_sample_key_reproducibility`, `check_sample_key_advance`,
 `check_fanout_distribution` / `_discrete` / `_mvnormal` / `_dirichlet`) onto
-the per-test-dir harness. The other two checks in that gate's docstring
-(`logdensity_value`, `logdensity_gradient`) are NOT here — they already have a
-home in `runners/logdensity_stablehlo.py`.
+the per-test-dir harness. The other two checks in that gate's docstring are
+NOT here — `logdensity_value` has a home in `runners/logdensity_stablehlo.py`,
+`logdensity_gradient` in `runners/gradient_stablehlo.py`.
 
 Each check takes already-drawn samples (the runner owns emitting +
 executing) plus a frozen `stat` dict (written by a sample `test.py`'s
