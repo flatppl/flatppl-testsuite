@@ -1,0 +1,5 @@
+s = rnginit(0)
+xs ~ iid(Gamma(shape = shape, rate = rate), 200)
+draws = rand(s, lawof(xs))
+inputs = (shape, rate)
+outputs = (draws)
