@@ -1,0 +1,40 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "mu": 0.0,
+    "sigma": 0.75
+  },
+  "inputs": [
+    "mu",
+    "sigma"
+  ],
+  "draws": 100000,
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "distribution",
+    "key_reproducibility",
+    "key_advance",
+    "fanout_distribution"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "lognorm",
+      "kwargs": {
+        "s": 0.75,
+        "scale": 1.0
+      }
+    },
+    "discrete": false
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}
