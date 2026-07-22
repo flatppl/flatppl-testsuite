@@ -1,0 +1,2 @@
+nu = elementof(posreals)
+x = draw(StudentT(nu = nu))
