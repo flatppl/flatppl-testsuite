@@ -1,6 +1,8 @@
 {
   "test_type": "sample",
-  "engines": ["det-js"],
+  "engines": [
+    "det-js"
+  ],
   "model": "hier_normal.flatppl",
   "density_model": "hier_normal_density.flatppl",
   "oracle": "closed-form (independent oracle; see test.py)",

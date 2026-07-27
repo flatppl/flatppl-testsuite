@@ -1,6 +1,8 @@
 {
   "test_type": "convert",
-  "engines": ["det-js"],
+  "engines": [
+    "det-js"
+  ],
   "backend": "roofit 6.41.01",
   "fixture_kind": "fixture",
   "hs3": "hs3.json",
@@ -54,14 +56,14 @@
         "pdf": "genpdf"
       },
       "tolerance": {
-        "atol": 1e-03,
-        "rtol": 1e-04
+        "atol": 0.001,
+        "rtol": 0.0001
       }
     },
     {
       "id": "twice_delta_nll_scan_diverge",
       "kind": "twice_delta_nll_scan",
-      "note": "These scan points diverge from the RooFit reference by ~1e-3 relative. The 2DeltaNLL difference is dominated by the generic-pdf normalizer ∫_S w over the observable domain S, computed by numeric quadrature. RooFit's RooGenericPdf integrator carries ~1e-4 error in log(Z), which (×2N over 2000 events) yields the ~0.3-0.5 absolute gap. An independent scipy quadrature (accurate to ~1e-11) confirms the FlatPPL value is the more accurate one; the frozen RooFit vector is not reproducible to the static 1e-7 tolerance. Tolerance loosened to cover the reference integrator's imprecision.",
+      "note": "These scan points diverge from the RooFit reference by ~1e-3 relative. The 2DeltaNLL difference is dominated by the generic-pdf normalizer \u222b_S w over the observable domain S, computed by numeric quadrature. RooFit's RooGenericPdf integrator carries ~1e-4 error in log(Z), which (\u00d72N over 2000 events) yields the ~0.3-0.5 absolute gap. An independent scipy quadrature (accurate to ~1e-11) confirms the FlatPPL value is the more accurate one; the frozen RooFit vector is not reproducible to the static 1e-7 tolerance. Tolerance loosened to cover the reference integrator's imprecision.",
       "comparison": {
         "rule": "|evaluated - expected| <= atol + rtol * |expected|",
         "type": "pointwise_comp"
@@ -88,8 +90,8 @@
         "pdf": "genpdf"
       },
       "tolerance": {
-        "atol": 1e-02,
-        "rtol": 1e-02
+        "atol": 0.01,
+        "rtol": 0.01
       }
     }
   ]

@@ -19,10 +19,45 @@ lookup, not oracle computation — see sample_checks.py's module docstring).
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
 from flatppl_testsuite.unified.loader import load_test_module
+
+
+def _json_safe(v):
+    """A freshly computed oracle value, encoded so it survives JSON.
+
+    `json.dumps` emits bare `Infinity`/`-Infinity`/`NaN` by default, which are
+    not valid JSON (RFC 8259 defines no such literals). Python and `jq` accept
+    them, but a strict parser rejects them -- including JavaScript's
+    `JSON.parse`, and this repo scores through a Node engine. So a non-finite
+    value is frozen in the same STRING form the corpus already uses and
+    `detjs_exec.parse_expected` already reads back (e.g. fragment's `trunc_out`,
+    a truncation gate scored outside its support: density exactly 0, log-density
+    `-inf`). Recurses so vector/gradient/stat payloads are covered too."""
+    if isinstance(v, float):
+        if math.isnan(v):
+            return "nan"
+        if math.isinf(v):
+            return "inf" if v > 0 else "-inf"
+        return v
+    if isinstance(v, list):
+        return [_json_safe(x) for x in v]
+    if isinstance(v, tuple):
+        return [_json_safe(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _json_safe(x) for k, x in v.items()}
+    return v
+
+
+def _write(dir: Path, raw: dict) -> None:
+    """Write `test.json`. `allow_nan=False` makes any non-finite that escaped
+    `_json_safe` raise instead of silently emitting an invalid literal."""
+    (dir / "test.json").write_text(
+        json.dumps(raw, indent=2, allow_nan=False) + "\n"
+    )
 
 
 def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
@@ -42,32 +77,32 @@ def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
     if test_type == "sample":
         stat = mod.stat()
         if isinstance(stat, dict) and "distribution" in stat:
-            raw["stat"] = stat
+            raw["stat"] = _json_safe(stat)
         else:
             for check in raw["checks"]:
                 update = stat.get(check["id"])
                 if update:
-                    check.update(update)
-        (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
+                    check.update(_json_safe(update))
+        _write(dir, raw)
         return stat
     if test_type == "gradient":
         expected_grad = [mod.grad_oracle(pt) for pt in raw["points"]]
-        raw["expected_grad"] = expected_grad
-        (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
+        raw["expected_grad"] = _json_safe(expected_grad)
+        _write(dir, raw)
         return expected_grad
     if "points" not in raw:
         # Mode A (det-js logdensity, no `points`): a single reference point
         # baked into the model/oracle itself -- test.py::oracle() takes no
         # arguments and freezes one scalar.
         expected_scalar = float(mod.oracle())
-        raw["expected"] = expected_scalar
-        (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
+        raw["expected"] = _json_safe(expected_scalar)
+        _write(dir, raw)
         return [expected_scalar]
     # Mode B (det-js logdensity, `points` present): test.py::oracle(point) is
     # called once per point, in order, and the whole list is frozen.
     expected = [float(mod.oracle(pt)) for pt in raw["points"]]
-    raw["expected"] = expected
-    (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
+    raw["expected"] = _json_safe(expected)
+    _write(dir, raw)
     return expected
 
 

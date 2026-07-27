@@ -1,9 +1,14 @@
 {
   "test_type": "logdensity",
-  "engines": ["det-js"],
+  "engines": [
+    "det-js"
+  ],
   "model": "pushfwd_affine.flatppl",
   "binding": "lp",
   "expected": -1.737085713764618,
-  "tolerance": {"atol": 1e-09, "rtol": 1e-09},
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
   "oracle": "scipy 1.18"
 }

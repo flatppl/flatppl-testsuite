@@ -1,6 +1,8 @@
 {
   "test_type": "convert",
-  "engines": ["det-js"],
+  "engines": [
+    "det-js"
+  ],
   "backend": "roofit 6.41.01",
   "fixture_kind": "fixture",
   "hs3": "hs3.json",
@@ -13,9 +15,15 @@
       "id": "structure_import",
       "kind": "structure_import",
       "target": {
-        "data": ["modelData"],
+        "data": [
+          "modelData"
+        ],
         "functions": [],
-        "pdfs": ["gx", "model", "px"]
+        "pdfs": [
+          "gx",
+          "model",
+          "px"
+        ]
       }
     },
     {
@@ -24,7 +32,10 @@
         "type": "pointwise_comp"
       },
       "expected": [
-        590.5208590923485, 151.10860182664874, 0.0, 175.4611985362626,
+        590.5208590923485,
+        151.10860182664874,
+        0.0,
+        175.4611985362626,
         639.1134577899811
       ],
       "id": "twice_delta_nll_scan",
@@ -36,14 +47,20 @@
         "x": 0.0
       },
       "scan_parameter": "mx",
-      "scan_points": [-1.0, -0.5, 0.0, 0.5, 1.0],
+      "scan_points": [
+        -1.0,
+        -0.5,
+        0.0,
+        0.5,
+        1.0
+      ],
       "target": {
         "data": "modelData",
         "pdf": "model"
       },
       "tolerance": {
-        "atol": 1e-7,
-        "rtol": 1e-8
+        "atol": 1e-07,
+        "rtol": 1e-08
       }
     }
   ]

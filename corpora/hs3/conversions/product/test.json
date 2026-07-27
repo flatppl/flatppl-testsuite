@@ -1,6 +1,8 @@
 {
   "test_type": "convert",
-  "engines": ["det-js"],
+  "engines": [
+    "det-js"
+  ],
   "backend": "roofit 6.41.01",
   "fixture_kind": "conversion",
   "model": "product.flatppl",

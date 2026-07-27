@@ -1,6 +1,8 @@
 {
   "test_type": "convert",
-  "engines": ["det-js"],
+  "engines": [
+    "det-js"
+  ],
   "backend": "roofit 6.41.01",
   "fixture_kind": "fixture",
   "hs3": "hs3.json",
@@ -13,9 +15,15 @@
       "id": "structure_import",
       "kind": "structure_import",
       "target": {
-        "data": ["gaussxyData"],
+        "data": [
+          "gaussxyData"
+        ],
         "functions": [],
-        "pdfs": ["gaussx", "gaussxy", "gaussy"]
+        "pdfs": [
+          "gaussx",
+          "gaussxy",
+          "gaussy"
+        ]
       }
     },
     {
@@ -24,7 +32,10 @@
         "type": "pointwise_comp"
       },
       "expected": [
-        8039.674331180346, 2022.4132412088638, 0.0, 1896.2149102835338,
+        8039.674331180346,
+        2022.4132412088638,
+        0.0,
+        1896.2149102835338,
         7280.114739240858
       ],
       "id": "twice_delta_nll_scan",
@@ -38,14 +49,20 @@
         "y": 0.0
       },
       "scan_parameter": "mean1",
-      "scan_points": [0.0, 1.0, 2.0, 3.0, 4.0],
+      "scan_points": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
       "target": {
         "data": "gaussxyData",
         "pdf": "gaussxy"
       },
       "tolerance": {
-        "atol": 1e-7,
-        "rtol": 1e-8
+        "atol": 1e-07,
+        "rtol": 1e-08
       }
     }
   ]
