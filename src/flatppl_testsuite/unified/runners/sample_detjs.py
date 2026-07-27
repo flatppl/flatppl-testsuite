@@ -111,10 +111,23 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
             tol = {"atol": check["atol"], "rtol": check["rtol"]}
             oracle = load_test_module(dir)
             status, tag, detail = "passed", "", ""
+            # Both the variate field names and the scored binding come from the
+            # test dir, NOT from this runner: `_RUNNERS` dispatches on
+            # (test_type, engine) alone, so hardcoding one directory's schema
+            # here would silently score a future second (sample, det-js) dir
+            # against hier_normal's fields and binding.
+            density_binding = body.get("density_binding")
+            if not density_binding:
+                results.append(CheckResult(
+                    tid, check_id, "failed", UNSCOREABLE,
+                    "test.json declares `density_model` but no `density_binding` "
+                    "(the binding in that model to score)",
+                ))
+                continue
             for point in realizations[:n_points]:
-                theta = {"mu": point["mu"], "y1": point["y1"], "y2": point["y2"]}
+                theta = {b: point[b] for b in bindings}
                 try:
-                    got = ex.log_density_at(density_model_path, "m", theta)
+                    got = ex.log_density_at(density_model_path, density_binding, theta)
                     want = oracle.logdensity(**theta)
                     compare_scalar(got, want, tol)
                 except ex.DeterminizeRefused as e:

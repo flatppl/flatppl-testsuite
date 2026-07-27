@@ -5,6 +5,7 @@
   ],
   "model": "hier_normal.flatppl",
   "density_model": "hier_normal_density.flatppl",
+  "density_binding": "m",
   "oracle": "closed-form (independent oracle; see test.py)",
   "n_samples": 4000,
   "seed_base": 0,

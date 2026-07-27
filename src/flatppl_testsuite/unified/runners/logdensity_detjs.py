@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.scoring.result import (
     CheckResult, DETERMINIZE_SKIP, NUMERIC_MISMATCH, UNSCOREABLE,
 )
@@ -30,11 +31,16 @@ from flatppl_testsuite.unified.loader import TestSpec
 
 
 def _close(got: float, want: float, atol: float, rtol: float) -> bool:
-    if got == want:            # exact, and makes ±inf compare equal
+    """Thin adapter over the ONE shared comparator (`scoring/compare.py`), which
+    owns the ±inf and NaN rules: a truncation gate scored out of support has an
+    infinite expected value and no finite tolerance band, and NaN must never
+    match. This runner previously carried its own copy of that logic, which had
+    already drifted from the shared one on the NaN case."""
+    try:
+        compare_scalar(got, want, {"atol": atol, "rtol": rtol})
         return True
-    if got != got or want != want:   # NaN never matches
+    except AssertionError:
         return False
-    return abs(got - want) <= atol + rtol * abs(want)
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
