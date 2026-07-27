@@ -22,16 +22,14 @@ exactly the two check kinds that gate used:
   point, scored against the directory's companion ``density_model`` (a model
   with the identical joint law but no ``rand(...)`` wrapper -- appending a
   second query after ``rand()`` has already consumed the stochastic-phase
-  graph is refused by the determinizer). The closed-form formula is
-  duplicated inline here (mirroring ``sample_gate.py``'s
-  ``_closed_form_logdensity``, which itself duplicates
-  ``corpora/sample/oracle.py::logdensity``) rather than imported from the
-  directory's ``test.py`` at runtime: everywhere else in this harness a
-  dir's ``test.py`` oracle only runs offline, under ``regen.py``, to freeze
-  values into ``test.json`` -- the harness itself only compares at test
-  time. This check is the one exception forced by the model: sampled points
-  are only known at runtime, so there is no frozen scalar to compare
-  against, and the oracle must be evaluated live per swept point.
+  graph is refused by the determinizer). Sampled points are only known at
+  runtime, so there is no frozen scalar to compare against; this check is
+  the one place in this harness that loads a directory's ``test.py`` and
+  calls its oracle LIVE, at test time, rather than only offline under
+  ``regen.py`` (this runner dispatches on ``(test_type, engine)`` alone, so
+  the formula must live in the directory's own ``test.py``, not here --
+  otherwise a second ``(sample, det-js)`` directory would silently get
+  scored against this one's model).
 
 A determiniser refusal (exit 3) is a SKIP, not a failure, for every check in
 the directory (mirroring ``sample_gate.py``'s per-check skip loop).
@@ -42,11 +40,11 @@ import statistics
 from pathlib import Path
 
 from flatppl_testsuite.scoring.compare import compare_scalar
-from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSCOREABLE
+from flatppl_testsuite.scoring.result import (
+    CheckResult, DETERMINIZE_SKIP, NUMERIC_MISMATCH, UNSCOREABLE,
+)
 from flatppl_testsuite.unified import detjs_exec as ex
-from flatppl_testsuite.unified.loader import TestSpec
-
-DETERMINIZE_SKIP = "DETERMINIZE_SKIP"
+from flatppl_testsuite.unified.loader import TestSpec, load_test_module
 
 
 def _mean(xs: list[float]) -> float:
@@ -60,20 +58,6 @@ def _var(xs: list[float]) -> float:
 def _cov(xs: list[float], ys: list[float]) -> float:
     mx, my = _mean(xs), _mean(ys)
     return sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / (len(xs) - 1)
-
-
-def _closed_form_logdensity(mu: float, y1: float, y2: float) -> float:
-    """Independent closed-form joint log-density for the hierarchical-Normal
-    model, duplicated from ``corpora/sample/oracle.py::logdensity`` /
-    ``corpora/sample/hier_normal/test.py`` (see this module's docstring for
-    why it is duplicated rather than imported at runtime)."""
-    from scipy.stats import norm
-
-    return (
-        norm.logpdf(mu, 0.0, 10.0)
-        + norm.logpdf(y1, mu, 1.0)
-        + norm.logpdf(y2, mu, 1.0)
-    )
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
@@ -125,12 +109,13 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
         elif kind == "density_consistency":
             n_points = min(check["n_points"], len(realizations))
             tol = {"atol": check["atol"], "rtol": check["rtol"]}
+            oracle = load_test_module(dir)
             status, tag, detail = "passed", "", ""
             for point in realizations[:n_points]:
                 theta = {"mu": point["mu"], "y1": point["y1"], "y2": point["y2"]}
                 try:
                     got = ex.log_density_at(density_model_path, "m", theta)
-                    want = _closed_form_logdensity(**theta)
+                    want = oracle.logdensity(**theta)
                     compare_scalar(got, want, tol)
                 except ex.DeterminizeRefused as e:
                     status, tag, detail = "skipped", DETERMINIZE_SKIP, str(e)

@@ -2,30 +2,43 @@
 each dir's test.py.oracle(point) or test.py.stat() and writes the result into
 test.json. The ONLY place oracles execute; the harness at test time only
 compares (sample's `stat['distribution']` recipe is a deterministic scipy
-lookup, not oracle computation — see sample_checks.py's module docstring)."""
+lookup, not oracle computation — see sample_checks.py's module docstring).
+
+`test_type == "sample"` directories come in two `stat()` shapes:
+
+* the stablehlo-sample shape -- `stat()` returns a single KS-test recipe
+  (`{"distribution": {...}, "discrete": bool}`), frozen wholesale under the
+  top-level `stat` key (`sample_checks.py` reconstructs a live scipy frozen
+  distribution from it at test time).
+* the per-check shape (e.g. `corpora/sample/hier_normal`) -- `stat()` returns
+  `{check_id: {"expected": ..., "atol": ...}}` and each entry is merged into
+  the matching `checks[i]` (by `id`) in place; there is no top-level `stat`
+  key for this shape because the frozen values already live inline on each
+  check (mean/var/cov per binding), not as one recipe.
+"""
 from __future__ import annotations
 
-import importlib.util
 import json
 import sys
 from pathlib import Path
 
-
-def _load_module(dir: Path):
-    spec = importlib.util.spec_from_file_location(f"_oracle_{dir.name}", dir / "test.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
+from flatppl_testsuite.unified.loader import load_test_module
 
 
 def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
     dir = Path(dir)
     raw = json.loads((dir / "test.json").read_text())
-    mod = _load_module(dir)
+    mod = load_test_module(dir)
     test_type = raw.get("test_type")
     if test_type == "sample":
         stat = mod.stat()
-        raw["stat"] = stat
+        if isinstance(stat, dict) and "distribution" in stat:
+            raw["stat"] = stat
+        else:
+            for check in raw["checks"]:
+                update = stat.get(check["id"])
+                if update:
+                    check.update(update)
         (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
         return stat
     if test_type == "gradient":

@@ -16,11 +16,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSCOREABLE
+from flatppl_testsuite.scoring.result import (
+    CheckResult, DETERMINIZE_SKIP, NUMERIC_MISMATCH, UNSCOREABLE,
+)
 from flatppl_testsuite.unified import detjs_exec as ex
 from flatppl_testsuite.unified.loader import TestSpec
-
-DETERMINIZE_SKIP = "DETERMINIZE_SKIP"
 
 
 def _close(got: float, want: float, atol: float, rtol: float) -> bool:

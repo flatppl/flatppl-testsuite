@@ -1,9 +1,11 @@
 """Load + validate a per-test `test.json`."""
 from __future__ import annotations
 
+import importlib.util
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from types import ModuleType
 
 KNOWN_TEST_TYPES = {"logdensity", "sample", "gradient"}  # extend as runners land (convert)
 
@@ -31,3 +33,17 @@ def load_test(dir: Path) -> TestSpec:
 
 def discover_test_dirs(root: Path) -> list[Path]:
     return sorted(p.parent for p in Path(root).rglob("test.json"))
+
+
+def load_test_module(dir: Path) -> ModuleType:
+    """Dynamically load a test directory's `test.py` (its `oracle` /
+    `grad_oracle` / `stat` / `logdensity` functions, per test_type). The one
+    shared loader: `regen.py` uses it offline to freeze values into
+    `test.json`, and a runner may also use it at test time when a check has
+    no frozen scalar to compare against and must evaluate the directory's own
+    oracle live (e.g. `sample_detjs.py`'s `density_consistency` check)."""
+    dir = Path(dir)
+    spec = importlib.util.spec_from_file_location(f"_testmod_{dir.name}", dir / "test.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
