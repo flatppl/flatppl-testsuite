@@ -35,6 +35,28 @@ EXPECTED_COUNTS = {
 }
 EXPECTED_TOTAL = 97
 
+# corpus -> the engine set EVERY dir in it must declare.
+#
+# Pinning directory names is not enough: dropping `"stablehlo"` from the 14
+# examples dirs removes 14 StableHLO cases with a fully green run, since the
+# harness parametrizes over whatever `engines` each dir happens to declare. That
+# is the same silent coverage loss the examples corpus already suffered once when
+# its StableHLO gate was retired -- so the engine list is pinned too, not just
+# the roster.
+EXPECTED_ENGINES = {
+    "bayesian_inference": {"det-js"},
+    "examples": {"det-js", "stablehlo"},
+    "fragment": {"det-js"},
+    "hs3": {"det-js"},
+    "sample": {"det-js"},
+    "stablehlo": {"stablehlo"},
+    "stablehlo-gradient": {"stablehlo"},
+    "stablehlo-sample": {"stablehlo"},
+}
+# Total (dir, engine) pairs the harness must collect -- the number that actually
+# determines how many cases run.
+EXPECTED_CASES = 111
+
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
     "ex_bayesian_inference_1", "ex_bayesian_inference_2", "ex_best_estimation",
@@ -106,3 +128,35 @@ def test_sample_corpus_still_pins_the_covariance_check():
     cov = checks["cov_y1_y2"]
     assert cov.get("fields") == ["y1", "y2"], f"unexpected fields: {cov.get('fields')}"
     assert float(cov["expected"]) == 100.0, f"unexpected expected: {cov['expected']}"
+
+
+def _engines_by_dir() -> dict[str, list[str]]:
+    out: dict[str, list[str]] = {}
+    for f in _CORPORA.rglob("test.json"):
+        rel = f.parent.relative_to(_CORPORA)
+        out[str(rel)] = json.loads(f.read_text())["engines"]
+    return out
+
+
+def test_every_dir_declares_the_expected_engines():
+    """A dir quietly dropping an engine removes its cases with a green run."""
+    wrong = {}
+    for rel, engines in _engines_by_dir().items():
+        corpus = rel.split("/")[0]
+        want = EXPECTED_ENGINES.get(corpus)
+        if want is None:
+            wrong[rel] = f"corpus {corpus!r} not in EXPECTED_ENGINES"
+        elif set(engines) != want:
+            wrong[rel] = f"declares {sorted(engines)}, expected {sorted(want)}"
+    assert not wrong, (
+        "engine coverage changed. If intentional, update EXPECTED_ENGINES "
+        f"(and EXPECTED_CASES):\n" + "\n".join(f"  {k}: {v}" for k, v in sorted(wrong.items()))
+    )
+
+
+def test_total_collected_case_count():
+    """(dir, engine) pairs -- the number that decides how many cases actually run."""
+    cases = sum(len(v) for v in _engines_by_dir().values())
+    assert cases == EXPECTED_CASES, (
+        f"expected {EXPECTED_CASES} (dir, engine) cases, found {cases}"
+    )

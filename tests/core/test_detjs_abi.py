@@ -1,6 +1,7 @@
 """det-js scores an inputs/outputs ABI query module, not just a named binding.
 
-The ABI (flatppl-design §12, "Compilation ABI: `inputs` and `outputs`") is how a
+The ABI (flatppl-design "Determinization" -> "Signature: `inputs` and
+`outputs`") is how a
 query designates its arguments and results. The StableHLO path consumes it
 natively: one compiled module, the point passed as runtime args. det-js
 historically did not — `DetJsScoreEngine.log_density` appended its own

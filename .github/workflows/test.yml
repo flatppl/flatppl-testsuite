@@ -35,8 +35,12 @@ jobs:
       - name: Install pinned converter + JS engine (no ROOT)
         run: pixi run setup
 
+      # FLATPPL_REQUIRE_ENGINES makes a missing prerequisite for the named engine
+      # FAIL rather than skip. Without it a wrong FLATPPL_BIN or a missing dep
+      # degrades every case for that engine to a skip and the step still exits 0,
+      # silently deleting the gate this step exists to be.
       - name: Run FlatPPL tests against frozen ROOT-verified values
-        run: pixi run test
+        run: FLATPPL_REQUIRE_ENGINES=det-js pixi run test
 
       # StableHLO numeric-execution gate: the unified per-test-dir suite (one
       # dir per distribution/model under corpora/stablehlo/, each carrying its
@@ -46,4 +50,4 @@ jobs:
       # @sample distribution + multi-rng independence. Separate env (python
       # 3.12 / enzyme pins), so a separate step.
       - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
-        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo unified
+        run: FLATPPL_REQUIRE_ENGINES=stablehlo FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo unified

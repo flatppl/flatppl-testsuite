@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from flatppl_testsuite.formats.hs3.importer import assemble, convert
 
 _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
@@ -80,18 +82,55 @@ def test_assemble_rf101_by_name_uses_real_converter():
     )
 
 
-def test_converter_still_reproduces_the_committed_golden():
-    """`flatppl convert` output must still equal the committed `model.flatppl`.
+# --- golden conversion, over the WHOLE hs3 roster -------------------------------
+#
+# The unified `convert` runner converts in memory and never compares to the
+# committed golden, so a converter change that alters the emitted FlatPPL while
+# preserving the numbers goes unnoticed -- exactly the RHS-expansion class of
+# regression the structural tests above exist for. The legacy suite compared every
+# committed golden (`test_conversions.py`, `test_fixture_converted_flatppl`); this
+# restores that over all 8 dirs, not just rf101.
+#
+# Two dir shapes:
+#   fixtures/<n>/     hs3.json          -> model.flatppl
+#   conversions/<n>/  <n>.hs3.json      -> <n>.flatppl, whose tail after a
+#                                          `# === scoring ===` marker is
+#                                          HAND-WRITTEN (the scoring bindings the
+#                                          converter does not emit), so only the
+#                                          part before the marker is compared.
+_SCORING_MARKER = "# === scoring ==="
 
-    The legacy suite compared converter output against every committed golden
-    (`test_conversions.py`, `test_fixture_converted_flatppl`); the unified
-    `convert` runner converts in memory and never compares to the golden, so a
-    converter change that alters the emitted FlatPPL while preserving the
-    numbers would go unnoticed. This restores the check for rf101."""
-    got = _strip_generated_header(convert(RF101 / "hs3.json"))
-    want = _strip_generated_header((RF101 / "model.flatppl").read_text())
+
+def _golden_cases() -> list[tuple[str, Path, Path]]:
+    cases = []
+    for d in sorted((_CORPORA / "hs3" / "fixtures").iterdir()):
+        if (d / "hs3.json").exists() and (d / "model.flatppl").exists():
+            cases.append((f"fixtures/{d.name}", d / "hs3.json", d / "model.flatppl"))
+    for d in sorted((_CORPORA / "hs3" / "conversions").iterdir()):
+        hs3, gold = d / f"{d.name}.hs3.json", d / f"{d.name}.flatppl"
+        if hs3.exists() and gold.exists():
+            cases.append((f"conversions/{d.name}", hs3, gold))
+    return cases
+
+
+_GOLDEN = _golden_cases()
+
+
+def test_the_golden_roster_is_complete():
+    """All 8 hs3 dirs must be covered; a silently-shrinking list defeats this."""
+    assert len(_GOLDEN) == 8, f"expected 8 golden cases, found {[c[0] for c in _GOLDEN]}"
+
+
+@pytest.mark.parametrize("name,hs3,gold", _GOLDEN, ids=[c[0] for c in _GOLDEN])
+def test_converter_still_reproduces_the_committed_golden(name, hs3: Path, gold: Path):
+    got = _strip_generated_header(convert(hs3))
+    want = _strip_generated_header(gold.read_text())
+    # A conversions golden carries a hand-written scoring tail the converter
+    # never emits; compare only the converted part.
+    if _SCORING_MARKER in want:
+        want = want.split(_SCORING_MARKER)[0]
     assert got.strip() == want.strip(), (
-        "converter output no longer matches the committed model.flatppl golden; "
+        f"{name}: converter output no longer matches the committed golden; "
         "if the change is intended, re-pin the golden"
     )
 
@@ -99,11 +138,10 @@ def test_converter_still_reproduces_the_committed_golden():
 def _strip_generated_header(src: str) -> str:
     """Drop a leading `# AUTOMATICALLY GENERATED` provenance comment.
 
-    `convert()` emits that header; the committed goldens do not carry it (the
-    vendored `model.flatppl` files are the converter's output without it). The
-    header is provenance, not semantics, so comparing modulo it is what makes
-    the golden check about the emitted MODEL -- verified: for rf101 the two agree
-    on all 2016 remaining lines and differ only by that header."""
+    `convert()` emits that header; the committed goldens do not carry it. The
+    header is provenance, not semantics, so comparing modulo it keeps the check
+    about the emitted MODEL -- verified: for rf101 the two agree on all 2016
+    remaining lines and differ only by that header."""
     lines = src.splitlines()
     while lines and (
         not lines[0].strip() or lines[0].lstrip().startswith("# AUTOMATICALLY GENERATED")

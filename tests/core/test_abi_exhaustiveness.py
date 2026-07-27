@@ -1,21 +1,31 @@
-"""Every ABI query module in the corpus must list ALL its parameterized params.
+"""No corpus ABI query leaves a dead `elementof` behind.
 
-The compilation ABI (flatppl-design §12, "Compilation ABI: `inputs` and
-`outputs`") makes `inputs` authoritative and exhaustive:
+This is a deliberate HOUSE RULE, stricter than the spec -- read the next
+paragraph before treating a failure here as a conformance bug.
 
-    every parameterized `elementof` binding in the module must appear in it,
-    otherwise the declaration is ill-formed -- a parameter with no argument slot.
+The normative rule (flatppl-design "Determinization" -> "Signature: `inputs` and
+`outputs`") is:
 
-A test dir's emitted module is `model.flatppl` + `query.flatppl` concatenated
-(see `unified/runners/logdensity_stablehlo.py::_concat`), so the rule applies to
-the CONCATENATION: a query that introduces its own `t_<field>` params while the
-model already declares `elementof` bindings of its own must account for both.
+    `inputs` must list every `elementof` leaf that an output depends on
+    (otherwise the module is ill-formed); an `elementof` that no output reaches
+    is eliminated like any other unreached binding.
 
-This is a local guard rather than a redundant one: `flatppl stablehlo` does not
-currently enforce exhaustiveness (verified 2026-07-27 -- an unlisted
-`elementof` emits a func with one fewer argument and exits 0), so an
-ill-formed query here would score correctly and silently until the emitter
-starts refusing it.
+So an UNREACHED `elementof` is explicitly well-formed and simply eliminated, and
+`flatppl stablehlo` accepts such a module (exit 0). This test additionally
+forbids it, because in THIS corpus a parameterized param that no output reaches
+is always an authoring slip -- a query that meant to feed it and does not, or a
+leftover shadowing duplicate of a binding the model already declares. Catching
+that early is worth a rule the spec does not impose; it is not evidence of
+non-conformance.
+
+The reached case IS enforced by the emitter, and loudly -- an `elementof` that an
+output depends on but that `inputs` omits is refused with exit 3
+("elementof parameter `x` is not listed in `inputs`"), so for that case this test
+is a fast local echo of a check that already exists. What it uniquely covers is
+the CONCATENATION: a test dir's emitted module is `model.flatppl` + `query.flatppl`
+(see `unified/runners/logdensity_stablehlo.py::_concat`), so a query introducing
+its own params while the model declares params of its own has to account for both,
+and that combined view is not visible to either file alone.
 """
 from __future__ import annotations
 
@@ -60,9 +70,11 @@ def test_inputs_lists_every_parameterized_param(dir: Path):
     unlisted = sorted(params - listed)
     assert not unlisted, (
         f"{dir.name}: parameterized elementof binding(s) {unlisted} are not listed "
-        f"in `inputs` ({sorted(listed)}) -- ill-formed per the compilation ABI. "
-        "Either list them, or have the query reuse the model's own binding instead "
-        "of shadowing it with a duplicate."
+        f"in `inputs` ({sorted(listed)}). If an output depends on it the module is "
+        "ill-formed per the spec; if nothing reaches it the spec would eliminate it, "
+        "but this corpus forbids a dead param anyway (see this module's docstring). "
+        "Either list it, or have the query reuse the model's own binding instead of "
+        "shadowing it with a duplicate."
     )
 
 

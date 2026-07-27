@@ -85,7 +85,8 @@ def abi_input_names(flatpdl_src: str) -> list[str]:
     need not be named after the point's fields: they are usually `t_<field>`
     (prefixed to avoid colliding with the model's own bindings), but a query
     whose model already declares its point coordinates as `elementof` reuses
-    those bindings directly. Tuple order IS the ABI order (§12)."""
+    those bindings directly. Tuple order IS the ABI order (flatppl-design
+    "Determinization" -> "Signature: `inputs` and `outputs`")."""
     m = _INPUTS_BINDING.search(flatpdl_src)
     if m is None:
         raise ValueError("module declares no `inputs` binding (not an ABI module)")

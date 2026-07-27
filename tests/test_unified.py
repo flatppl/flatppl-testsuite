@@ -16,6 +16,8 @@ Run the stablehlo cases for real:
 """
 from __future__ import annotations
 
+import importlib
+import os
 from pathlib import Path
 
 import pytest
@@ -29,23 +31,59 @@ _CASES = [(d, engine) for d in _DIRS for engine in load_test(d).engines]
 _CASE_IDS = [f"{d.relative_to(_CORPORA)}::{engine}" for d, engine in _CASES]
 
 
+# Engines whose prerequisites must be PRESENT: a missing prerequisite for one of
+# these fails instead of skipping. Without it an environment fault degrades the
+# whole engine to skips and the run still exits 0 -- e.g. a wrong FLATPPL_BIN in
+# the stablehlo CI step turns all 111 stablehlo cases into skips and reports
+# success, silently removing the entire numeric-execution gate. That is the same
+# hole `assert_results_acceptable` closes for CheckResults, one level up, and it
+# takes out every case rather than one directory. CI sets this for the engine each
+# step exists to exercise; a developer's local run leaves it unset and still skips
+# politely.
+_REQUIRED_ENGINES = {
+    e.strip() for e in os.environ.get("FLATPPL_REQUIRE_ENGINES", "").split(",") if e.strip()
+}
+
+
+def _unavailable(engine: str, reason: str) -> None:
+    """Skip -- or FAIL, if this engine was declared required."""
+    if engine in _REQUIRED_ENGINES:
+        pytest.fail(
+            f"engine {engine!r} is required (FLATPPL_REQUIRE_ENGINES="
+            f"{os.environ.get('FLATPPL_REQUIRE_ENGINES')!r}) but unavailable: {reason}"
+        )
+    pytest.skip(reason)
+
+
 def _gate_engine(engine: str) -> None:
     """Deferred import + availability check, scoped to the one engine this
     case is about to run -- so a det-js-only case (base pixi env, no
     jax/enzyme installed at all) never touches the stablehlo import, and vice
     versa."""
     if engine == "stablehlo":
-        pytest.importorskip("jax", reason="unified harness stablehlo runner needs the `stablehlo` env")
-        pytest.importorskip("enzyme_ad", reason="unified harness stablehlo runner needs Enzyme-JAX")
+        for mod in ("jax", "enzyme_ad"):
+            try:
+                importlib.import_module(mod)
+            except ImportError:
+                _unavailable(
+                    engine,
+                    f"unified harness stablehlo runner needs `{mod}` (the `stablehlo` env)",
+                )
         from flatppl_testsuite.unified import stablehlo_exec as ex
 
         if not ex.binary_supports_stablehlo():
-            pytest.skip("FLATPPL_BIN must point at a `flatppl` built with the `stablehlo` feature")
+            _unavailable(
+                engine,
+                "FLATPPL_BIN must point at a `flatppl` built with the `stablehlo` feature",
+            )
     elif engine == "det-js":
         from flatppl_testsuite.unified import detjs_exec as ex
 
         if not ex.engine_available():
-            pytest.skip("FLATPPL_BIN / score_flatpdl.cjs must both be resolvable for the det-js runner")
+            _unavailable(
+                engine,
+                "FLATPPL_BIN / score_flatpdl.cjs must both be resolvable for the det-js runner",
+            )
 
 
 def assert_results_acceptable(results, allow_skip: bool) -> None:
