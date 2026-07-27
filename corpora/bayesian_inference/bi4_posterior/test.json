@@ -1,0 +1,9 @@
+{
+  "test_type": "logdensity",
+  "engines": ["det-js"],
+  "model": "bi4_posterior.flatppl",
+  "binding": "lp",
+  "expected": -74.10185205965193,
+  "tolerance": {"atol": 1e-09, "rtol": 1e-09},
+  "oracle": "scipy 1.18"
+}
