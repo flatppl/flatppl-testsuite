@@ -1,4 +1,7 @@
-t_theta1 = elementof(reals)
-t_theta2 = elementof(reals)
-inputs = (t_theta1, t_theta2)
-outputs = logdensityof(posterior, record(theta1 = t_theta1, theta2 = t_theta2))
+# This model declares its OWN evaluation-point coordinates as parameterized
+# params (`theta1`/`theta2` = elementof(reals)), so the ABI reuses those
+# bindings directly instead of shadowing them with `t_`-prefixed duplicates.
+# `inputs` is authoritative and exhaustive: duplicates would strand the
+# model's own params with no argument slot, which is ill-formed.
+inputs = (theta1, theta2)
+outputs = logdensityof(posterior, record(theta1 = theta1, theta2 = theta2))
