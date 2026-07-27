@@ -5,13 +5,16 @@ from pathlib import Path
 
 from flatppl_testsuite.scoring.result import CheckResult
 from flatppl_testsuite.unified.loader import TestSpec, load_test
-from flatppl_testsuite.unified.runners import gradient_stablehlo, logdensity_stablehlo, sample_stablehlo
+from flatppl_testsuite.unified.runners import (
+    gradient_stablehlo, logdensity_detjs, logdensity_stablehlo, sample_stablehlo,
+)
 
 # (test_type, engine) -> runner.run(spec, dir) -> list[CheckResult]
 _RUNNERS = {
     ("logdensity", "stablehlo"): logdensity_stablehlo.run,
     ("sample", "stablehlo"): sample_stablehlo.run,
     ("gradient", "stablehlo"): gradient_stablehlo.run,
+    ("logdensity", "det-js"): logdensity_detjs.run,
 }
 
 
