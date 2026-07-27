@@ -1,13 +1,19 @@
 """Runner: test_type=logdensity, engine=det-js.
 
-Two point-modes, discriminated by the presence of `points`:
+Three point-modes, chosen per test dir:
 
+* Mode ABI (`query.flatppl` present) -- PREFERRED. The dir carries an
+  inputs/outputs ABI query, so det-js scores exactly the module the StableHLO
+  runner scores: `outputs` evaluated with each declared input bound to that
+  point's value. One query, both engines, one frozen oracle.
 * Mode A (no `points`) -- the model is self-contained and ALREADY ends in the
   scored binding at a fixed point (`lp = logdensityof(m, <point>)`), so the
-  model IS the query. Scored with `score_binding`, one scalar check.
-* Mode B (`points` present) -- the model carries no point; for each point the
-  det-js engine appends `__score__ = logdensityof(<binding>, <theta record>)`
-  and scores that, one check per point.
+  model IS the query. Scored with `score_binding`, one scalar check. This is the
+  fragment/bayesian_inference shape; those dirs have no `query.flatppl`.
+* Mode B (`points`, but no `query.flatppl`) -- the theta-splice fallback: the
+  engine appends `__score__ = logdensityof(<binding>, <theta record>)` per point
+  and re-determinizes each time. Superseded by Mode ABI wherever a query exists;
+  retained for a multi-point dir that has not been given one.
 
 A determiniser refusal (exit 3) is a SKIP, not a failure: it means the model
 uses a construct outside the determiniser's density fragment.
@@ -53,15 +59,26 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                 "" if ok else f"got {got!r}, want {want!r} (atol {atol}, rtol {rtol})",
             )]
 
-        expected = body["expected"]                          # Mode B
+        expected = body["expected"]              # Mode ABI / Mode B
         if not isinstance(expected, list) or len(expected) != len(points):
             return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
                                 f"{len(points)} points but "
                                 f"{len(expected) if isinstance(expected, list) else 'scalar'} "
                                 "expected values (run regen)")]
+
+        query = dir / "query.flatppl"
+        if query.exists():                                   # Mode ABI
+            fields = body.get("inputs")
+            if not fields:
+                return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
+                                    "query.flatppl present but test.json declares no "
+                                    "`inputs` (ABI field order)")]
+            scores = ex.score_abi_points(model, query, fields, points)
+        else:                                                # Mode B (splice)
+            scores = [ex.log_density_at(model, binding, pt) for pt in points]
+
         out = []
-        for i, (pt, raw) in enumerate(zip(points, expected)):
-            got = ex.log_density_at(model, binding, pt)
+        for i, (pt, raw, got) in enumerate(zip(points, expected, scores)):
             want = ex.parse_expected(raw)
             ok = _close(got, want, atol, rtol)
             out.append(CheckResult(
