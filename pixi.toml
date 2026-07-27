@@ -17,8 +17,9 @@ python = ">=3.11"
 nodejs = "24.*"
 # rust provides cargo, used to install the flatppl CLI from git at a pinned rev.
 rust = ">=1.75"
-# INDEPENDENT oracle for corpora/fragment/gen_expected.py (closed-form
-# Normal/mixture/truncation/log-normal densities) — never the sibling engine.
+# INDEPENDENT oracle for the det-js corpora's test.py::oracle()/regen.py
+# offline path (closed-form Normal/mixture/truncation/log-normal densities,
+# etc.) — never the sibling engine.
 scipy = ">=1.11"
 
 [pypi-dependencies]
@@ -36,39 +37,24 @@ FLATPPL_JS_DIR = "${FLATPPL_JS_DIR:-$PIXI_PROJECT_ROOT/../flatppl-js}"
 [tasks]
 # One-time setup: install the pinned converter binary.
 setup = { cmd = "bash scripts/setup.sh" }
-# Run the conversion test suite the repo owner drops into tests/.
+# Run the whole test suite: tests/core/ (toolkit) + tests/test_unified.py (the
+# unified per-test-directory harness, det-js cases only in this env -- see
+# `unified` below for that alone).
 # `python -m pytest` (not the bare `pytest` console script) is robust when the
 # env exposes pytest as a module but not on PATH.
 test = "python -m pytest -q"
 # Convert one fixture (debugging aid): pixi run convert <hs3.json> <out.flatppl>
 convert = ".pixi-bin/bin/flatppl convert --from hs3"
-# Full numeric harness over the HS3TestSuite fixtures.
-harness = "python -m flatppl_testsuite"
-# Run the HS3 corpus and print formatted tables (fixtures 2DeltaNLL + conversions).
-hs3 = "python corpora/hs3/run_comparisons.py"
-# Render the HS3 scoring results as a Markdown report.
-report = "python corpora/hs3/report.py"
-# Run the HS3 corpus under the det-js engine (determinize -> score, no
-# convert-time measure algebra) and print a model -> PASS/SKIP/MISMATCH table.
-gate = "python corpora/hs3/gate.py"
-# Regenerate the conversions' frozen ROOT 2DeltaNLL vectors (needs the root env):
+# The unified per-test-directory harness alone (every `corpora/**/test.json`
+# dir, one case per (dir, engine) pair -- see tests/test_unified.py). In the
+# base env this runs every det-js case; run under `-e stablehlo` (with
+# FLATPPL_BIN + PYTHONPATH=$PWD/src) for the stablehlo cases too.
+unified = "python -m pytest tests/test_unified.py -q"
+# Regenerate the conversions corpus's frozen ROOT 2DeltaNLL vectors -- the
+# ROOT/RooFit oracle for the `(convert, det-js)` hs3 test dirs, which
+# `unified/regen.py` deliberately does NOT reproduce offline (needs the root env):
 #   pixi run -e root python corpora/hs3/conversions/gen_expected.py
 gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
-# Run the fragment corpus under the det-js engine (determinize -> score, no
-# convert-time measure algebra) and print a test_id -> PASS/SKIP/MISMATCH table.
-fragment = "python corpora/fragment/gate.py"
-# Run the sample corpus under the det-js engine (determinize -> seed-sweep ->
-# empirical stats vs closed-form oracle) and print a
-# test_id::check -> PASS/SKIP/MISMATCH table.
-sample = "python corpora/sample/gate.py"
-# Run the bayesian_inference corpus under the det-js engine (determinize ->
-# score, no convert-time measure algebra) and print a
-# test_id -> PASS/SKIP/MISMATCH table.
-bayesian_inference = "python corpora/bayesian_inference/gate.py"
-# Run the examples corpus under the det-js engine (determinize a constructed
-# posterior query -> score vs a frozen oracle, or assert refusal) and print a
-# test_id::check -> LOWERS/REFUSE/MISMATCH table.
-examples = "python corpora/examples/gate.py"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
@@ -109,19 +95,19 @@ jax = "==0.4.36"
 jaxlib = "==0.4.36"
 pytest = ">=8"
 
-# The gate tasks live on the feature (the `stablehlo` env is no-default-feature,
-# so the base `[tasks]` are not in scope). Point FLATPPL_BIN at a `flatppl`
-# built with the `stablehlo` feature (the subcommand is feature-gated).
-# Score every flatppl-examples posterior under StableHLO via a `load_module`
-# query module, execute under Enzyme-JAX, compare to the frozen scipy oracle.
-# Resolves the flatppl-examples checkout from FLATPPL_EXAMPLES_DIR (else the
-# sibling `../flatppl-examples`):
-#   FLATPPL_BIN=/path/to/target/release/flatppl pixi run -e stablehlo examples-shlo
+# The stablehlo-feature tasks live here (the `stablehlo` env is
+# no-default-feature, so the base `[tasks]` are not in scope). Point
+# FLATPPL_BIN at a `flatppl` built with the `stablehlo` feature (the
+# subcommand is feature-gated).
 [feature.stablehlo.tasks]
-examples-shlo = "python corpora/examples/gate_stablehlo.py"
 # Regenerate a unified test dir's frozen `expected` from its test.py oracle:
 #   pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 regen = "python -m flatppl_testsuite.unified.regen"
+# The unified harness's stablehlo cases (every `corpora/**/test.json` dir
+# listing "stablehlo" among its engines), executed via Enzyme-JAX:
+#   FLATPPL_BIN=/path/to/target/release/flatppl PYTHONPATH=$PWD/src \
+#     pixi run -e stablehlo unified
+unified = "python -m pytest tests/test_unified.py -q"
 
 [environments]
 root = ["root"]

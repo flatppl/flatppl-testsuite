@@ -32,14 +32,15 @@ data-only, so $\Delta(\log L)$ matches exactly.
 
 #### Verification
 
-Each model ships a frozen ROOT 2ΔNLL vector in `<model>/expected.json` (check kind
-`twice_delta_nll_points`). The harness scores the committed `<model>.flatppl` with the FlatPPL
-engine over the same θ points and compares — the same score+compare loop as the `fixtures/`
-corpus, with no hand-copied numbers. Run from the repo root:
+Each model ships a frozen ROOT 2ΔNLL vector in `<model>/test.json` (`test_type: "convert"`,
+`fixture_kind: "conversion"`, check kind `twice_delta_nll_points`). The unified harness scores
+the committed `<model>.flatppl` with the FlatPPL engine over the same θ points and compares — the
+same score+compare loop as the `fixtures/` corpus, with no hand-copied numbers. Run from the repo
+root:
 
 ```
-pixi run hs3                 # score every fixture + conversion, print comparison tables
-pixi run test                # the same checks, gated by pytest
+pixi run test                 # tests/core/ + the unified harness, incl. every conversion here
+pixi run unified               # the unified harness alone
 ```
 
 The frozen vectors are **generated from ROOT**, not the sibling engine. To regenerate after a
@@ -51,6 +52,6 @@ pixi run -e root gen-conversions
 
 | Script | Purpose |
 |--------|---------|
-| `gen_expected.py` | Regenerate each `expected.json` from the ROOT/RooFit oracle |
+| `gen_expected.py` | Regenerate each `test.json`'s frozen `expected` vector from the ROOT/RooFit oracle |
 | `regen.py` | Regenerate each `<model>.flatppl` from `<model>.hs3.json` via the converter |
 | `<model>/<model>_root.py` | Standalone ROOT/RooFit oracle table (ROOT ≥ 6.30) |

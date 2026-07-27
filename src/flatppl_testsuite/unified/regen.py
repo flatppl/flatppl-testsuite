@@ -55,6 +55,16 @@ def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
         raw["expected_grad"] = expected_grad
         (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
         return expected_grad
+    if "points" not in raw:
+        # Mode A (det-js logdensity, no `points`): a single reference point
+        # baked into the model/oracle itself -- test.py::oracle() takes no
+        # arguments and freezes one scalar.
+        expected_scalar = float(mod.oracle())
+        raw["expected"] = expected_scalar
+        (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
+        return [expected_scalar]
+    # Mode B (det-js logdensity, `points` present): test.py::oracle(point) is
+    # called once per point, in order, and the whole list is frozen.
     expected = [float(mod.oracle(pt)) for pt in raw["points"]]
     raw["expected"] = expected
     (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")

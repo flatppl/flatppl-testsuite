@@ -1,7 +1,8 @@
 """Root conftest: ensure repo root and src/ are on sys.path.
 
-This allows ``import corpora.hs3.tests.*`` and ``import flatppl_testsuite.*``
-to resolve from any test location (tests/, tests/core/, corpora/hs3/tests/).
+This allows ``import flatppl_testsuite.*`` (and, for the unified harness's
+runners under ``src/flatppl_testsuite/unified/``, dynamic loading of any
+``corpora/<corpus>/<test_id>/test.py``) to resolve from any test location.
 """
 import sys
 from pathlib import Path
