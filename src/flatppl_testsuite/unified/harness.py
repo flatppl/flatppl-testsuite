@@ -18,10 +18,13 @@ _RUNNERS = {
 }
 
 
-def run_test_dir(dir: Path) -> list[CheckResult]:
+def run_test_dir(dir: Path, engines: list[str] | None = None) -> list[CheckResult]:
+    """Run every check for `dir`, or only for `engines` if given (a subset of
+    the dir's `test.json` engines) -- lets a caller gate/dispatch one engine
+    at a time without one engine's skip suppressing another's checks."""
     spec: TestSpec = load_test(dir)
     out: list[CheckResult] = []
-    for engine in spec.engines:
+    for engine in (spec.engines if engines is None else engines):
         runner = _RUNNERS.get((spec.test_type, engine))
         if runner is None:
             out.append(CheckResult(

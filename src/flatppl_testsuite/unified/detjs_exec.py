@@ -29,8 +29,10 @@ def log_density_at(model: Path, binding: str, theta: dict) -> float:
 def parse_expected(v):
     """Frozen expected value -> float. `±inf`/`nan` cannot round-trip through
     JSON, so they are stored as the STRINGS "inf"/"-inf"/"nan" (e.g.
-    fragment's trunc_out, whose density outside the support is exactly 0)."""
-    return float(v) if not isinstance(v, str) else float(v)
+    fragment's trunc_out, whose density outside the support is exactly 0).
+    `float()` already parses those strings natively, so this is just a
+    documented single entry point for runners to call."""
+    return float(v)
 
 
 @lru_cache(maxsize=1)
