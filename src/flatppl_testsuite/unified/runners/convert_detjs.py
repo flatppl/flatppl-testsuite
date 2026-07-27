@@ -26,6 +26,7 @@ Skip semantics (legacy tags, preserved distinctly):
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -49,8 +50,35 @@ def _run_fixture(tid: str, dir: Path, body: dict) -> list[CheckResult]:
         kind = check["kind"]
 
         if kind == "static_integrity":
-            # Pass if the HS3 JSON is valid (already parsed above).
-            results.append(CheckResult(tid, check_id, "passed"))
+            # The vendored fixture must still be the content its frozen ROOT
+            # vector was computed against. Both the legacy gate and the first
+            # unified port passed unconditionally ("it parsed"), while the
+            # recorded per-fixture hashes went unread -- so a vendored copy could
+            # drift from its expected vector silently.
+            #
+            # Hash the CANONICAL form, not the raw bytes: the canonical form
+            # matches all 5 recorded hashes, whereas raw bytes match only 3
+            # (two fixtures carry formatting churn with identical semantic
+            # content), so raw-byte hashing would fail them for a difference
+            # that cannot affect any result.
+            want = check.get("canonical_sha256")
+            if not want:
+                results.append(CheckResult(
+                    tid, check_id, "failed", UNSCOREABLE,
+                    "static_integrity declares no `canonical_sha256`, so it "
+                    "verifies nothing",
+                ))
+                continue
+            got = hashlib.sha256(
+                json.dumps(hs3_doc, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
+            if got == want:
+                results.append(CheckResult(tid, check_id, "passed"))
+            else:
+                results.append(CheckResult(
+                    tid, check_id, "failed", NUMERIC_MISMATCH,
+                    f"vendored fixture has drifted: canonical sha256 {got} != {want}",
+                ))
             continue
 
         if kind == "structure_import":
