@@ -1,0 +1,4 @@
+t_theta = elementof(cartpow(reals, 4))
+t_b = elementof(cartpow(reals, 5))
+inputs = (t_theta, t_b)
+outputs = logdensityof(posterior, record(theta = t_theta, b = t_b))

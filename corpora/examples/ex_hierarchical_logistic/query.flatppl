@@ -1,0 +1,6 @@
+t_mu_a = elementof(reals)
+t_sigma_a = elementof(posreals)
+t_a = elementof(cartpow(reals, 3))
+t_b = elementof(reals)
+inputs = (t_mu_a, t_sigma_a, t_a, t_b)
+outputs = logdensityof(posterior, record(mu_a = t_mu_a, sigma_a = t_sigma_a, a = t_a, b = t_b))

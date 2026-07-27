@@ -13,6 +13,8 @@ def compare_scalar(actual: float, expected: float,
     An infinite `expected` (a truncation gate scored out of support) has no
     finite tolerance band, so it is compared with exact `==` instead.
     """
+    if math.isnan(actual) or math.isnan(expected):
+        raise AssertionError(f"got {actual!r}, expected {expected!r} (NaN never matches)")
     if math.isinf(expected):
         if actual != expected:
             raise AssertionError(f"got {actual!r}, expected {expected!r}")

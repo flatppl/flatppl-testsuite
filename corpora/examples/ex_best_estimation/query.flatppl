@@ -1,0 +1,7 @@
+t_mu1 = elementof(reals)
+t_mu2 = elementof(reals)
+t_sigma1 = elementof(interval(0.1, 20.0))
+t_sigma2 = elementof(interval(0.1, 20.0))
+t_nu = elementof(posreals)
+inputs = (t_mu1, t_mu2, t_sigma1, t_sigma2, t_nu)
+outputs = logdensityof(posterior, record(mu1 = t_mu1, mu2 = t_mu2, sigma1 = t_sigma1, sigma2 = t_sigma2, nu = t_nu))

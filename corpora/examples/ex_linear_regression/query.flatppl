@@ -1,0 +1,5 @@
+t_alpha = elementof(reals)
+t_beta = elementof(reals)
+t_sigma = elementof(posreals)
+inputs = (t_alpha, t_beta, t_sigma)
+outputs = logdensityof(posterior, record(alpha = t_alpha, beta = t_beta, sigma = t_sigma))
