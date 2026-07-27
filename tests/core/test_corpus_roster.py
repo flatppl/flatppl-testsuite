@@ -1,0 +1,108 @@
+"""The corpus inventory is pinned, so a test directory cannot vanish silently.
+
+`tests/test_unified.py` collects by `discover_test_dirs`, i.e. `rglob("test.json")`.
+That is convenient -- dropping in a directory is the whole point of the layout --
+but it means DELETING one, renaming it, or removing its `test.json` reduces the
+collected count with **no failing test**. Coverage silently shrinks and the suite
+still reports green.
+
+The legacy per-corpus gates guarded exactly this with literal roster assertions
+(`test_all_fragments_are_gated`, `test_all_posteriors_are_gated`,
+`test_all_examples_are_gated`, `test_all_sample_models_are_gated`,
+`test_conversions_are_gated`, and the `cov_y1_y2` structural check). Those were
+deleted with the gates; this module is their replacement, in one place.
+
+Updating these literals is intended when coverage genuinely changes -- adding a
+test dir should be a deliberate one-line edit here, not an invisible drift.
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+_CORPORA = Path(__file__).resolve().parents[2] / "corpora"
+
+# corpus -> number of test directories it must contain.
+EXPECTED_COUNTS = {
+    "bayesian_inference": 5,
+    "examples": 14,
+    "fragment": 17,
+    "hs3": 8,
+    "sample": 1,
+    "stablehlo": 20,
+    "stablehlo-gradient": 14,
+    "stablehlo-sample": 18,
+}
+EXPECTED_TOTAL = 97
+
+# The rosters whose individual membership the legacy gates pinned by name.
+EXPECTED_EXAMPLES = {
+    "ex_bayesian_inference_1", "ex_bayesian_inference_2", "ex_best_estimation",
+    "ex_capture_recapture", "ex_dissimilar_mixture", "ex_eight_schools",
+    "ex_gamma_reparam", "ex_hierarchical_logistic", "ex_linear_regression",
+    "ex_partial_pooling", "ex_poisson_glm_link", "ex_poisson_model",
+    "ex_rasch_1pl", "ex_zero_inflated_binomial",
+}
+EXPECTED_HS3 = {
+    "conversions/gaussian", "conversions/histfactory", "conversions/product",
+    "fixtures/rf101_basics", "fixtures/rf103_interprfuncs", "fixtures/rf203_ranges",
+    "fixtures/rf207_comptools", "fixtures/rf304_uncorrprod",
+}
+# Examples deliberately NOT given a test dir (recorded when the legacy
+# manifest.json that listed them was deleted).
+EXCLUDED_EXAMPLES = {
+    "minimal", "aggregates", "bayesian_inference_common",
+    "bayesian_inference_priors", "bayesian_inference_3", "bayesian_inference_4",
+}
+
+
+def _dirs_by_corpus() -> dict[str, set[str]]:
+    out: dict[str, set[str]] = {}
+    for f in _CORPORA.rglob("test.json"):
+        rel = f.parent.relative_to(_CORPORA)
+        out.setdefault(rel.parts[0], set()).add(str(Path(*rel.parts[1:])))
+    return out
+
+
+def test_every_corpus_has_its_expected_number_of_test_dirs():
+    actual = {k: len(v) for k, v in _dirs_by_corpus().items()}
+    assert actual == EXPECTED_COUNTS, (
+        "corpus inventory changed. If this is intentional, update EXPECTED_COUNTS "
+        f"(and EXPECTED_TOTAL) in this file.\n  expected: {EXPECTED_COUNTS}\n"
+        f"  actual:   {actual}"
+    )
+
+
+def test_total_test_dir_count():
+    total = sum(len(v) for v in _dirs_by_corpus().values())
+    assert total == EXPECTED_TOTAL, (
+        f"expected {EXPECTED_TOTAL} test dirs, found {total}"
+    )
+
+
+def test_examples_roster_by_name():
+    assert _dirs_by_corpus().get("examples", set()) == EXPECTED_EXAMPLES
+
+
+def test_hs3_roster_by_name():
+    assert _dirs_by_corpus().get("hs3", set()) == EXPECTED_HS3
+
+
+def test_excluded_examples_have_no_test_dir():
+    """The 6 deliberately-excluded examples must not acquire one silently."""
+    present = _dirs_by_corpus().get("examples", set())
+    leaked = sorted(EXCLUDED_EXAMPLES & {p.removeprefix("ex_") for p in present})
+    assert not leaked, f"excluded example(s) gained a test dir: {leaked}"
+
+
+def test_sample_corpus_still_pins_the_covariance_check():
+    """`cov_y1_y2` is the check the sample corpus exists for -- a shared-ancestor
+    hierarchical model induces covariance between its leaves, and 100.0 is the
+    closed-form value. The legacy suite pinned its id, fields and expected value
+    structurally so the check could not be quietly dropped or renamed."""
+    body = json.loads((_CORPORA / "sample" / "hier_normal" / "test.json").read_text())
+    checks = {c["id"]: c for c in body["checks"]}
+    assert "cov_y1_y2" in checks, f"cov_y1_y2 check gone (have: {sorted(checks)})"
+    cov = checks["cov_y1_y2"]
+    assert cov.get("fields") == ["y1", "y2"], f"unexpected fields: {cov.get('fields')}"
+    assert float(cov["expected"]) == 100.0, f"unexpected expected: {cov['expected']}"
