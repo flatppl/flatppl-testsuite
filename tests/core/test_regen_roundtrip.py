@@ -77,9 +77,23 @@ def test_regen_preserves_the_frozen_value(tmp_path: Path):
     "dirname", ["superpose", "pushfwd_exp", "kchain_bern"], ids=lambda s: s
 )
 def test_regen_is_value_preserving_for_finite_dirs(tmp_path: Path, dirname: str):
-    """The finite Mode-A dirs must round-trip unchanged too."""
+    """The finite Mode-A dirs must round-trip unchanged too.
+
+    Compared to a few ULP rather than bit-exactly. An earlier version of this test
+    asserted `repr` equality and failed in CI on `kchain_bern`
+    (-1.628203311361044 -> -1.6282033113610441): exactly 1 ULP, 1.4e-16 relative,
+    from libm differing between macOS and Linux when scipy recomputes the oracle.
+    That is not the property under test -- the value-preservation this guards is
+    "regen did not CHANGE the number", and any real change is orders of magnitude
+    larger than this (the dirs' own harness tolerance is 1e-9). Asserting
+    bit-exactness across platforms would make the test fail for a reason that
+    cannot affect a single result.
+    """
     d = _copy_dir(_CORPORA / "fragment" / dirname, tmp_path / dirname)
-    before = json.loads((d / "test.json").read_text())["expected"]
+    before = float(json.loads((d / "test.json").read_text())["expected"])
     regen_dir(d)
-    after = json.loads((d / "test.json").read_text())["expected"]
-    assert repr(before) == repr(after), f"{dirname}: {before!r} -> {after!r}"
+    after = float(json.loads((d / "test.json").read_text())["expected"])
+    # A few ULP of slack; still ~7 orders tighter than the harness's own 1e-9.
+    assert after == pytest.approx(before, rel=1e-14, abs=1e-14), (
+        f"{dirname}: regen changed the frozen value {before!r} -> {after!r}"
+    )
