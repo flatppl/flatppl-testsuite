@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 
-KNOWN_TEST_TYPES = {"logdensity", "sample", "gradient"}  # extend as runners land (convert)
+KNOWN_TEST_TYPES = {"logdensity", "sample", "gradient", "convert"}  # extend as runners land
 
 
 @dataclass(frozen=True)

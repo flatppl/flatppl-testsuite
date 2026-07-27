@@ -73,3 +73,12 @@ def test_detjs_sample_hier_normal():
     assert all(r.status == "passed" for r in results), [
         (r.check_id, r.status, r.message) for r in results
     ]
+
+
+def test_convert_hs3_rf101_basics():
+    d = _CORPORA / "hs3" / "fixtures" / "rf101_basics"
+    results = run_test_dir(d)
+    assert results
+    assert all(r.status in ("passed", "skipped") for r in results), [
+        (r.check_id, r.status, r.message) for r in results
+    ]

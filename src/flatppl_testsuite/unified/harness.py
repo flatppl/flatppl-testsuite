@@ -6,8 +6,8 @@ from pathlib import Path
 from flatppl_testsuite.scoring.result import CheckResult
 from flatppl_testsuite.unified.loader import TestSpec, load_test
 from flatppl_testsuite.unified.runners import (
-    gradient_stablehlo, logdensity_detjs, logdensity_stablehlo, sample_detjs,
-    sample_stablehlo,
+    convert_detjs, gradient_stablehlo, logdensity_detjs, logdensity_stablehlo,
+    sample_detjs, sample_stablehlo,
 )
 
 # (test_type, engine) -> runner.run(spec, dir) -> list[CheckResult]
@@ -17,6 +17,7 @@ _RUNNERS = {
     ("gradient", "stablehlo"): gradient_stablehlo.run,
     ("logdensity", "det-js"): logdensity_detjs.run,
     ("sample", "det-js"): sample_detjs.run,
+    ("convert", "det-js"): convert_detjs.run,
 }
 
 

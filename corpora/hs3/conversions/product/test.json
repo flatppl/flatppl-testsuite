@@ -1,0 +1,42 @@
+{
+  "test_type": "convert",
+  "engines": ["det-js"],
+  "backend": "roofit 6.41.01",
+  "fixture_kind": "conversion",
+  "model": "product.flatppl",
+  "checks": [
+    {
+      "id": "twice_delta_nll_points",
+      "kind": "twice_delta_nll_points",
+      "binding": "likelihood",
+      "reference_point": {
+        "mu1": 0.0,
+        "sigma1": 1.0,
+        "mu2": 1.0,
+        "sigma2": 2.0
+      },
+      "points": [
+        {
+          "mu1": 0.0,
+          "sigma1": 1.0,
+          "mu2": 1.0,
+          "sigma2": 2.0
+        },
+        {
+          "mu1": 0.5,
+          "sigma1": 1.0,
+          "mu2": 1.0,
+          "sigma2": 2.0
+        }
+      ],
+      "expected": [
+        0.0,
+        -2.6171642316370054
+      ],
+      "tolerance": {
+        "atol": 0.0002,
+        "rtol": 0.0001
+      }
+    }
+  ]
+}
