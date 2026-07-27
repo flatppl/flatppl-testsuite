@@ -1,13 +1,22 @@
-"""StableHLO fallback-coverage: a model declaring neither `inputs` nor
-`outputs` must be REFUSED (exit 3), not silently emitted through some legacy
-last-public-binding heuristic.
+"""flatppl-rust refuses a model declaring neither `inputs` nor `outputs`.
+
+This pins an IMPLEMENTATION CHOICE, not a spec mandate. The spec
+("Determinization" -> "Signature: `inputs` and `outputs`") ends:
+
+    Absent both bindings, an engine MAY locate outputs and arguments by an
+    implementation-defined convention; that fallback carries no normative force.
+
+So refusing is permitted, not required — another engine could legitimately apply
+a convention instead. What makes this worth pinning is that flatppl-rust
+deliberately removed its old last-public-binding heuristic, and a silent
+regression back to it would be invisible: a module with no ABI would start
+emitting again, against a query nobody declared. Exit 3 is the observable that
+says the heuristic is still gone.
 
 Ported from the deleted `corpora/examples/gate_stablehlo.py`'s
-`check_legacy_no_abi_refused` (design doc "Fallback + migration"): the
-concrete-point query convention every check used before the `inputs`/`outputs`
-ABI landed has no fallback left — it must refuse outright. This only needs the
-`flatppl` CLI and a tiny inline no-ABI model, so it lives in tests/core/
-rather than threading through the examples corpus or an executor.
+`check_legacy_no_abi_refused`. Needs only the `flatppl` CLI and a tiny inline
+no-ABI model, so it lives in tests/core/ rather than threading through the
+examples corpus or an executor.
 """
 from __future__ import annotations
 
