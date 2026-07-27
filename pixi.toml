@@ -50,16 +50,19 @@ convert = ".pixi-bin/bin/flatppl convert --from hs3"
 # base env this runs every det-js case; run under `-e stablehlo` (with
 # FLATPPL_BIN + PYTHONPATH=$PWD/src) for the stablehlo cases too.
 unified = "python -m pytest tests/test_unified.py -q"
-# Regenerate the conversions corpus's frozen ROOT 2DeltaNLL vectors -- the
-# ROOT/RooFit oracle for the `(convert, det-js)` hs3 test dirs, which
-# `unified/regen.py` deliberately does NOT reproduce offline (needs the root env):
-#   pixi run -e root python corpora/hs3/conversions/gen_expected.py
-gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
 # kept in separate features so the base environment stays light.
 # ---------------------------------------------------------------------------
+# The ROOT oracle task lives on the feature, not the base env: it imports ROOT,
+# so exposing it in the default env only invites `pixi run gen-conversions` to
+# fail (or, before the merge fix, to appear to succeed while writing nothing the
+# harness reads). Refresh the hs3 conversions' frozen 2DeltaNLL vectors with:
+#   pixi run -e root gen-conversions
+[feature.root.tasks]
+gen-conversions = { cmd = "python corpora/hs3/conversions/gen_expected.py" }
+
 [feature.root.dependencies]
 root = ">=6.30"
 
