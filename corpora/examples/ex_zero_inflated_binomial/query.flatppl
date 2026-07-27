@@ -1,0 +1,4 @@
+t_p = elementof(interval(0.0, 1.0))
+t_psi = elementof(interval(0.0, 1.0))
+inputs = (t_p, t_psi)
+outputs = logdensityof(posterior, record(p = t_p, psi = t_psi))

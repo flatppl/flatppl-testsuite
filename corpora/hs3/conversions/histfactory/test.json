@@ -1,0 +1,90 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "backend": "roofit 6.41.01",
+  "backend_provenance": "Frozen under roofit 6.41.01 (the `backend` field). Independently reconfirmed 2026-07-27 under ROOT 6.40.02 via `pixi run -e root gen-conversions`, which reproduced this vector exactly -- a cross-version confirmation, not a re-pin. A future refresh overwrites `backend` with whatever ROOT produced the numbers then.",
+  "fixture_kind": "conversion",
+  "model": "histfactory.flatppl",
+  "checks": [
+    {
+      "id": "twice_delta_nll_points",
+      "kind": "twice_delta_nll_points",
+      "binding": "likelihood",
+      "reference_point": {
+        "mu": 1.0,
+        "syst1": 0.0,
+        "syst2": 0.0,
+        "syst3": 0.0,
+        "mcstat": [
+          1.0,
+          1.0
+        ]
+      },
+      "points": [
+        {
+          "mu": 1.0,
+          "syst1": 0.0,
+          "syst2": 0.0,
+          "syst3": 0.0,
+          "mcstat": [
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "mu": 1.5,
+          "syst1": 0.5,
+          "syst2": 0.0,
+          "syst3": 0.0,
+          "mcstat": [
+            1.1,
+            1.0
+          ]
+        },
+        {
+          "mu": 0.5,
+          "syst1": -0.3,
+          "syst2": 0.2,
+          "syst3": 0.0,
+          "mcstat": [
+            0.9,
+            1.1
+          ]
+        },
+        {
+          "mu": 2.0,
+          "syst1": 1.0,
+          "syst2": -1.0,
+          "syst3": 0.5,
+          "mcstat": [
+            1.2,
+            0.8
+          ]
+        },
+        {
+          "mu": 0.0,
+          "syst1": 0.0,
+          "syst2": 0.0,
+          "syst3": 0.0,
+          "mcstat": [
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "expected": [
+        0.0,
+        6.647424258048886,
+        9.560402800109841,
+        29.735370956759198,
+        5.835940133893928
+      ],
+      "tolerance": {
+        "atol": 1e-06,
+        "rtol": 1e-06
+      }
+    }
+  ]
+}

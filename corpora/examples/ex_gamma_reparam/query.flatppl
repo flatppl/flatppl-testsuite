@@ -1,0 +1,4 @@
+t_mu = elementof(reals)
+t_sigma = elementof(posreals)
+inputs = (t_mu, t_sigma)
+outputs = logdensityof(posterior, record(mu = t_mu, sigma = t_sigma))

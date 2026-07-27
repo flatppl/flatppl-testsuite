@@ -1,0 +1,10 @@
+# This model declares its own `theta1`/`theta2` as elementof params, so the ABI
+# reuses those bindings rather than shadowing them with `t_`-prefixed duplicates.
+# That is a STYLE choice, not a correctness fix: the shadowing form was legal and
+# scored correctly. Under the spec ("Determinization" -> "Signature: `inputs` and
+# `outputs`") only elementof leaves an output DEPENDS ON must be listed, and
+# `kernelof` abstracts this model's own theta1/theta2 into kernel boundary inputs,
+# so `outputs` never reached them and they were eliminated as unreached. Reusing
+# them just makes `inputs` name the same coordinates the point record uses.
+inputs = (theta1, theta2)
+outputs = logdensityof(posterior, record(theta1 = theta1, theta2 = theta2))

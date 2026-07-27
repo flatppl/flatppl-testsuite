@@ -1,0 +1,35 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "lowers",
+  "points": [
+    {
+      "p": 0.5,
+      "psi": 0.5
+    },
+    {
+      "p": 0.35,
+      "psi": 0.7
+    }
+  ],
+  "expected": [
+    -32.71689036287145,
+    -21.295777749753334
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09,
+    "value_atol_f32": 0.001,
+    "value_rtol_f32": 0.0001
+  },
+  "oracle": "scipy 1.18",
+  "inputs": [
+    "p",
+    "psi"
+  ]
+}

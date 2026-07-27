@@ -1,0 +1,3 @@
+t_lambda = elementof(posreals)
+inputs = t_lambda
+outputs = logdensityof(posterior, record(lambda = t_lambda))

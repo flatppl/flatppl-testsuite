@@ -1,0 +1,5 @@
+t_phi = elementof(interval(0.0, 1.0))
+t_kappa = elementof(posreals)
+t_theta = elementof(cartpow(interval(0.0, 1.0), 8))
+inputs = (t_phi, t_kappa, t_theta)
+outputs = logdensityof(posterior, record(phi = t_phi, kappa = t_kappa, theta = t_theta))

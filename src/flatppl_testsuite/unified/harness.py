@@ -5,20 +5,29 @@ from pathlib import Path
 
 from flatppl_testsuite.scoring.result import CheckResult
 from flatppl_testsuite.unified.loader import TestSpec, load_test
-from flatppl_testsuite.unified.runners import gradient_stablehlo, logdensity_stablehlo, sample_stablehlo
+from flatppl_testsuite.unified.runners import (
+    convert_detjs, gradient_stablehlo, logdensity_detjs, logdensity_stablehlo,
+    sample_detjs, sample_stablehlo,
+)
 
 # (test_type, engine) -> runner.run(spec, dir) -> list[CheckResult]
 _RUNNERS = {
     ("logdensity", "stablehlo"): logdensity_stablehlo.run,
     ("sample", "stablehlo"): sample_stablehlo.run,
     ("gradient", "stablehlo"): gradient_stablehlo.run,
+    ("logdensity", "det-js"): logdensity_detjs.run,
+    ("sample", "det-js"): sample_detjs.run,
+    ("convert", "det-js"): convert_detjs.run,
 }
 
 
-def run_test_dir(dir: Path) -> list[CheckResult]:
+def run_test_dir(dir: Path, engines: list[str] | None = None) -> list[CheckResult]:
+    """Run every check for `dir`, or only for `engines` if given (a subset of
+    the dir's `test.json` engines) -- lets a caller gate/dispatch one engine
+    at a time without one engine's skip suppressing another's checks."""
     spec: TestSpec = load_test(dir)
     out: list[CheckResult] = []
-    for engine in spec.engines:
+    for engine in (spec.engines if engines is None else engines):
         runner = _RUNNERS.get((spec.test_type, engine))
         if runner is None:
             out.append(CheckResult(

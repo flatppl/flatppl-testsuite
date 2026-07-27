@@ -5,13 +5,6 @@ on:
     branches: [main]
   pull_request:
 
-# Gate the FlatPPL engine against the frozen, ROOT-verified values only. The
-# live ROOT/pyHS3 oracle (heavy conda stacks) is never run in CI — FLATPPL_NO_ORACLE
-# short-circuits it so the oracle envs are never solved or installed; those tests
-# skip. The frozen expected.json vectors were produced by ROOT offline.
-env:
-  FLATPPL_NO_ORACLE: "1"
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -42,8 +35,12 @@ jobs:
       - name: Install pinned converter + JS engine (no ROOT)
         run: pixi run setup
 
+      # FLATPPL_REQUIRE_ENGINES makes a missing prerequisite for the named engine
+      # FAIL rather than skip. Without it a wrong FLATPPL_BIN or a missing dep
+      # degrades every case for that engine to a skip and the step still exits 0,
+      # silently deleting the gate this step exists to be.
       - name: Run FlatPPL tests against frozen ROOT-verified values
-        run: pixi run test
+        run: FLATPPL_REQUIRE_ENGINES=det-js pixi run test
 
       # StableHLO numeric-execution gate: the unified per-test-dir suite (one
       # dir per distribution/model under corpora/stablehlo/, each carrying its
@@ -53,17 +50,4 @@ jobs:
       # @sample distribution + multi-rng independence. Separate env (python
       # 3.12 / enzyme pins), so a separate step.
       - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
-        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo python -m pytest tests/test_unified.py -q
-
-      # Examples corpus under StableHLO: score each flatppl-examples posterior
-      # via a `load_module` query module, execute under Enzyme-JAX, compare to
-      # the frozen scipy oracle. Needs the flatppl-examples checkout (unlike the
-      # in-repo stablehlo corpus above) — clone it blobless and point the gate
-      # at it via FLATPPL_EXAMPLES_DIR. Placed AFTER `pixi run test` so that
-      # pytest path is unchanged (its det-js examples suite still skips when the
-      # checkout is absent at that point).
-      - name: Fetch flatppl-examples for the StableHLO examples gate
-        run: git clone --filter=blob:none https://github.com/flatppl/flatppl-examples "$HOME/flatppl-examples"
-
-      - name: Run StableHLO examples posterior-scoring gate (Enzyme-JAX)
-        run: FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" FLATPPL_EXAMPLES_DIR="$HOME/flatppl-examples" PYTHONPATH="$PWD/src" pixi run -e stablehlo examples-shlo
+        run: FLATPPL_REQUIRE_ENGINES=stablehlo FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo unified

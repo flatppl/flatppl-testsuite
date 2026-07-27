@@ -1,0 +1,14 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "eight_schools_posterior.flatppl",
+  "binding": "lp",
+  "expected": -43.43563727714813,
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18"
+}

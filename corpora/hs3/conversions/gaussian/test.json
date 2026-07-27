@@ -1,0 +1,44 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "backend": "roofit 6.41.01",
+  "backend_provenance": "Frozen under roofit 6.41.01 (the `backend` field). Independently reconfirmed 2026-07-27 under ROOT 6.40.02 via `pixi run -e root gen-conversions`, which reproduced this vector exactly -- a cross-version confirmation, not a re-pin. A future refresh overwrites `backend` with whatever ROOT produced the numbers then.",
+  "fixture_kind": "conversion",
+  "model": "gaussian.flatppl",
+  "checks": [
+    {
+      "id": "twice_delta_nll_points",
+      "kind": "twice_delta_nll_points",
+      "binding": "obs",
+      "reference_point": {
+        "mu": 0.0,
+        "sigma": 1.0
+      },
+      "points": [
+        {
+          "mu": 0.0,
+          "sigma": 1.0
+        },
+        {
+          "mu": 0.5,
+          "sigma": 1.0
+        },
+        {
+          "mu": 1.27,
+          "sigma": 1.0
+        }
+      ],
+      "expected": [
+        0.0,
+        -1.0199999999999996,
+        -1.6128999999999998
+      ],
+      "tolerance": {
+        "atol": 1e-07,
+        "rtol": 1e-08
+      }
+    }
+  ]
+}

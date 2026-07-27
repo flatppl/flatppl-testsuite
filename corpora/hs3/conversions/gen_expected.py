@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generate ``conversions/<model>/expected.json`` from the ROOT/RooFit oracle.
+"""Refresh ``conversions/<model>/test.json``'s frozen ROOT vector.
 
 For each HS3 paper example, evaluate the converted likelihood's 2DeltaNLL over a
-set of theta points with ROOT (the authority) and freeze it as ``expected.json``
-(check kind ``twice_delta_nll_points``). The harness then scores the committed
+set of theta points with ROOT (the authority) and freeze it into that dir's
+``test.json`` (check kind ``twice_delta_nll_points``), MERGING in place so the
+unified envelope (``test_type``/``engines``/``fixture_kind``/``model``) and the
+check's own points and tolerance survive untouched. This is the only refresh
+path for these vectors: ``unified/regen.py`` refuses ``test_type: "convert"``
+and points here. The harness then scores the committed
 ``<model>.flatppl`` with the FlatPPL engine and compares against this frozen ROOT
 vector — the same score+compare loop as the fixtures, with no hand-copied
 numbers (which is what let ``repro_hs3_js.cjs`` silently rot when the converter
@@ -30,7 +34,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import ROOT
+try:  # ROOT is only present in the `root` pixi env; the merge helper below
+    import ROOT  # is pure and must stay importable (and testable) without it.
+except ImportError:  # pragma: no cover - exercised by the non-root env
+    ROOT = None
 
 HERE = Path(__file__).resolve().parent
 
@@ -109,31 +116,46 @@ def root_logL(hs3: Path, pdf_name: str, data_name: str, globals_: list[str]):
     return logL
 
 
+def merged_doc(current: dict, expected: list[float], backend: str) -> dict:
+    """`current` test.json with the refreshed ROOT numbers merged in.
+
+    Deliberately a MERGE, not a rebuild: the pre-migration version rebuilt the
+    document from scratch in the legacy `expected.json` schema, which after the
+    migration meant writing a file nothing reads and silently leaving the frozen
+    vectors stale. Only `expected` (and the ROOT version in `backend`) may
+    change; `test_type`, `engines`, `fixture_kind`, `model`, and the check's
+    `points`/`reference_point`/`tolerance`/`binding` are carried through, so a
+    refresh that finds the same numbers is a byte-identical no-op."""
+    doc = json.loads(json.dumps(current))  # deep copy; never mutate the caller's
+    doc["backend"] = backend
+    checks = doc.get("checks") or []
+    target = next(
+        (c for c in checks if c.get("kind") == "twice_delta_nll_points"), None
+    )
+    if target is None:
+        raise KeyError(
+            "test.json has no `twice_delta_nll_points` check to refresh "
+            f"(kinds present: {[c.get('kind') for c in checks]})"
+        )
+    if len(expected) != len(target.get("points", [])):
+        raise ValueError(
+            f"refreshed {len(expected)} values but the check declares "
+            f"{len(target.get('points', []))} points"
+        )
+    target["expected"] = expected
+    return doc
+
+
 def gen(model: str, cfg: dict) -> None:
     hs3 = HERE / model / f"{model}.hs3.json"
     logL = root_logL(hs3, cfg["pdf"], cfg["data"], cfg["globals"])
     ref = logL(cfg["points"][0]["root"])
     # `+ 0.0` normalises the reference point's -0.0 to 0.0 for a clean diff.
     expected = [-2.0 * (logL(p["root"]) - ref) + 0.0 for p in cfg["points"]]
-    doc = {
-        "schema_version": 1,
-        "test_id": f"conv_{model}",
-        "model": f"{model}.flatppl",
-        "reference_backend": f"root {ROOT.gROOT.GetVersion()}",
-        "checks": [
-            {
-                "id": "twice_delta_nll_points",
-                "kind": "twice_delta_nll_points",
-                "binding": cfg["binding"],
-                "reference_point": cfg["points"][0]["record"],
-                "points": [p["record"] for p in cfg["points"]],
-                "expected": expected,
-                "tolerance": cfg["tolerance"],
-            }
-        ],
-    }
-    out = HERE / model / "expected.json"
-    out.write_text(json.dumps(doc, indent=2) + "\n")
+    out = HERE / model / "test.json"
+    current = json.loads(out.read_text())
+    doc = merged_doc(current, expected, f"root {ROOT.gROOT.GetVersion()}")
+    out.write_text(json.dumps(doc, indent=2, allow_nan=False) + "\n")
     print(f"{model}: expected={expected}")
 
 

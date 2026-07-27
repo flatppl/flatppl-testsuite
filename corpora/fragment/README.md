@@ -11,47 +11,30 @@ append and no theta: it determinizes and scores `lp` directly.
 
 ## Contents
 
+One directory per fragment (17 in total), each a unified test dir:
+
 | Path | What |
 |------|------|
-| `manifest.json` | Index of the 8 fragments. |
-| `<name>/<name>.flatppl` | One self-contained model, ending in `lp = logdensityof(...)`. |
-| `<name>/expected.json` | Frozen expected value for `lp` (schema mirrors `corpora/hs3/`; check kind `logdensity_value`). |
-| `gen_expected.py` | Reproduces every `expected.json` value from an INDEPENDENT scipy oracle (not on the default test path — see its docstring). |
-| `gate.py` | Prints a `test_id -> PASS/SKIP/MISMATCH` table (`pixi run fragment`). |
-| `tests/test_fragment_gate.py` | The corpus's own pytest definitions; `tests/test_fragment.py` at the repo root is a one-line shim that re-exports them. |
+| `<test_id>/<test_id>.flatppl` | One self-contained model, ending in `lp = logdensityof(...)`. |
+| `<test_id>/test.json` | `test_type: "logdensity"`, `engines: ["det-js"]`, the frozen `expected` scalar for `lp`, tolerances. |
+| `<test_id>/test.py` | INDEPENDENT oracle: `oracle()` reproduces `expected` in closed form (scipy / Julia Distributions.jl). |
+
+`tests/test_unified.py` discovers every directory here automatically; there is no
+per-corpus gate script or manifest anymore.
 
 ## Oracle
 
-Every `expected.json` value was originally computed with Julia's
-`Distributions.jl 0.25` (an INDEPENDENT oracle — never the sibling FlatPPL
-engine); `gen_expected.py` independently re-derives the same closed-form
-values with `scipy.stats` and reproduces them to `<= 1e-12`. `±inf`
-(`frag_trunc_out`, scored out of its truncation support) has no JSON
-Infinity literal, so it is frozen as the string `"-inf"` and compared with
-exact `==` rather than a tolerance band.
+Every `test.py::oracle()` is an INDEPENDENT closed-form computation (scipy or
+Julia `Distributions.jl` — never the sibling FlatPPL engine) of the same
+measure-algebra construct the fragment exercises: `superpose`, `truncate` (+
+`normalize`), `pushfwd` (+ `bijection`), `kchain` (+ `kernelof`), `densityof`.
+`frag_trunc_out` (scored out of its truncation support) freezes `-inf` and is
+compared with exact equality rather than a tolerance band.
 
 ## Run
 
 ```sh
-pixi run fragment                              # formatted table (gate.py)
-pixi run test                                  # pytest, incl. this corpus via its shim
-pixi run python corpora/fragment/gen_expected.py   # regenerate + verify expected.json
+pixi run test                                                    # pytest, incl. every dir here
+pixi run unified                                                  # the unified harness alone
+PYTHONPATH=$PWD/src pixi run -e stablehlo regen corpora/fragment/<test_id>   # refreeze from test.py::oracle()
 ```
-
-Three later additions — `densityof_normal`, `pushfwd_projection_iid`,
-`pushfwd_log_exp` — numerically verify determiniser lowerings for
-`densityof`, `pushfwd` structural projection, and `pushfwd`
-positive-support log-bijection; their frozen values were confirmed
-end-to-end against the det-js engine and cross-checked with scipy directly
-(`reference_backend: "scipy 1.18"`), with no Julia predecessor.
-
-## Numeric gate status
-
-This corpus's numeric gate (`corpora/fragment/tests/test_fragment_gate.py`)
-requires a determinizer/engine fix pair that is not yet merged to `main`:
-flatppl-rust's `logsumexp` determinizer lowering emitting a vector argument
-(blocks `superpose`, `kchain_bern`, `kchain_cat`), and flatppl-js's
-value-level `x in interval(lo, hi)` evaluation plus a fixed-phase `±inf`
-materialiser fix (blocks `trunc_in`, `trunc_out`, `norm_trunc`). All 8
-fragments verify GREEN against those fix binaries; the gate goes green on
-`main` once they land and the testsuite's pins are bumped.

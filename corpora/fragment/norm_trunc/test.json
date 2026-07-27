@@ -1,0 +1,14 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "norm_trunc.flatppl",
+  "binding": "lp",
+  "expected": -0.84377223888021,
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18"
+}
