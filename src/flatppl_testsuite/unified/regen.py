@@ -28,8 +28,17 @@ from flatppl_testsuite.unified.loader import load_test_module
 def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
     dir = Path(dir)
     raw = json.loads((dir / "test.json").read_text())
-    mod = load_test_module(dir)
     test_type = raw.get("test_type")
+    if test_type == "convert":
+        raise NotImplementedError(
+            f"{dir}: regen does not support test_type 'convert' -- the hs3 corpus's "
+            "frozen twice_delta_nll vectors are ROOT/RooFit oracle values, regenerated "
+            "in the separate `root` pixi env by subprocessing a ROOT/RooFit run over "
+            "the HS3SUITE checkout (see corpora/hs3/conversions/gen_expected.py and "
+            "the `pixi run -e root ...` oracle path), not by this offline test.py "
+            "oracle harness. Do not add a generic fallback here."
+        )
+    mod = load_test_module(dir)
     if test_type == "sample":
         stat = mod.stat()
         if isinstance(stat, dict) and "distribution" in stat:
@@ -46,15 +55,6 @@ def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
         raw["expected_grad"] = expected_grad
         (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
         return expected_grad
-    if test_type == "convert":
-        raise NotImplementedError(
-            f"{dir}: regen does not support test_type 'convert' -- the hs3 corpus's "
-            "frozen twice_delta_nll vectors are ROOT/RooFit oracle values, regenerated "
-            "in the separate `root` pixi env by subprocessing a ROOT/RooFit run over "
-            "the HS3SUITE checkout (see corpora/hs3/conversions/gen_expected.py and "
-            "the `pixi run -e root ...` oracle path), not by this offline test.py "
-            "oracle harness. Do not add a generic fallback here."
-        )
     expected = [float(mod.oracle(pt)) for pt in raw["points"]]
     raw["expected"] = expected
     (dir / "test.json").write_text(json.dumps(raw, indent=2) + "\n")
