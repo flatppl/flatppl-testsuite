@@ -48,37 +48,42 @@ def _gate_engine(engine: str) -> None:
             pytest.skip("FLATPPL_BIN / score_flatpdl.cjs must both be resolvable for the det-js runner")
 
 
+def assert_results_acceptable(results, allow_skip: bool) -> None:
+    """Every check must have PASSED. A `failed` is obviously fatal; a `skipped`
+    is fatal too unless the directory opted in with `"allow_skip": true`.
+
+    Skips were previously tolerated everywhere, which made an all-refusing run
+    report green -- a determiniser regression turning the examples corpus into
+    `DETERMINIZE_SKIP`s would have shipped silently. Strict by default; a
+    genuine, current inability to score is declared in the test.json where a
+    reviewer can see it."""
+    assert results, "no results"
+
+    failed = [r for r in results if r.status == "failed"]
+    assert not failed, "failed checks:\n" + "\n".join(
+        f"  {r.check_id}: {r.tag} {r.message}" for r in failed
+    )
+
+    if not allow_skip:
+        skipped = [r for r in results if r.status == "skipped"]
+        assert not skipped, (
+            "skipped checks (set \"allow_skip\": true in this dir's test.json if "
+            "this is a known, accepted gap):\n"
+            + "\n".join(f"  {r.check_id}: {r.tag} {r.message}" for r in skipped)
+        )
+
+
 @pytest.mark.parametrize("test_dir,engine", _CASES, ids=_CASE_IDS)
 def test_unified_dir(test_dir, engine):
     _gate_engine(engine)
     results = run_test_dir(test_dir, engines=[engine])
-    assert results, f"{test_dir}: no results"
-    failed = [r for r in results if r.status == "failed"]
-    assert not failed, "\n".join(f"{r.check_id}: {r.message}" for r in failed)
+    allow_skip = bool(load_test(test_dir).body.get("allow_skip", False))
+    assert_results_acceptable(results, allow_skip=allow_skip)
 
 
-def test_detjs_fragment_densityof_normal():
-    d = _CORPORA / "fragment" / "densityof_normal"
-    results = run_test_dir(d)
-    assert results, "no checks produced"
-    assert all(r.status == "passed" for r in results), [
-        (r.check_id, r.status, r.message) for r in results
-    ]
-
-
-def test_detjs_sample_hier_normal():
-    d = _CORPORA / "sample" / "hier_normal"
-    results = run_test_dir(d)
-    assert results
-    assert all(r.status == "passed" for r in results), [
-        (r.check_id, r.status, r.message) for r in results
-    ]
-
-
-def test_convert_hs3_rf101_basics():
-    d = _CORPORA / "hs3" / "fixtures" / "rf101_basics"
-    results = run_test_dir(d)
-    assert results
-    assert all(r.status in ("passed", "skipped") for r in results), [
-        (r.check_id, r.status, r.message) for r in results
-    ]
+# The three per-dir smoke tests that used to live here (fragment/densityof_normal,
+# sample/hier_normal, hs3/fixtures/rf101_basics) were removed: each duplicated the
+# parametrized case for the same directory, and each called `run_test_dir` WITHOUT
+# `_gate_engine`, so on a machine with no resolvable `flatppl` binary they hard-
+# errored where the parametrized case correctly skips. Now that the parametrized
+# case is strict about skips, they carried nothing the parametrization does not.
