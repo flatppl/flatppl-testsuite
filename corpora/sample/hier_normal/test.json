@@ -1,0 +1,84 @@
+{
+  "test_type": "sample",
+  "engines": ["det-js"],
+  "model": "hier_normal.flatppl",
+  "density_model": "hier_normal_density.flatppl",
+  "oracle": "closed-form (independent oracle; see test.py)",
+  "n_samples": 4000,
+  "seed_base": 0,
+  "bindings": [
+    "mu",
+    "y1",
+    "y2"
+  ],
+  "checks": [
+    {
+      "id": "mean_mu",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "mu",
+      "expected": 0.0,
+      "atol": 0.7905694150420949
+    },
+    {
+      "id": "mean_y1",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "y1",
+      "expected": 0.0,
+      "atol": 0.7945124291035353
+    },
+    {
+      "id": "mean_y2",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "y2",
+      "expected": 0.0,
+      "atol": 0.7945124291035353
+    },
+    {
+      "id": "var_mu",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "mu",
+      "expected": 100.0,
+      "atol": 11.180339887498949
+    },
+    {
+      "id": "var_y1",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "y1",
+      "expected": 101.0,
+      "atol": 11.292143286373939
+    },
+    {
+      "id": "var_y2",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "y2",
+      "expected": 101.0,
+      "atol": 11.292143286373939
+    },
+    {
+      "id": "cov_y1_y2",
+      "kind": "sample_stats",
+      "stat": "cov",
+      "fields": [
+        "y1",
+        "y2"
+      ],
+      "expected": 100.0,
+      "atol": 11.236380645029787,
+      "note": "THE SHARED-ANCESTOR CATCH: y1 and y2 share the SAME mu draw, so Cov(y1, y2) = Var(mu) = 100. If the determinizer had instead sampled mu independently per consumer (the bug this whole vertical exists to rule out), y1 and y2 would come out independent and Cov(y1, y2) would land near 0 -- about 44.5 SE away from this tolerance band's center, i.e. unmissable. Passing this check is the statistical proof that the sample path preserves shared-ancestor identity end-to-end."
+    },
+    {
+      "id": "density_consistency",
+      "kind": "density_consistency",
+      "n_points": 5,
+      "atol": 1e-06,
+      "rtol": 1e-06,
+      "note": "For the first n_points swept realizations, the closed-form joint log-density at that exact (mu, y1, y2) must match logdensityof(lawof(record(mu=mu, y1=y1, y2=y2)), <point>) scored via the det-js path against density_model -- the sampling<->density agreement check."
+    }
+  ]
+}

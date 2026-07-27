@@ -15,6 +15,7 @@ from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.engine import (  # noqa: F401  (re-exported)
     DeterminizeRefused,
     DetJsScoreEngine,
+    sample_sweep,
     score_binding,
 )
 

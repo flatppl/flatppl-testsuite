@@ -64,3 +64,12 @@ def test_detjs_fragment_densityof_normal():
     assert all(r.status == "passed" for r in results), [
         (r.check_id, r.status, r.message) for r in results
     ]
+
+
+def test_detjs_sample_hier_normal():
+    d = _CORPORA / "sample" / "hier_normal"
+    results = run_test_dir(d)
+    assert results
+    assert all(r.status == "passed" for r in results), [
+        (r.check_id, r.status, r.message) for r in results
+    ]
