@@ -105,11 +105,19 @@ def _known_defect_reason(probe: Probe) -> str | None:
     FlatPDL; neither is fixed here (that is out of scope for this module)."""
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind == "truncate":
-        return ("truncate's containment gate compares the WHOLE record variate "
-                "against the interval instead of the scalar field it wraps -- "
-                "emitted as `record(x = ...) in interval(lo, hi)`, which is "
-                "always false, so the density is always -inf regardless of the "
-                "query point")
+        # NOT "the gate should have compared the field". §06's ν(A) = M(A ∩ S)
+        # makes -inf the correct density of the zero measure here, because a
+        # scalar `interval` (§03) and a record variate are disjoint spaces, and
+        # no spec rule restricts a record's field by a scalar set -- §04's
+        # auto-splat is a calling convention and does not reach `truncate`'s
+        # second argument. The defect is that an ill-typed truncation reads as a
+        # computation: a modelling error should be a static refusal, which is
+        # what the same engine does for a record variate under `pushfwd`. The
+        # oracle therefore supplies no value for this shape (see `oracle.py`).
+        return ("truncate accepts a truncation set whose space does not match "
+                "the measure's variate -- `record(x = ...) in interval(lo, hi)` "
+                "is always false, so it silently yields the zero measure's -inf "
+                "instead of refusing an ill-typed restriction")
     if (probe.base.kind == "poisson" and wrap.kind == "pushfwd"
             and wrap.args[0] == "sqrt"
             and probe.spelling in ("direct", "stochastic_node")):
@@ -155,10 +163,19 @@ def _row_for(probe: Probe) -> Row:
 
     known_defect = False
     known_defect_reason = None
-    if v.outcome == Outcome.LOWERS and v.value is not None and oracle_val is not None:
-        try:
-            compare_scalar(v.value, oracle_val, _TOLERANCE)
-        except AssertionError:
+    if v.outcome == Outcome.LOWERS and v.value is not None:
+        # A mismatch against the oracle is the usual trigger. A LOWERS row with NO
+        # oracle is the other one: a shape the oracle deliberately refuses to value
+        # because the model is ill-typed still carries a defect -- the determiniser
+        # returned a number for it. `_known_defect_reason` returns None for every
+        # shape it does not recognise, so this admits only investigated ones.
+        mismatched = oracle_val is None
+        if not mismatched:
+            try:
+                compare_scalar(v.value, oracle_val, _TOLERANCE)
+            except AssertionError:
+                mismatched = True
+        if mismatched:
             reason = _known_defect_reason(probe)
             if reason is not None:
                 known_defect = True

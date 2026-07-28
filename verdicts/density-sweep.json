@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-07-28T17:21:06.885247+00:00",
+    "generated_at": "2026-07-28T18:07:00.645103+00:00",
     "determinizer_commit": "9ac4ae76fb7b435c805f8941ce393d8b846c23f9",
     "probe_count": 738,
     "outcome_counts": {
@@ -1869,68 +1869,68 @@
     {
       "probe_id": "beta.truncate_0.0_inf.record.pinned_earlier.consumer",
       "outcome": "REFUSES",
-      "oracle": 0.5469646703818638,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "beta.truncate_0.0_inf.record.pinned_earlier.noconsumer",
       "outcome": "REFUSES",
-      "oracle": 0.5469646703818638,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "beta.truncate_0.0_inf.record.pinned_later.consumer",
       "outcome": "REFUSES",
-      "oracle": 0.5469646703818638,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "beta.truncate_0.0_inf.record.pinned_later.noconsumer",
       "outcome": "REFUSES",
-      "oracle": 0.5469646703818638,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "beta.truncate_0.0_inf.record.single.consumer",
       "outcome": "LOWERS",
-      "oracle": 0.5469646703818638,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "beta.truncate_0.0_inf.record.single.noconsumer",
       "outcome": "LOWERS",
-      "oracle": 0.5469646703818638,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "beta.truncate_0.0_inf.stochastic_node.pinned_earlier.consumer",
@@ -4047,68 +4047,68 @@
     {
       "probe_id": "gamma.truncate_0.0_inf.record.pinned_earlier.consumer",
       "outcome": "REFUSES",
-      "oracle": -1.0945348918918356,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "gamma.truncate_0.0_inf.record.pinned_earlier.noconsumer",
       "outcome": "REFUSES",
-      "oracle": -1.0945348918918356,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "gamma.truncate_0.0_inf.record.pinned_later.consumer",
       "outcome": "REFUSES",
-      "oracle": -1.0945348918918356,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "gamma.truncate_0.0_inf.record.pinned_later.noconsumer",
       "outcome": "REFUSES",
-      "oracle": -1.0945348918918356,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "gamma.truncate_0.0_inf.record.single.consumer",
       "outcome": "LOWERS",
-      "oracle": -1.0945348918918356,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "gamma.truncate_0.0_inf.record.single.noconsumer",
       "outcome": "LOWERS",
-      "oracle": -1.0945348918918356,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "gamma.truncate_0.0_inf.stochastic_node.pinned_earlier.consumer",
@@ -5829,68 +5829,68 @@
     {
       "probe_id": "normal.truncate_0.0_inf.record.pinned_earlier.consumer",
       "outcome": "REFUSES",
-      "oracle": -1.0439385332046727,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "normal.truncate_0.0_inf.record.pinned_earlier.noconsumer",
       "outcome": "REFUSES",
-      "oracle": -1.0439385332046727,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "normal.truncate_0.0_inf.record.pinned_later.consumer",
       "outcome": "REFUSES",
-      "oracle": -1.0439385332046727,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "normal.truncate_0.0_inf.record.pinned_later.noconsumer",
       "outcome": "REFUSES",
-      "oracle": -1.0439385332046727,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "normal.truncate_0.0_inf.record.single.consumer",
       "outcome": "LOWERS",
-      "oracle": -1.0439385332046727,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "normal.truncate_0.0_inf.record.single.noconsumer",
       "outcome": "LOWERS",
-      "oracle": -1.0439385332046727,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "normal.truncate_0.0_inf.stochastic_node.pinned_earlier.consumer",
@@ -7809,68 +7809,68 @@
     {
       "probe_id": "poisson.truncate_0.0_inf.record.pinned_earlier.consumer",
       "outcome": "REFUSES",
-      "oracle": -1.4959226032237258,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "poisson.truncate_0.0_inf.record.pinned_earlier.noconsumer",
       "outcome": "REFUSES",
-      "oracle": -1.4959226032237258,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "poisson.truncate_0.0_inf.record.pinned_later.consumer",
       "outcome": "REFUSES",
-      "oracle": -1.4959226032237258,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "poisson.truncate_0.0_inf.record.pinned_later.noconsumer",
       "outcome": "REFUSES",
-      "oracle": -1.4959226032237258,
+      "oracle": null,
       "value": null,
       "marker": "draw:refuse-draw-node-nodeid-primitive-measure",
       "spec_justified": false,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": false,
       "known_defect_reason": null
     },
     {
       "probe_id": "poisson.truncate_0.0_inf.record.single.consumer",
       "outcome": "LOWERS",
-      "oracle": -1.4959226032237258,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "poisson.truncate_0.0_inf.record.single.noconsumer",
       "outcome": "LOWERS",
-      "oracle": -1.4959226032237258,
+      "oracle": null,
       "value": "-inf",
       "marker": null,
       "spec_justified": null,
-      "oracle_unvalidated": false,
+      "oracle_unvalidated": true,
       "known_defect": true,
-      "known_defect_reason": "truncate's containment gate compares the WHOLE record variate against the interval instead of the scalar field it wraps -- emitted as `record(x = ...) in interval(lo, hi)`, which is always false, so the density is always -inf regardless of the query point"
+      "known_defect_reason": "truncate accepts a truncation set whose space does not match the measure's variate -- `record(x = ...) in interval(lo, hi)` is always false, so it silently yields the zero measure's -inf instead of refusing an ill-typed restriction"
     },
     {
       "probe_id": "poisson.truncate_0.0_inf.stochastic_node.pinned_earlier.consumer",
