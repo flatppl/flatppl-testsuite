@@ -1,4 +1,5 @@
 """The probe space is pure data, so it is testable with no engine present."""
+import math
 import subprocess
 import tempfile
 from pathlib import Path
@@ -6,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.config import CONFIG
-from flatppl_testsuite.sweep.space import Base, Probe, Wrap, enumerate_probes
+from flatppl_testsuite.sweep.space import INNER, Base, Probe, Wrap, enumerate_probes, in_support
 from flatppl_testsuite.sweep.render import render
 
 
@@ -68,6 +69,39 @@ def test_every_wrap_is_present_across_all_three_spellings():
         assert marker in r.source, (
             f"{p.id}: wrap operator {marker!r} missing from the "
             f"{p.spelling!r} spelling's source"
+        )
+
+
+# Inverse of each `pushfwd` forward map, for recovering the preimage of a
+# probe's query point.
+_INVERSE = {
+    "exp": math.log,
+    "log": math.exp,
+    "neg": lambda y: -y,
+    "sqrt": lambda y: y * y,
+}
+
+
+def test_pushfwd_points_are_derived_not_hardcoded():
+    """A `pushfwd` probe's point must be `forward(INNER[base])` -- derived,
+    not a per-operator constant that happens to land in some base's support
+    by luck (that was fix round 1's bug: `log`/`sqrt` reused `gamma`'s inner
+    point for `beta`, landing outside `beta`'s support).
+
+    Checking `in_support` alone would not catch a wrong-but-in-support
+    constant, so also pin the preimage to `INNER[base]` exactly -- that is
+    what forces "derived", not just "happens to work"."""
+    for p in enumerate_probes():
+        w = p.wraps[0]
+        if w.kind != "pushfwd":
+            continue
+        preimage = _INVERSE[w.args[0]](p.point)
+        assert in_support(p.base, preimage), (
+            f"{p.id}: preimage {preimage} not in {p.base.kind}'s support"
+        )
+        assert preimage == pytest.approx(INNER[p.base.kind], abs=1e-9), (
+            f"{p.id}: preimage {preimage} != INNER[{p.base.kind}] "
+            f"({INNER[p.base.kind]}) -- point looks hardcoded, not derived"
         )
 
 

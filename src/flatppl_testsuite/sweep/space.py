@@ -11,6 +11,7 @@ query case is where two silent wrong densities were found by hand.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 
@@ -46,6 +47,21 @@ BASES = [
     Base("beta", (2.0, 3.0)),        # (0, 1)
     Base("poisson", (3.0,)),         # nonneg integers
 ]
+
+# The point inside EACH base's own support that every wrapped point is
+# derived from (see `_point_for`) — never hardcode a wrapped point directly,
+# or the next base added shares another base's constant by accident (that
+# was exactly the bug in fix round 1: `pushfwd_log`/`pushfwd_sqrt` reused
+# `gamma`'s inner point for `beta`, landing outside `beta`'s support).
+INNER = {"normal": 0.5, "gamma": 1.5, "beta": 0.4, "poisson": 2.0}
+
+# Forward maps for the `pushfwd` wraps, keyed the same as their `args[0]`.
+_FORWARD = {
+    "exp": math.exp,
+    "log": math.log,
+    "neg": lambda x: -x,
+    "sqrt": math.sqrt,
+}
 
 # §13 "Output reduction"'s list. Each entry is one normative rule.
 WRAPS = [
@@ -87,16 +103,43 @@ def _supported(base: Base, wrap: Wrap) -> bool:
 
 
 def _point_for(base: Base, wrap: Wrap) -> float:
-    """A point inside the WRAPPED measure's support."""
-    inner = {"normal": 0.5, "gamma": 1.5, "beta": 0.4, "poisson": 2.0}[base.kind]
+    """A point inside the WRAPPED measure's support.
+
+    Derived from `INNER[base.kind]`, never hardcoded: the preimage of a
+    derived point is `INNER[base.kind]` BY CONSTRUCTION, which is in
+    `base`'s own support by construction too, so the invariant holds for
+    every base without per-base casework here.
+    """
+    inner = INNER[base.kind]
     if wrap.kind == "pushfwd":
-        return {"exp": 1.6487212707001282, "log": 0.4054651081081644,
-                "neg": -inner, "sqrt": 1.224744871391589}[wrap.args[0]]
+        return _FORWARD[wrap.args[0]](inner)
     if wrap.kind == "affine":
         return wrap.args[0] * inner + wrap.args[1]
     if wrap.kind == "locscale":
         return wrap.args[0] + wrap.args[1] * inner
     return inner
+
+
+def in_support(base: Base, x: float) -> bool:
+    """Whether `x` lies in `base`'s own (unwrapped) support.
+
+    Public because Task 2's oracle needs the same predicate to decide
+    whether a density is even defined at a given point — one copy, not two
+    that can drift.
+    """
+    if base.kind == "normal":
+        return True
+    if base.kind == "gamma":
+        return x > 0.0
+    if base.kind == "beta":
+        return 0.0 < x < 1.0
+    if base.kind == "poisson":
+        # Tolerant of float round-trip noise (e.g. `math.sqrt(2.0) ** 2`
+        # lands at 2.0000000000000004, not exactly 2.0) rather than an exact
+        # `.is_integer()`, which would reject a genuinely-integer point for
+        # a reason that has nothing to do with support.
+        return x >= -1e-9 and abs(x - round(x)) < 1e-9
+    raise ValueError(f"unknown base kind: {base.kind}")
 
 
 def enumerate_probes() -> list[Probe]:
