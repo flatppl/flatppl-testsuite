@@ -49,26 +49,31 @@ def _wrap_src(wrap: Wrap, inner: str) -> str:
     raise ValueError(f"unrendered wrap kind: {k}")
 
 
-def render(probe: Probe) -> RenderedProbe:
-    measure = _base_src(probe.base)
-    for w in probe.wraps:
-        measure = _wrap_src(w, measure)
+def _fold(wraps: tuple[Wrap, ...], inner: str) -> str:
+    """Compose every wrap onto `inner`, in order."""
+    for w in wraps:
+        inner = _wrap_src(w, inner)
+    return inner
 
+
+def render(probe: Probe) -> RenderedProbe:
     lines: list[str] = []
     if probe.spelling == "direct":
-        lines.append(f"m = {measure}")
+        lines.append(f"m = {_fold(probe.wraps, _base_src(probe.base))}")
         query_measure = "m"
     elif probe.spelling == "stochastic_node":
         # §06 declares this equivalent to the direct spelling.
         lines.append(f"mb = {_base_src(probe.base)}")
         lines.append("x = draw(mb)")
-        lines.append(f"m = lawof(x)" if probe.wraps[0].kind == "identity"
-                     else f"m = {_wrap_src(probe.wraps[0], 'lawof(x)')}")
+        lines.append(f"m = {_fold(probe.wraps, 'lawof(x)')}")
         query_measure = "m"
     elif probe.spelling == "record":
+        # Same equivalence, spelled through a record law rather than a bare
+        # scalar law — every wrap folds onto the record law exactly as the
+        # `direct` spelling folds them onto the base constructor.
         lines.append(f"mb = {_base_src(probe.base)}")
         lines.append("x = draw(mb)")
-        lines.append("m = lawof(record(x = x))")
+        lines.append(f"m = {_fold(probe.wraps, 'lawof(record(x = x))')}")
         query_measure = "m"
     else:
         raise ValueError(f"unrendered spelling: {probe.spelling}")

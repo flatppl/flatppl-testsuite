@@ -41,6 +41,36 @@ def test_a_known_probe_renders_the_expected_source():
     assert "logdensityof(m, 1.6487212707001282)" in r.source
 
 
+def _wrap_marker(wrap: Wrap) -> str:
+    """A substring that only appears in the rendered source if this wrap's
+    operator was actually applied — used to catch a spelling that silently
+    drops a wrap, the general form of the bug where `record` built its law
+    from the unwrapped base while the query point stayed wrap-adjusted."""
+    if wrap.kind == "pushfwd":
+        return f"pushfwd({wrap.args[0]}"
+    if wrap.kind == "affine":
+        return "x ->"
+    return f"{wrap.kind}("
+
+
+def test_every_wrap_is_present_across_all_three_spellings():
+    """The spelling axis exists to assert direct/stochastic_node/record denote
+    the SAME measure, so a wrap that one spelling composes and another drops
+    is a correctness bug in the sweep itself, not a cosmetic gap — it would
+    manufacture false "the determiniser is wrong" findings once Tasks 2-4
+    start comparing spellings against each other and the oracle."""
+    for p in enumerate_probes():
+        w = p.wraps[0]
+        if w.kind == "identity":
+            continue
+        r = render(p)
+        marker = _wrap_marker(w)
+        assert marker in r.source, (
+            f"{p.id}: wrap operator {marker!r} missing from the "
+            f"{p.spelling!r} spelling's source"
+        )
+
+
 @pytest.mark.skipif(not CONFIG.flatppl_bin.exists(), reason="needs the flatppl binary")
 def test_every_rendered_model_parses():
     """A probe whose source does not parse measures the sweep's bug, not the

@@ -69,16 +69,20 @@ ORDERINGS = ["single", "pinned_earlier", "pinned_later"]
 def _supported(base: Base, wrap: Wrap) -> bool:
     """Skip combinations that are ill-formed rather than merely refused.
 
-    A `log` pushforward over a base with mass on the negatives is not a
-    determiniser question — the map is undefined there, so §06's domain
-    restriction makes a refusal CORRECT and the probe carries no information.
-    Excluding it keeps the space's refusals meaningful. `sqrt` is the same at
-    `nonnegreals`; `discrete` bases take no continuous map at all.
+    §06 case 1's well-formedness guard keys on DOMAIN CONTAINMENT, not on
+    continuity or discreteness. `log` is restricted to `posreals`, so it is
+    ill-formed wherever the base's support isn't a subset of `posreals` —
+    `normal` (all reals) and `poisson` (an atom at 0) both fail that, leaving
+    only `gamma`/`beta`. `sqrt` is restricted to `nonnegreals`: `poisson`'s
+    support `{0,1,2,...}` IS a subset of `nonnegreals`, so `sqrt` is
+    well-formed there too (a bijection on a discrete support doesn't distort
+    the counting measure — see §06 line 28); only `normal` fails `sqrt`.
+    Every other wrap in `WRAPS` carries no domain restriction at all.
     """
-    if base.kind == "poisson":
-        return wrap.kind in ("identity", "weighted", "logweighted")
-    if wrap.kind == "pushfwd" and wrap.args[0] in ("log", "sqrt"):
+    if wrap.kind == "pushfwd" and wrap.args[0] == "log":
         return base.kind in ("gamma", "beta")
+    if wrap.kind == "pushfwd" and wrap.args[0] == "sqrt":
+        return base.kind in ("gamma", "beta", "poisson")
     return True
 
 
@@ -104,7 +108,12 @@ def enumerate_probes() -> list[Probe]:
             for spelling in SPELLINGS:
                 for ordering in ORDERINGS:
                     for consumer in (False, True):
-                        wname = wrap.kind + ("_" + str(wrap.args[0]) if wrap.args else "")
+                        # Join ALL args, not just the first — ids are the
+                        # verdict table's primary key, so e.g. truncate's
+                        # upper bound and locscale's scale must both appear
+                        # or two distinct wraps of the same kind could collide.
+                        wname = wrap.kind + ("_" + "_".join(str(a) for a in wrap.args)
+                                             if wrap.args else "")
                         pid = (f"{base.kind}.{wname}.{spelling}.{ordering}."
                                f"{'consumer' if consumer else 'noconsumer'}")
                         out.append(Probe(
