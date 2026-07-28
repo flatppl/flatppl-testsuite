@@ -1,0 +1,96 @@
+"""Probe -> FlatPPL source. Pure.
+
+Separate from `classify` so the whole space can be rendered and parse-checked
+with no determiniser present, and so the oracle never sees source text — it
+walks the Probe, which is the structure we built.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from flatppl_testsuite.sweep.space import Base, Probe, Wrap
+
+_CTOR = {
+    "normal": "Normal(mu = {0}, sigma = {1})",
+    "gamma": "Gamma(shape = {0}, rate = {1})",
+    "beta": "Beta(alpha = {0}, beta = {1})",
+    "poisson": "Poisson(lambda = {0})",
+}
+
+
+@dataclass(frozen=True)
+class RenderedProbe:
+    source: str
+    binding: str
+
+
+def _base_src(base: Base) -> str:
+    return _CTOR[base.kind].format(*base.params)
+
+
+def _wrap_src(wrap: Wrap, inner: str) -> str:
+    k = wrap.kind
+    if k == "identity":
+        return inner
+    if k == "pushfwd":
+        return f"pushfwd({wrap.args[0]}, {inner})"
+    if k == "affine":
+        return f"pushfwd(x -> {wrap.args[0]} * x + {wrap.args[1]}, {inner})"
+    if k == "truncate":
+        return f"truncate({inner}, interval({wrap.args[0]}, {wrap.args[1]}))"
+    if k == "weighted":
+        return f"weighted({wrap.args[0]}, {inner})"
+    if k == "logweighted":
+        return f"logweighted({wrap.args[0]}, {inner})"
+    if k == "normalize":
+        return f"normalize({inner})"
+    if k == "locscale":
+        return f"locscale({inner}, {wrap.args[0]}, {wrap.args[1]})"
+    raise ValueError(f"unrendered wrap kind: {k}")
+
+
+def render(probe: Probe) -> RenderedProbe:
+    measure = _base_src(probe.base)
+    for w in probe.wraps:
+        measure = _wrap_src(w, measure)
+
+    lines: list[str] = []
+    if probe.spelling == "direct":
+        lines.append(f"m = {measure}")
+        query_measure = "m"
+    elif probe.spelling == "stochastic_node":
+        # §06 declares this equivalent to the direct spelling.
+        lines.append(f"mb = {_base_src(probe.base)}")
+        lines.append("x = draw(mb)")
+        lines.append(f"m = lawof(x)" if probe.wraps[0].kind == "identity"
+                     else f"m = {_wrap_src(probe.wraps[0], 'lawof(x)')}")
+        query_measure = "m"
+    elif probe.spelling == "record":
+        lines.append(f"mb = {_base_src(probe.base)}")
+        lines.append("x = draw(mb)")
+        lines.append("m = lawof(record(x = x))")
+        query_measure = "m"
+    else:
+        raise ValueError(f"unrendered spelling: {probe.spelling}")
+
+    if probe.consumer:
+        lines.append("w_consumer = 1.0")
+
+    pt = probe.point
+    if probe.spelling == "record":
+        query = f"lp = logdensityof({query_measure}, record(x = {pt}))"
+    else:
+        query = f"lp = logdensityof({query_measure}, {pt})"
+
+    if probe.ordering == "pinned_earlier":
+        lines.insert(0, "z_pin = draw(Normal(mu = 0.0, sigma = 1.0))")
+        lines.append("lp_pin = logdensityof(lawof(z_pin), 0.3)")
+        lines.append(query)
+    elif probe.ordering == "pinned_later":
+        lines.insert(0, "z_pin = draw(Normal(mu = 0.0, sigma = 1.0))")
+        lines.append(query)
+        lines.append("lp_pin = logdensityof(lawof(z_pin), 0.3)")
+    else:
+        lines.append(query)
+
+    return RenderedProbe(source="\n".join(lines) + "\n", binding="lp")
