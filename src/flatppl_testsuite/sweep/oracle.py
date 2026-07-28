@@ -183,6 +183,21 @@ def true_logpdf(probe: Probe) -> float:
     logv = 0.0          # accumulated FORWARD log-volume, subtracted at the end
     extra = 0.0         # weight and normalization terms: point-independent shifts
 
+    # A scalar truncation region over a RECORD variate has no defined density.
+    # §06 "Support restriction" gives `truncate(M, S)` as ν(A) = M(A ∩ S). Under the
+    # `record` spelling the measure's variate is `record(x: real)` while `interval`
+    # is a set of reals (§03), so A ∩ S is empty and ν is the zero measure —
+    # -inf everywhere, at every query point.
+    #
+    # There is no field-wise reading to compute instead. §03 spells no
+    # record-valued interval, and §04 "Calling conventions"' auto-splat is a
+    # calling convention for a callable's named arguments that explicitly does not
+    # apply to "a record given alongside other arguments" — `truncate(M, S)` has
+    # two. So this oracle must not supply a value: asserting the field-wise answer
+    # would pin unspecified semantics and report a spec gap as a determiniser bug.
+    if probe.spelling == "record" and any(w.kind == "truncate" for w in probe.wraps):
+        raise OracleUnsupported("truncate over a record variate: no §06 rule")
+
     for i in range(len(probe.wraps) - 1, -1, -1):
         w = probe.wraps[i]
         k = w.kind

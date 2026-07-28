@@ -43,6 +43,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -105,11 +106,19 @@ def _known_defect_reason(probe: Probe) -> str | None:
     FlatPDL; neither is fixed here (that is out of scope for this module)."""
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind == "truncate":
-        return ("truncate's containment gate compares the WHOLE record variate "
-                "against the interval instead of the scalar field it wraps -- "
-                "emitted as `record(x = ...) in interval(lo, hi)`, which is "
-                "always false, so the density is always -inf regardless of the "
-                "query point")
+        # NOT "the gate should have compared the field". §06's ν(A) = M(A ∩ S)
+        # makes -inf the correct density of the zero measure here, because a
+        # scalar `interval` (§03) and a record variate are disjoint spaces, and
+        # no spec rule restricts a record's field by a scalar set -- §04's
+        # auto-splat is a calling convention and does not reach `truncate`'s
+        # second argument. The defect is that an ill-typed truncation reads as a
+        # computation: a modelling error should be a static refusal, which is
+        # what the same engine does for a record variate under `pushfwd`. The
+        # oracle therefore supplies no value for this shape (see `oracle.py`).
+        return ("truncate accepts a truncation set whose space does not match "
+                "the measure's variate -- `record(x = ...) in interval(lo, hi)` "
+                "is always false, so it silently yields the zero measure's -inf "
+                "instead of refusing an ill-typed restriction")
     if (probe.base.kind == "poisson" and wrap.kind == "pushfwd"
             and wrap.args[0] == "sqrt"
             and probe.spelling in ("direct", "stochastic_node")):
@@ -155,10 +164,19 @@ def _row_for(probe: Probe) -> Row:
 
     known_defect = False
     known_defect_reason = None
-    if v.outcome == Outcome.LOWERS and v.value is not None and oracle_val is not None:
-        try:
-            compare_scalar(v.value, oracle_val, _TOLERANCE)
-        except AssertionError:
+    if v.outcome == Outcome.LOWERS and v.value is not None:
+        # A mismatch against the oracle is the usual trigger. A LOWERS row with NO
+        # oracle is the other one: a shape the oracle deliberately refuses to value
+        # because the model is ill-typed still carries a defect -- the determiniser
+        # returned a number for it. `_known_defect_reason` returns None for every
+        # shape it does not recognise, so this admits only investigated ones.
+        mismatched = oracle_val is None
+        if not mismatched:
+            try:
+                compare_scalar(v.value, oracle_val, _TOLERANCE)
+            except AssertionError:
+                mismatched = True
+        if mismatched:
             reason = _known_defect_reason(probe)
             if reason is not None:
                 known_defect = True
@@ -276,6 +294,10 @@ def save(path: Path, rows: list[Row], *, commit: str | None = None) -> None:
         "metadata": {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "determinizer_commit": commit or "unknown",
+            # The determiniser decides LOWERS vs REFUSES; the ENGINE decides
+            # MALFORMED and every recorded value, so a table naming only the
+            # determiniser is half-pinned.
+            "engine_commit": engine_commit() or "unknown",
             "probe_count": len(ordered),
             "outcome_counts": counts,
             "ci_slice": {
@@ -364,6 +386,20 @@ def resolved_commit() -> str | None:
     return text or None
 
 
+def engine_commit() -> str | None:
+    """The commit of the flatppl-js checkout the scorer loads, or `None` when the
+    directory is absent or is not a git checkout."""
+    d = CONFIG.flatppl_js_dir
+    if not d.exists():
+        return None
+    try:
+        out = subprocess.run(["git", "-C", str(d), "rev-parse", "HEAD"],
+                             capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip() or None if out.returncode == 0 else None
+
+
 def check_provenance(path: Path) -> str | None:
     """`None` if the live binary's commit matches the committed table's
     `determinizer_commit`; otherwise ONE explanatory message. Deliberately
@@ -385,6 +421,23 @@ def check_provenance(path: Path) -> str | None:
         return (f"table was generated against determinizer {table_commit}, this run "
                 f"used {live_commit} -- regenerate with `pixi run sweep-regen`, or "
                 f"check out {table_commit}")
+
+    # The engine side, for the same reason. A missing engine directory is the
+    # loudest case and the one that actually misleads: every gated probe then
+    # classifies MALFORMED, which reads as 16 determiniser defects rather than as
+    # an absent scorer. The sibling default (`../flatppl-js`) resolves off the
+    # repo root, so it does NOT exist when the harness runs from a worktree --
+    # set `FLATPPL_JS_DIR` there.
+    if not CONFIG.flatppl_js_dir.exists():
+        return (f"the configured engine directory does not exist "
+                f"({CONFIG.flatppl_js_dir}) -- every gated probe would classify "
+                f"MALFORMED for want of a scorer; set FLATPPL_JS_DIR")
+    # A DIFFERING engine commit is deliberately not a failure, unlike a differing
+    # determiniser commit. `setup.sh` pins the engine at `FLATPPL_JS_REF`, default
+    # `main`, so it advances on every unrelated flatppl-js merge; failing here would
+    # be a standing false alarm rather than a signal. The commit is recorded in the
+    # table's metadata so a reader can see which engine produced the values, and a
+    # verdict that actually moved still surfaces through `diff()`.
     return None
 
 
