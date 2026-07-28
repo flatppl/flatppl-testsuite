@@ -1,9 +1,16 @@
 """The independent oracle: a probe's TRUE log-density.
 
-Transcribes §13 "Output reduction"'s enumerated rules over scipy base
-densities. It walks the `Probe` — the structure the generator built — so it
-needs no parser and no type inference, and it never reads the determiniser's
-output. Authority order is maths > spec > code.
+Transcribes a SUBSET of §13 "Output reduction"'s enumerated rules over scipy
+base densities — the ones the probe space generates: `weighted`, `logweighted`,
+`normalize`, `truncate`, and `pushfwd` (including its `affine`/`locscale`
+spellings). §13's remaining rules are **not** implemented: `superpose`,
+`joint`, `iid`, `jointchain`, and `kchain` all raise `OracleUnsupported`, as
+does any base outside the four in `space.BASES`. That list is the module's
+scope, stated here rather than left to be discovered at runtime.
+
+It walks the `Probe` — the structure the generator built — so it needs no
+parser and no type inference, and it never reads the determiniser's output.
+Authority order is maths > spec > code.
 
 Each rule below cites the clause it implements. A rule with no citation is a
 bug: the point of this module is that it is derivable from the spec by someone
@@ -117,11 +124,16 @@ _INVERSE = {
     "sqrt": lambda y: y * y,
 }
 # Points whose preimage overflows the float range. `pushfwd(log, M)` at y > ~709
-# has preimage `e^y = inf`, which raises rather than returning a density. §06's
-# posreals guard means `log` is only well-formed over `gamma`/`beta`, and both
-# have density 0 that far out (`beta`'s support ends at 1; `gamma`'s density
-# decays like `e^-x`), so the density there is 0 -- but it has to be RETURNED,
-# not raised, or the sweep dies on a probe instead of scoring it.
+# has preimage `e^y = inf`, which raises rather than returning a density -- and it
+# has to be RETURNED, not raised, or the sweep dies on a probe instead of scoring
+# it.
+#
+# **The `-inf` here is justified per-base, not in general.** §06's posreals guard
+# restricts `log` to `gamma`/`beta`, and both have density 0 that far out
+# (`beta`'s support ends at 1; `gamma`'s decays like `e^-x`). A base added later
+# whose density decays SLOWER than `1/x` would make `-inf` wrong here, because the
+# `+y` volume term grows without bound: the correct limit is then not 0. If a base
+# joins `space.BASES` for which `log` is well-formed, re-derive this.
 _PREIMAGE_OVERFLOWS = {"log": lambda y: y > 709.0}
 _LOGVOLUME_AT_PREIMAGE = {
     "exp":  lambda y: math.log(y),            # |d exp/dx| at log y  = y
@@ -133,9 +145,12 @@ _LOGVOLUME_AT_PREIMAGE = {
     # discards the term and leaves `pmf(0)` at the atom 0.
     "sqrt": lambda y: math.inf if y == 0.0 else -math.log(2.0 * y),
 }
-# The domain of the forward map: a point outside it is not in the pushed-forward
-# measure's variate space at all, so the density there is 0.
-_FORWARD_RANGE = {
+# Whether a query point lies in the forward map's IMAGE. This is the image, not
+# the domain -- `{y > 0}` is where `exp` sends things, not where it accepts them.
+# The distinction matters because the query point lives in the pushed-forward
+# measure's space: a `y` outside the image has no preimage, so it is not in the
+# variate space at all and the density there is 0.
+_IN_FORWARD_IMAGE = {
     "exp":  lambda y: y > 0.0,
     "log":  lambda y: True,
     "neg":  lambda y: True,
@@ -180,8 +195,8 @@ def true_logpdf(probe: Probe) -> float:
                 op = w.args[0]
                 if op not in _INVERSE:
                     raise OracleUnsupported(f"pushfwd {op}")
-                if not _FORWARD_RANGE[op](x):
-                    return -math.inf      # outside the forward map's range
+                if not _IN_FORWARD_IMAGE[op](x):
+                    return -math.inf      # no preimage: not in the variate space
                 if _PREIMAGE_OVERFLOWS.get(op, lambda _: False)(x):
                     return -math.inf      # preimage past the float range: density 0
                 logv += _LOGVOLUME_AT_PREIMAGE[op](x)
@@ -218,13 +233,14 @@ def _log_total_mass(probe: Probe, idx: int) -> float:
     """log(totalmass(M)) for the measure INSIDE the `normalize` at `probe.wraps[idx]`
     (§13: normalize "subtracts log(totalmass(M)), which must be finite and nonzero").
 
-    Only the shapes the space generates are implemented: a bare base (§08 opens
-    "the built-in distributions (i.e. probability measures)", so the mass is
-    exactly 1), a truncated base (mass = the base's CDF over the interval), and a
-    `weighted` base (mass = the weight). Anything else is an explicit gap, not a
-    guess — `normalize(pushfwd(...))` is left unimplemented even though a
-    pushforward preserves mass, because nothing generates it and an untested
-    branch here is indistinguishable from a wrong one.
+    Three shapes are implemented: a bare base (§08 opens "the built-in
+    distributions (i.e. probability measures)", so the mass is exactly 1), a
+    truncated base (the base's mass over the closed interval), and a `weighted`
+    base (the weight). Anything else is an explicit gap, not a guess —
+    `normalize(pushfwd(...))` is left unimplemented even though a pushforward
+    preserves mass, because nothing generates it and an untested branch here is
+    indistinguishable from a wrong one. Every branch that DOES exist is covered by
+    a direct test, which is the same principle applied consistently.
     """
     inner = probe.wraps[:idx]
     if len(inner) == 0:
@@ -232,7 +248,20 @@ def _log_total_mass(probe: Probe, idx: int) -> float:
     if len(inner) == 1 and inner[0].kind == "truncate":
         lo, hi = _interval(inner[0])
         d = _frozen(probe.base)
-        return math.log(float(d.cdf(hi) - d.cdf(lo)))
+        mass = float(d.cdf(hi) - d.cdf(lo))
+        if _is_discrete(probe.base):
+            # §03: "`interval(lo, hi)` denotes the closed interval [lo, hi]", and
+            # the `truncate` gate above is `lo <= x <= hi` to match. scipy's `cdf`
+            # is `P(X <= lo)`, so `cdf(hi) - cdf(lo)` EXCLUDES an atom sitting
+            # exactly at `lo` -- which a discrete base can have and a continuous
+            # one cannot. Poisson(3)'s atom at 0 carries 5% of its mass, so
+            # omitting it puts `normalize(truncate(Poisson(3), interval(0, inf)))`
+            # at mass 0.95021 instead of 1.0: a log-density error of 0.0511
+            # attributed to the determiniser.
+            mass += float(d.pmf(lo))
+        return math.log(mass)
     if len(inner) == 1 and inner[0].kind == "weighted":
+        # totalmass(weighted(w, M)) = w * totalmass(M), and M here is a bare §08
+        # distribution, so the mass is w.
         return math.log(inner[0].args[0])
     raise OracleUnsupported(f"totalmass of {[w.kind for w in inner]}")

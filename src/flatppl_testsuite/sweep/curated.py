@@ -297,8 +297,29 @@ def _bindings(text: str) -> tuple[dict[str, str], dict[str, str], set[str],
     aliases: dict[str, str] = {}
     params: set[str] = set()
     queries: list[tuple[str, str]] = []
+    # §05: `#` starts a line comment and `###` alone on a line opens a block
+    # comment; doc-comments are "lexically symmetric to plain comments
+    # (`%` <-> `#`, `%%%` <-> `###`)", and a block opener may carry a markup tag
+    # with no space after the marker (`%%%markdown`). `%` is comment-only in
+    # FlatPPL — §07 spells modulo as the function `mod`, so there is no `%`
+    # operator a strip could corrupt.
+    #
+    # Stripping only `#` made 14 `examples/*` dirs report
+    # `unparsed line: '%%%'` instead of the substantive construct that actually
+    # defeats the matcher: fail-closed, but misleading about why.
+    in_block: str | None = None
     for raw in text.splitlines():
-        line = raw.split("#", 1)[0].strip()
+        line = raw.strip()
+        if in_block is not None:
+            if line == in_block:
+                in_block = None
+            continue
+        opener = next((m for m in ("###", "%%%") if line.startswith(m)), None)
+        if opener:
+            in_block = opener
+            continue
+        for marker in ("#", "%"):
+            line = line.split(marker, 1)[0].strip()
         if not line:
             continue
         m = re.match(rf"^({_IDENT})\s*=\s*(.+)$", line)

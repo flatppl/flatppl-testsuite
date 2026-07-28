@@ -6,8 +6,9 @@ import math
 from pathlib import Path
 
 import pytest
-from scipy import integrate
+from scipy import integrate, stats
 
+from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.sweep.oracle import (
     OracleUnsupported,
     _frozen,
@@ -209,6 +210,98 @@ def test_wraps_are_peeled_outermost_first():
     assert true_logpdf(inner_gate) == -math.inf
 
 
+def test_locscale_shift_and_scale_map_to_the_right_arguments():
+    """Corroborates the `(shift, scale)` argument ORDER against scipy, not against
+    a value derived by the same hand that wrote the rule.
+
+    §06 defines `locscale(m, shift, scale)` as `pushfwd(x -> scale*x + shift, m)`,
+    so over `Normal(0, 1)` it is exactly `Normal(shift, scale)` — a `loc`/`scale`
+    parameterized frozen distribution, which scipy provides directly. If the two
+    arguments were swapped the oracle would be scoring `Normal(2, 1)` here, and
+    the mass invariant could not tell: any affine map preserves mass, so both
+    orders integrate to 1.
+
+    This is the one rule whose argument mapping the mass invariant is blind to.
+    """
+    loc, scale = 1.0, 2.0
+    d = stats.norm(loc=loc, scale=scale)
+    for y in (-3.0, -0.5, 0.0, 1.0, 2.0, 4.5):
+        got = true_logpdf(_probe(Base("normal", (0.0, 1.0)),
+                                 Wrap("locscale", (loc, scale)), y))
+        assert got == pytest.approx(float(d.logpdf(y)), rel=1e-12), f"at y={y}"
+    # And the swap really is distinguishable, so the check above has teeth.
+    assert float(stats.norm(loc=2.0, scale=1.0).logpdf(1.0)) != pytest.approx(
+        float(d.logpdf(1.0)), rel=1e-12)
+
+
+def test_normalize_of_a_truncated_discrete_base_includes_the_boundary_atom():
+    """§03: "`interval(lo, hi)` denotes the closed interval [lo, hi]", so an atom
+    sitting exactly at `lo` is INSIDE the truncation set. scipy's `cdf(lo)` is
+    `P(X <= lo)`, so `cdf(hi) - cdf(lo)` would drop it.
+
+    `interval(2, inf)` over Poisson(3) makes this visible: the closed mass is
+    `P(X >= 2) = 1 - cdf(1)`, whereas the open-lower reading gives
+    `1 - cdf(2)` — they differ by `pmf(2)`, about 22% of the mass. At the atom
+    k = 2 the normalized log-density is `logpmf(2, 3) - log(P(X >= 2))`.
+    """
+    d = stats.poisson(mu=3.0)
+    closed_mass = float(1.0 - d.cdf(1.0))
+    p = Probe(id="t", base=Base("poisson", (3.0,)),
+              wraps=(Wrap("truncate", (2.0, "inf")), Wrap("normalize", ())),
+              spelling="direct", ordering="single", consumer=False, point=2.0)
+    expected = float(d.logpmf(2)) - math.log(closed_mass)
+    assert true_logpdf(p) == pytest.approx(expected, rel=1e-12)
+    # The dropped-atom reading is numerically distinct, so this test has teeth.
+    assert math.log(float(1.0 - d.cdf(2.0))) != pytest.approx(math.log(closed_mass))
+
+
+def test_normalize_of_a_weighted_base_divides_out_the_weight():
+    """`totalmass(weighted(w, M)) = w * totalmass(M)`, and `M` is a §08 probability
+    measure, so the mass is `w` and `normalize` cancels the weight exactly:
+    `log w + log phi(x) - log w = log phi(x)`.
+    """
+    p = Probe(id="t", base=Base("normal", (0.0, 1.0)),
+              wraps=(Wrap("weighted", (0.25,)), Wrap("normalize", ())),
+              spelling="direct", ordering="single", consumer=False, point=0.5)
+    assert true_logpdf(p) == pytest.approx(-1.0439385332046727, rel=1e-12)
+
+
+def test_a_point_outside_the_forward_maps_image_has_no_preimage():
+    """`exp` sends the reals to the positive reals, so a query at `y <= 0` is not
+    in `pushfwd(exp, M)`'s variate space at all: density 0. Likewise `sqrt`'s
+    image is the nonnegative reals, so `y < 0` is outside it.
+    """
+    base = Base("normal", (0.0, 1.0))
+    assert true_logpdf(_probe(base, Wrap("pushfwd", ("exp",)), -1.0)) == -math.inf
+    assert true_logpdf(_probe(base, Wrap("pushfwd", ("exp",)), 0.0)) == -math.inf
+    assert true_logpdf(_probe(Base("gamma", (2.0, 1.0)),
+                              Wrap("pushfwd", ("sqrt",)), -1.0)) == -math.inf
+
+
+def test_a_preimage_past_the_float_range_returns_a_density_rather_than_raising():
+    """`pushfwd(log, M)` at `y = 800` has preimage `e^800`, which overflows. It
+    must RETURN `-inf`, not raise: an oracle that raises kills the sweep on a
+    probe instead of scoring it. (Justified per-base — see `_PREIMAGE_OVERFLOWS`.)
+    """
+    for base in (Base("gamma", (2.0, 1.0)), Base("beta", (2.0, 3.0))):
+        assert true_logpdf(_probe(base, Wrap("pushfwd", ("log",)), 800.0)) == -math.inf
+
+
+def test_points_outside_a_base_support_are_minus_inf():
+    """Both support gates in `_base_logpdf`: the continuous one, and the discrete
+    one reached by a preimage that is a negative integer.
+    """
+    # Continuous: gamma is supported on x > 0, beta on (0, 1).
+    assert true_logpdf(_probe(Base("gamma", (2.0, 1.0)), Wrap("identity", ()), -1.0)) \
+        == -math.inf
+    assert true_logpdf(_probe(Base("beta", (2.0, 3.0)), Wrap("identity", ()), 1.5)) \
+        == -math.inf
+    # Discrete: an exact integer, but outside Poisson's nonnegative support. Via
+    # `pushfwd(neg, ·)` so the preimage is recovered rather than passed in.
+    assert true_logpdf(_probe(Base("poisson", (3.0,)),
+                              Wrap("pushfwd", ("neg",)), 2.0)) == -math.inf
+
+
 def test_an_unimplemented_structure_raises_rather_than_guessing():
     with pytest.raises(OracleUnsupported):
         true_logpdf(_probe(Base("normal", (0.0, 1.0)), Wrap("superpose", ()), 0.5))
@@ -357,10 +450,14 @@ def test_oracle_agrees_with_every_curated_case_it_can_express():
             unexpressible.append((name, str(e)))
             continue
         checked += 1
-        if got == expected:            # covers the -inf == -inf case
-            continue
-        if abs(got - expected) > 1e-9 + 1e-9 * abs(expected):
-            wrong.append((name, got, expected))
+        # `scoring.compare.compare_scalar` owns the +-inf and NaN rules; a
+        # hand-rolled `abs(got - expected) > tol` silently PASSES a NaN, because
+        # every comparison against NaN is False — so a NaN oracle result would be
+        # counted as a validated case. One comparator, not two.
+        try:
+            compare_scalar(got, expected, {"atol": 1e-9, "rtol": 1e-9})
+        except AssertionError as e:
+            wrong.append((name, str(e)))
 
     assert not wrong, "oracle disagrees with curated cases:\n" + "\n".join(map(str, wrong))
     assert checked >= 8, (
