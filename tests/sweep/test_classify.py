@@ -2,11 +2,14 @@
 import pytest
 
 from flatppl_testsuite.config import CONFIG
+from flatppl_testsuite.sweep import classify as classify_mod
 from flatppl_testsuite.sweep.classify import Outcome, classify_source
 
 pytestmark = pytest.mark.skipif(
     not CONFIG.flatppl_bin.exists(), reason="needs the flatppl binary"
 )
+
+_PLAIN_SOURCE = "m = Normal(mu = 0.0, sigma = 1.0)\nlp = logdensityof(m, 0.5)\n"
 
 
 def test_a_plain_density_lowers_and_scores():
@@ -52,3 +55,39 @@ def test_a_record_pushfwd_whose_map_does_not_match_the_variate_refuses():
     v = classify_source(src, "lp")
     assert v.outcome == Outcome.REFUSES
     assert v.marker
+
+
+def test_a_scorer_crash_on_emitted_output_is_malformed_not_a_hard_abort(monkeypatch):
+    """`determinize` exits 0 (the source above is unremarkable), but the JS
+    scorer throws evaluating what it emitted -- e.g. a builtin fed the wrong
+    shape, per the design note in `classify.py`'s module docstring. That is a
+    determinizer defect (`MALFORMED`), not the "scorer crash fails the run
+    loudly" infrastructure case, so it must not propagate past `classify_source`.
+
+    No end-to-end fixture in this probe space currently reaches this against
+    the pinned binary (0 crashes over the full 738-probe sweep) -- the
+    `score_binding` failure mode is exercised directly here instead, the same
+    way `test_classify_malformed_detector.py` pins `_RESIDUAL_CALL` against
+    synthetic text rather than a real CLI run.
+    """
+    def _boom(model, binding):
+        raise RuntimeError("score_flatpdl failed: score_flatpdl: log expects a number, got object")
+
+    monkeypatch.setattr(classify_mod, "score_binding", _boom)
+    v = classify_source(_PLAIN_SOURCE, "lp")
+    assert v.outcome == Outcome.MALFORMED
+    assert v.marker.startswith("crash:")
+    assert v.value is None
+
+
+def test_a_genuine_determinize_failure_inside_score_binding_still_fails_loudly(monkeypatch):
+    """The OTHER `RuntimeError` shape `score_binding` can raise -- its own
+    internal `determinize` call failing -- is infrastructure, not a probe
+    verdict, and must still propagate rather than being swallowed into
+    `MALFORMED` alongside the scorer-crash case."""
+    def _boom(model, binding):
+        raise RuntimeError("determinize failed: something is badly wrong")
+
+    monkeypatch.setattr(classify_mod, "score_binding", _boom)
+    with pytest.raises(RuntimeError, match="determinize failed"):
+        classify_source(_PLAIN_SOURCE, "lp")

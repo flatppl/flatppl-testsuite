@@ -6,14 +6,20 @@ still emit something that is not FlatPDL (a surviving `(%call ...)`), and no
 existing gate rejects that. Scoring it would report a tolerance failure for
 the wrong reason, or worse, a pass.
 
-`MALFORMED` is scoped narrowly to that one shape -- a residual `%call` -- not
-to "anything that looks type-ill-formed". A builtin fed the wrong shape (e.g.
-`log` applied to a record, or a builtin called with the wrong arity) is a
-*different* kind of defect: FlatPDL syntactically, just wrongly typed. This
-classifier does not hunt for that; if it makes the JS scorer choke,
-`score_binding` already raises, and that is exactly the "a scorer crash fails
-the run loudly" case the harness treats as infrastructure failure, not a
-probe verdict -- catching it here too would blur the two categories together.
+`MALFORMED` covers two shapes now, both "exit 0, not actually evaluable":
+
+1. A residual `%call` in the printed output (see the known-limitation note
+   below -- structurally unreachable through the CLI, kept anyway).
+2. The determinizer emits FlatPDL that type-checks syntactically but is
+   wrongly typed for the builtin/op it feeds (e.g. `log` applied to a whole
+   record instead of a scalar) -- the JS scorer throws evaluating it.
+   `score_binding` wraps that as a `RuntimeError("score_flatpdl failed: ...")`.
+   That is NOT the "a scorer crash fails the run loudly" infrastructure case
+   (missing binary, unresolvable engine, missing Node) -- the scorer started
+   fine and ran; it choked on the SHAPE of what determinize handed it. Routing
+   it into a bare `RuntimeError` re-raise would abort the entire sweep on a
+   single bad probe. Distinguished by message prefix: `score_flatpdl failed`
+   means the scorer subprocess ran and threw; anything else re-raises.
 
 **Known limitation, not a bug in this module**: `_RESIDUAL_CALL` scans the
 *printed* `-o` file, i.e. surface FlatPPL text re-derived from the
@@ -81,6 +87,27 @@ def _marker(stderr: str) -> str:
     return f"{head.group(1) if head else '?'}:{'-'.join(words)}"
 
 
+def _crash_marker(message: str) -> str:
+    """A stable slice of a scorer-crash message, for the table to diff on.
+
+    Same shape as `_marker` (a short word-list, not full prose), but for the
+    JS scorer throwing on emitted FlatPDL it can't evaluate -- there is no
+    `refuse <head>` line here, so this always keys off the literal `crash`
+    prefix rather than a parsed head.
+
+    **Residual risk, stated rather than hidden**: this cannot by itself tell
+    a determinizer defect (wrong-shaped output) apart from a `flatppl-js` bug
+    on genuinely valid FlatPDL. The marker narrows a human's triage; it does
+    not replace it.
+    """
+    line = message.strip().splitlines()[0] if message.strip() else ""
+    for prefix in ("score_flatpdl failed: ", "score_flatpdl: "):
+        if line.startswith(prefix):
+            line = line[len(prefix):]
+    words = re.findall(r"[a-z]{4,}", line.lower())[:6]
+    return f"crash:{'-'.join(words)}"
+
+
 def classify_source(source: str, binding: str) -> Verdict:
     """Determinize `source` and classify what came back.
 
@@ -110,6 +137,11 @@ def classify_source(source: str, binding: str) -> Verdict:
             value = score_binding(model, binding)
         except DeterminizeRefused as e:
             return Verdict("", Outcome.REFUSES, None, _marker(str(e)))
+        except RuntimeError as e:
+            msg = str(e)
+            if not msg.startswith("score_flatpdl failed"):
+                raise  # "determinize failed": infrastructure, fail loudly
+            return Verdict("", Outcome.MALFORMED, None, _crash_marker(msg))
         return Verdict("", Outcome.LOWERS, float(value), None)
 
 
