@@ -45,15 +45,20 @@ def moments() -> dict[str, float]:
     => E[y_i] = 0, Var[y_i] = Var[mu] + 1 = 101.
     Cov(y1, y2) = Var[mu] = 100, because y1 and y2 share the same mu term
     and their independent noise terms eps_1, eps_2 don't covary.
+    Var[y1 - y2] = 2 * Y_SIGMA**2 = 2: the shared mu term cancels exactly in
+    the difference, leaving eps_1 - eps_2 ~ N(0, 2 * Y_SIGMA**2), so this
+    moment is free of the mu prior entirely.
     """
     var_mu = MU_SIGMA ** 2
     var_y = var_mu + Y_SIGMA ** 2
     cov_y1_y2 = var_mu
+    var_y1_minus_y2 = 2 * Y_SIGMA ** 2
     return {
         "mean_mu": 0.0, "var_mu": var_mu,
         "mean_y1": 0.0, "var_y1": var_y,
         "mean_y2": 0.0, "var_y2": var_y,
         "cov_y1_y2": cov_y1_y2,
+        "var_y1_minus_y2": var_y1_minus_y2,
     }
 
 
@@ -71,12 +76,16 @@ def stat() -> dict[str, dict[str, float]]:
     assert var_y1 == var_y2
     var_y = var_y1
     cov_y1_y2 = m["cov_y1_y2"]
+    var_diff = m["var_y1_minus_y2"]
 
     se_mean_mu = math.sqrt(var_mu / N_SAMPLES)
     se_mean_y = math.sqrt(var_y / N_SAMPLES)
     se_var_mu = var_mu * math.sqrt(2 / N_SAMPLES)
     se_var_y = var_y * math.sqrt(2 / N_SAMPLES)
     se_cov = math.sqrt((var_y1 * var_y2 + cov_y1_y2 ** 2) / N_SAMPLES)
+    # y1 - y2 is exactly Normal(0, var_diff), so the normal-theory sample-variance
+    # SE applies without approximation -- same form as se_var_mu/se_var_y above.
+    se_var_diff = var_diff * math.sqrt(2 / N_SAMPLES)
 
     return {
         "mean_mu": {"expected": m["mean_mu"], "atol": K * se_mean_mu},
@@ -86,6 +95,7 @@ def stat() -> dict[str, dict[str, float]]:
         "var_y1": {"expected": var_y1, "atol": K * se_var_y},
         "var_y2": {"expected": var_y2, "atol": K * se_var_y},
         "cov_y1_y2": {"expected": cov_y1_y2, "atol": K * se_cov},
+        "var_y1_minus_y2": {"expected": var_diff, "atol": K * se_var_diff},
     }
 
 

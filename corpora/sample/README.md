@@ -45,6 +45,14 @@ about 44 standard errors away from the tolerance band at N=4000. **This is
 the point of this test dir**: passing `cov_y1_y2` is the statistical proof
 that the sample path preserves shared-ancestor identity end-to-end.
 
+`Var(mu) = 100` also swamps the observation noise in every marginal, which
+leaves all seven mean/var/cov checks blind to `sigma_y` — raising it from 1
+to 2 in the model keeps them all inside their `±11` bands. `var_y1_minus_y2`
+closes that: `y1 - y2 = eps1 - eps2` cancels the shared `mu` exactly, so it
+pins `2 * sigma_y**2 = 2` to `±0.224`, and the same mutation moves it to
+7.93. It is also the only check here that catches `y2` aliased to `y1`
+(reads exactly 0; `cov_y1_y2` then becomes `Var(y1)` and still passes).
+
 ## The seed sweep
 
 A fixed seed gives one deterministic realization, so `scoring/sample_sweep.cjs`
@@ -90,8 +98,8 @@ do not include the `sample_stats`/`cov` checks this dir exists for.
 Every stat frozen in `test.json` is an INDEPENDENT closed-form fact about the
 model (never derived from flatppl-js output): `mu ~ N(0, 10)` =>
 `E[mu]=0, Var[mu]=100`; `y_i = mu + eps_i`, `eps_i ~ N(0, 1)` =>
-`E[y_i]=0, Var[y_i]=101, Cov(y1,y2)=Var(mu)=100`. See `test.py` for the
-derivation and the Monte-Carlo tolerance formulas.
+`E[y_i]=0, Var[y_i]=101, Cov(y1,y2)=Var(mu)=100, Var(y1-y2)=2*Y_SIGMA**2=2`.
+See `test.py` for the derivation and the Monte-Carlo tolerance formulas.
 
 ## Run
 

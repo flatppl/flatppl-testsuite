@@ -9,12 +9,14 @@ exactly the two check kinds that gate used:
 * ``sample_stats`` -- seed-sweep the determinized model
   (``detjs_exec.sample_sweep``, N distinct seeds from a fixed ``seed_base``)
   into an empirical sample set, reduce a named field (or field pair) to
-  mean/var/cov, and compare against a frozen closed-form-oracle value within
-  a frozen Monte-Carlo tolerance. ``test.json``'s ``checks`` entries, their
-  ``expected``/``atol`` values, ``n_samples`` and ``seed_base`` are copied
-  VERBATIM from the legacy ``corpora/sample/hier_normal/expected.json`` --
-  changing the seed base or draw count would make this a different
-  statistical test, not the same one ported.
+  mean/var/cov/var_diff, and compare against a frozen closed-form-oracle
+  value within a frozen Monte-Carlo tolerance. ``test.json``'s ported
+  ``checks`` entries, their ``expected``/``atol`` values, ``n_samples`` and
+  ``seed_base`` are copied VERBATIM from the legacy
+  ``corpora/sample/hier_normal/expected.json`` -- changing the seed base or
+  draw count would make this a different statistical test, not the same one
+  ported. A check added after the port is frozen the same way, from the
+  directory's own ``test.py`` oracle at that same N and seed base.
 
 * ``density_consistency`` -- for the first ``n_points`` swept realizations,
   the closed-form joint log-density at that exact point must match what the
@@ -95,6 +97,14 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                 elif stat == "cov":
                     f1, f2 = check["fields"]
                     got = _cov(fields[f1], fields[f2])
+                elif stat == "var_diff":
+                    # Variance of the pointwise DIFFERENCE of two fields.
+                    # Algebraically var(f1) + var(f2) - 2*cov(f1, f2), but
+                    # computed on the differenced realizations so a shared
+                    # high-variance ancestor cancels numerically rather than
+                    # surviving in each term's Monte-Carlo tolerance.
+                    f1, f2 = check["fields"]
+                    got = _var([a - b for a, b in zip(fields[f1], fields[f2])])
                 else:
                     raise ValueError(f"unknown sample_stats stat {stat!r}")
                 compare_scalar(got, check["expected"], {"atol": check["atol"], "rtol": 0.0})

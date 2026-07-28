@@ -77,6 +77,18 @@
       "note": "THE SHARED-ANCESTOR CATCH: y1 and y2 share the SAME mu draw, so Cov(y1, y2) = Var(mu) = 100. If the determinizer had instead sampled mu independently per consumer (the bug this whole vertical exists to rule out), y1 and y2 would come out independent and Cov(y1, y2) would land near 0 -- about 44.5 SE away from this tolerance band's center, i.e. unmissable. Passing this check is the statistical proof that the sample path preserves shared-ancestor identity end-to-end."
     },
     {
+      "id": "var_y1_minus_y2",
+      "kind": "sample_stats",
+      "stat": "var_diff",
+      "fields": [
+        "y1",
+        "y2"
+      ],
+      "expected": 2.0,
+      "atol": 0.22360679774997896,
+      "note": "THE SIGMA_Y CATCH. y1 - y2 = eps1 - eps2 exactly (the shared mu term cancels), so this is Normal(0, 2*sigma_y^2), free of the mu prior. Every other sample_stats check here is blind to sigma_y, because Var(mu) = 100 swamps the y-noise in every marginal: sigma_y 1 -> 2 in the model leaves all seven of them passing and moves only this one, to 7.93 (133 SE out). It also catches the opposite failure cov_y1_y2 misses -- y2 aliased to y1 reads exactly 0 here, while Cov becomes Var(y1) ~ 99 and stays inside its +-11 band. var_y1 + var_y2 - 2*cov_y1_y2 is the same quantity algebraically, but at +-11 per term it is pinned only to ~+-30; differencing per-draw is what recovers the signal."
+    },
+    {
       "id": "density_consistency",
       "kind": "density_consistency",
       "n_points": 5,
