@@ -50,6 +50,13 @@ convert = ".pixi-bin/bin/flatppl convert --from hs3"
 # base env this runs every det-js case; run under `-e stablehlo` (with
 # FLATPPL_BIN + PYTHONPATH=$PWD/src) for the stablehlo cases too.
 unified = "python -m pytest tests/test_unified.py -q"
+# The density oracle sweep's sized defect report, from the committed table
+# (verdicts/density-sweep.json) -- no engine calls, just reads the file.
+sweep = "python -m flatppl_testsuite.sweep.cli report"
+# Regenerate that table from a live full-space sweep (needs FLATPPL_BIN +
+# FLATPPL_JS_DIR). Slow -- see sweep/table.py's SLICE_DESCRIPTION for the
+# faster CI-only slice `tests/sweep/test_gate.py` runs instead.
+sweep-regen = "python -m flatppl_testsuite.sweep.cli regen --full"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,
