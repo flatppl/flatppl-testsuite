@@ -10,11 +10,17 @@ from dataclasses import dataclass
 
 from flatppl_testsuite.sweep.space import Base, Probe, Wrap
 
+# Parameter names are §08's, and they have to be exactly right: a wrong one is
+# silent everywhere downstream. `Poisson(lambda = 3.0)` parses, converts to
+# `(%kwarg lambda 3.0)`, and determinizes with no diagnostic, so no test in the
+# toolchain guards these strings except
+# `test_base_constructors_use_the_parameter_names_the_corpus_uses`, which pins them
+# against the committed corpus models.
 _CTOR = {
     "normal": "Normal(mu = {0}, sigma = {1})",
     "gamma": "Gamma(shape = {0}, rate = {1})",
     "beta": "Beta(alpha = {0}, beta = {1})",
-    "poisson": "Poisson(lambda = {0})",
+    "poisson": "Poisson(rate = {0})",
 }
 
 

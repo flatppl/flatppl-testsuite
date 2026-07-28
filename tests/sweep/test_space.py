@@ -1,5 +1,6 @@
 """The probe space is pure data, so it is testable with no engine present."""
 import math
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -7,7 +8,16 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.config import CONFIG
-from flatppl_testsuite.sweep.space import INNER, Base, Probe, Wrap, enumerate_probes, in_support
+from flatppl_testsuite.sweep.curated import _args, _as_call
+from flatppl_testsuite.sweep.space import (
+    BASES,
+    INNER,
+    Base,
+    Probe,
+    Wrap,
+    enumerate_probes,
+    in_support,
+)
 from flatppl_testsuite.sweep.render import render
 
 
@@ -40,6 +50,58 @@ def test_a_known_probe_renders_the_expected_source():
     assert r.binding == "lp"
     assert "pushfwd(exp, Normal(mu = 0.0, sigma = 1.0))" in r.source
     assert "logdensityof(m, 1.6487212707001282)" in r.source
+
+
+def _corpus_ctor_keywords() -> dict[str, tuple[str, ...]]:
+    """`{constructor: (keyword, ...)}` as spelled in the committed corpus models."""
+    out: dict[str, tuple[str, ...]] = {}
+    root = Path(__file__).resolve().parents[2] / "corpora"
+    for model in sorted(root.glob("*/*/*.flatppl")):
+        for raw in model.read_text().splitlines():
+            m = re.match(r"^[A-Za-z_]\w*\s*=\s*draw\((.+)\)$", raw.strip())
+            if not m:
+                continue
+            call = _as_call(m.group(1))
+            if not call:
+                continue
+            _pos, kw = _args(call[1])
+            if kw:
+                out.setdefault(call[0], tuple(sorted(kw)))
+    return out
+
+
+def test_base_constructors_use_the_parameter_names_the_corpus_uses():
+    """A wrong distribution parameter name is caught by NOTHING else in the
+    toolchain: `Poisson(lambda = 3.0)` parses, converts to `(%kwarg lambda 3.0)`,
+    and determinizes with no diagnostic at all — the emitted keyword simply has to
+    be right. So pin `render`'s keywords against the committed corpus models,
+    which carry §08's names and whose numbers are gated on frozen oracles.
+
+    §08's parameter names for the four bases: `Normal(mu, sigma)`,
+    `Gamma(shape, rate)`, `Beta(alpha, beta)`, `Poisson(rate)`.
+    """
+    corpus = _corpus_ctor_keywords()
+    assert corpus, "found no corpus constructors to compare against"
+
+    checked = 0
+    for base in BASES:
+        probe = Probe(id="t", base=base, wraps=(Wrap("identity", ()),),
+                      spelling="direct", ordering="single", consumer=False,
+                      point=INNER[base.kind])
+        rhs = render(probe).source.splitlines()[0].split("=", 1)[1].strip()
+        call = _as_call(rhs)
+        assert call, f"{base.kind}: rendered constructor did not parse: {rhs!r}"
+        head, argstr = call
+        _pos, kw = _args(argstr)
+        assert head in corpus, (
+            f"{head} appears in no corpus model, so this test cannot verify its "
+            "parameter names — add a corpus case or pin them another way")
+        assert tuple(sorted(kw)) == corpus[head], (
+            f"{head}: render emits {tuple(sorted(kw))}, the corpus uses "
+            f"{corpus[head]} — a wrong parameter name is silent all the way "
+            "through the determiniser")
+        checked += 1
+    assert checked == len(BASES)
 
 
 def _wrap_marker(wrap: Wrap) -> str:
