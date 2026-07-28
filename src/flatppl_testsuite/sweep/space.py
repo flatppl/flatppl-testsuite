@@ -70,6 +70,13 @@ WRAPS = [
     Wrap("pushfwd", ("log",)),
     Wrap("pushfwd", ("neg",)),
     Wrap("pushfwd", ("sqrt",)),
+    # "affine" is this sweep's OWN label, not a FlatPPL construct -- there is
+    # no such combinator in the spec or either engine's catalogue. It names
+    # the LAMBDA-PUSHFWD spelling of an affine map (render.py emits
+    # `pushfwd(x -> 2.0 * x + 1.0, ·)`), covering the same §06 rule as
+    # `locscale` below through a different spelling -- §06 gives `locscale`
+    # verbatim as `pushfwd(x -> scale * x + shift, m)`, so the two exist here
+    # to check the spellings agree, not because they are two rules.
     Wrap("affine", (2.0, 1.0)),          # 2*x + 1
     Wrap("truncate", (0.0, "inf")),
     Wrap("weighted", (0.5,)),

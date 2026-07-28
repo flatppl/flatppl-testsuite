@@ -10,12 +10,17 @@ a number to check it against, not a fresh derivation.
 `spec_justified` is decided from the PROBE'S OWN STRUCTURE (spelling, wrap
 kind), not from `classify()`'s `marker` text: the ONE guard this probe space's
 `record`-spelling REFUSES trace to is §04 "Calling conventions"' auto-splat
-correspondence rule, applied to a scalar map (`pushfwd`/`affine`/`locscale`)
-over a record variate (verified against a pinned binary: `refuse user-call
-...: value must be a record`, `refuse divide ...: value must be a record`,
-`refuse Lit(Real(2.0)) ...: locscale base measure variate domain is not
-confirmed scalar or vector`, and the pushfwd-log/sqrt domain guard refusing
-because a record obscures the support it would otherwise confirm). Keying off
+correspondence rule, applied to a scalar map over a record variate. Three
+`space.Wrap` kinds reach it: `pushfwd` (a bare map), `locscale` (a named §06
+construct that IS itself `pushfwd(x -> scale*x+shift, m)` per spec), and
+`affine` -- this sweep's OWN axis label, not a FlatPPL construct, for the
+lambda-pushfwd SPELLING of that same affine map (see `space.WRAPS`). All
+three desugar to one scalar map applied to the base's variate (verified
+against a pinned binary: `refuse user-call ...: value must be a record`,
+`refuse divide ...: value must be a record`, `refuse Lit(Real(2.0)) ...:
+locscale base measure variate domain is not confirmed scalar or vector`, and
+the pushfwd-log/sqrt domain guard refusing because a record obscures the
+support it would otherwise confirm). Keying off
 `marker` instead would be fragile: `_marker`'s word-slice is dominated by the
 generic `refuse X (node NodeId(N)):` preamble and a gensym'd node id, so
 semantically-identical refusals can carry different marker strings across
@@ -61,14 +66,14 @@ DEFAULT_PATH = Path(__file__).resolve().parents[3] / "verdicts" / "density-sweep
 
 _TOLERANCE = {"atol": 1e-9, "rtol": 1e-9}
 
-# The guard behind every REFUSES this probe space produces (verified: 126/126
-# REFUSES in a full sweep are `spelling == "record"` wrapped in one of these
-# three kinds -- see the module docstring). §04 "Calling conventions"'
-# auto-splat rule: a scalar map's argument names must correspond to a
-# record's field names, or the call is a static error; `affine`/`locscale`
-# desugar to the same scalar-map shape, and `pushfwd`'s log/sqrt domain guard
-# also refuses through a record because the record obscures the support it
-# would otherwise confirm.
+# The guard behind every REFUSES this probe space's `record` spelling
+# produces -- see the module docstring. §04 "Calling conventions"' auto-splat
+# rule: a scalar map's argument names must correspond to a record's field
+# names, or the call is a static error. `pushfwd`, `locscale`, and this
+# sweep's `affine` label (a SPELLING of `pushfwd`, not a separate construct --
+# see `space.WRAPS`) all apply such a scalar map, so all three trip the same
+# guard; `pushfwd`'s log/sqrt domain guard also refuses through a record
+# because the record obscures the support it would otherwise confirm.
 _AUTO_SPLAT_REFUSAL_WRAPS = {"pushfwd", "affine", "locscale"}
 
 
@@ -115,14 +120,23 @@ def _known_defect_reason(probe: Probe) -> str | None:
     if probe.base.kind == "poisson" and (
             wrap.kind in ("affine", "locscale")
             or (wrap.kind == "pushfwd" and wrap.args[0] == "exp")):
-        # §06 line 28: counting measure is not distorted by a bijection, so a
-        # discrete base should carry NO log-volume term (see oracle.py's own
-        # `_is_discrete` zeroing). Verified emitted FlatPDL subtracts one
-        # anyway: `builtin_logdensityof(Poisson, ..., log(y)) - log(y)` for
+        # Three wrap kinds, one scalar map: `pushfwd(exp)`, this sweep's
+        # `affine` label (the lambda-pushfwd SPELLING of `x -> a*x+b`, not a
+        # separate FlatPPL construct -- see `space.WRAPS`), and `locscale`
+        # (§06's named construct for that same map). §06 line 28: counting
+        # measure is not distorted by a bijection, so a discrete base should
+        # carry NO log-volume term (see oracle.py's own `_is_discrete`
+        # zeroing). Verified emitted FlatPDL subtracts one anyway:
+        # `builtin_logdensityof(Poisson, ..., log(y)) - log(y)` for
         # pushfwd(exp); `builtin_logdensityof(Poisson, ..., (y-b)/a) -
-        # log(abs(a))` for affine/locscale. `pushfwd(neg)` is unaffected
-        # (its volume element is 0, so subtracting it is a no-op) -- verified
-        # numerically correct, not merely assumed.
+        # log(abs(a))` for the affine-map spellings. `pushfwd(neg)` is
+        # unaffected (its volume element is 0, so subtracting it is a no-op)
+        # -- verified numerically correct, not merely assumed. (The returned
+        # string below still says "affine/locscale/pushfwd(exp)" -- matching
+        # the wording already baked into the committed table's
+        # `known_defect_reason` field; reworded here in the comment only, not
+        # the persisted string, so this edit causes no diff against what is
+        # already on disk.)
         return ("emits a spurious log-volume subtraction for the discrete "
                 "Poisson base under a continuous bijection (affine/locscale/"
                 "pushfwd(exp)) -- the counting measure isn't distorted by a "
