@@ -16,6 +16,19 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def test_the_running_binary_matches_the_table_it_is_compared_against():
+    """Checked BEFORE any per-probe comparison, and failing on its own with
+    ONE message: a per-probe diff against a DIFFERENT determinizer is noise,
+    not signal (this is what actually broke CI -- 22 phantom
+    "REFUSES where the table LOWERS" rows, all query-ordering probes whose
+    lowering path only exists on a branch, not on the main build CI runs).
+    Unknown provenance on either side also fails here, deliberately, rather
+    than letting an unverifiable comparison report green.
+    """
+    problem = table.check_provenance(table.DEFAULT_PATH)
+    assert problem is None, problem
+
+
 def test_live_sweep_matches_the_committed_table():
     expected = table.load(table.DEFAULT_PATH)
     assert expected, "no committed verdict table — run `pixi run sweep-regen`"

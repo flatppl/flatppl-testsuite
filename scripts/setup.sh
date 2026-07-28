@@ -38,6 +38,24 @@ cargo install \
 
 echo ">> done. flatppl binary at .pixi-bin/bin/flatppl"
 
+# Record the commit `cargo install` actually resolved `--branch` to, so the
+# density sweep's CI gate (sweep/table.py::check_provenance) can tell whether
+# a committed verdict table was generated against the SAME determinizer this
+# run just installed, rather than silently diffing against a different one.
+# `cargo install --git` writes the resolved commit into `.crates2.json`'s
+# install key, e.g. `flatppl-cli 0.1.0 (git+https://...?branch=main#<40-hex>)`
+# -- extracted here rather than re-resolving the ref ourselves, since this is
+# the exact commit that was actually built, not a second (possibly racing)
+# `git ls-remote`. `|| true` on the grep: an absent/reshaped `.crates2.json`
+# must leave provenance representable as "not recorded", never abort setup.
+COMMIT="$(grep -oE '#[0-9a-f]{40}\)' .pixi-bin/.crates2.json 2>/dev/null | head -1 | tr -d '#)' || true)"
+if [ -n "$COMMIT" ]; then
+  echo "$COMMIT" > .pixi-bin/flatppl-rust.commit
+  echo ">> recorded determinizer commit $COMMIT"
+else
+  echo ">> could not resolve a determinizer commit from .pixi-bin/.crates2.json" >&2
+fi
+
 # ---------------------------------------------------------------------------
 # 2. JS engine
 # ---------------------------------------------------------------------------

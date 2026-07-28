@@ -2,6 +2,7 @@
 the spec_justified/known_defect predicates -- kept separate from `test_gate.py`
 (which needs the real binary) so these run with no engine present."""
 import math
+from types import SimpleNamespace
 
 from flatppl_testsuite.sweep import table
 from flatppl_testsuite.sweep.space import Base, Probe, Wrap
@@ -160,6 +161,35 @@ def test_an_ordinary_probe_is_not_a_known_defect():
     assert table._known_defect_reason(p) is None
 
 
+def _poisson_probe(wrap_kind, wrap_args, spelling="direct"):
+    return Probe(id="t", base=Base("poisson", (3.0,)), wraps=(Wrap(wrap_kind, wrap_args),),
+                 spelling=spelling, ordering="single", consumer=False, point=1.0)
+
+
+def test_poisson_pushfwd_exp_affine_locscale_are_known_defects():
+    """The missing discrete-no-volume-term defect: verified directly against
+    main (9ac4ae76) -- pushfwd(exp)/affine/locscale over Poisson each emit a
+    spurious `- log(...)` volume subtraction that a discrete base should
+    never carry (§06 line 28's counting measure)."""
+    assert table._known_defect_reason(_poisson_probe("pushfwd", ("exp",))) is not None
+    assert table._known_defect_reason(_poisson_probe("affine", (2.0, 1.0))) is not None
+    assert table._known_defect_reason(_poisson_probe("locscale", (1.0, 2.0))) is not None
+
+
+def test_poisson_pushfwd_neg_is_not_a_known_defect():
+    """`neg`'s volume element is 0, so subtracting it is a no-op -- verified
+    numerically correct on main, not merely assumed exempt."""
+    assert table._known_defect_reason(_poisson_probe("pushfwd", ("neg",))) is None
+
+
+def test_the_volume_term_defect_is_scoped_to_poisson():
+    """A continuous base's volume term IS supposed to be subtracted -- this
+    defect is specifically about the counting measure not being distorted,
+    so it must not fire for a continuous base."""
+    assert table._known_defect_reason(_probe(base_kind="normal", wrap_kind="pushfwd",
+                                              wrap_args=("exp",), spelling="direct")) is None
+
+
 # --------------------------------------------------------------------------
 # diff(): the four signals, plus the "one side only" asymmetry (see
 # diff()'s own docstring for why expected-only is not a divergence).
@@ -217,3 +247,71 @@ def test_diff_does_not_flag_a_probe_present_only_in_expected():
     designed, not a divergence."""
     e = {"only_in_full_space": _row("only_in_full_space")}
     assert table.diff(e, {}) == []
+
+
+# --------------------------------------------------------------------------
+# resolved_commit / check_provenance -- what actually broke CI (comparing a
+# table generated against one determinizer to a run of a different one, which
+# produced 22 phantom per-probe diffs no probe-level fix could explain).
+# --------------------------------------------------------------------------
+
+def test_resolved_commit_prefers_the_env_override(monkeypatch):
+    monkeypatch.setenv("FLATPPL_RUST_COMMIT", "deadbeef")
+    assert table.resolved_commit() == "deadbeef"
+
+
+def test_resolved_commit_falls_back_to_the_setup_sh_sidecar(monkeypatch, tmp_path):
+    monkeypatch.delenv("FLATPPL_RUST_COMMIT", raising=False)
+    root = tmp_path / "install-root"
+    (root / "bin").mkdir(parents=True)
+    binary = root / "bin" / "flatppl"
+    binary.write_text("")
+    (root / "flatppl-rust.commit").write_text("cafebabe\n")
+    monkeypatch.setattr(table, "CONFIG", SimpleNamespace(flatppl_bin=binary))
+    assert table.resolved_commit() == "cafebabe"
+
+
+def test_resolved_commit_is_none_with_no_env_and_no_sidecar(monkeypatch, tmp_path):
+    """Representable as unknown, not a crash -- e.g. FLATPPL_BIN pointed at a
+    co-development sibling build that never went through `pixi run setup`."""
+    monkeypatch.delenv("FLATPPL_RUST_COMMIT", raising=False)
+    root = tmp_path / "install-root"
+    (root / "bin").mkdir(parents=True)
+    binary = root / "bin" / "flatppl"
+    binary.write_text("")
+    monkeypatch.setattr(table, "CONFIG", SimpleNamespace(flatppl_bin=binary))
+    assert table.resolved_commit() is None
+
+
+def test_check_provenance_passes_when_the_live_commit_matches_the_table(monkeypatch, tmp_path):
+    path = tmp_path / "t.json"
+    table.save(path, [_row()], commit="abc123")
+    monkeypatch.setattr(table, "resolved_commit", lambda: "abc123")
+    assert table.check_provenance(path) is None
+
+
+def test_check_provenance_fails_with_one_message_on_a_mismatch(monkeypatch, tmp_path):
+    path = tmp_path / "t.json"
+    table.save(path, [_row()], commit="abc123")
+    monkeypatch.setattr(table, "resolved_commit", lambda: "def456")
+    problem = table.check_provenance(path)
+    assert problem is not None
+    assert "abc123" in problem and "def456" in problem
+
+
+def test_check_provenance_fails_when_the_table_commit_is_unknown(monkeypatch, tmp_path):
+    path = tmp_path / "t.json"
+    table.save(path, [_row()], commit=None)
+    monkeypatch.setattr(table, "resolved_commit", lambda: "abc123")
+    assert table.check_provenance(path) is not None
+
+
+def test_check_provenance_fails_when_the_live_commit_is_unresolvable(monkeypatch, tmp_path):
+    """Unknown provenance on the LIVE side is also a failure, not a pass --
+    an unverifiable gate must not report green."""
+    path = tmp_path / "t.json"
+    table.save(path, [_row()], commit="abc123")
+    monkeypatch.setattr(table, "resolved_commit", lambda: None)
+    problem = table.check_provenance(path)
+    assert problem is not None
+    assert "abc123" in problem

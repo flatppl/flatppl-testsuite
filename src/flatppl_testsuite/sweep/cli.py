@@ -22,14 +22,19 @@ def _regen(argv: list[str]) -> int:
                           "default is the CI slice (see table.SLICE_DESCRIPTION)")
     ap.add_argument("--commit", default=None,
                      help="the flatppl determinizer commit this table is generated against; "
-                          "recorded in the table's metadata")
+                          "recorded in the table's metadata. Defaults to "
+                          "table.resolved_commit() (FLATPPL_RUST_COMMIT, or the "
+                          "sidecar scripts/setup.sh writes) -- pass explicitly only "
+                          "when neither is available")
     args = ap.parse_args(argv)
 
+    commit = args.commit or table.resolved_commit()
     rows = table.sweep(slice_only=not args.full)
-    table.save(table.DEFAULT_PATH, rows, commit=args.commit)
+    table.save(table.DEFAULT_PATH, rows, commit=commit)
     counts = Counter(r.outcome for r in rows)
     print(f"wrote {len(rows)} rows to {table.DEFAULT_PATH} "
-          f"({'full space' if args.full else 'CI slice'}): "
+          f"({'full space' if args.full else 'CI slice'}, determinizer "
+          f"{commit or 'unknown'}): "
           f"{counts.get('LOWERS', 0)} LOWERS, {counts.get('REFUSES', 0)} REFUSES, "
           f"{counts.get('MALFORMED', 0)} MALFORMED")
     return 0
