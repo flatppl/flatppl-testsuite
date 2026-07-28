@@ -283,7 +283,19 @@ def test_resolved_commit_is_none_with_no_env_and_no_sidecar(monkeypatch, tmp_pat
     assert table.resolved_commit() is None
 
 
+def _present_engine(monkeypatch, tmp_path, commit="eng111"):
+    """Pin the engine side so a determiniser-provenance test does not depend on
+    whether an engine checkout happens to sit beside the running repo -- it does
+    not, when the harness runs from a worktree."""
+    d = tmp_path / "flatppl-js"
+    d.mkdir(exist_ok=True)
+    monkeypatch.setattr(table, "CONFIG", SimpleNamespace(flatppl_js_dir=d))
+    monkeypatch.setattr(table, "engine_commit", lambda: commit)
+    return d
+
+
 def test_check_provenance_passes_when_the_live_commit_matches_the_table(monkeypatch, tmp_path):
+    _present_engine(monkeypatch, tmp_path)
     path = tmp_path / "t.json"
     table.save(path, [_row()], commit="abc123")
     monkeypatch.setattr(table, "resolved_commit", lambda: "abc123")
@@ -291,6 +303,7 @@ def test_check_provenance_passes_when_the_live_commit_matches_the_table(monkeypa
 
 
 def test_check_provenance_fails_with_one_message_on_a_mismatch(monkeypatch, tmp_path):
+    _present_engine(monkeypatch, tmp_path)
     path = tmp_path / "t.json"
     table.save(path, [_row()], commit="abc123")
     monkeypatch.setattr(table, "resolved_commit", lambda: "def456")
@@ -300,6 +313,7 @@ def test_check_provenance_fails_with_one_message_on_a_mismatch(monkeypatch, tmp_
 
 
 def test_check_provenance_fails_when_the_table_commit_is_unknown(monkeypatch, tmp_path):
+    _present_engine(monkeypatch, tmp_path)
     path = tmp_path / "t.json"
     table.save(path, [_row()], commit=None)
     monkeypatch.setattr(table, "resolved_commit", lambda: "abc123")
@@ -309,9 +323,40 @@ def test_check_provenance_fails_when_the_table_commit_is_unknown(monkeypatch, tm
 def test_check_provenance_fails_when_the_live_commit_is_unresolvable(monkeypatch, tmp_path):
     """Unknown provenance on the LIVE side is also a failure, not a pass --
     an unverifiable gate must not report green."""
+    _present_engine(monkeypatch, tmp_path)
     path = tmp_path / "t.json"
     table.save(path, [_row()], commit="abc123")
     monkeypatch.setattr(table, "resolved_commit", lambda: None)
     problem = table.check_provenance(path)
     assert problem is not None
     assert "abc123" in problem
+
+
+def test_check_provenance_fails_when_the_engine_directory_is_absent(monkeypatch, tmp_path):
+    """The case that misleads rather than merely failing: with no scorer, every
+    gated probe classifies MALFORMED, which reads as a batch of determiniser
+    defects. Measured: 16 phantom MALFORMED rows, all `truncate`, from running
+    the sweep in a worktree where the `../flatppl-js` sibling default does not
+    resolve."""
+    path = tmp_path / "t.json"
+    d = _present_engine(monkeypatch, tmp_path)
+    table.save(path, [_row()], commit="abc123")
+    monkeypatch.setattr(table, "resolved_commit", lambda: "abc123")
+    d.rmdir()
+    problem = table.check_provenance(path)
+    assert problem is not None
+    assert "FLATPPL_JS_DIR" in problem
+
+
+def test_a_differing_engine_commit_is_recorded_but_does_not_fail_the_gate(monkeypatch, tmp_path):
+    """Unlike the determiniser pin. `setup.sh` pins the engine at `FLATPPL_JS_REF`,
+    default `main`, so it advances on every unrelated flatppl-js merge -- failing
+    here would be a standing false alarm. The commit is recorded so a reader knows
+    which engine produced the values."""
+    path = tmp_path / "t.json"
+    _present_engine(monkeypatch, tmp_path, commit="eng111")
+    table.save(path, [_row()], commit="abc123")
+    assert table.load_metadata(path)["engine_commit"] == "eng111"
+    monkeypatch.setattr(table, "resolved_commit", lambda: "abc123")
+    monkeypatch.setattr(table, "engine_commit", lambda: "eng222")
+    assert table.check_provenance(path) is None
