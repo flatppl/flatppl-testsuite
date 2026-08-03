@@ -5,8 +5,13 @@ base densities — the ones the probe space generates: `weighted`, `logweighted`
 `normalize`, `truncate`, and `pushfwd` (including its `affine`/`locscale`
 spellings). §13's remaining rules are **not** implemented: `superpose`,
 `joint`, `iid`, `jointchain`, and `kchain` all raise `OracleUnsupported`, as
-does any base outside the four in `space.BASES`. That list is the module's
-scope, stated here rather than left to be discovered at runtime.
+does any base outside the four in `space.BASES` and the two in
+`space.VECTOR_BASES`. That list is the module's scope, stated here rather than
+left to be discovered at runtime.
+
+The vector family (`space.VECTOR_BASES`) has its own fold, `_vector_logpdf`:
+the same rules applied cell-wise, with `pushfwd` over a manifold support
+withheld rather than guessed (`_MANIFOLD_SAFE_FORWARDS`).
 
 It walks the `Probe` — the structure the generator built — so it needs no
 parser and no type inference, and it never reads the determiniser's output.
@@ -22,7 +27,13 @@ import math
 
 from scipy import stats
 
-from flatppl_testsuite.sweep.space import Base, Probe, Wrap, in_support
+from flatppl_testsuite.sweep.space import (
+    Base,
+    Probe,
+    Wrap,
+    in_support,
+    is_vector_base,
+)
 
 
 class OracleUnsupported(Exception):
@@ -93,8 +104,143 @@ def _interval(wrap: Wrap) -> tuple[float, float]:
 
 def _is_discrete(base: Base) -> bool:
     """§06 line 28: the reference measure is "Lebesgue measure for continuous
-    variates, counting measure for discrete variates"."""
-    return base.kind == "poisson"
+    variates, counting measure for discrete variates".
+
+    `multinomial` is the vector family's discrete member: §08 gives its density
+    "w.r.t. `iid(Counting(integers), k)`", a product of counting measures.
+    """
+    return base.kind in ("poisson", "multinomial")
+
+
+# --------------------------------------------------------------------------
+# The vector family. A parallel path rather than a widening of the scalar fold
+# below: the verdict table is frozen history, so the scalar arithmetic must stay
+# bit-identical, and a shared fold threading `float | list[float]` through every
+# branch is how a silent change to it gets in.
+# --------------------------------------------------------------------------
+
+def _vector_base_logpdf(base: Base, x: list[float]) -> float:
+    """A `VECTOR_BASES` member's log-density at `x`, transcribed from §08.
+
+    scipy's parameterisations are §08's verbatim here, unlike `Gamma` above:
+
+    * §08 `Multinomial(n, p)` — "Density w.r.t. `iid(Counting(integers), k)`:
+      n!/prod_i x_i! prod_i p_i^{x_i} for x_i >= 0, sum_i x_i = n", which is
+      `scipy.stats.multinomial(n, p).logpmf(x)` argument for argument.
+    * §08 `Dirichlet(alpha)` — "Density w.r.t. `Lebesgue(stdsimplex(n))`:
+      Gamma(||alpha||_1)/prod_i Gamma(alpha_i) prod_i x_i^{alpha_i - 1}", which is
+      `scipy.stats.dirichlet(alpha).logpdf(x)`.
+
+    **`Lebesgue(stdsimplex(n))` is the CHART measure, `dx_1 ... dx_{n-1}`, not the
+    n-1 dimensional Hausdorff measure of the simplex embedded in R^n.** The two
+    differ by sqrt(n) — for n = 3 by sqrt(3) = 1.732, i.e. 0.549 in log-density.
+    Verified by integrating §08's own formula over {x_1 > 0, x_2 > 0, x_1 + x_2 < 1}
+    with x_3 = 1 - x_1 - x_2: the mass is 1.000000000000001, so §08's normalisation
+    is the chart's. `test_oracle` pins that integral rather than leaving the reading
+    to a comment.
+
+    The support gate is `space.in_support`, which is the constraint SURFACE (sum
+    x_i = n; sum x_i = 1) and not a bounding box — scipy would raise on an
+    off-surface point rather than return -inf, and an exception here would abort the
+    sweep on a probe instead of scoring it.
+    """
+    if not in_support(base, x):
+        return -math.inf
+    if base.kind == "multinomial":
+        n, p = base.params
+        cells = [float(round(c)) for c in x]     # snapped: see `_base_logpdf`
+        return float(stats.multinomial(n=n, p=list(p)).logpmf(cells))
+    if base.kind == "dirichlet":
+        (alpha,) = base.params
+        return float(stats.dirichlet(list(alpha)).logpdf(list(x)))
+    raise OracleUnsupported(f"vector base {base.kind}")
+
+
+# Forward maps whose log-volume element is unambiguous over a support that is a
+# lower-dimensional MANIFOLD of the ambient variate space — `Dirichlet`'s
+# `stdsimplex(n)` (§08), which is an (n-1)-manifold inside `cartpow(reals, n)`.
+#
+# **Only a map that preserves the manifold's own volume element qualifies, and of
+# the maps this family generates that is `neg` alone.** `neg` is an isometry of R^n
+# (it reflects the simplex onto a congruent copy), so its restricted volume element
+# is 1 and the log-volume is 0 whichever reference is meant. `exp` is not, and there
+# the reference measure of the IMAGE is genuinely not determined by §06 or §08:
+# three defensible readings of `pushfwd(exp, Dirichlet(2, 3, 4))`'s volume term at
+# (e^0.2, e^0.3, e^0.5) disagree —
+#
+#   * 1.0     — the ambient R^3 Jacobian log-det, `sum_i log y_i` (which on the
+#               simplex is just `sum_i x_i` = 1);
+#   * 0.6816  — the 2-D Hausdorff element on the image surface,
+#               `0.5 * log det(U^T diag(y)^2 U)` for an orthonormal basis U of the
+#               simplex's tangent space {v : sum v_i = 0};
+#   * 0.5     — the (y_1, y_2) coordinate chart's `log|d(y_1,y_2)/d(x_1,x_2)|`.
+#
+# They differ by 0.32 and 0.5 in log-density, so no reading is a rounding detail.
+# §06 says `logvolume` "generalizes the log-absolute-determinant of the Jacobian to
+# mappings between spaces of different dimension"; this map is R^3 -> R^3 while the
+# MEASURE lives on a 2-manifold, which is a case §06 does not name. Per
+# `flatppl-dev/density-sweep-notes.md` ("the oracle must not assume semantics the
+# spec does not give"), withhold: supplying one of the three would make this module
+# the authority for semantics nobody wrote down, and would report a spec gap as a
+# determiniser bug.
+_MANIFOLD_SAFE_FORWARDS = {"neg"}
+
+# Vector bases whose support is a lower-dimensional manifold of the variate space.
+# `Multinomial`'s is not: its reference is a counting measure (§08), and a bijection
+# does not distort a counting measure whatever the support's shape, so the question
+# above never arises there.
+_MANIFOLD_SUPPORTS = {"dirichlet"}
+
+
+def _vector_logpdf(probe: Probe) -> float:
+    """`true_logpdf` for a `VECTOR_BASES` probe. Wraps peeled OUTERMOST FIRST, as
+    in the scalar fold, and every map applied CELL-WISE — §06's elementwise
+    pushforward is one scalar map per cell, so its log-volume is the SUM of the
+    per-cell terms.
+    """
+    x = list(probe.point)
+    logv = 0.0
+
+    for i in range(len(probe.wraps) - 1, -1, -1):
+        w = probe.wraps[i]
+        if w.kind == "identity":
+            continue
+        if w.kind == "pushfwd":
+            op = w.args[0]
+            if op not in _INVERSE:
+                raise OracleUnsupported(f"pushfwd {op}")
+            if (probe.base.kind in _MANIFOLD_SUPPORTS
+                    and op not in _MANIFOLD_SAFE_FORWARDS):
+                raise OracleUnsupported(
+                    f"pushfwd({op}, {probe.base.kind}): the reference measure of the "
+                    "image of a manifold support is not named by §06 or §08")
+            if not all(_IN_FORWARD_IMAGE[op](c) for c in x):
+                return -math.inf      # some cell has no preimage
+            if any(_PREIMAGE_OVERFLOWS.get(op, lambda _: False)(c) for c in x):
+                return -math.inf
+            logv += math.fsum(_LOGVOLUME_AT_PREIMAGE[op](c) for c in x)
+            x = [_INVERSE[op](c) for c in x]
+        elif w.kind == "truncate":
+            # A SCALAR truncation region over a VECTOR variate has no defined
+            # density, for the reason the record spelling has none: §06 "Support
+            # restriction" gives `truncate(M, S)` as ν(A) = M(A ∩ S), and §03 makes
+            # `interval(lo, hi)` a set of REALS while the variate is a vector, so
+            # A ∩ S is empty and ν is the zero measure — -inf at every point.
+            #
+            # There is no cell-wise reading to compute instead. §03 spells no
+            # vector-valued `interval` (`cartpow(interval(lo, hi), n)` is the set of
+            # vectors, and is a different second argument), and §04's auto-splat is a
+            # calling convention for a callable's named arguments. The determiniser
+            # REFUSES this shape rather than emitting -inf, which is why the probe is
+            # a `spec_justified` refusal and not a row with a value.
+            raise OracleUnsupported(
+                "a scalar truncation set over a vector variate: no §06 rule")
+        else:
+            raise OracleUnsupported(f"wrap {w.kind} over a vector variate")
+
+    if _is_discrete(probe.base):
+        logv = 0.0        # counting measure: a bijection distorts no volume
+    return _vector_base_logpdf(probe.base, x) - logv
 
 
 # Forward log-volume elements of the `pushfwd` maps, EVALUATED AT THE PREIMAGE.
@@ -178,7 +324,13 @@ def true_logpdf(probe: Probe) -> float:
     has density `pmf(log y)` at `y` — no `- log y`. Subtracting a Lebesgue Jacobian
     there would make this oracle wrong in exactly the region the space was widened
     to probe, and it would report the error as the determiniser's.
+
+    A `VECTOR_BASES` probe is delegated to `_vector_logpdf`, which is the same
+    algebra applied cell-wise.
     """
+    if is_vector_base(probe.base):
+        return _vector_logpdf(probe)
+
     x = probe.point
     logv = 0.0          # accumulated FORWARD log-volume, subtracted at the end
     extra = 0.0         # weight and normalization terms: point-independent shifts

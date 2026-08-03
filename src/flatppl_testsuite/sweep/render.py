@@ -21,6 +21,11 @@ _CTOR = {
     "gamma": "Gamma(shape = {0}, rate = {1})",
     "beta": "Beta(alpha = {0}, beta = {1})",
     "poisson": "Poisson(rate = {0})",
+    # §08 "Multivariate distributions": `Multinomial(n, p)` and `Dirichlet(alpha)`.
+    # `Multinomial`'s `n` is `elementof(posintegers)` per §08, so it is rendered as
+    # an integer literal (`n = 5`), not `5.0`.
+    "multinomial": "Multinomial(n = {0}, p = {1})",
+    "dirichlet": "Dirichlet(alpha = {0})",
 }
 
 
@@ -30,8 +35,18 @@ class RenderedProbe:
     binding: str
 
 
+def _value_src(v) -> str:
+    """A FlatPPL value literal: a scalar as itself, a vector as `[a, b, c]` (§05's
+    array literal). Vector parameters arrive as tuples and vector points as lists,
+    so both sequence types render the same way — `repr` on a tuple would emit
+    `(0.2, 0.3, 0.5)`, which is not FlatPPL syntax at all."""
+    if isinstance(v, (tuple, list)):
+        return "[" + ", ".join(_value_src(c) for c in v) + "]"
+    return str(v)
+
+
 def _base_src(base: Base) -> str:
-    return _CTOR[base.kind].format(*base.params)
+    return _CTOR[base.kind].format(*(_value_src(p) for p in base.params))
 
 
 def _wrap_src(wrap: Wrap, inner: str) -> str:
@@ -87,7 +102,7 @@ def render(probe: Probe) -> RenderedProbe:
     if probe.consumer:
         lines.append("w_consumer = 1.0")
 
-    pt = probe.point
+    pt = _value_src(probe.point)
     if probe.spelling == "record":
         query = f"lp = logdensityof({query_measure}, record(x = {pt}))"
     else:

@@ -18,7 +18,8 @@ from flatppl_testsuite.sweep.space import enumerate_probes
 def _regen(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="sweep regen")
     ap.add_argument("--full", action="store_true",
-                     help="sweep the whole probe space (738 probes); "
+                     help="sweep the whole probe space (768 probes: the scalar "
+                          "axes' cross-product plus the targeted vector family); "
                           "default is the CI slice (see table.SLICE_DESCRIPTION)")
     ap.add_argument("--commit", default=None,
                      help="the flatppl determinizer commit this table is generated against; "

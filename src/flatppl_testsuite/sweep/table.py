@@ -60,7 +60,11 @@ from flatppl_testsuite.sweep.space import (
     Wrap,
     _point_for,
     _supported,
+    _vector_point_for,
+    _wrap_name,
     enumerate_probes,
+    is_vector_base,
+    vector_shapes,
 )
 
 DEFAULT_PATH = Path(__file__).resolve().parents[3] / "verdicts" / "density-sweep.json"
@@ -104,6 +108,14 @@ def _spec_justified(probe: Probe, outcome: str) -> bool | None:
         # refusal is a diagnostic for an ill-typed restriction (§07 `in`
         # requires x's type to match S's element type), not a capability gap.
         # Same shape the oracle declines (`oracle.py`, OracleUnsupported).
+        return True
+    if is_vector_base(probe.base) and wrap.kind == "truncate":
+        # The SAME set-kind check, reached from the other side: a scalar
+        # `interval` (§03 — a set of reals) against a vector variate. The
+        # determiniser names both spaces and refuses
+        # (`density.rs::refuse_truncation_set_kind_mismatch`), and the oracle
+        # declines the shape for the same §06 reason it declines the record one.
+        # Conformant, not a gap.
         return True
     return False  # an unrecognized refusal: a tracked over-refusal, not a pass
 
@@ -223,13 +235,20 @@ SLICE_EXCLUDED_AXES = {
     "base": ("excludes beta entirely; excludes poisson except pushfwd(sqrt) "
              "at spelling=direct, covering the known float-roundtrip defect"),
     "consumer": "fixed False (True excluded)",
+    "vector_family": ("one probe per (base, wrap) shape space.vector_shapes() "
+                      "generates, at spelling='direct' ordering='single'; the "
+                      "shapes flatppl-js cannot evaluate are not in the family "
+                      "at all (space._ENGINE_BLOCKED) and are pinned instead by "
+                      "tests/sweep/test_vector_arms.py"),
 }
 SLICE_DESCRIPTION = (
     "every (wrap, ordering) pair, spelling='direct', consumer=False; "
     "base='normal' except pushfwd(log)/pushfwd(sqrt), which normal's domain "
     "guard refuses -- those use 'gamma' instead (see space._supported); plus "
     "a handful of extra probes so the two known defects are inside the "
-    "slice (see SLICE_EXCLUDED_AXES / _KNOWN_DEFECT_COVERAGE)"
+    "slice (see SLICE_EXCLUDED_AXES / _KNOWN_DEFECT_COVERAGE); plus one probe "
+    "per vector-family (base, wrap) shape, so every vector arm the family "
+    "covers is inside the fast gate rather than only in a --full run"
 )
 
 # Minimal punch-through of the excluded spelling/base axes: enough probes,
@@ -248,7 +267,7 @@ def _slice_probes() -> list[Probe]:
     out: list[Probe] = []
     for wrap in WRAPS:
         base = normal if _supported(normal, wrap) else gamma
-        wname = wrap.kind + ("_" + "_".join(str(a) for a in wrap.args) if wrap.args else "")
+        wname = _wrap_name(wrap)
         for ordering in ORDERINGS:
             pid = f"{base.kind}.{wname}.direct.{ordering}.noconsumer"
             out.append(Probe(
@@ -259,13 +278,23 @@ def _slice_probes() -> list[Probe]:
         base = by_kind[extra["base_kind"]]
         wrap = extra["wrap"]
         spelling = extra["spelling"]
-        wname = wrap.kind + ("_" + "_".join(str(a) for a in wrap.args) if wrap.args else "")
+        wname = _wrap_name(wrap)
         for ordering in ORDERINGS:
             pid = f"{base.kind}.{wname}.{spelling}.{ordering}.noconsumer"
             out.append(Probe(
                 id=pid, base=base, wraps=(wrap,), spelling=spelling,
                 ordering=ordering, consumer=False, point=_point_for(base, wrap),
             ))
+    # One probe per vector-family SHAPE, not per probe: the family's spelling and
+    # ordering axes repeat arms the scalar slice already gates, while the (base,
+    # wrap) shape is what decides which vector arm the determiniser emits. Every
+    # shape in the family is therefore in the fast gate.
+    for base, wrap in vector_shapes():
+        pid = f"{base.kind}.{_wrap_name(wrap)}.direct.single.noconsumer"
+        out.append(Probe(
+            id=pid, base=base, wraps=(wrap,), spelling="direct",
+            ordering="single", consumer=False, point=_vector_point_for(base, wrap),
+        ))
     return out
 
 
