@@ -97,13 +97,24 @@ def _spec_justified(probe: Probe, outcome: str) -> bool | None:
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind in _AUTO_SPLAT_REFUSAL_WRAPS:
         return True
+    if probe.spelling == "record" and wrap.kind == "truncate":
+        # The determiniser now refuses a truncation set whose space provably
+        # mismatches the variate (record against a scalar `interval`). §06's
+        # ν(A) = M(A ∩ S) made -inf the correct zero-measure density, so the
+        # refusal is a diagnostic for an ill-typed restriction (§07 `in`
+        # requires x's type to match S's element type), not a capability gap.
+        # Same shape the oracle declines (`oracle.py`, OracleUnsupported).
+        return True
     return False  # an unrecognized refusal: a tracked over-refusal, not a pass
 
 
 def _known_defect_reason(probe: Probe) -> str | None:
     """Investigated, cited defects only -- see the module docstring. Both were
     found and confirmed by hand against the pinned `c570844` binary's emitted
-    FlatPDL; neither is fixed here (that is out of scope for this module)."""
+    FlatPDL. Both are since fixed in the determiniser (the truncate shape now
+    refuses at lowering; the discrete preimage is snapped to the lattice), so
+    these entries are regression tripwires: a row matching one again means the
+    fix regressed."""
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind == "truncate":
         # NOT "the gate should have compared the field". §06's ν(A) = M(A ∩ S)
