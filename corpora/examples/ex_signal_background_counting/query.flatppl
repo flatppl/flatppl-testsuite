@@ -1,0 +1,9 @@
+t_S = elementof(posreals)
+t_sigma_B = elementof(posreals)
+t_m_B = elementof(posreals)
+t_lam = elementof(posreals)
+t_B = elementof(cartpow(posreals, 5))
+inputs = (t_S, t_sigma_B, t_m_B, t_lam, t_B)
+outputs = logdensityof(posterior, record(
+    S = t_S, sigma_B = t_sigma_B, m_B = t_m_B, lam = t_lam, B = t_B,
+))

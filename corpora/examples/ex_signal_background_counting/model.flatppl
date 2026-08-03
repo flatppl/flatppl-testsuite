@@ -1,0 +1,81 @@
+%%%
+# Signal-plus-background rare-event search (BAT.jl paper example)
+
+Hierarchical counting experiment over 5 detector datasets: a Gaussian signal
+peak (fixed shape) over an exponential background. Full description and the
+side-by-side BAT.jl source are in `README.md`.
+
+Julia's `Exponential(λ)` is scale-parameterised (the BAT example's convention),
+FlatPPL's `Exponential(rate)` is rate-parameterised, so the background mixand is
+`Exponential(1 / lam)`.
+%%%
+flatppl_compat = "0.1"
+
+# Per-dataset summary data (BAT.jl's summary_dataset_table): one row per dataset.
+datasets = table(
+    exposure   = [1.6, 1.3, 1.0, 0.7, 0.4],
+    efficiency = [0.5, 0.6, 0.7, 0.8, 0.9],
+    counts     = [13, 10, 10, 2, 2],
+)
+exposure     = datasets.exposure
+efficiency   = datasets.efficiency
+counts_data  = datasets.counts
+
+# Measured event energies [keV], grouped by dataset.
+E1_data = [32.29945024522565, 69.08580773988763, 25.440423777510436, 75.61403615267723, 7.9267656229908585, 3.3354153534688638, 20.670985493456392, 82.75167461000609, 136.75349754794027, 19.976541400061382, 34.57232691499431, 52.32632653325007, 4.75519376172241]
+E2_data = [63.76604456320073, 4.602635553779128, 68.24639884216056, 4.272813246216692, 49.33863066627453, 41.748541234687956, 47.49935392156085, 37.52247790527123, 26.040570121268903, 58.08667451701596]
+E3_data = [58.822595816291454, 8.785379233761681, 55.58320441541379, 63.51718319418958, 58.297943138713215, 40.37315193306145, 7.875521943121733, 139.17144907577784, 100.79360983559722, 98.9325347685139]
+E4_data = [31.878682258259104, 21.28067021826852]
+E5_data = [53.041794807908694, 98.55886779280806]
+
+# Fixed Gaussian signal shape [keV].
+S_mu    = 100.0
+S_sigma = 2.0
+
+# Priors.
+S       ~ Uniform(interval(0.0, 10.0))       % signal strength
+sigma_B ~ Uniform(interval(0.1, 1.0))        % background-rate log-scale
+m_B     ~ Uniform(interval(1e-10, 20.0))     % background-rate mean (0.1 * (E_max - E_min))
+lam     ~ Uniform(interval(1e-10, 100.0))    % exponential background scale
+
+% Hierarchical per-dataset background rates, chosen so that E[B_i] = m_B.
+B ~ iid(LogNormal(log(m_B) - sigma_B^2 / 2.0, sigma_B), 5)
+
+prior = lawof(record(S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B))
+
+# Expected background/signal yields per dataset, and the per-dataset background
+# mixing weight w = nu_B / (nu_B + nu_S).
+nu_B = exposure .* B
+nu_S = exposure .* efficiency .* S
+w    = nu_B ./ (nu_B .+ nu_S)
+
+# Shared mixture components.
+bkg = Exponential(1.0 / lam)
+sig = Normal(S_mu, S_sigma)
+
+# Observed count per dataset.
+event_counts ~ Poisson.(nu_B .+ nu_S)
+
+###
+Per-event energy is a two-component mixture of background `bkg` (weight `w_i`)
+and signal `sig` (weight `1 - w_i`), the weights fixed by each dataset's yields.
+Ideally one broadcast over all events; the reference engine cannot yet score a
+broadcast whose kernel is a composite measure, so it is written as one `iid`
+block per dataset (the mixing weight is constant within a dataset).
+###
+E1 ~ iid(normalize(superpose(weighted(w[1], bkg), weighted(1.0 - w[1], sig))), 13)
+E2 ~ iid(normalize(superpose(weighted(w[2], bkg), weighted(1.0 - w[2], sig))), 10)
+E3 ~ iid(normalize(superpose(weighted(w[3], bkg), weighted(1.0 - w[3], sig))), 10)
+E4 ~ iid(normalize(superpose(weighted(w[4], bkg), weighted(1.0 - w[4], sig))), 2)
+E5 ~ iid(normalize(superpose(weighted(w[5], bkg), weighted(1.0 - w[5], sig))), 2)
+
+# Posterior: prior x likelihood (per-dataset counts + per-event energies).
+forward_kernel = kernelof(
+    record(event_counts = event_counts, E1 = E1, E2 = E2, E3 = E3, E4 = E4, E5 = E5),
+    S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B,
+)
+L = likelihoodof(forward_kernel, record(
+    event_counts = counts_data,
+    E1 = E1_data, E2 = E2_data, E3 = E3_data, E4 = E4_data, E5 = E5_data,
+))
+posterior = bayesupdate(L, prior)
