@@ -51,7 +51,11 @@ from pathlib import Path
 from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.sweep.classify import Outcome, classify
-from flatppl_testsuite.sweep.oracle import OracleUnsupported, true_logpdf
+from flatppl_testsuite.sweep.oracle import (
+    OracleUnsupported,
+    simplex_chart_to_hausdorff_offset,
+    true_logpdf,
+)
 from flatppl_testsuite.sweep.space import (
     BASES,
     ORDERINGS,
@@ -60,7 +64,11 @@ from flatppl_testsuite.sweep.space import (
     Wrap,
     _point_for,
     _supported,
+    _vector_point_for,
+    _wrap_name,
     enumerate_probes,
+    is_vector_base,
+    vector_shapes,
 )
 
 DEFAULT_PATH = Path(__file__).resolve().parents[3] / "verdicts" / "density-sweep.json"
@@ -89,6 +97,16 @@ class Row:
     oracle_unvalidated: bool
     known_defect: bool = False
     known_defect_reason: str | None = None
+    # An UNRESOLVED SPEC-WORDING question behind this row's reference measure. Not a
+    # doubtful value: `spec_wording_pending` says the number is the one the project
+    # requires (numerical parity with Stan/NumPyro/scipy) while two normative
+    # sections word its reference measure incompatibly, so what will move is the
+    # spec text, not the row. `oracle_alt_reading` records what the OTHER wording
+    # would imply, so a future ruling can be checked mechanically instead of
+    # re-derived. See `_spec_wording_pending`.
+    spec_wording_pending: bool = False
+    spec_wording_note: str | None = None
+    oracle_alt_reading: float | None = None
 
 
 def _spec_justified(probe: Probe, outcome: str) -> bool | None:
@@ -105,7 +123,66 @@ def _spec_justified(probe: Probe, outcome: str) -> bool | None:
         # requires x's type to match S's element type), not a capability gap.
         # Same shape the oracle declines (`oracle.py`, OracleUnsupported).
         return True
+    if is_vector_base(probe.base) and wrap.kind == "truncate":
+        # The SAME set-kind check, reached from the other side: a scalar
+        # `interval` (§03 — a set of reals) against a vector variate. The
+        # determiniser names both spaces and refuses
+        # (`density.rs::refuse_truncation_set_kind_mismatch`), and the oracle
+        # declines the shape for the same §06 reason it declines the record one.
+        # Conformant, not a gap.
+        #
+        # As everywhere in this function, the refusal's MARKER is deliberately not
+        # consulted, so this returns True for a refusal of this SHAPE whatever
+        # reason the determiniser gave — a refusal for an unrelated reason would
+        # still read `spec_justified`. That is the stated policy, not an oversight
+        # (see the module docstring), and the `aa1cdcb` diagnostics rewording
+        # vindicated it: keying on the message would have silently reclassified 84
+        # conformant refusals when only the prose changed. The cost is this blind
+        # spot; `tests/sweep/test_vector_arms.py` covers it from the other side by
+        # asserting the emitted arm.
+        return True
     return False  # an unrecognized refusal: a tracked over-refusal, not a pass
+
+
+_DIRICHLET_WORDING_NOTE = (
+    "§08's Dirichlet formula is normalised against the CHART measure "
+    "dx_1...dx_{n-1}, but §03 \"Standard simplex\" and §06 \"Lebesgue\" define "
+    "`Lebesgue(stdsimplex(n))` as SURFACE AREA on the embedded simplex, i.e. the "
+    "(n-1)-dimensional Hausdorff measure, whose area element is "
+    "sqrt(n) dx_1...dx_{n-1}. The two readings are log sqrt(n) apart "
+    "(0.5493061443340549 at n = 3). This row's `oracle` and `value` are the CHART "
+    "reading, which is required for numerical parity with Stan, NumPyro and scipy "
+    "and will not move; `oracle_alt_reading` is what the §03/§06 wording implies. "
+    "What is unresolved is which wording flatppl-design settles on -- tracked as an "
+    "open spec question in flatppl-dev/measure-algebra-audit.md"
+)
+
+
+def _spec_wording_pending(probe: Probe,
+                          chart: float | None) -> tuple[str, float | None] | None:
+    """`(note, alternative_reading)` when this probe's reference measure is subject to
+    an unresolved spec-wording question, else `None`.
+
+    Keyed on the probe's own structure, like every other classifier here, never on
+    engine or refusal text. Only `dirichlet` qualifies: §08's `Multinomial` density is
+    w.r.t. `iid(Counting(integers), k)`, and no section words a counting reference
+    two ways.
+
+    `chart` is the oracle value the CALLER already computed for this probe (`None`
+    where the oracle withheld one), threaded in rather than recomputed — one
+    `true_logpdf` per probe, and no way for the row's `oracle` and its
+    `oracle_alt_reading` to be derived from two different evaluations. The
+    alternative reading needs a finite value to shift; a withheld, refused or
+    infinite row still carries the note with `None`, which keeps the open question
+    visible on that row.
+    """
+    if probe.base.kind != "dirichlet":
+        return None
+    if chart is None or not math.isfinite(chart):
+        return (_DIRICHLET_WORDING_NOTE, None)
+    (alpha,) = probe.base.params
+    offset = simplex_chart_to_hausdorff_offset(len(alpha))
+    return (_DIRICHLET_WORDING_NOTE, chart - offset)
 
 
 def _known_defect_reason(probe: Probe) -> str | None:
@@ -193,6 +270,8 @@ def _row_for(probe: Probe) -> Row:
                 known_defect = True
                 known_defect_reason = reason
 
+    wording = _spec_wording_pending(probe, oracle_val)
+
     return Row(
         probe_id=probe.id,
         outcome=v.outcome.value if isinstance(v.outcome, Outcome) else v.outcome,
@@ -203,6 +282,9 @@ def _row_for(probe: Probe) -> Row:
         oracle_unvalidated=oracle_unvalidated,
         known_defect=known_defect,
         known_defect_reason=known_defect_reason,
+        spec_wording_pending=wording is not None,
+        spec_wording_note=wording[0] if wording else None,
+        oracle_alt_reading=wording[1] if wording else None,
     )
 
 
@@ -223,13 +305,20 @@ SLICE_EXCLUDED_AXES = {
     "base": ("excludes beta entirely; excludes poisson except pushfwd(sqrt) "
              "at spelling=direct, covering the known float-roundtrip defect"),
     "consumer": "fixed False (True excluded)",
+    "vector_family": ("one probe per (base, wrap) shape space.vector_shapes() "
+                      "generates, at spelling='direct' ordering='single'; the "
+                      "shapes flatppl-js cannot evaluate are not in the family "
+                      "at all (space._ENGINE_BLOCKED) and are pinned instead by "
+                      "tests/sweep/test_vector_arms.py"),
 }
 SLICE_DESCRIPTION = (
     "every (wrap, ordering) pair, spelling='direct', consumer=False; "
     "base='normal' except pushfwd(log)/pushfwd(sqrt), which normal's domain "
     "guard refuses -- those use 'gamma' instead (see space._supported); plus "
     "a handful of extra probes so the two known defects are inside the "
-    "slice (see SLICE_EXCLUDED_AXES / _KNOWN_DEFECT_COVERAGE)"
+    "slice (see SLICE_EXCLUDED_AXES / _KNOWN_DEFECT_COVERAGE); plus one probe "
+    "per vector-family (base, wrap) shape, so every vector arm the family "
+    "covers is inside the fast gate rather than only in a --full run"
 )
 
 # Minimal punch-through of the excluded spelling/base axes: enough probes,
@@ -248,7 +337,7 @@ def _slice_probes() -> list[Probe]:
     out: list[Probe] = []
     for wrap in WRAPS:
         base = normal if _supported(normal, wrap) else gamma
-        wname = wrap.kind + ("_" + "_".join(str(a) for a in wrap.args) if wrap.args else "")
+        wname = _wrap_name(wrap)
         for ordering in ORDERINGS:
             pid = f"{base.kind}.{wname}.direct.{ordering}.noconsumer"
             out.append(Probe(
@@ -259,13 +348,23 @@ def _slice_probes() -> list[Probe]:
         base = by_kind[extra["base_kind"]]
         wrap = extra["wrap"]
         spelling = extra["spelling"]
-        wname = wrap.kind + ("_" + "_".join(str(a) for a in wrap.args) if wrap.args else "")
+        wname = _wrap_name(wrap)
         for ordering in ORDERINGS:
             pid = f"{base.kind}.{wname}.{spelling}.{ordering}.noconsumer"
             out.append(Probe(
                 id=pid, base=base, wraps=(wrap,), spelling=spelling,
                 ordering=ordering, consumer=False, point=_point_for(base, wrap),
             ))
+    # One probe per vector-family SHAPE, not per probe: the family's spelling and
+    # ordering axes repeat arms the scalar slice already gates, while the (base,
+    # wrap) shape is what decides which vector arm the determiniser emits. Every
+    # shape in the family is therefore in the fast gate.
+    for base, wrap in vector_shapes():
+        pid = f"{base.kind}.{_wrap_name(wrap)}.direct.single.noconsumer"
+        out.append(Probe(
+            id=pid, base=base, wraps=(wrap,), spelling="direct",
+            ordering="single", consumer=False, point=_vector_point_for(base, wrap),
+        ))
     return out
 
 
@@ -327,6 +426,9 @@ def save(path: Path, rows: list[Row], *, commit: str | None = None) -> None:
                 "oracle_unvalidated": r.oracle_unvalidated,
                 "known_defect": r.known_defect,
                 "known_defect_reason": r.known_defect_reason,
+                "spec_wording_pending": r.spec_wording_pending,
+                "spec_wording_note": r.spec_wording_note,
+                "oracle_alt_reading": _dump_num(r.oracle_alt_reading),
             }
             for r in ordered
         ],
@@ -352,6 +454,9 @@ def load(path: Path) -> dict[str, Row]:
             oracle_unvalidated=r.get("oracle_unvalidated", False),
             known_defect=r.get("known_defect", False),
             known_defect_reason=r.get("known_defect_reason"),
+            spec_wording_pending=r.get("spec_wording_pending", False),
+            spec_wording_note=r.get("spec_wording_note"),
+            oracle_alt_reading=_load_num(r.get("oracle_alt_reading")),
         )
         out[row.probe_id] = row
     return out

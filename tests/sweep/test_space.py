@@ -12,11 +12,14 @@ from flatppl_testsuite.sweep.curated import _args, _as_call
 from flatppl_testsuite.sweep.space import (
     BASES,
     INNER,
+    VECTOR_BASES,
+    VECTOR_INNER,
     Base,
     Probe,
     Wrap,
     enumerate_probes,
     in_support,
+    is_vector_base,
 )
 from flatppl_testsuite.sweep.render import render
 
@@ -104,6 +107,68 @@ def test_base_constructors_use_the_parameter_names_the_corpus_uses():
     assert checked == len(BASES)
 
 
+# §08 "Multivariate distributions"' parameter names for the vector family, quoted
+# from the entries themselves: `Dirichlet(alpha)` and `Multinomial(n, p)`. Only
+# `Dirichlet` appears in the committed corpus (`corpora/stablehlo/dirichlet`), so
+# `Multinomial`'s names are pinned against §08 directly — there is no corpus model
+# to compare them with, and the test above would otherwise silently not cover it.
+_VECTOR_CTOR_KEYWORDS = {
+    "Dirichlet": ("alpha",),
+    "Multinomial": ("n", "p"),
+}
+
+
+def test_vector_base_constructors_use_sec08s_parameter_names():
+    corpus = _corpus_ctor_keywords()
+    checked = 0
+    for base in VECTOR_BASES:
+        probe = Probe(id="t", base=base, wraps=(Wrap("identity", ()),),
+                      spelling="direct", ordering="single", consumer=False,
+                      point=VECTOR_INNER[base.kind])
+        rhs = render(probe).source.splitlines()[0].split("=", 1)[1].strip()
+        call = _as_call(rhs)
+        assert call, f"{base.kind}: rendered constructor did not parse: {rhs!r}"
+        head, argstr = call
+        _pos, kw = _args(argstr)
+        assert head in _VECTOR_CTOR_KEYWORDS, f"{head}: no §08 names recorded"
+        assert tuple(sorted(kw)) == tuple(sorted(_VECTOR_CTOR_KEYWORDS[head])), (
+            f"{head}: render emits {tuple(sorted(kw))}, §08 gives "
+            f"{_VECTOR_CTOR_KEYWORDS[head]}")
+        if head in corpus:
+            # Where a corpus model does exist, it must agree with §08 too —
+            # otherwise one of the two is wrong and this test would hide it.
+            assert tuple(sorted(kw)) == corpus[head], (
+                f"{head}: §08 names {tuple(sorted(kw))} disagree with the corpus's "
+                f"{corpus[head]}")
+        checked += 1
+    assert checked == len(VECTOR_BASES)
+
+
+def test_every_vector_probe_point_is_on_its_supports_constraint_surface():
+    """A vector base's support is a surface, not a box (§08: Multinomial's is
+    {x in N_0^k : sum x_i = n}, Dirichlet's is `stdsimplex(n)`). A point off it has
+    density 0, so a probe generated there would be a -inf row proving nothing about
+    the arm it claims to cover.
+
+    Checked through the PREIMAGE, which is what makes it "derived, not hardcoded":
+    every wrap in the family is either point-preserving or an invertible elementwise
+    map, so the preimage must be `VECTOR_INNER[base.kind]` exactly.
+    """
+    inverse = {"exp": math.log, "neg": lambda y: -y}
+    for p in enumerate_probes():
+        if not is_vector_base(p.base):
+            continue
+        w = p.wraps[0]
+        pre = list(p.point)
+        if w.kind == "pushfwd":
+            pre = [inverse[w.args[0]](c) for c in pre]
+        assert pre == pytest.approx(VECTOR_INNER[p.base.kind], abs=1e-9), (
+            f"{p.id}: preimage {pre} != VECTOR_INNER[{p.base.kind}] "
+            f"({VECTOR_INNER[p.base.kind]}) — point looks hardcoded, not derived")
+        assert in_support(p.base, pre), (
+            f"{p.id}: preimage {pre} not in {p.base.kind}'s support")
+
+
 def _wrap_marker(wrap: Wrap) -> str:
     """A substring that only appears in the rendered source if this wrap's
     operator was actually applied — used to catch a spelling that silently
@@ -155,7 +220,9 @@ def test_pushfwd_points_are_derived_not_hardcoded():
     what forces "derived", not just "happens to work"."""
     for p in enumerate_probes():
         w = p.wraps[0]
-        if w.kind != "pushfwd":
+        if w.kind != "pushfwd" or is_vector_base(p.base):
+            # The vector family has its own version of this check, cell-wise:
+            # `test_every_vector_probe_point_is_on_its_supports_constraint_surface`.
             continue
         preimage = _INVERSE[w.args[0]](p.point)
         assert in_support(p.base, preimage), (

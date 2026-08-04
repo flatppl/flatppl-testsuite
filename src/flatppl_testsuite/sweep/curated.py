@@ -51,7 +51,16 @@ _BASE_SPECS = {
     "Gamma": ("gamma", ("shape", "rate")),
     "Beta": ("beta", ("alpha", "beta")),
     "Poisson": ("poisson", ("rate",)),
+    # §08 "Multivariate distributions". `Dirichlet(alpha)`'s single parameter is a
+    # VECTOR, so it is listed in `_VECTOR_PARAMS` below as well.
+    "Dirichlet": ("dirichlet", ("alpha",)),
 }
+
+# Which constructor parameters are vector-valued, by (constructor, parameter name).
+# A parameter resolved through the wrong one of `_Ctx.number`/`_Ctx.vector` would
+# either raise or bind a length-1 vector, so the split is explicit rather than
+# inferred from whatever the point happens to hold.
+_VECTOR_PARAMS = {("Dirichlet", "alpha")}
 
 # `pushfwd` forward maps the oracle implements, by every spelling the corpus uses.
 _FORWARD_NAMES = {
@@ -137,8 +146,30 @@ class _Ctx:
             return lit
         name = tok.strip()
         if name in self.params and name in self.point:
-            return float(self.point[name])
+            value = self.point[name]
+            if isinstance(value, list):
+                raise _NoMatch(f"{name} is vector-valued in this case's point")
+            return float(value)
         raise _NoMatch(f"unresolved numeric argument {tok!r}")
+
+    def vector(self, tok: str) -> tuple[float, ...]:
+        """A vector: an `[a, b, c]` literal (§05), or a declared parameter this
+        case's point binds to a JSON list. Returned as a tuple because `Base` is
+        frozen and hashable (`space.Base.params`)."""
+        tok = tok.strip()
+        if tok.startswith("[") and tok.endswith("]"):
+            cells = [c for c in _split_top(tok[1:-1]) if c]
+            if not cells:
+                raise _NoMatch("empty vector literal")
+            return tuple(self.number(c) for c in cells)
+        if tok in self.params and tok in self.point:
+            value = self.point[tok]
+            if not isinstance(value, list):
+                raise _NoMatch(f"{tok} is not vector-valued in this case's point")
+            return tuple(float(c) for c in value)
+        if tok in self.bindings and tok not in self.params:
+            return self.vector(self.bindings[tok])
+        raise _NoMatch(f"unresolved vector argument {tok!r}")
 
 
 def _forward(tok: str, ctx: _Ctx) -> Wrap:
@@ -258,28 +289,41 @@ def _peel(expr: str, ctx: _Ctx) -> tuple[Base, tuple[Wrap, ...]]:
 
 
 def _ctor_params(head: str, names: tuple[str, ...], pos: list[str],
-                 kw: dict[str, str], ctx: _Ctx) -> tuple[float, ...]:
+                 kw: dict[str, str], ctx: _Ctx) -> tuple:
     """Constructor arguments in §08's positional order. Keywords must be exactly
-    §08's names; a mix of positional and keyword, or any extra key, is refused."""
+    §08's names; a mix of positional and keyword, or any extra key, is refused.
+
+    A parameter in `_VECTOR_PARAMS` is resolved as a vector, so the result is a
+    tuple of scalars with a nested tuple in that slot — exactly `space.Base.params`'
+    shape.
+    """
+    def one(name: str, tok: str):
+        return ctx.vector(tok) if (head, name) in _VECTOR_PARAMS else ctx.number(tok)
+
     if pos and kw:
         raise _NoMatch(f"{head}: mixed positional and keyword arguments")
     if kw:
         if set(kw) != set(names):
             raise _NoMatch(f"{head}: expected parameters {names}, got {sorted(kw)}")
-        return tuple(ctx.number(kw[n]) for n in names)
+        return tuple(one(n, kw[n]) for n in names)
     if len(pos) != len(names):
         raise _NoMatch(f"{head}: expected {len(names)} arguments, got {len(pos)}")
-    return tuple(ctx.number(p) for p in pos)
+    return tuple(one(n, p) for n, p in zip(names, pos))
 
 
-def _query_point(expr: str, ctx: _Ctx) -> float:
-    """The second argument of `logdensityof`, as a scalar point."""
+def _query_point(expr: str, ctx: _Ctx) -> float | tuple[float, ...]:
+    """The second argument of `logdensityof`, as a scalar or vector point.
+
+    A vector is returned as a tuple, matching `space.Probe.point`.
+    """
     rec = _as_call(expr)
     if rec and rec[0] == "record":
         rpos, rkw = _args(rec[1])
         if rpos or len(rkw) != 1:
             raise _NoMatch("query point is not a single-field record")
-        return ctx.number(next(iter(rkw.values())))
+        expr = next(iter(rkw.values()))
+    if expr.strip().startswith("["):
+        return ctx.vector(expr)
     return ctx.number(expr)
 
 

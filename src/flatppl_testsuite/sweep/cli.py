@@ -18,7 +18,8 @@ from flatppl_testsuite.sweep.space import enumerate_probes
 def _regen(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="sweep regen")
     ap.add_argument("--full", action="store_true",
-                     help="sweep the whole probe space (738 probes); "
+                     help="sweep the whole probe space (768 probes: the scalar "
+                          "axes' cross-product plus the targeted vector family); "
                           "default is the CI slice (see table.SLICE_DESCRIPTION)")
     ap.add_argument("--commit", default=None,
                      help="the flatppl determinizer commit this table is generated against; "
@@ -72,6 +73,18 @@ def _report(argv: list[str]) -> int:
           f"({len(refuses_justified)} spec-justified, {len(refuses_unjustified)} over-refusal)")
     print(f"  MALFORMED   {len(malformed)}")
     print(f"  oracle-unvalidated  {len(unvalidated)}")
+
+    # Not folded into the counts above: these rows' VALUES are settled (they are the
+    # numerical-parity ones). What is open is which normative wording their reference
+    # measure follows, so they are reported as a separate standing question rather
+    # than as a defect or an unvalidated row.
+    pending = [r for r in rows if r.spec_wording_pending]
+    if pending:
+        print(f"  spec-wording pending  {len(pending)}  "
+              "(value settled, reference-measure WORDING unresolved)")
+        for note in sorted({r.spec_wording_note for r in pending
+                            if r.spec_wording_note}):
+            print(f"    {note}")
     return 0
 
 

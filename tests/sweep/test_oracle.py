@@ -13,9 +13,22 @@ from flatppl_testsuite.sweep.oracle import (
     OracleUnsupported,
     _frozen,
     _interval,
+    _support_is_manifold,
+    simplex_chart_to_hausdorff_offset,
     true_logpdf,
 )
-from flatppl_testsuite.sweep.space import Base, Probe, Wrap, enumerate_probes
+from flatppl_testsuite.sweep.space import (
+    VECTOR_BASES,
+    VECTOR_INNER,
+    VECTOR_SUPPORT_IS_MANIFOLD,
+    Base,
+    Probe,
+    Wrap,
+    enumerate_probes,
+    in_support,
+    is_vector_base,
+    vector_shapes,
+)
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -388,9 +401,15 @@ def _breakpoints(base, wrap, fwd):
 
 
 def _unique_shapes():
-    """One probe per (base, wraps) the space actually generates."""
+    """One probe per (base, wraps) the space actually generates, SCALAR bases only —
+    the vector family's mass invariant is a lattice sum over a constraint surface
+    and a simplex integral, neither of which this test's quadrature machinery
+    expresses. Both live in
+    `test_every_vector_measure_carries_the_mass_the_algebra_requires` instead."""
     shapes = {}
     for p in enumerate_probes():
+        if is_vector_base(p.base):
+            continue
         shapes.setdefault((p.base, p.wraps), p)
     return sorted(shapes.values(), key=lambda p: p.id)
 
@@ -429,6 +448,345 @@ def test_every_wrapped_measure_carries_the_mass_the_algebra_requires(probe):
     assert got == pytest.approx(want, rel=1e-9), (
         f"{probe.base.kind} + {wrap.kind}{wrap.args}: integrated mass {got}, "
         f"want {want} over ({bps[0]}, {bps[-1]})")
+
+
+# --------------------------------------------------------------------------
+# The vector family. Same three gates as the scalar oracle: hand-derived closed
+# forms, the total-mass invariant, and reproduction of the curated cases.
+# --------------------------------------------------------------------------
+
+_MULTINOMIAL = Base("multinomial", (5, (0.2, 0.3, 0.5)))
+_DIRICHLET = Base("dirichlet", ((2.0, 3.0, 4.0),))
+
+
+def _lgamma_multinomial(n, p, x):
+    """§08 `Multinomial(n, p)`: "n!/prod_i x_i! prod_i p_i^{x_i} for x_i >= 0,
+    sum_i x_i = n". Written out in log-gammas, independent of scipy."""
+    t = math.lgamma(n + 1)
+    for xi, pi in zip(x, p):
+        t -= math.lgamma(xi + 1)
+        t += xi * math.log(pi)
+    return t
+
+
+def _lgamma_dirichlet(alpha, x):
+    """§08 `Dirichlet(alpha)`: "Gamma(||alpha||_1)/prod_i Gamma(alpha_i)
+    prod_i x_i^{alpha_i - 1}". Written out in log-gammas, independent of scipy."""
+    t = math.lgamma(sum(alpha)) - math.fsum(math.lgamma(a) for a in alpha)
+    return t + math.fsum((a - 1.0) * math.log(xi) for a, xi in zip(alpha, x))
+
+
+def test_bare_multinomial_matches_the_hand_derived_log_gamma_form():
+    want = _lgamma_multinomial(5, (0.2, 0.3, 0.5), (1, 2, 2))
+    got = true_logpdf(_probe(_MULTINOMIAL, Wrap("identity", ()), [1.0, 2.0, 2.0]))
+    assert got == pytest.approx(want, abs=1e-12)
+    assert got == pytest.approx(-2.0024805005437063, abs=1e-12)
+
+
+def test_bare_dirichlet_matches_the_hand_derived_log_gamma_form():
+    want = _lgamma_dirichlet((2.0, 3.0, 4.0), (0.2, 0.3, 0.5))
+    got = true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()), [0.2, 0.3, 0.5]))
+    assert got == pytest.approx(want, abs=1e-12)
+    assert got == pytest.approx(2.0228711901914425, abs=1e-12)
+
+
+def _dirichlet_chart_mass(alpha):
+    """§08's Dirichlet formula integrated over the (x1, x2) chart of stdsimplex(3)."""
+    def f(x2, x1):
+        x3 = 1.0 - x1 - x2
+        if x3 <= 0.0:
+            return 0.0
+        return math.exp(_lgamma_dirichlet(alpha, (x1, x2, x3)))
+
+    return integrate.dblquad(f, 0.0, 1.0, lambda x1: 0.0, lambda x1: 1.0 - x1,
+                             epsabs=1e-12, epsrel=1e-12)
+
+
+def test_sec08s_dirichlet_FORMULA_is_normalised_against_the_chart_measure():
+    """What this establishes is what §08's FORMULA is normalised against — NOT what
+    `Lebesgue(stdsimplex(n))` denotes. The two are different questions and the spec
+    answers them incompatibly; see
+    `test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not`.
+    """
+    mass, err = _dirichlet_chart_mass((2.0, 3.0, 4.0))
+    assert err < 1e-9
+    assert mass == pytest.approx(1.0, abs=1e-9), (
+        f"§08's Dirichlet formula integrates to {mass} over the (x1, x2) chart")
+
+
+def test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not():
+    """The internal spec inconsistency, pinned as arithmetic so it cannot be argued
+    away or quietly forgotten.
+
+    §03 "Standard simplex": `Lebesgue(support = stdsimplex(n))` "measures **surface
+    area** within the simplex". §06 "Lebesgue": for lower-dimensional embedded affine
+    sets it is "the **intrinsic affine Lebesgue measure** on that set". Surface area
+    on the embedded simplex is the (n-1)-dimensional Hausdorff measure.
+
+    Its area element is sqrt(n) dx_1...dx_{n-1}: the tangent basis {e_i - e_n} has
+    Gram matrix I + J, whose determinant is n. So §08's formula — which integrates to
+    1 against the chart — integrates to sqrt(n) against the measure §03 and §06 name.
+    A density cannot be normalised against both.
+
+    The shipped rows carry the CHART reading, required for numerical parity with
+    Stan/NumPyro/scipy, and are flagged `spec_wording_pending` in the verdict table.
+    This test does not assert which reading is right; it asserts they differ by
+    exactly log sqrt(n), which is what makes the flag necessary.
+    """
+    n = 3
+    # The Gram determinant, computed rather than asserted from the formula.
+    basis = [[1.0, 0.0, -1.0], [0.0, 1.0, -1.0]]           # e1 - e3, e2 - e3
+    gram = [[sum(a * b for a, b in zip(u, v)) for v in basis] for u in basis]
+    det = gram[0][0] * gram[1][1] - gram[0][1] * gram[1][0]
+    assert det == pytest.approx(n, abs=1e-12), (
+        f"the simplex tangent Gram determinant is {det}, expected n = {n}")
+    assert simplex_chart_to_hausdorff_offset(n) == pytest.approx(
+        0.5 * math.log(det), abs=1e-15)
+    assert simplex_chart_to_hausdorff_offset(n) == pytest.approx(
+        0.5493061443340549, abs=1e-15)
+
+    # §08's formula integrates to sqrt(n), not 1, against the surface measure.
+    chart_mass, _err = _dirichlet_chart_mass((2.0, 3.0, 4.0))
+    assert chart_mass * math.sqrt(n) == pytest.approx(math.sqrt(n), abs=1e-8)
+
+    # The two candidate values for the shipped row, both stated explicitly.
+    chart = true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()), (0.2, 0.3, 0.5)))
+    assert chart == pytest.approx(2.0228711901914425, abs=1e-12)
+    assert chart - simplex_chart_to_hausdorff_offset(n) == pytest.approx(
+        1.4735650458573875, abs=1e-12)
+
+
+def test_every_vector_base_declares_its_support_geometry():
+    """`oracle._support_is_manifold` requires a declaration rather than defaulting,
+    so a new vector base with a manifold support cannot silently take the
+    ambient-Jacobian reading. Assert the two sets are equal so the failure lands here,
+    at the roster, and not at whichever probe happens to run first."""
+    assert set(VECTOR_SUPPORT_IS_MANIFOLD) == {b.kind for b in VECTOR_BASES}, (
+        "space.VECTOR_SUPPORT_IS_MANIFOLD and VECTOR_BASES have drifted — every "
+        "vector base must declare whether its support is a lower-dimensional "
+        "manifold before the oracle will value a pushforward of it")
+
+
+def test_an_undeclared_support_geometry_raises_rather_than_assuming_flat():
+    """The inverted default, exercised. A base absent from the declaration must fail
+    loudly; the old allowlist would have given it the ambient-Jacobian reading."""
+    undeclared = Base("vonmisesfisher", ((1.0, 0.0, 0.0), 2.0))
+    with pytest.raises(OracleUnsupported, match="support geometry"):
+        _support_is_manifold(undeclared)
+
+
+def test_a_zero_cell_is_inside_sec08s_dirichlet_support():
+    """§08:532 gives the support inclusively — "p_i >= 0". Whether the density is
+    finite at a zero cell is a separate question, decided by the exponent
+    `alpha_i - 1`, and `oracle._dirichlet_logpdf` decides it per case rather than
+    letting a support gate answer it (which is what made the gate wrong for
+    alpha_i < 1)."""
+    at_boundary = (0.0, 0.5, 0.5)
+    assert in_support(_DIRICHLET, at_boundary), "§08 puts a zero cell in the support"
+
+    # alpha_i > 1 at the zero cell: x_i^(alpha_i - 1) -> 0, so the density is 0.
+    assert true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()),
+                              at_boundary)) == -math.inf
+    # alpha_i < 1: §08's factor DIVERGES. scipy refuses the point; the oracle must
+    # report +inf rather than -inf, which is what the old gate got wrong.
+    heavy = Base("dirichlet", ((0.5, 3.0, 4.0),))
+    assert in_support(heavy, at_boundary)
+    assert true_logpdf(_probe(heavy, Wrap("identity", ()), at_boundary)) == math.inf
+    # alpha_i == 1: the factor is 0^0 = 1, so the density is finite there, and equals
+    # §08's product with the zero cell's factor simply omitted.
+    alpha = (1.0, 3.0, 4.0)
+    flat = Base("dirichlet", (alpha,))
+    got = true_logpdf(_probe(flat, Wrap("identity", ()), at_boundary))
+    assert math.isfinite(got), f"alpha_i == 1 at a zero cell must be finite, got {got}"
+    want = (math.lgamma(sum(alpha)) - sum(math.lgamma(a) for a in alpha)
+            + sum((a - 1.0) * math.log(xi)
+                  for a, xi in zip(alpha, at_boundary) if xi > 0.0))
+    assert got == pytest.approx(want, abs=1e-12)
+
+
+def test_mixed_zero_cells_are_withheld_rather_than_resolved_by_case_order():
+    """A diverging and a vanishing zero cell at once make §08's product `inf * 0`, a
+    genuine indeterminate: `x = (0, 0, 1)` with `alpha = (0.5, 2, 4)` is
+    `0^-0.5 * 0^1`. Whichever case the code tested first would decide the answer, so
+    it withholds instead. Reachable on the simplex; reached by no shipped row."""
+    mixed = Base("dirichlet", ((0.5, 2.0, 4.0),))
+    point = (0.0, 0.0, 1.0)
+    assert in_support(mixed, point), "the point is on §08's inclusive support"
+    with pytest.raises(OracleUnsupported, match="indeterminate"):
+        true_logpdf(_probe(mixed, Wrap("identity", ()), point))
+
+    # Each limb ALONE is still answered, so the withhold is scoped to the mix.
+    only_diverging = Base("dirichlet", ((0.5, 2.0, 4.0),))
+    assert true_logpdf(_probe(only_diverging, Wrap("identity", ()),
+                              (0.0, 0.5, 0.5))) == math.inf
+    only_vanishing = Base("dirichlet", ((2.0, 3.0, 4.0),))
+    assert true_logpdf(_probe(only_vanishing, Wrap("identity", ()),
+                              (0.0, 0.5, 0.5))) == -math.inf
+
+
+def test_a_vector_point_off_the_support_surface_is_minus_inf():
+    """The support is §08's constraint SURFACE. A point in the bounding box but off
+    the surface has density 0 — a gap-scan the oracle must not answer with a finite
+    number, which is what scipy would raise on rather than return."""
+    # sum = 4, not n = 5.
+    assert true_logpdf(_probe(_MULTINOMIAL, Wrap("identity", ()),
+                              [1.0, 1.0, 2.0])) == -math.inf
+    # off the integer lattice
+    assert true_logpdf(_probe(_MULTINOMIAL, Wrap("identity", ()),
+                              [1.5, 1.5, 2.0])) == -math.inf
+    # negative cell
+    assert true_logpdf(_probe(_MULTINOMIAL, Wrap("identity", ()),
+                              [-1.0, 4.0, 2.0])) == -math.inf
+    # sum = 0.9, not 1
+    assert true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()),
+                              (0.2, 0.3, 0.4))) == -math.inf
+    # a negative cell: sums to 1 but leaves the simplex
+    assert true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()),
+                              (-0.1, 0.6, 0.5))) == -math.inf
+    # A ZERO cell is deliberately NOT here: §08's support is inclusive, so it is ON
+    # the surface, and what happens there depends on `alpha_i` rather than on the
+    # support. See `test_a_zero_cell_is_inside_sec08s_dirichlet_support`.
+
+
+def test_a_vector_pushfwd_neg_is_volume_preserving_cell_wise():
+    """`neg`'s per-cell forward log-volume is 0, so summing over cells is still 0 —
+    and `neg` reflects the simplex onto a congruent copy, so the manifold reading
+    agrees with the ambient one. The pushed-forward density equals the base's."""
+    bare = true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()), [0.2, 0.3, 0.5]))
+    pushed = true_logpdf(_probe(_DIRICHLET, Wrap("pushfwd", ("neg",)),
+                                [-0.2, -0.3, -0.5]))
+    assert pushed == pytest.approx(bare, abs=1e-12)
+
+
+def test_a_vector_pushfwd_over_a_manifold_support_withholds_a_value():
+    """`pushfwd(exp, Dirichlet)` is the shape whose reference measure §06 and §08 do
+    not name (see `oracle._MANIFOLD_SAFE_FORWARDS`): the ambient R^3 Jacobian, the
+    2-D Hausdorff element on the image surface and the (y1, y2) chart give 1.0,
+    0.6816 and 0.5 for the same volume term. The oracle must withhold rather than
+    pick one — supplying a value would make it the authority for semantics nobody
+    wrote down."""
+    y = [math.exp(c) for c in (0.2, 0.3, 0.5)]
+    with pytest.raises(OracleUnsupported):
+        true_logpdf(_probe(_DIRICHLET, Wrap("pushfwd", ("exp",)), y))
+
+
+def test_a_vector_pushfwd_over_a_counting_reference_takes_no_volume_term():
+    """§08 gives Multinomial's density w.r.t. `iid(Counting(integers), k)`, and §06
+    line 28's counting measure is not distorted by a bijection. So
+    `pushfwd(exp, Multinomial)` at `y = exp(x)` is the pmf at `x`, with no
+    `- sum(log y)`: a Lebesgue Jacobian here would be 5.0 (= sum x_i), which is the
+    whole density's magnitude, not a correction to it.
+
+    This shape is `_ENGINE_BLOCKED`, so no verdict-table row carries this number;
+    the oracle still has to hold it, because that is the value the row will be
+    checked against the day `flatppl-js` can evaluate the emitted gate."""
+    x = VECTOR_INNER["multinomial"]
+    y = [math.exp(c) for c in x]
+    bare = true_logpdf(_probe(_MULTINOMIAL, Wrap("identity", ()), x))
+    pushed = true_logpdf(_probe(_MULTINOMIAL, Wrap("pushfwd", ("exp",)), y))
+    assert pushed == pytest.approx(bare, abs=1e-12)
+    assert pushed == pytest.approx(-2.0024805005437063, abs=1e-12)
+
+
+def test_a_scalar_truncation_over_a_vector_variate_withholds_a_value():
+    """§03 makes `interval(lo, hi)` a set of REALS, so §06's ν(A) = M(A ∩ S) makes
+    the restriction the zero measure over a vector variate. No §03 rule reads it
+    cell-wise, so the oracle declines — exactly as it declines the record spelling.
+    The determiniser REFUSES this shape, which is why it is a `spec_justified`
+    refusal rather than a row with a value."""
+    for base, point in ((_MULTINOMIAL, [1.0, 2.0, 2.0]),
+                        (_DIRICHLET, [0.2, 0.3, 0.5])):
+        with pytest.raises(OracleUnsupported):
+            true_logpdf(_probe(base, Wrap("truncate", (0.0, 1.0)), point))
+
+
+@pytest.mark.parametrize("base,wrap", vector_shapes(),
+                         ids=lambda a: getattr(a, "kind", str(a)))
+def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
+    """The strongest vector check that references no hand-derived value: sum or
+    integrate the oracle's own density over the whole variate space and assert the
+    mass §06's algebra requires — 1 for every shape in the family, since §08's
+    distributions are probability measures and `pushfwd` preserves mass by
+    definition ((f_*M)(Y) = M(f^-1(Y))).
+
+    Multinomial's variate space is the lattice {x in N_0^3 : sum x_i = n}, enumerated
+    exactly — no quadrature, no truncation error. Dirichlet's is `stdsimplex(3)`,
+    integrated over the (x1, x2) chart §08's formula is normalised on.
+
+    **What this does NOT catch, stated because the earlier wording overclaimed it.**
+    "A sign error in a per-cell volume term cannot survive the mass invariant" is
+    FALSE for this family: every shape it reaches has a log-volume that is identically
+    zero (`pushfwd(neg)`'s per-cell term is 0; `pushfwd(exp, Multinomial)` is
+    counting-referenced so takes no term; `pushfwd(exp, Dirichlet)` is withheld), and
+    a sign error on 0 is invisible. What these rows DO establish is that the inverse
+    map is applied at all — a missing inversion evaluates Dirichlet off the simplex
+    and gives -inf. The per-cell log-volume MAGNITUDE has no oracle-checked row
+    anywhere in the family; an `MvNormal` base would make it checkable, since its §08
+    reference is `iid(Lebesgue(reals), n)` over a full-dimensional support so the
+    volume term is nonzero. Recorded as a follow-up in
+    `flatppl-dev/density-sweep-notes.md`.
+
+    The mass invariant is also blind to the `log sqrt(n)` reference-measure question
+    on the Dirichlet base: it integrates against the same chart §08's formula
+    normalises to, so it returns 1 under either wording. See
+    `test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not`.
+    """
+    if wrap.kind == "truncate":
+        pytest.skip("the oracle withholds a value for this shape, so there is "
+                    "no density to integrate (see the test above)")
+
+    fwd = {"exp": math.exp, "neg": lambda x: -x}.get(
+        wrap.args[0] if wrap.kind == "pushfwd" else None, lambda x: x)
+
+    def at(point):
+        return true_logpdf(_probe(base, wrap, list(point)))
+
+    if base.kind == "multinomial":
+        n, _p = base.params
+        total = math.fsum(
+            math.exp(at([fwd(float(a)) for a in (i, j, n - i - j)]))
+            for i in range(n + 1) for j in range(n + 1 - i))
+        assert total == pytest.approx(1.0, abs=1e-9), (
+            f"{base.kind} + {wrap.kind}{wrap.args}: summed lattice mass {total}")
+        return
+
+    # Dirichlet: integrate over the chart, pushing each chart point forward.
+    def density(x2, x1):
+        x3 = 1.0 - x1 - x2
+        if x3 <= 0.0:
+            return 0.0
+        return math.exp(at([fwd(c) for c in (x1, x2, x3)]))
+
+    mass, err = integrate.dblquad(density, 0.0, 1.0, lambda x1: 0.0,
+                                  lambda x1: 1.0 - x1, epsabs=1e-11, epsrel=1e-11)
+    assert err < 1e-8, f"quadrature did not converge: error estimate {err}"
+    assert mass == pytest.approx(1.0, abs=1e-8), (
+        f"{base.kind} + {wrap.kind}{wrap.args}: integrated mass {mass}")
+
+
+def test_the_vector_oracle_has_a_curated_reproduction_gate_for_dirichlet_only():
+    """State the vector family's validation coverage rather than leaving it implied.
+
+    `corpora/stablehlo/dirichlet` carries 11 frozen `expected` values derived in its
+    own `test.py` against `scipy.stats.dirichlet`, and the oracle reproduces all of
+    them (`test_oracle_agrees_with_every_curated_case_it_can_express`).
+    `Multinomial` appears in NO committed corpus case, so it has no reproduction
+    gate: its licence is the hand-derived log-gamma form above plus the exact
+    lattice-mass sum. That is a real coverage difference and it is asserted here so
+    it cannot rot into an assumption.
+    """
+    from flatppl_testsuite.sweep.curated import curated_probes
+
+    kinds = {p.base.kind for _n, p, _e in curated_probes()}
+    assert "dirichlet" in kinds, (
+        "the curated matcher no longer expresses corpora/stablehlo/dirichlet — the "
+        "vector oracle just lost its only reproduction gate")
+    assert "multinomial" not in kinds, (
+        "a curated Multinomial case now exists; add it to the reproduction gate and "
+        "update this test rather than leaving the coverage claim stale")
+    n_dirichlet = sum(1 for _n, p, _e in curated_probes()
+                      if p.base.kind == "dirichlet")
+    assert n_dirichlet == 11, f"expected 11 curated Dirichlet cases, got {n_dirichlet}"
 
 
 def test_oracle_agrees_with_every_curated_case_it_can_express():
