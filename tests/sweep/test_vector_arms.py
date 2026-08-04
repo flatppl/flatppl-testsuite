@@ -93,6 +93,14 @@ def _cartpow_gate(base_kind: str) -> str:
     return f"incartpow(posreals,{len(VECTOR_INNER[base_kind])})"
 
 
+# Since determinizer 48899b0 the image comes from the BASE'S SUPPORT, not from a
+# static per-op table. Multinomial's support resolves (nonneg-integer hull), so
+# exp's image tightens to ge(y, 1.0), reduced over the vector as a minimum —
+# the cartpow spelling survives only where support resolution falls back to the
+# map's own domain (Dirichlet: no per-cell constructor support).
+_GE_ONE_GATE = ("land(minimum(", ")>=1.0")
+
+
 _ARM = {
     "lattice_snap": "iszero(sum(abs(",
     "broadcast_round": "real(round.(",
@@ -106,12 +114,23 @@ def test_the_cartpow_membership_gate_fires_where_it_is_claimed(spelling):
     `cartpow(posreals, n)`. Asserted for both bases, because the gate comes off the
     forward map's image and must not depend on the base's reference measure, and over
     every spelling in the family, because the emitted-text invariant should not be
-    pinned for only the rows that happen to use `direct`."""
-    for kind in ("dirichlet", "multinomial"):
-        text = _emitted(_probe(kind, Wrap("pushfwd", ("exp",)), spelling))
-        assert _cartpow_gate(kind) in text, (
-            f"{kind} + pushfwd(exp) [{spelling}]: the cartpow membership gate did "
-            f"not fire, so nothing here covers it:\n{text}")
+    pinned for only the rows that happen to use `direct`.
+
+    Multinomial's claim moved with the support-aware images (determinizer 48899b0):
+    its resolved support tightens exp's image to ge(y, 1.0), emitted as a
+    minimum-reduce, so the cartpow spelling now fires only for Dirichlet."""
+    text = _emitted(_probe("dirichlet", Wrap("pushfwd", ("exp",)), spelling))
+    assert _cartpow_gate("dirichlet") in text, (
+        f"dirichlet + pushfwd(exp) [{spelling}]: the cartpow membership gate did "
+        f"not fire, so nothing here covers it:\n{text}")
+    text = _emitted(_probe("multinomial", Wrap("pushfwd", ("exp",)), spelling))
+    for part in _GE_ONE_GATE:
+        assert part in text, (
+            f"multinomial + pushfwd(exp) [{spelling}]: the support-tightened ge(1.0) "
+            f"image gate did not fire, so nothing here covers it:\n{text}")
+    assert _cartpow_gate("multinomial") not in text, (
+        f"multinomial + pushfwd(exp) [{spelling}]: both the cartpow and the ge(1.0) "
+        f"gate fired — the claimed-arm map in this file is stale:\n{text}")
 
 
 @pytest.mark.parametrize("spelling", VECTOR_SPELLINGS)
