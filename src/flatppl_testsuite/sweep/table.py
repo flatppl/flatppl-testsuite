@@ -306,9 +306,10 @@ SLICE_EXCLUDED_AXES = {
              "at spelling=direct, covering the known float-roundtrip defect"),
     "consumer": "fixed False (True excluded)",
     "vector_family": ("one probe per (base, wrap) shape space.vector_shapes() "
-                      "generates, at spelling='direct' ordering='single'; the "
-                      "shapes flatppl-js cannot evaluate are not in the family "
-                      "at all (space._ENGINE_BLOCKED) and are pinned instead by "
+                      "generates, at spelling='direct' ordering='single'; the one "
+                      "shape whose reference measure §06 does not give "
+                      "(dirichlet + pushfwd(exp)) is not in the family at all "
+                      "(space._HELD_OUT) and is pinned instead by "
                       "tests/sweep/test_vector_arms.py"),
 }
 SLICE_DESCRIPTION = (

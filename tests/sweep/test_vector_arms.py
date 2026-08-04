@@ -1,4 +1,4 @@
-"""The vector family's coverage invariant, and the two arms it cannot yet close.
+"""The vector family's coverage invariant, and the one arm still open.
 
 The verdict table records a probe's OUTCOME. It does not record which gate the
 determiniser emitted to produce that outcome, so a row can claim to cover the
@@ -8,15 +8,23 @@ targeted vector arm it asserts, against the determiniser's own emitted text, tha
 the arm FIRES in the probe that claims it, and that a probe which should NOT reach
 an arm does not.
 
-It also pins the two arms `flatppl-js` cannot evaluate. Those shapes are held out
-of the probe family (`space._ENGINE_BLOCKED`) because a `MALFORMED` row is banned
-from the committed table and is indistinguishable there from a determiniser
-defect. Holding them out silently would leave the arms uncovered with nothing
-saying so, so each is pinned here with its emitted arm, its derived oracle value
-where one exists, and the exact crash. **When `flatppl-js` gains the missing op
-the crash assertion FAILS**, which is what forces the shape back into the family
-rather than letting the gap outlive its cause.
+**Both target arms are now oracle-checked.** The `cartpow` image gate and the
+discrete lattice snap were held out while `flatppl-js` could evaluate neither
+`real` over an integer array nor `in` over a `cartpow` set; `e9803b6` fixed both,
+the failing-when-fixed crash pins fired as designed, and the two
+`multinomial + pushfwd` shapes are back in the generated family with real
+verdict-table rows checked against §08's pmf.
+
+One hold-out remains, and its cause is NOT an engine gap:
+`dirichlet + pushfwd(exp)` scores fine — the sweep has nothing to check the number
+against, because §06 scopes `Lebesgue` to lower-dimensional embedded **affine**
+sets and `exp`'s image of the simplex is curved. It retires on a spec ruling
+(`flatppl-dev/measure-algebra-audit.md`), not on an engine release, and the pin
+here fails if the emitted value, the oracle's withhold, or the recorded category
+moves. The distinction matters: an engine-gap hold-out and an oracle-gap hold-out
+retire on different events, so `space._HELD_OUT` records the category per shape.
 """
+import math
 import re
 import subprocess
 import tempfile
@@ -25,7 +33,6 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.config import CONFIG
-from flatppl_testsuite.scoring.engine import score_binding
 from flatppl_testsuite.sweep.classify import Outcome, classify
 from flatppl_testsuite.sweep.oracle import OracleUnsupported, true_logpdf
 from flatppl_testsuite.sweep.render import render
@@ -36,6 +43,7 @@ from flatppl_testsuite.sweep.space import (
     Probe,
     Wrap,
     _ENGINE_BLOCKED,
+    _HELD_OUT,
     _vector_point_for,
     enumerate_vector_probes,
 )
@@ -171,139 +179,155 @@ def test_the_bare_vector_laws_emit_a_gateless_builtin_density(spelling):
         assert "ifelse(" not in text, f"{kind}: unexpected gate:\n{text}"
 
 
+
 # --------------------------------------------------------------------------
-# The held-out shapes
+# The reinstated shapes: both target arms now score
 # --------------------------------------------------------------------------
 
-# The crash each `_ENGINE_BLOCKED` shape currently produces, as `classify._crash_marker`
-# renders it, and HOW MUCH that marker actually discriminates.
-#
-# The two `real` markers name the failing op, so they do discriminate: a different
-# crash changes the marker and fails the pin. `crash:derivation` does NOT — it is
-# what `classify._crash_marker` produces for ANY "no derivation for X" failure, with
-# no diagnostic line to narrow it. For that shape the pin's guarantee is only
-# "MALFORMED, and still by a bare derivation failure"; the CAUSE is pinned separately
-# by `test_the_cartpow_membership_gate_is_what_flatppl_js_cannot_evaluate`, which
-# scores a direct membership model where the engine does emit an identifying throw.
-# Saying so here rather than letting the module docstring overclaim it.
-_BLOCKED_MARKERS = {
-    ("multinomial", Wrap("pushfwd", ("neg",))):
-        "crash:diagnostic-real-expects-complex-array-integer",
-    ("multinomial", Wrap("pushfwd", ("exp",))):
-        "crash:diagnostic-real-expects-complex-array-integer",
-    ("dirichlet", Wrap("pushfwd", ("exp",))):
-        "crash:derivation",
-}
-
-# Markers that identify their cause, versus markers that only say "it failed".
-_DISCRIMINATING_MARKERS = {
-    ("multinomial", Wrap("pushfwd", ("neg",))),
-    ("multinomial", Wrap("pushfwd", ("exp",))),
-}
+# The value every `Multinomial` probe in the family must produce, whatever wrap it
+# carries. §08 gives the density w.r.t. `iid(Counting(integers), k)`, and §06 line 28's
+# counting measure is not distorted by a bijection, so a pushforward carries NO volume
+# term and lands on the bare pmf at the preimage. Independently: the log-gamma closed
+# form log(5!/(1!2!2!) * 0.2 * 0.3^2 * 0.5^2) = log(0.135) = -2.0024805005437063.
+_MULTINOMIAL_LOGPMF = -2.0024805005437063
 
 
-def test_the_cartpow_membership_gate_is_what_flatppl_js_cannot_evaluate():
-    """Pin J2's MECHANISM somewhere the harness can actually observe it.
+@pytest.mark.parametrize("op", ["neg", "exp"])
+@pytest.mark.parametrize("spelling", VECTOR_SPELLINGS)
+def test_a_multinomial_pushfwd_scores_the_counting_reference_value(op, spelling):
+    """The two arms this family exists for, now checked against a number rather than
+    against a crash.
 
-    Through a probe, `dirichlet + pushfwd(exp)` only ever reports
-    `score_flatpdl: no derivation for 'lp'` — generic, and it names nothing. The
-    membership gate in isolation DOES throw identifiably, so score that instead: a
-    model whose only unusual construct is `in cartpow(posreals, n)`. If this starts
-    passing, `in` has learned `cartpow` and the `dirichlet + pushfwd(exp)` hold-out
-    should be re-examined even though its own generic marker cannot tell.
+    `pushfwd(exp, Multinomial)` emits BOTH the `cartpow` image gate and the discrete
+    lattice snap; `pushfwd(neg, Multinomial)` emits the snap alone (`neg` is onto, so
+    it has no image gate). Both were held out while `flatppl-js` could evaluate
+    neither `real` over an integer array nor `in` over a `cartpow` set. Both now score,
+    and the value is the bare pmf — which is the whole point of the counting
+    reference, and the thing a spurious volume term would break: subtracting
+    `sum(log y)` here would be -5.0, not a rounding error.
     """
-    n = len(VECTOR_INNER["dirichlet"])
-    cells = ", ".join("1.0" for _ in range(n))
-    source = (f"s = cartpow(posreals, {n})\n"
-              f"y = [{cells}]\n"
-              "b = ifelse(y in s, 1.0, -1.0)\n")
-    with tempfile.TemporaryDirectory() as tmp:
-        model = Path(tmp) / "membership.flatppl"
-        model.write_text(source)
-        with pytest.raises(RuntimeError) as exc:
-            score_binding(model, "b")
-    message = str(exc.value)
-    assert "score_flatpdl failed" in message, (
-        f"expected a scorer failure, got: {message}")
-    # Match most of the throw, not just "length": J1's own diagnostic ends in
-    # `(length 3)`, so a bare substring could be satisfied by an unrelated failure.
-    assert "Cannot read properties of undefined (reading 'length')" in message, (
-        "flatppl-js no longer fails `in cartpow(...)` the recorded way. If it now "
-        "EVALUATES the gate, J2 is fixed: re-examine the dirichlet + pushfwd(exp) "
-        f"hold-out in space._ENGINE_BLOCKED. Got: {message}")
+    probe = _probe("multinomial", Wrap("pushfwd", (op,)), spelling)
+    verdict = classify(probe)
+    assert verdict.outcome == Outcome.LOWERS, (
+        f"multinomial + pushfwd({op}) [{spelling}] no longer scores: "
+        f"{verdict.outcome} (marker={verdict.marker})")
+    assert verdict.value == pytest.approx(_MULTINOMIAL_LOGPMF, abs=1e-12)
+    # And the oracle agrees, derived from §08 rather than from the engine.
+    assert true_logpdf(probe) == pytest.approx(_MULTINOMIAL_LOGPMF, abs=1e-12)
 
 
-def test_a_generic_blocked_marker_is_labelled_as_such():
-    """The `_DISCRIMINATING_MARKERS` bookkeeping must stay honest: a marker claimed to
-    discriminate has to name something beyond the bare failure mode."""
-    for shape, marker in _BLOCKED_MARKERS.items():
-        if shape in _DISCRIMINATING_MARKERS:
-            assert marker != "crash:derivation", (
-                f"{shape} is listed as discriminating but its marker is the generic "
-                "crash:derivation")
-        else:
-            assert marker == "crash:derivation", (
-                f"{shape} is not listed as discriminating, so its marker was expected "
-                f"to be the generic crash:derivation, not {marker!r} — if it now "
-                "names a cause, add it to _DISCRIMINATING_MARKERS")
-
-
-def test_the_blocked_list_and_the_pinned_crashes_are_the_same_set():
-    assert set(_BLOCKED_MARKERS) == set(_ENGINE_BLOCKED), (
-        "space._ENGINE_BLOCKED and this module's pinned crashes have drifted — a "
-        "shape held out of the family with no pinned crash is an uncovered arm with "
-        "nothing saying so")
-
-
-@pytest.mark.parametrize(
-    "shape",
-    sorted(_BLOCKED_MARKERS, key=lambda s: (s[0], s[1].kind, s[1].args)),
-    ids=lambda s: f"{s[0]}.{s[1].kind}_{s[1].args[0]}")
-def test_a_blocked_shape_still_fails_the_way_its_recorded_reason_says(shape):
-    """Every held-out shape must still be MALFORMED for the pinned reason.
-
-    This test failing is GOOD NEWS and an action item, not a regression: it means
-    `flatppl-js` can now evaluate the emitted arm, so the shape belongs back in
-    `space.VECTOR_WRAPS`' generated family, with a real verdict-table row checked
-    against the oracle value the next test derives.
-    """
-    kind, wrap = shape
-    verdict = classify(_probe(kind, wrap))
-    assert verdict.outcome == Outcome.MALFORMED, (
-        f"{kind} + {wrap.kind}{wrap.args} now classifies {verdict.outcome} "
-        f"(value={verdict.value}). Remove it from space._ENGINE_BLOCKED, regenerate "
-        f"the verdict table, and delete its entry here.\n"
-        f"Recorded reason: {_ENGINE_BLOCKED[shape]}")
-    assert verdict.marker == _BLOCKED_MARKERS[shape], (
-        f"{kind} + {wrap.kind}{wrap.args} fails differently now: marker "
-        f"{verdict.marker!r}, pinned {_BLOCKED_MARKERS[shape]!r}. The recorded "
-        f"reason no longer describes the failure.\n"
-        f"Recorded reason: {_ENGINE_BLOCKED[shape]}")
-
-
-def test_the_blocked_multinomial_arms_already_have_their_oracle_value():
-    """The cartpow gate and the lattice snap are only ORACLE-blocked over Dirichlet
-    (a manifold support, see `oracle._MANIFOLD_SAFE_FORWARDS`). Over Multinomial the
-    reference is a counting measure, so §08's pmf at the preimage IS the value, with
-    no volume term — derivable today, and held here so the number is not re-derived
-    under time pressure the day the engine gap closes.
-    """
-    x = VECTOR_INNER["multinomial"]
-    bare = true_logpdf(_probe("multinomial", Wrap("identity", ())))
-    for op in ("exp", "neg"):
-        got = true_logpdf(_probe("multinomial", Wrap("pushfwd", (op,))))
-        assert got == pytest.approx(bare, abs=1e-12), (
-            f"pushfwd({op}, Multinomial) at the forward image of {x} must equal the "
-            f"pmf at {x}: a bijection does not distort a counting measure")
-
-    with pytest.raises(OracleUnsupported):
-        true_logpdf(_probe("dirichlet", Wrap("pushfwd", ("exp",))))
-
-
-def test_no_blocked_shape_reached_the_generated_family():
-    """The family and the held-out list must partition the wrap list, or a
-    `MALFORMED` row lands in the committed table and the gate fails on regen with a
-    message about a determiniser defect that does not exist."""
+def test_the_reinstated_arms_are_in_the_generated_family():
+    """The reinstatement is what makes the arms *covered*; the assertions above would
+    still pass with the shapes held out, so pin membership too."""
     generated = {(p.base.kind, p.wraps[0]) for p in enumerate_vector_probes()}
-    overlap = generated & set(_ENGINE_BLOCKED)
-    assert not overlap, f"blocked shapes are being generated: {sorted(overlap)}"
+    for op in ("neg", "exp"):
+        assert ("multinomial", Wrap("pushfwd", (op,))) in generated, (
+            f"multinomial + pushfwd({op}) is not generated, so no verdict-table row "
+            "covers its arm")
+
+
+def test_the_engine_gap_category_is_empty():
+    """`_ENGINE_BLOCKED` held both Multinomial pushforwards until flatppl-js gained
+    `real` over integer arrays and `in` over `cartpow`. Nothing should be blocked on
+    the engine now. A future entry here is fine — but it must be a deliberate
+    addition, not a silent regression of these two."""
+    assert _ENGINE_BLOCKED == {}, (
+        "a shape is held out on an ENGINE gap again: "
+        f"{sorted(_ENGINE_BLOCKED)}. If that is intended, pin its crash the way the "
+        "Multinomial shapes used to be pinned, so it retires when the engine is fixed")
+
+
+# --------------------------------------------------------------------------
+# The one remaining hold-out, and why it is NOT an engine gap
+# --------------------------------------------------------------------------
+
+# The bare Dirichlet log-density at the family's point, under §08's formula.
+_DIRICHLET_BARE = 2.0228711901914425
+# The ambient-R^3 Jacobian the determiniser subtracts for `pushfwd(exp, ·)` over a
+# vector variate: `sum(log y)` at `y = exp(x)` is `sum(x)`, and on `stdsimplex(n)`
+# that is exactly 1. So the emitted value is the bare law minus 1, to the bit.
+_DIRICHLET_AMBIENT_LOGVOL = 1.0
+_DIRICHLET_PUSHFWD_EXP_EMITTED = _DIRICHLET_BARE - _DIRICHLET_AMBIENT_LOGVOL
+
+
+def test_the_dirichlet_pushfwd_exp_holdout_is_an_oracle_gap_not_an_engine_gap():
+    """The hold-out that survived wave J, re-pinned on its actual cause.
+
+    It is no longer blocked on the engine: `flatppl-js` scores this shape now. It is
+    held out because §06 scopes `Lebesgue` to lower-dimensional embedded **affine**
+    sets, and `exp`'s image of `stdsimplex(n)` is a CURVED 2-manifold — so no §06 rule
+    says which measure the emitted number is a density against. The ambient Jacobian,
+    the Hausdorff area element and the coordinate chart give 1.0, 0.6816 and 0.5 for
+    the same volume term. Generating the probe would add a `LOWERS` row with
+    `oracle = None`: a row no gate compares, which looks covered and is not.
+
+    Three assertions, so the pin fails on any of the three ways this can move:
+
+    1. the engine still evaluates it, and to the AMBIENT reading (a different reading
+       would mean the determiniser changed its mind about the volume term);
+    2. the oracle still withholds (if it stops, the spec question was ruled on and the
+       shape must be reinstated with a real oracle value);
+    3. the shape is still out of the generated family.
+
+    It retires on a SPEC RULING, recorded in
+    `flatppl-dev/measure-algebra-audit.md`, not on an engine release.
+    """
+    probe = _probe("dirichlet", Wrap("pushfwd", ("exp",)))
+
+    verdict = classify(probe)
+    assert verdict.outcome == Outcome.LOWERS, (
+        f"the engine stopped scoring this shape ({verdict.outcome}, "
+        f"marker={verdict.marker}). It scored at flatppl-js e9803b6; a regression "
+        "here is an engine bug, not a reason to re-record the hold-out")
+    assert verdict.value == pytest.approx(_DIRICHLET_PUSHFWD_EXP_EMITTED, abs=1e-12), (
+        f"the determiniser now emits {verdict.value} for pushfwd(exp, Dirichlet), not "
+        f"the ambient-Jacobian {_DIRICHLET_PUSHFWD_EXP_EMITTED}. If it moved to the "
+        "Hausdorff (0.6816) or chart (0.5) volume term, the manifold question has "
+        "been decided somewhere -- check flatppl-dev/measure-algebra-audit.md and "
+        "reinstate this shape with the matching oracle rule")
+
+    with pytest.raises(OracleUnsupported, match="affine"):
+        true_logpdf(probe)
+
+    generated = {(p.base.kind, p.wraps[0]) for p in enumerate_vector_probes()}
+    assert ("dirichlet", Wrap("pushfwd", ("exp",))) not in generated
+
+    category, reason = _HELD_OUT[("dirichlet", Wrap("pushfwd", ("exp",)))]
+    assert category == "oracle", (
+        "the recorded category still says the engine is at fault; it is not, the "
+        "engine scores this shape")
+    assert "affine" in reason.lower(), (
+        "the reason no longer names the §06 affine scoping that justifies the "
+        "withhold")
+    assert "measure-algebra-audit" in reason, (
+        "the reason no longer points at where the open spec question is tracked")
+
+
+def test_the_emitted_ambient_volume_term_is_exactly_one_on_the_simplex():
+    """Why the pinned value is `bare - 1.0` rather than an opaque constant: for
+    `pushfwd(exp, ·)` the per-cell forward log-volume at the preimage is `log y_i`, so
+    the sum is `sum(x_i)`, and every point of `stdsimplex(n)` sums to 1. Derived here
+    so the literal above cannot drift from its own justification."""
+    x = VECTOR_INNER["dirichlet"]
+    assert sum(x) == pytest.approx(1.0, abs=1e-15)
+    ambient = math.fsum(math.log(math.exp(c)) for c in x)
+    assert ambient == pytest.approx(_DIRICHLET_AMBIENT_LOGVOL, abs=1e-12)
+    bare = true_logpdf(_probe("dirichlet", Wrap("identity", ())))
+    assert bare == pytest.approx(_DIRICHLET_BARE, abs=1e-12)
+
+
+def test_no_held_out_shape_reached_the_generated_family():
+    """The family and the hold-out list must partition the wrap list, or an unchecked
+    row lands in the committed table."""
+    generated = {(p.base.kind, p.wraps[0]) for p in enumerate_vector_probes()}
+    overlap = generated & set(_HELD_OUT)
+    assert not overlap, f"held-out shapes are being generated: {sorted(overlap)}"
+
+
+def test_every_held_out_shape_records_a_known_category_and_a_reason():
+    for shape, entry in _HELD_OUT.items():
+        category, reason = entry
+        assert category in ("engine", "oracle"), (
+            f"{shape}: unknown hold-out category {category!r}")
+        assert reason and len(reason) > 80, (
+            f"{shape}: a hold-out needs a reason a triager can act on")

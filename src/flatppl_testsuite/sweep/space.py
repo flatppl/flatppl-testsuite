@@ -177,8 +177,9 @@ VECTOR_SUPPORT_IS_MANIFOLD = {
 #                  `oracle._MANIFOLD_SAFE_FORWARDS`), so it is the one that
 #                  oracle-checks the vector change-of-variables end to end.
 # * `pushfwd(exp)` — the member that reaches the `cartpow` image gate, and over
-#                  `Multinomial` the lattice snap as well. Currently unevaluable
-#                  (`_ENGINE_BLOCKED`), pinned in `tests/sweep/test_vector_arms.py`.
+#                  `Multinomial` the lattice snap as well. Generated and
+#                  oracle-checked over `Multinomial`; held out over `Dirichlet`,
+#                  where the oracle has no value to check against (`_HELD_OUT`).
 # * `truncate`   — a SCALAR `interval` against a vector variate: the set-kind
 #                  mismatch the determiniser refuses. A conformant refusal, not a
 #                  capability gap (`table._spec_justified`).
@@ -193,47 +194,53 @@ VECTOR_WRAPS = [
 # variate KIND, which is the scalar family's `record` axis, not a vector arm.
 VECTOR_SPELLINGS = ["direct", "stochastic_node"]
 
-# (base kind, wrap) shapes whose emitted FlatPDL is well-formed but which the
-# `flatppl-js` scorer cannot evaluate, so they classify `MALFORMED` — a frozen
-# `MALFORMED` row is banned from the verdict table
-# (`tests/sweep/test_gate.py::test_the_table_records_no_malformed_and_no_wrong_numbers`)
-# and would be indistinguishable from a determiniser defect.
+# (base kind, wrap) shapes deliberately kept OUT of the generated family, each with
+# the CATEGORY of reason and the reason itself. `_supported` is where ill-formed
+# combinations go; this is for shapes that are well formed and simply cannot yield a
+# checkable row.
 #
-# **This is an ENGINE gap list, not a well-formedness gate** — `_supported` is
-# where ill-formed combinations go. Each entry is pinned by its own test in
-# `tests/sweep/test_vector_arms.py`, which asserts the arm fires in the emitted
-# text AND asserts the current crash. When `flatppl-js` learns the missing op that
-# test fails, which is what forces the probe back in rather than leaving the arm
-# silently uncovered.
-# Each reason records what THIS HARNESS OBSERVES, verbatim, because that is the
-# string a human triaging the gap will grep for. Where the underlying mechanism
-# produces a different message on a more direct probe, both are given and labelled
-# -- an unobservable quote sends the next reader looking for output that never
-# appears (a defect this list previously had).
-_ENGINE_BLOCKED = {
-    ("multinomial", Wrap("pushfwd", ("neg",))):
-        "flatppl-js `real` rejects an integer array: the determiniser's lattice "
-        "snap emits `real(round.(v))` over a vector variate. Observed through this "
-        "harness: `diagnostic: real: arg 1 expects complex, got array of integer "
-        "(length 3)`, then `score_flatpdl: no derivation for 'lp'`",
-    ("multinomial", Wrap("pushfwd", ("exp",))):
-        "the same `real` gap as pushfwd(neg), reached first: this shape emits BOTH "
-        "the lattice snap and the `cartpow` image gate, and flatppl-js supports "
-        "neither `real` over an integer array nor `in` over a `cartpow` set. "
-        "Observed through this harness: the same `real: arg 1 expects complex, got "
-        "array of integer (length 3)` diagnostic",
-    ("dirichlet", Wrap("pushfwd", ("exp",))):
-        "flatppl-js `in` does not handle a `cartpow` set, so the emitted image gate "
-        "`y in cartpow(posreals, 3)` cannot be evaluated. Observed through this "
-        "harness: `score_flatpdl: no derivation for 'lp'` with NO diagnostic line, "
-        "which is generic -- the marker is `crash:derivation` and does not identify "
-        "the cause. The mechanism is observable only on a direct membership model "
-        "(`y = [1.0, 2.0, 3.0]` / `b = ifelse(y in cartpow(posreals, 3), 1.0, "
-        "-1.0)`), which throws `Cannot read properties of undefined (reading "
-        "'length')`; `test_vector_arms` scores that model separately so the cause is "
-        "pinned somewhere observable. The oracle would withhold a value for this "
-        "shape in any case -- see `oracle._MANIFOLD_SAFE_FORWARDS`",
+# Two categories have existed, and the distinction is the whole point — they retire
+# on different events:
+#
+# * `"engine"` — the emitted FlatPDL is correct but `flatppl-js` cannot evaluate it,
+#   so the probe classifies `MALFORMED`, which is banned from the verdict table
+#   (`test_gate.py::test_the_table_records_no_malformed_and_no_wrong_numbers`) and is
+#   indistinguishable there from a determiniser defect. **This category is now
+#   EMPTY.** It held `multinomial + pushfwd(neg)` and `multinomial + pushfwd(exp)`
+#   until flatppl-js `e9803b6` taught `real` to accept integer arrays and gave `in` a
+#   `cartpow` branch; both are now generated and oracle-checked, which is exactly
+#   what the failing-when-fixed pins were for.
+#
+# * `"oracle"` — the engine evaluates the shape and returns a number, but no §06 rule
+#   gives the reference measure of the result, so THIS SWEEP HAS NOTHING TO CHECK IT
+#   AGAINST. Generating it would add a `LOWERS` row with `oracle = None`, which no
+#   gate compares, i.e. a row that looks covered and is not.
+#
+# Each reason records what this harness OBSERVES, because that is what a human
+# triaging it will grep for.
+_HELD_OUT = {
+    ("dirichlet", Wrap("pushfwd", ("exp",))): (
+        "oracle",
+        "the engine now scores this shape -- 1.022871190191443, which is the bare "
+        "law's 2.0228711901914425 minus an ambient-R^3 Jacobian of exactly 1.0 "
+        "(`sum(log y)`, which on the simplex is `sum(x)` = 1). But §06 scopes "
+        "`Lebesgue` to lower-dimensional embedded AFFINE sets and `exp`'s image of "
+        "`stdsimplex(n)` is a CURVED 2-manifold, so no §06 rule says which measure "
+        "that number is a density against: the ambient Jacobian, the Hausdorff area "
+        "element and the coordinate chart give 1.0, 0.6816 and 0.5 for the same "
+        "volume term. The oracle withholds (`oracle._MANIFOLD_SAFE_FORWARDS`), so a "
+        "generated row here would carry no checkable value. Tracked as an open spec "
+        "question in flatppl-dev/measure-algebra-audit.md; this hold-out retires when "
+        "that question is ruled on, NOT when an engine changes -- "
+        "`tests/sweep/test_vector_arms.py` fails if either the emitted value or the "
+        "oracle's withhold moves",
+    ),
 }
+
+# The engine-gap category, kept as a named empty set rather than deleted: it records
+# that the category exists and what retires it, so the next engine gap has somewhere
+# obvious to go instead of being bolted onto the oracle one.
+_ENGINE_BLOCKED = {k: v[1] for k, v in _HELD_OUT.items() if v[0] == "engine"}
 
 
 def _supported(base: Base, wrap: Wrap) -> bool:
@@ -359,7 +366,7 @@ def vector_shapes() -> list[tuple[Base, Wrap]]:
     probe per shape without re-deriving which shapes exist.
     """
     return [(b, w) for b in VECTOR_BASES for w in VECTOR_WRAPS
-            if (b.kind, w) not in _ENGINE_BLOCKED]
+            if (b.kind, w) not in _HELD_OUT]
 
 
 def enumerate_vector_probes() -> list[Probe]:

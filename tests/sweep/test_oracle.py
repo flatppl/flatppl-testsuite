@@ -677,9 +677,11 @@ def test_a_vector_pushfwd_over_a_counting_reference_takes_no_volume_term():
     `- sum(log y)`: a Lebesgue Jacobian here would be 5.0 (= sum x_i), which is the
     whole density's magnitude, not a correction to it.
 
-    This shape is `_ENGINE_BLOCKED`, so no verdict-table row carries this number;
-    the oracle still has to hold it, because that is the value the row will be
-    checked against the day `flatppl-js` can evaluate the emitted gate."""
+    This shape IS now in the generated family — `flatppl-js e9803b6` learned to
+    evaluate both the `cartpow` gate and the lattice snap — so verdict-table rows
+    carry this number and are checked against it. The unit assertion stays because it
+    derives the value from §08 with no engine in the loop, which is what licenses
+    those rows."""
     x = VECTOR_INNER["multinomial"]
     y = [math.exp(c) for c in x]
     bare = true_logpdf(_probe(_MULTINOMIAL, Wrap("identity", ()), x))
