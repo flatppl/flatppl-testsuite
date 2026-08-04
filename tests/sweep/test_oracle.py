@@ -502,11 +502,11 @@ def _dirichlet_chart_mass(alpha):
                              epsabs=1e-12, epsrel=1e-12)
 
 
-def test_sec08s_dirichlet_FORMULA_is_normalised_against_the_chart_measure():
-    """What this establishes is what §08's FORMULA is normalised against — NOT what
-    `Lebesgue(stdsimplex(n))` denotes. The two are different questions and the spec
-    answers them incompatibly; see
-    `test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not`.
+def test_sec08s_dirichlet_formula_is_normalised_against_the_coordinate_measure():
+    """§08's formula integrates to 1 against `dx_1 ... dx_{n-1}`, which is exactly the
+    reference §08 now names under it: "The reference measure is the coordinate measure
+    dx_1 ... dx_{n-1} of `Lebesgue(stdsimplex(n))`." So this pins the spec's stated
+    convention, and agreement with scipy, Stan and NumPyro follows from it.
     """
     mass, err = _dirichlet_chart_mass((2.0, 3.0, 4.0))
     assert err < 1e-9
@@ -514,24 +514,23 @@ def test_sec08s_dirichlet_FORMULA_is_normalised_against_the_chart_measure():
         f"§08's Dirichlet formula integrates to {mass} over the (x1, x2) chart")
 
 
-def test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not():
-    """The internal spec inconsistency, pinned as arithmetic so it cannot be argued
-    away or quietly forgotten.
+def test_the_surface_measure_sec03_rules_out_is_larger_by_exactly_sqrt_n():
+    """The normative reading, and the size of the error it rules out.
 
-    §03 "Standard simplex": `Lebesgue(support = stdsimplex(n))` "measures **surface
-    area** within the simplex". §06 "Lebesgue": for lower-dimensional embedded affine
-    sets it is "the **intrinsic affine Lebesgue measure** on that set". Surface area
-    on the embedded simplex is the (n-1)-dimensional Hausdorff measure.
+    §03 "Standard simplex" now defines `Lebesgue(support = stdsimplex(n))` as "the
+    (n-1)-dimensional coordinate Lebesgue measure on the simplex: the image of
+    dx_1 ... dx_{n-1} under the chart that appends x_n = 1 - sum_{i<n} x_i", and says
+    outright that "It is not the surface (Hausdorff) measure of the embedded simplex,
+    which is larger by the factor sqrt(n)". §06 "Lebesgue" matches: the coordinate
+    Lebesgue measure of the free coordinates, "not its surface area".
 
-    Its area element is sqrt(n) dx_1...dx_{n-1}: the tangent basis {e_i - e_n} has
-    Gram matrix I + J, whose determinant is n. So §08's formula — which integrates to
-    1 against the chart — integrates to sqrt(n) against the measure §03 and §06 name.
-    A density cannot be normalised against both.
-
-    The shipped rows carry the CHART reading, required for numerical parity with
-    Stan/NumPyro/scipy, and are flagged `spec_wording_pending` in the verdict table.
-    This test does not assert which reading is right; it asserts they differ by
-    exactly log sqrt(n), which is what makes the flag necessary.
+    This test derives that sqrt(n) rather than trusting it — the tangent basis
+    {e_i - e_n} has Gram matrix I + J with determinant n — and pins the log-density
+    gap it implies. §03 and §06 briefly said the opposite (surface area), which put
+    §08's formula log sqrt(n) out of step with its own stated reference; the spec edit
+    resolved that in favour of the coordinate measure, i.e. the value the sweep
+    already shipped. What this guards now is a regression: 0.549 at n = 3 is what a row
+    would move by if anything started applying the surface-measure correction.
     """
     n = 3
     # The Gram determinant, computed rather than asserted from the formula.

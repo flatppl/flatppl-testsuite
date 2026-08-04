@@ -47,47 +47,28 @@ def test_the_table_records_no_malformed_and_no_wrong_numbers():
     assert not malformed, f"MALFORMED rows frozen in the table: {malformed}"
 
 
-def test_every_dirichlet_row_carries_the_open_wording_question():
-    """The §08-vs-§03/§06 reference-measure inconsistency has to be visible in the
-    COMMITTED artifact, not only in `measure-algebra-audit.md`. A Dirichlet row whose
-    `oracle` and `value` agree looks like clean independent corroboration; it is not,
-    because the oracle and the engine both transcribe §08's formula, so neither can
-    detect a `log sqrt(n)` error in the reference measure. The flag is what stops the
-    next reader taking that agreement at face value.
+def test_dirichlet_rows_record_the_coordinate_measure_value():
+    """A plain regression check where an open-question flag used to be.
 
-    The values themselves are settled — numerical parity with Stan, NumPyro and scipy
-    requires §08's formula — so this is `spec_wording_pending`, not a defect and not
-    an unvalidated oracle.
+    §08's Dirichlet formula is normalised against the coordinate measure
+    `dx_1 ... dx_{n-1}`, which §03 "Standard simplex" and §06 "Lebesgue" now name
+    explicitly as what `Lebesgue(stdsimplex(n))` denotes -- and §03 states that the
+    surface (Hausdorff) measure "is larger by the factor sqrt(n)". Those rows briefly
+    carried a `spec_wording_pending` flag while §03/§06 said the opposite; the spec
+    edit settled it in favour of the value the sweep already shipped, so the flag is
+    gone and this pins the number instead.
+
+    A row here reading 1.4735650458573875 rather than 2.0228711901914425 would mean
+    something applied the sqrt(n) surface-measure correction the spec now rules out.
     """
     rows = table.load(table.DEFAULT_PATH).values()
-    dirichlet = [r for r in rows if r.probe_id.startswith("dirichlet.")]
-    assert dirichlet, "no Dirichlet rows in the committed table"
-    unflagged = [r.probe_id for r in dirichlet if not r.spec_wording_pending]
-    assert not unflagged, (
-        "Dirichlet rows recorded without the open reference-measure wording "
-        f"question: {unflagged}")
-    for r in dirichlet:
-        assert r.spec_wording_note, f"{r.probe_id}: flagged with no reason recorded"
-    # Rows with a finite oracle must carry the alternative reading, exactly log sqrt(3)
-    # below it, so a future spec ruling can be applied mechanically.
-    import math as _math
-    for r in dirichlet:
-        if r.oracle is None or not _math.isfinite(r.oracle):
-            continue
-        assert r.oracle_alt_reading is not None, (
-            f"{r.probe_id}: has an oracle value but no alternative reading")
-        gap = r.oracle - r.oracle_alt_reading
-        assert abs(gap - 0.5 * _math.log(3)) < 1e-12, (
-            f"{r.probe_id}: the two readings are {gap} apart, expected log sqrt(3)")
-
-
-def test_no_row_outside_the_dirichlet_base_is_flagged_spec_wording_pending():
-    """Scope the flag, so it keeps meaning something. Only §08's Dirichlet reference
-    measure is worded two ways; a flag that spread would stop being a signal."""
-    rows = table.load(table.DEFAULT_PATH).values()
-    stray = [r.probe_id for r in rows
-             if r.spec_wording_pending and not r.probe_id.startswith("dirichlet.")]
-    assert not stray, f"spec_wording_pending leaked onto unrelated rows: {stray}"
+    bare = [r for r in rows if r.probe_id.startswith("dirichlet.identity.")]
+    assert bare, "no bare Dirichlet rows in the committed table"
+    for r in bare:
+        assert r.oracle == pytest.approx(2.0228711901914425, abs=1e-12), (
+            f"{r.probe_id}: oracle {r.oracle} is not the coordinate-measure value")
+        assert r.value == pytest.approx(2.0228711901914425, abs=1e-12), (
+            f"{r.probe_id}: engine value {r.value} is not the coordinate-measure value")
 
 
 def test_the_table_flags_no_unreviewed_wrong_numbers():

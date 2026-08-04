@@ -121,8 +121,15 @@ def _is_discrete(base: Base) -> bool:
 # --------------------------------------------------------------------------
 
 def simplex_chart_to_hausdorff_offset(n: int) -> float:
-    """`log sqrt(n)` — the gap between the two readings of `Lebesgue(stdsimplex(n))`
-    that §08 and §03/§06 disagree about (see `_vector_base_logpdf`).
+    """`log sqrt(n)` — the factor between `Lebesgue(stdsimplex(n))`, which §03 defines
+    as the COORDINATE measure, and the surface (Hausdorff) measure of the embedded
+    simplex, which §03 notes "is larger by the factor sqrt(n)".
+
+    Not applied anywhere in the density path: §03, §06 and §08 all name the coordinate
+    measure, so §08's formula needs no correction. This exists so `test_oracle` can pin
+    that convention as arithmetic rather than as a comment — the two measures differ by
+    0.549 in log-density at n = 3, which is the size of the error the spec's wording
+    now rules out.
 
     Derivation, not a fudge factor: parameterise the simplex by the chart
     (x_1, ..., x_{n-1}) with x_n = 1 - sum. The tangent basis is {e_i - e_n}, whose
@@ -146,39 +153,34 @@ def _vector_base_logpdf(base: Base, x) -> float:
       Gamma(||alpha||_1)/prod_i Gamma(alpha_i) prod_i x_i^{alpha_i - 1}", which is
       `scipy.stats.dirichlet(alpha).logpdf(x)`.
 
-    ## `Lebesgue(stdsimplex(n))` has TWO readings, and the spec gives both
+    ## `Lebesgue(stdsimplex(n))` is the COORDINATE measure — settled, and normative
 
-    This is an unresolved INTERNAL SPEC INCONSISTENCY, tracked as an open question in
-    `flatppl-dev/measure-algebra-audit.md`. Do not read the choice below as a ruling.
+    The spec now says so in all three places, so this is no longer a reading to
+    justify. §03 "Standard simplex":
 
-    * §03 "Standard simplex" and §06 "Lebesgue" name the **surface measure**. §03:
-      "`Lebesgue(support = stdsimplex(n))` is the intrinsic (n-1)-dimensional
-      Lebesgue measure on the simplex, embedded in R^n: it measures **surface area**
-      within the simplex". §06: "For lower-dimensional embedded affine sets such as
-      `stdsimplex(n)`, it is the **intrinsic affine Lebesgue measure** on that set."
-      Surface area on the embedded simplex is the (n-1)-dimensional Hausdorff
-      measure, whose area element is sqrt(n) dx_1...dx_{n-1}
-      (`simplex_chart_to_hausdorff_offset`).
-    * §08's Dirichlet **formula** is normalised against the **chart** measure
-      dx_1...dx_{n-1}: it integrates to 1 there, hence to sqrt(n) against the measure
-      §03 and §06 name.
+        `Lebesgue(support = stdsimplex(n))` is the (n-1)-dimensional coordinate
+        Lebesgue measure on the simplex: the image of dx_1 ... dx_{n-1} under the
+        chart that appends x_n = 1 - sum_{i<n} x_i (dropping any other coordinate
+        gives the same measure). ... It is not the surface (Hausdorff) measure of the
+        embedded simplex, which is larger by the factor sqrt(n).
 
-    The two readings are `log sqrt(n)` apart — 0.5493061443340549 at n = 3. At
-    alpha = (2, 3, 4), x = (0.2, 0.3, 0.5) the chart reading is 2.0228711901914425
-    and the surface reading 1.4735650458573875.
+    §06 "Lebesgue" agrees: for lower-dimensional embedded affine sets such as
+    `stdsimplex(n)` it is "the coordinate Lebesgue measure of the set's free
+    coordinates ..., not its surface area". §08's Dirichlet entry names it under the
+    formula: "The reference measure is the coordinate measure dx_1 ... dx_{n-1} of
+    `Lebesgue(stdsimplex(n))`."
 
-    **This function computes §08's formula, i.e. the CHART reading**, because
-    numerical parity with Stan, NumPyro and scipy is a project requirement and all
-    three use that formula. So the value is not in doubt and will not move; what is
-    unresolved is which §03/§06 wording the spec settles on. Rows carrying this
-    reading are flagged `spec_wording_pending` in the verdict table so the open
-    question is visible in the committed artifact rather than only in a doc.
+    So §08's formula, `scipy.stats.dirichlet` and this function all agree, and they
+    agree with Stan and NumPyro — the numerical parity the project requires.
+    `simplex_chart_to_hausdorff_offset` is kept only to express the sqrt(n) factor
+    §03 mentions, which `test_oracle` uses to pin the convention; nothing in the
+    density path applies it.
 
-    **Consequence for this oracle's authority, stated plainly:** on the Dirichlet
-    base it agrees with the engine because both transcribe §08's formula, so it
-    cannot independently detect a `log sqrt(n)` reference-measure error. It is an
-    independent check of the ALGEBRA around that base (the wraps, the support gate,
-    the total mass), not of the base's reference measure.
+    **Consequence for this oracle's authority, still worth stating:** on the Dirichlet
+    base it agrees with the engine because both transcribe §08's formula, so it cannot
+    independently detect a reference-measure error in that formula. It is an
+    independent check of the ALGEBRA around the base (the wraps, the support gate, the
+    total mass), not a second opinion on §08 itself.
 
     The support gate is `space.in_support`, which is the constraint SURFACE (sum
     x_i = n; sum x_i = 1) and not a bounding box — scipy would raise on an
