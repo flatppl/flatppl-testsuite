@@ -311,11 +311,10 @@ def _ctor_params(head: str, names: tuple[str, ...], pos: list[str],
     return tuple(one(n, p) for n, p in zip(names, pos))
 
 
-def _query_point(expr: str, ctx: _Ctx) -> float | list[float]:
+def _query_point(expr: str, ctx: _Ctx) -> float | tuple[float, ...]:
     """The second argument of `logdensityof`, as a scalar or vector point.
 
-    A vector is returned as a `list`, matching `space.Probe.point`; the tuple
-    `_Ctx.vector` hands back is `Base.params`' shape, not a point's.
+    A vector is returned as a tuple, matching `space.Probe.point`.
     """
     rec = _as_call(expr)
     if rec and rec[0] == "record":
@@ -324,7 +323,7 @@ def _query_point(expr: str, ctx: _Ctx) -> float | list[float]:
             raise _NoMatch("query point is not a single-field record")
         expr = next(iter(rkw.values()))
     if expr.strip().startswith("["):
-        return list(ctx.vector(expr))
+        return ctx.vector(expr)
     return ctx.number(expr)
 
 

@@ -58,7 +58,10 @@ class Probe:
     ordering: str      # "single" | "pinned_earlier" | "pinned_later"
     consumer: bool
     # A scalar query point, or one cell per component for a `VECTOR_BASES` probe.
-    point: float | list[float]
+    # A TUPLE for the vector case, not a list: `Probe` is frozen, so a mutable
+    # field would make an otherwise-immutable record only conditionally hashable.
+    # `render._value_src` renders either sequence type.
+    point: float | tuple[float, ...]
 
 
 # Support-distinct bases. `point` per base is chosen INSIDE the base's support
@@ -137,9 +140,32 @@ VECTOR_BASES = [
 # (1, 2, 2) is chosen to sum to n = 5, and Dirichlet's as `stdsimplex(n)`, so
 # (0.2, 0.3, 0.5) sums to 1. A point off the surface has density 0, which would
 # make every probe in the family a -inf row proving nothing.
+#
+# Tuples, not lists, for the reason `Base.params` uses tuples: these are module
+# constants and a probe's `point` derives from them, and `Probe` is frozen.
 VECTOR_INNER = {
-    "multinomial": [1.0, 2.0, 2.0],
-    "dirichlet": [0.2, 0.3, 0.5],
+    "multinomial": (1.0, 2.0, 2.0),
+    "dirichlet": (0.2, 0.3, 0.5),
+}
+
+# Whether each vector base's SUPPORT is a lower-dimensional manifold of the variate
+# space, which decides whether a pushforward's volume element is well defined
+# (`oracle._MANIFOLD_SAFE_FORWARDS`).
+#
+# **Every `VECTOR_BASES` member must appear here, and
+# `test_oracle.test_every_vector_base_declares_its_support_geometry` asserts the two
+# sets are equal.** The declaration is mandatory rather than an allowlist with a
+# permissive default: a new manifold-support base (`LKJ`, a von Mises-Fisher) that
+# someone forgot to declare would otherwise silently take the ambient-Jacobian
+# reading and produce a wrong number, which is the one failure mode this module is
+# built to prevent. Absent = loud `OracleUnsupported`, never "probably flat".
+VECTOR_SUPPORT_IS_MANIFOLD = {
+    # §08: support `stdsimplex(n)`, an (n-1)-manifold inside `cartpow(reals, n)`.
+    "dirichlet": True,
+    # §08: support {x in N_0^k : sum x_i = n}. A counting reference (§08 gives the
+    # density w.r.t. `iid(Counting(integers), k)`), which a bijection does not
+    # distort whatever shape the support has, so the manifold question never arises.
+    "multinomial": False,
 }
 
 # The curated wrap list. Four entries, each for a stated reason:
@@ -179,20 +205,34 @@ VECTOR_SPELLINGS = ["direct", "stochastic_node"]
 # text AND asserts the current crash. When `flatppl-js` learns the missing op that
 # test fails, which is what forces the probe back in rather than leaving the arm
 # silently uncovered.
+# Each reason records what THIS HARNESS OBSERVES, verbatim, because that is the
+# string a human triaging the gap will grep for. Where the underlying mechanism
+# produces a different message on a more direct probe, both are given and labelled
+# -- an unobservable quote sends the next reader looking for output that never
+# appears (a defect this list previously had).
 _ENGINE_BLOCKED = {
     ("multinomial", Wrap("pushfwd", ("neg",))):
         "flatppl-js `real` rejects an integer array: the determiniser's lattice "
-        "snap emits `real(round.(v))` over a vector variate, and the scorer throws "
-        "`real: arg 1 expects complex, got array of integer`",
+        "snap emits `real(round.(v))` over a vector variate. Observed through this "
+        "harness: `diagnostic: real: arg 1 expects complex, got array of integer "
+        "(length 3)`, then `score_flatpdl: no derivation for 'lp'`",
     ("multinomial", Wrap("pushfwd", ("exp",))):
         "the same `real` gap as pushfwd(neg), reached first: this shape emits BOTH "
         "the lattice snap and the `cartpow` image gate, and flatppl-js supports "
-        "neither `real` over an integer array nor `in` over a `cartpow` set",
+        "neither `real` over an integer array nor `in` over a `cartpow` set. "
+        "Observed through this harness: the same `real: arg 1 expects complex, got "
+        "array of integer (length 3)` diagnostic",
     ("dirichlet", Wrap("pushfwd", ("exp",))):
-        "flatppl-js `in` does not handle a `cartpow` set: the emitted image gate "
-        "`y in cartpow(posreals, 3)` throws `Cannot read properties of undefined "
-        "(reading 'length')`. The oracle would withhold a value here in any case "
-        "-- see `oracle._MANIFOLD_SAFE_FORWARDS`",
+        "flatppl-js `in` does not handle a `cartpow` set, so the emitted image gate "
+        "`y in cartpow(posreals, 3)` cannot be evaluated. Observed through this "
+        "harness: `score_flatpdl: no derivation for 'lp'` with NO diagnostic line, "
+        "which is generic -- the marker is `crash:derivation` and does not identify "
+        "the cause. The mechanism is observable only on a direct membership model "
+        "(`y = [1.0, 2.0, 3.0]` / `b = ifelse(y in cartpow(posreals, 3), 1.0, "
+        "-1.0)`), which throws `Cannot read properties of undefined (reading "
+        "'length')`; `test_vector_arms` scores that model separately so the cause is "
+        "pinned somewhere observable. The oracle would withhold a value for this "
+        "shape in any case -- see `oracle._MANIFOLD_SAFE_FORWARDS`",
 }
 
 
@@ -243,7 +283,7 @@ def is_vector_base(base: Base) -> bool:
     return base.kind in {b.kind for b in VECTOR_BASES}
 
 
-def in_support(base: Base, x: float | list[float]) -> bool:
+def in_support(base: Base, x: float | tuple[float, ...] | list[float]) -> bool:
     """Whether `x` lies in `base`'s own (unwrapped) support.
 
     Public because Task 2's oracle needs the same predicate to decide
@@ -269,8 +309,15 @@ def in_support(base: Base, x: float | list[float]) -> bool:
             return False
         return sum(round(c) for c in cells) == n
     if base.kind == "dirichlet":
+        # §08's support is INCLUSIVE: "{p in R^n : sum p_i = 1, p_i >= 0}". A zero
+        # cell is IN the support, and whether the density is finite there is a
+        # separate question the density function answers (`oracle` handles the three
+        # cases of `x_i^(alpha_i - 1)` at x_i = 0). Excluding 0 here would conflate
+        # "the density is not defined there" with "the point is outside the support",
+        # and it would be observably wrong for alpha_i < 1, where §08's density
+        # DIVERGES at a zero cell rather than vanishing.
         cells = list(x)
-        return all(c > 0.0 for c in cells) and abs(sum(cells) - 1.0) < 1e-9
+        return all(c >= 0.0 for c in cells) and abs(sum(cells) - 1.0) < 1e-9
     if base.kind == "normal":
         return True
     if base.kind == "gamma":
@@ -286,7 +333,7 @@ def in_support(base: Base, x: float | list[float]) -> bool:
     raise ValueError(f"unknown base kind: {base.kind}")
 
 
-def _vector_point_for(base: Base, wrap: Wrap) -> list[float]:
+def _vector_point_for(base: Base, wrap: Wrap) -> tuple[float, ...]:
     """`_point_for`'s vector counterpart: the forward map applied CELL-WISE.
 
     Derived from `VECTOR_INNER[base.kind]` for exactly the reason `_point_for` is
@@ -296,8 +343,8 @@ def _vector_point_for(base: Base, wrap: Wrap) -> list[float]:
     inner = VECTOR_INNER[base.kind]
     if wrap.kind == "pushfwd":
         f = _FORWARD[wrap.args[0]]
-        return [f(c) for c in inner]
-    return list(inner)
+        return tuple(f(c) for c in inner)
+    return tuple(inner)
 
 
 def _wrap_name(wrap: Wrap) -> str:

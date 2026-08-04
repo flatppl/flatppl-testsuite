@@ -51,7 +51,11 @@ from pathlib import Path
 from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.sweep.classify import Outcome, classify
-from flatppl_testsuite.sweep.oracle import OracleUnsupported, true_logpdf
+from flatppl_testsuite.sweep.oracle import (
+    OracleUnsupported,
+    simplex_chart_to_hausdorff_offset,
+    true_logpdf,
+)
 from flatppl_testsuite.sweep.space import (
     BASES,
     ORDERINGS,
@@ -93,6 +97,16 @@ class Row:
     oracle_unvalidated: bool
     known_defect: bool = False
     known_defect_reason: str | None = None
+    # An UNRESOLVED SPEC-WORDING question behind this row's reference measure. Not a
+    # doubtful value: `spec_wording_pending` says the number is the one the project
+    # requires (numerical parity with Stan/NumPyro/scipy) while two normative
+    # sections word its reference measure incompatibly, so what will move is the
+    # spec text, not the row. `oracle_alt_reading` records what the OTHER wording
+    # would imply, so a future ruling can be checked mechanically instead of
+    # re-derived. See `_spec_wording_pending`.
+    spec_wording_pending: bool = False
+    spec_wording_note: str | None = None
+    oracle_alt_reading: float | None = None
 
 
 def _spec_justified(probe: Probe, outcome: str) -> bool | None:
@@ -116,8 +130,58 @@ def _spec_justified(probe: Probe, outcome: str) -> bool | None:
         # (`density.rs::refuse_truncation_set_kind_mismatch`), and the oracle
         # declines the shape for the same §06 reason it declines the record one.
         # Conformant, not a gap.
+        #
+        # As everywhere in this function, the refusal's MARKER is deliberately not
+        # consulted, so this returns True for a refusal of this SHAPE whatever
+        # reason the determiniser gave — a refusal for an unrelated reason would
+        # still read `spec_justified`. That is the stated policy, not an oversight
+        # (see the module docstring), and the `aa1cdcb` diagnostics rewording
+        # vindicated it: keying on the message would have silently reclassified 84
+        # conformant refusals when only the prose changed. The cost is this blind
+        # spot; `tests/sweep/test_vector_arms.py` covers it from the other side by
+        # asserting the emitted arm.
         return True
     return False  # an unrecognized refusal: a tracked over-refusal, not a pass
+
+
+_DIRICHLET_WORDING_NOTE = (
+    "§08's Dirichlet formula is normalised against the CHART measure "
+    "dx_1...dx_{n-1}, but §03 \"Standard simplex\" and §06 \"Lebesgue\" define "
+    "`Lebesgue(stdsimplex(n))` as SURFACE AREA on the embedded simplex, i.e. the "
+    "(n-1)-dimensional Hausdorff measure, whose area element is "
+    "sqrt(n) dx_1...dx_{n-1}. The two readings are log sqrt(n) apart "
+    "(0.5493061443340549 at n = 3). This row's `oracle` and `value` are the CHART "
+    "reading, which is required for numerical parity with Stan, NumPyro and scipy "
+    "and will not move; `oracle_alt_reading` is what the §03/§06 wording implies. "
+    "What is unresolved is which wording flatppl-design settles on -- tracked as an "
+    "open spec question in flatppl-dev/measure-algebra-audit.md"
+)
+
+
+def _spec_wording_pending(probe: Probe) -> tuple[str, float | None] | None:
+    """`(note, alternative_reading)` when this probe's reference measure is subject to
+    an unresolved spec-wording question, else `None`.
+
+    Keyed on the probe's own structure, like every other classifier here, never on
+    engine or refusal text. Only `dirichlet` qualifies: §08's `Multinomial` density is
+    w.r.t. `iid(Counting(integers), k)`, and no section words a counting reference
+    two ways.
+
+    The alternative reading is only computable where the oracle produced a value at
+    all; a withheld or refused row carries the note with `None`, which still makes
+    the open question visible on that row.
+    """
+    if probe.base.kind != "dirichlet":
+        return None
+    (alpha,) = probe.base.params
+    try:
+        chart = true_logpdf(probe)
+    except OracleUnsupported:
+        return (_DIRICHLET_WORDING_NOTE, None)
+    if not math.isfinite(chart):
+        return (_DIRICHLET_WORDING_NOTE, None)
+    offset = simplex_chart_to_hausdorff_offset(len(alpha))
+    return (_DIRICHLET_WORDING_NOTE, chart - offset)
 
 
 def _known_defect_reason(probe: Probe) -> str | None:
@@ -205,6 +269,8 @@ def _row_for(probe: Probe) -> Row:
                 known_defect = True
                 known_defect_reason = reason
 
+    wording = _spec_wording_pending(probe)
+
     return Row(
         probe_id=probe.id,
         outcome=v.outcome.value if isinstance(v.outcome, Outcome) else v.outcome,
@@ -215,6 +281,9 @@ def _row_for(probe: Probe) -> Row:
         oracle_unvalidated=oracle_unvalidated,
         known_defect=known_defect,
         known_defect_reason=known_defect_reason,
+        spec_wording_pending=wording is not None,
+        spec_wording_note=wording[0] if wording else None,
+        oracle_alt_reading=wording[1] if wording else None,
     )
 
 
@@ -356,6 +425,9 @@ def save(path: Path, rows: list[Row], *, commit: str | None = None) -> None:
                 "oracle_unvalidated": r.oracle_unvalidated,
                 "known_defect": r.known_defect,
                 "known_defect_reason": r.known_defect_reason,
+                "spec_wording_pending": r.spec_wording_pending,
+                "spec_wording_note": r.spec_wording_note,
+                "oracle_alt_reading": _dump_num(r.oracle_alt_reading),
             }
             for r in ordered
         ],
@@ -381,6 +453,9 @@ def load(path: Path) -> dict[str, Row]:
             oracle_unvalidated=r.get("oracle_unvalidated", False),
             known_defect=r.get("known_defect", False),
             known_defect_reason=r.get("known_defect_reason"),
+            spec_wording_pending=r.get("spec_wording_pending", False),
+            spec_wording_note=r.get("spec_wording_note"),
+            oracle_alt_reading=_load_num(r.get("oracle_alt_reading")),
         )
         out[row.probe_id] = row
     return out

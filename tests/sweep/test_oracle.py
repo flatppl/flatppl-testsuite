@@ -13,15 +13,19 @@ from flatppl_testsuite.sweep.oracle import (
     OracleUnsupported,
     _frozen,
     _interval,
+    _support_is_manifold,
+    simplex_chart_to_hausdorff_offset,
     true_logpdf,
 )
 from flatppl_testsuite.sweep.space import (
     VECTOR_BASES,
     VECTOR_INNER,
+    VECTOR_SUPPORT_IS_MANIFOLD,
     Base,
     Probe,
     Wrap,
     enumerate_probes,
+    in_support,
     is_vector_base,
     vector_shapes,
 )
@@ -486,28 +490,118 @@ def test_bare_dirichlet_matches_the_hand_derived_log_gamma_form():
     assert got == pytest.approx(2.0228711901914425, abs=1e-12)
 
 
-def test_sec08s_dirichlet_density_is_normalised_on_the_coordinate_chart():
-    """Which Lebesgue measure §08's `Lebesgue(stdsimplex(n))` names is load-bearing,
-    not a nicety: the (n-1)-dimensional Hausdorff measure of the simplex embedded in
-    R^n differs from the `dx_1 ... dx_{n-1}` chart measure by sqrt(n), i.e. 0.549 in
-    log-density for n = 3. §08's own formula integrates to 1 over the CHART, so that
-    is the reference the oracle transcribes."""
-    alpha = (2.0, 3.0, 4.0)
-
+def _dirichlet_chart_mass(alpha):
+    """§08's Dirichlet formula integrated over the (x1, x2) chart of stdsimplex(3)."""
     def f(x2, x1):
         x3 = 1.0 - x1 - x2
         if x3 <= 0.0:
             return 0.0
         return math.exp(_lgamma_dirichlet(alpha, (x1, x2, x3)))
 
-    mass, err = integrate.dblquad(f, 0.0, 1.0, lambda x1: 0.0, lambda x1: 1.0 - x1,
-                                  epsabs=1e-12, epsrel=1e-12)
+    return integrate.dblquad(f, 0.0, 1.0, lambda x1: 0.0, lambda x1: 1.0 - x1,
+                             epsabs=1e-12, epsrel=1e-12)
+
+
+def test_sec08s_dirichlet_FORMULA_is_normalised_against_the_chart_measure():
+    """What this establishes is what §08's FORMULA is normalised against — NOT what
+    `Lebesgue(stdsimplex(n))` denotes. The two are different questions and the spec
+    answers them incompatibly; see
+    `test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not`.
+    """
+    mass, err = _dirichlet_chart_mass((2.0, 3.0, 4.0))
     assert err < 1e-9
     assert mass == pytest.approx(1.0, abs=1e-9), (
-        f"§08's Dirichlet density integrates to {mass} over the (x1, x2) chart; "
-        f"sqrt(3) * that is {mass * math.sqrt(3)} — if THAT were 1, the reference "
-        "would be the Hausdorff measure and every vector Dirichlet oracle value "
-        "here would be off by 0.549")
+        f"§08's Dirichlet formula integrates to {mass} over the (x1, x2) chart")
+
+
+def test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not():
+    """The internal spec inconsistency, pinned as arithmetic so it cannot be argued
+    away or quietly forgotten.
+
+    §03 "Standard simplex": `Lebesgue(support = stdsimplex(n))` "measures **surface
+    area** within the simplex". §06 "Lebesgue": for lower-dimensional embedded affine
+    sets it is "the **intrinsic affine Lebesgue measure** on that set". Surface area
+    on the embedded simplex is the (n-1)-dimensional Hausdorff measure.
+
+    Its area element is sqrt(n) dx_1...dx_{n-1}: the tangent basis {e_i - e_n} has
+    Gram matrix I + J, whose determinant is n. So §08's formula — which integrates to
+    1 against the chart — integrates to sqrt(n) against the measure §03 and §06 name.
+    A density cannot be normalised against both.
+
+    The shipped rows carry the CHART reading, required for numerical parity with
+    Stan/NumPyro/scipy, and are flagged `spec_wording_pending` in the verdict table.
+    This test does not assert which reading is right; it asserts they differ by
+    exactly log sqrt(n), which is what makes the flag necessary.
+    """
+    n = 3
+    # The Gram determinant, computed rather than asserted from the formula.
+    basis = [[1.0, 0.0, -1.0], [0.0, 1.0, -1.0]]           # e1 - e3, e2 - e3
+    gram = [[sum(a * b for a, b in zip(u, v)) for v in basis] for u in basis]
+    det = gram[0][0] * gram[1][1] - gram[0][1] * gram[1][0]
+    assert det == pytest.approx(n, abs=1e-12), (
+        f"the simplex tangent Gram determinant is {det}, expected n = {n}")
+    assert simplex_chart_to_hausdorff_offset(n) == pytest.approx(
+        0.5 * math.log(det), abs=1e-15)
+    assert simplex_chart_to_hausdorff_offset(n) == pytest.approx(
+        0.5493061443340549, abs=1e-15)
+
+    # §08's formula integrates to sqrt(n), not 1, against the surface measure.
+    chart_mass, _err = _dirichlet_chart_mass((2.0, 3.0, 4.0))
+    assert chart_mass * math.sqrt(n) == pytest.approx(math.sqrt(n), abs=1e-8)
+
+    # The two candidate values for the shipped row, both stated explicitly.
+    chart = true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()), (0.2, 0.3, 0.5)))
+    assert chart == pytest.approx(2.0228711901914425, abs=1e-12)
+    assert chart - simplex_chart_to_hausdorff_offset(n) == pytest.approx(
+        1.4735650458573875, abs=1e-12)
+
+
+def test_every_vector_base_declares_its_support_geometry():
+    """`oracle._support_is_manifold` requires a declaration rather than defaulting,
+    so a new vector base with a manifold support cannot silently take the
+    ambient-Jacobian reading. Assert the two sets are equal so the failure lands here,
+    at the roster, and not at whichever probe happens to run first."""
+    assert set(VECTOR_SUPPORT_IS_MANIFOLD) == {b.kind for b in VECTOR_BASES}, (
+        "space.VECTOR_SUPPORT_IS_MANIFOLD and VECTOR_BASES have drifted — every "
+        "vector base must declare whether its support is a lower-dimensional "
+        "manifold before the oracle will value a pushforward of it")
+
+
+def test_an_undeclared_support_geometry_raises_rather_than_assuming_flat():
+    """The inverted default, exercised. A base absent from the declaration must fail
+    loudly; the old allowlist would have given it the ambient-Jacobian reading."""
+    undeclared = Base("vonmisesfisher", ((1.0, 0.0, 0.0), 2.0))
+    with pytest.raises(OracleUnsupported, match="support geometry"):
+        _support_is_manifold(undeclared)
+
+
+def test_a_zero_cell_is_inside_sec08s_dirichlet_support():
+    """§08:532 gives the support inclusively — "p_i >= 0". Whether the density is
+    finite at a zero cell is a separate question, decided by the exponent
+    `alpha_i - 1`, and `oracle._dirichlet_logpdf` decides it per case rather than
+    letting a support gate answer it (which is what made the gate wrong for
+    alpha_i < 1)."""
+    at_boundary = (0.0, 0.5, 0.5)
+    assert in_support(_DIRICHLET, at_boundary), "§08 puts a zero cell in the support"
+
+    # alpha_i > 1 at the zero cell: x_i^(alpha_i - 1) -> 0, so the density is 0.
+    assert true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()),
+                              at_boundary)) == -math.inf
+    # alpha_i < 1: §08's factor DIVERGES. scipy refuses the point; the oracle must
+    # report +inf rather than -inf, which is what the old gate got wrong.
+    heavy = Base("dirichlet", ((0.5, 3.0, 4.0),))
+    assert in_support(heavy, at_boundary)
+    assert true_logpdf(_probe(heavy, Wrap("identity", ()), at_boundary)) == math.inf
+    # alpha_i == 1: the factor is 0^0 = 1, so the density is finite there, and equals
+    # §08's product with the zero cell's factor simply omitted.
+    alpha = (1.0, 3.0, 4.0)
+    flat = Base("dirichlet", (alpha,))
+    got = true_logpdf(_probe(flat, Wrap("identity", ()), at_boundary))
+    assert math.isfinite(got), f"alpha_i == 1 at a zero cell must be finite, got {got}"
+    want = (math.lgamma(sum(alpha)) - sum(math.lgamma(a) for a in alpha)
+            + sum((a - 1.0) * math.log(xi)
+                  for a, xi in zip(alpha, at_boundary) if xi > 0.0))
+    assert got == pytest.approx(want, abs=1e-12)
 
 
 def test_a_vector_point_off_the_support_surface_is_minus_inf():
@@ -586,7 +680,7 @@ def test_a_scalar_truncation_over_a_vector_variate_withholds_a_value():
 @pytest.mark.parametrize("base,wrap", vector_shapes(),
                          ids=lambda a: getattr(a, "kind", str(a)))
 def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
-    """The strongest vector check: no hand-derived value appears in it. Sum or
+    """The strongest vector check that references no hand-derived value: sum or
     integrate the oracle's own density over the whole variate space and assert the
     mass §06's algebra requires — 1 for every shape in the family, since §08's
     distributions are probability measures and `pushfwd` preserves mass by
@@ -594,7 +688,24 @@ def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
 
     Multinomial's variate space is the lattice {x in N_0^3 : sum x_i = n}, enumerated
     exactly — no quadrature, no truncation error. Dirichlet's is `stdsimplex(3)`,
-    integrated over the (x1, x2) chart the density is normalised on.
+    integrated over the (x1, x2) chart §08's formula is normalised on.
+
+    **What this does NOT catch, stated because the earlier wording overclaimed it.**
+    "A sign error in a per-cell volume term cannot survive the mass invariant" is
+    FALSE for this family: every shape it reaches has a log-volume that is identically
+    zero (`pushfwd(neg)`'s per-cell term is 0; `pushfwd(exp, Multinomial)` is
+    counting-referenced so takes no term; `pushfwd(exp, Dirichlet)` is withheld), and
+    a sign error on 0 is invisible. What these rows DO establish is that the inverse
+    map is applied at all — a missing inversion evaluates Dirichlet off the simplex
+    and gives -inf. The per-cell log-volume MAGNITUDE has no oracle-checked row
+    anywhere in the family; closing that needs a full-dimensional continuous vector
+    base (`MvNormal`), recorded as the wave-C follow-up in
+    `flatppl-dev/density-sweep-notes.md`.
+
+    The mass invariant is also blind to the `log sqrt(n)` reference-measure question
+    on the Dirichlet base: it integrates against the same chart §08's formula
+    normalises to, so it returns 1 under either wording. See
+    `test_sec03_and_sec06_name_the_surface_measure_which_sec08s_formula_is_not`.
     """
     if wrap.kind == "truncate":
         pytest.skip("the oracle withholds a value for this shape, so there is "
