@@ -82,8 +82,9 @@ def _report(argv: list[str]) -> int:
     if pending:
         print(f"  spec-wording pending  {len(pending)}  "
               "(value settled, reference-measure WORDING unresolved)")
-        for r in sorted({r.spec_wording_note for r in pending if r.spec_wording_note}):
-            print(f"    {r}")
+        for note in sorted({r.spec_wording_note for r in pending
+                            if r.spec_wording_note}):
+            print(f"    {note}")
     return 0
 
 

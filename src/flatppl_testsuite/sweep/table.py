@@ -158,7 +158,8 @@ _DIRICHLET_WORDING_NOTE = (
 )
 
 
-def _spec_wording_pending(probe: Probe) -> tuple[str, float | None] | None:
+def _spec_wording_pending(probe: Probe,
+                          chart: float | None) -> tuple[str, float | None] | None:
     """`(note, alternative_reading)` when this probe's reference measure is subject to
     an unresolved spec-wording question, else `None`.
 
@@ -167,19 +168,19 @@ def _spec_wording_pending(probe: Probe) -> tuple[str, float | None] | None:
     w.r.t. `iid(Counting(integers), k)`, and no section words a counting reference
     two ways.
 
-    The alternative reading is only computable where the oracle produced a value at
-    all; a withheld or refused row carries the note with `None`, which still makes
-    the open question visible on that row.
+    `chart` is the oracle value the CALLER already computed for this probe (`None`
+    where the oracle withheld one), threaded in rather than recomputed — one
+    `true_logpdf` per probe, and no way for the row's `oracle` and its
+    `oracle_alt_reading` to be derived from two different evaluations. The
+    alternative reading needs a finite value to shift; a withheld, refused or
+    infinite row still carries the note with `None`, which keeps the open question
+    visible on that row.
     """
     if probe.base.kind != "dirichlet":
         return None
+    if chart is None or not math.isfinite(chart):
+        return (_DIRICHLET_WORDING_NOTE, None)
     (alpha,) = probe.base.params
-    try:
-        chart = true_logpdf(probe)
-    except OracleUnsupported:
-        return (_DIRICHLET_WORDING_NOTE, None)
-    if not math.isfinite(chart):
-        return (_DIRICHLET_WORDING_NOTE, None)
     offset = simplex_chart_to_hausdorff_offset(len(alpha))
     return (_DIRICHLET_WORDING_NOTE, chart - offset)
 
@@ -269,7 +270,7 @@ def _row_for(probe: Probe) -> Row:
                 known_defect = True
                 known_defect_reason = reason
 
-    wording = _spec_wording_pending(probe)
+    wording = _spec_wording_pending(probe, oracle_val)
 
     return Row(
         probe_id=probe.id,

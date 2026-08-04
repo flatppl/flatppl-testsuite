@@ -42,7 +42,7 @@ def test_a_dirichlet_row_is_flagged_spec_wording_pending_with_both_readings():
     Stan/NumPyro/scipy is required, so it will not move) and carries the other
     reading alongside, so a future spec ruling is a mechanical check."""
     probe = _vec_probe("dirichlet", Wrap("identity", ()), (0.2, 0.3, 0.5))
-    got = table._spec_wording_pending(probe)
+    got = table._spec_wording_pending(probe, true_logpdf(probe))
     assert got is not None, "a Dirichlet row must carry the open wording question"
     note, alt = got
     assert "§03" in note and "§06" in note and "§08" in note
@@ -56,14 +56,14 @@ def test_multinomial_carries_no_wording_question():
     """§08 gives Multinomial's density w.r.t. `iid(Counting(integers), k)`, and no
     section words a counting reference two ways. Flagging it would dilute the flag."""
     probe = _vec_probe("multinomial", Wrap("identity", ()), (1.0, 2.0, 2.0))
-    assert table._spec_wording_pending(probe) is None
+    assert table._spec_wording_pending(probe, true_logpdf(probe)) is None
 
 
 def test_a_scalar_probe_carries_no_wording_question():
     probe = Probe(id="s", base=Base("normal", (0.0, 1.0)),
                   wraps=(Wrap("identity", ()),), spelling="direct",
                   ordering="single", consumer=False, point=0.5)
-    assert table._spec_wording_pending(probe) is None
+    assert table._spec_wording_pending(probe, true_logpdf(probe)) is None
 
 
 def test_a_withheld_dirichlet_shape_still_carries_the_note_without_an_alternative():
@@ -71,7 +71,8 @@ def test_a_withheld_dirichlet_shape_still_carries_the_note_without_an_alternativ
     applies to it — the note must survive with `None` rather than the row losing the
     flag entirely."""
     probe = _vec_probe("dirichlet", Wrap("truncate", (0.0, 1.0)), (0.2, 0.3, 0.5))
-    got = table._spec_wording_pending(probe)
+    # The oracle withholds for this shape, so the caller passes None.
+    got = table._spec_wording_pending(probe, None)
     assert got is not None
     note, alt = got
     assert alt is None and "§03" in note

@@ -213,12 +213,27 @@ def _dirichlet_logpdf(alpha: list[float], x: list[float]) -> float:
     the previous strictly-positive support gate happened to return. The other two are
     implemented because getting them from a support gate rather than from the density
     is what made that gate wrong in general.
+
+    **MIXED zero cells are withheld, not resolved by case order.** With a diverging
+    factor and a vanishing one at once — `x = (0, 0, 1)`, `alpha = (0.5, 2, 4)` gives
+    `0^-0.5 * 0^1`, i.e. `inf * 0` — the product is a genuine indeterminate, and any
+    answer here is an artefact of which case the code happens to test first. §08 gives
+    the density as that product and no limit convention alongside it, so this module
+    withholds rather than pick a limb, exactly as it withholds elsewhere.
     """
     zeros = [i for i, xi in enumerate(x) if xi <= 0.0]
     if zeros:
-        if any(alpha[i] < 1.0 for i in zeros):
+        diverging = [i for i in zeros if alpha[i] < 1.0]
+        vanishing = [i for i in zeros if alpha[i] > 1.0]
+        if diverging and vanishing:
+            raise OracleUnsupported(
+                f"Dirichlet at a point with both a diverging (alpha_i < 1) and a "
+                f"vanishing (alpha_i > 1) zero cell: cells {diverging} and "
+                f"{vanishing} make §08's product an inf * 0 indeterminate, and §08 "
+                "gives no limit convention for it")
+        if diverging:
             return math.inf
-        if any(alpha[i] > 1.0 for i in zeros):
+        if vanishing:
             return -math.inf
         # Every zero cell has alpha_i == 1: those factors are 1, so drop them and
         # evaluate the rest of §08's product directly.
@@ -296,10 +311,10 @@ def _vector_logpdf(probe: Probe) -> float:
     identically 0, `pushfwd(exp, Multinomial)` is counting-referenced so it takes no
     term at all, and `pushfwd(exp, Dirichlet)` is withheld below. The per-cell SUM is
     therefore not oracle-discriminated by any row: a sign error, or a
-    per-cell/whole-vector confusion, would survive here. Closing that needs a
-    full-dimensional continuous vector base (`MvNormal`, whose §08 support is
-    `cartpow(reals, n)` and whose reference is `iid(Lebesgue(reals), n)`), which is
-    recorded as the wave-C follow-up in `flatppl-dev/density-sweep-notes.md`.
+    per-cell/whole-vector confusion, would survive here. An `MvNormal` base would
+    make the arm checkable — §08 gives its support as `cartpow(reals, n)` and its
+    reference as `iid(Lebesgue(reals), n)`, so the volume term is nonzero and
+    unambiguous. Recorded as a follow-up in `flatppl-dev/density-sweep-notes.md`.
     """
     x = list(probe.point)
     logv = 0.0

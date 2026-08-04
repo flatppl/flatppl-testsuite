@@ -206,7 +206,9 @@ def test_the_cartpow_membership_gate_is_what_flatppl_js_cannot_evaluate():
     message = str(exc.value)
     assert "score_flatpdl failed" in message, (
         f"expected a scorer failure, got: {message}")
-    assert "length" in message, (
+    # Match most of the throw, not just "length": J1's own diagnostic ends in
+    # `(length 3)`, so a bare substring could be satisfied by an unrelated failure.
+    assert "Cannot read properties of undefined (reading 'length')" in message, (
         "flatppl-js no longer fails `in cartpow(...)` the recorded way. If it now "
         "EVALUATES the gate, J2 is fixed: re-examine the dirichlet + pushfwd(exp) "
         f"hold-out in space._ENGINE_BLOCKED. Got: {message}")

@@ -604,6 +604,26 @@ def test_a_zero_cell_is_inside_sec08s_dirichlet_support():
     assert got == pytest.approx(want, abs=1e-12)
 
 
+def test_mixed_zero_cells_are_withheld_rather_than_resolved_by_case_order():
+    """A diverging and a vanishing zero cell at once make §08's product `inf * 0`, a
+    genuine indeterminate: `x = (0, 0, 1)` with `alpha = (0.5, 2, 4)` is
+    `0^-0.5 * 0^1`. Whichever case the code tested first would decide the answer, so
+    it withholds instead. Reachable on the simplex; reached by no shipped row."""
+    mixed = Base("dirichlet", ((0.5, 2.0, 4.0),))
+    point = (0.0, 0.0, 1.0)
+    assert in_support(mixed, point), "the point is on §08's inclusive support"
+    with pytest.raises(OracleUnsupported, match="indeterminate"):
+        true_logpdf(_probe(mixed, Wrap("identity", ()), point))
+
+    # Each limb ALONE is still answered, so the withhold is scoped to the mix.
+    only_diverging = Base("dirichlet", ((0.5, 2.0, 4.0),))
+    assert true_logpdf(_probe(only_diverging, Wrap("identity", ()),
+                              (0.0, 0.5, 0.5))) == math.inf
+    only_vanishing = Base("dirichlet", ((2.0, 3.0, 4.0),))
+    assert true_logpdf(_probe(only_vanishing, Wrap("identity", ()),
+                              (0.0, 0.5, 0.5))) == -math.inf
+
+
 def test_a_vector_point_off_the_support_surface_is_minus_inf():
     """The support is §08's constraint SURFACE. A point in the bounding box but off
     the surface has density 0 — a gap-scan the oracle must not answer with a finite
@@ -619,10 +639,13 @@ def test_a_vector_point_off_the_support_surface_is_minus_inf():
                               [-1.0, 4.0, 2.0])) == -math.inf
     # sum = 0.9, not 1
     assert true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()),
-                              [0.2, 0.3, 0.4])) == -math.inf
-    # a zero cell: §08's x_i^(alpha_i - 1) is undefined there for alpha_i < 1
+                              (0.2, 0.3, 0.4))) == -math.inf
+    # a negative cell: sums to 1 but leaves the simplex
     assert true_logpdf(_probe(_DIRICHLET, Wrap("identity", ()),
-                              [0.0, 0.5, 0.5])) == -math.inf
+                              (-0.1, 0.6, 0.5))) == -math.inf
+    # A ZERO cell is deliberately NOT here: §08's support is inclusive, so it is ON
+    # the surface, and what happens there depends on `alpha_i` rather than on the
+    # support. See `test_a_zero_cell_is_inside_sec08s_dirichlet_support`.
 
 
 def test_a_vector_pushfwd_neg_is_volume_preserving_cell_wise():
@@ -698,8 +721,9 @@ def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
     a sign error on 0 is invisible. What these rows DO establish is that the inverse
     map is applied at all — a missing inversion evaluates Dirichlet off the simplex
     and gives -inf. The per-cell log-volume MAGNITUDE has no oracle-checked row
-    anywhere in the family; closing that needs a full-dimensional continuous vector
-    base (`MvNormal`), recorded as the wave-C follow-up in
+    anywhere in the family; an `MvNormal` base would make it checkable, since its §08
+    reference is `iid(Lebesgue(reals), n)` over a full-dimensional support so the
+    volume term is nonzero. Recorded as a follow-up in
     `flatppl-dev/density-sweep-notes.md`.
 
     The mass invariant is also blind to the `log sqrt(n)` reference-measure question
