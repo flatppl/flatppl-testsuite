@@ -1,0 +1,2 @@
+b = Gamma(shape = 2.0, rate = 1.0)
+a = draw(pushfwd(log, b))

@@ -1,0 +1,32 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "y"
+  ],
+  "grad_params": [
+    "y"
+  ],
+  "points": [
+    {
+      "y": 1.0
+    },
+    {
+      "y": 2.0
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.001
+  },
+  "expected_grad": [
+    {
+      "y": -1.718281828459045
+    },
+    {
+      "y": -6.38905609893065
+    }
+  ]
+}

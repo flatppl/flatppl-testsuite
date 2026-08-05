@@ -1,0 +1,2 @@
+b = Normal(mu = 0.0, sigma = 1.0)
+a = draw(pushfwd(tanh, b))

@@ -1,0 +1,25 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "y"
+  ],
+  "points": [
+    {
+      "y": 1.0
+    },
+    {
+      "y": 2.0
+    }
+  ],
+  "tolerance": {
+    "value_atol_f32": 0.0001
+  },
+  "expected": [
+    -1.718281828459045,
+    -5.38905609893065
+  ]
+}
