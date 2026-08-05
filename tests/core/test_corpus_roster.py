@@ -29,11 +29,11 @@ EXPECTED_COUNTS = {
     "fragment": 18,
     "hs3": 8,
     "sample": 1,
-    "stablehlo": 20,
-    "stablehlo-gradient": 14,
+    "stablehlo": 25,
+    "stablehlo-gradient": 18,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 99
+EXPECTED_TOTAL = 108
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -55,7 +55,7 @@ EXPECTED_ENGINES = {
 }
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 114
+EXPECTED_CASES = 123
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

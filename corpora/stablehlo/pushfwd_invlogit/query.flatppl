@@ -1,0 +1,4 @@
+y = elementof(reals)
+lp = logdensityof(lawof(record(a = a)), record(a = y))
+inputs = (y)
+outputs = (lp)

@@ -1,0 +1,2 @@
+b = Exponential(rate = 1.0)
+a = draw(pushfwd(log, b))
