@@ -11,7 +11,7 @@ append and no theta: it determinizes and scores `lp` directly.
 
 ## Contents
 
-One directory per fragment (17 in total), each a unified test dir:
+One directory per fragment (18 in total), each a unified test dir:
 
 | Path | What |
 |------|------|
@@ -30,6 +30,12 @@ measure-algebra construct the fragment exercises: `superpose`, `truncate` (+
 `normalize`), `pushfwd` (+ `bijection`), `kchain` (+ `kernelof`), `densityof`.
 `frag_trunc_out` (scored out of its truncation support) freezes `-inf` and is
 compared with exact equality rather than a tolerance band.
+
+`shared_latent_record` is the one case whose oracle is a MULTIVARIATE law: two
+record fields drawn over one shared latent are correlated, so the joint is
+`MvNormal` with a rank-one-plus-diagonal covariance, not the product of the two
+per-field marginals. The product is 0.199 nats away at the frozen point, which is
+what the case discriminates against.
 
 ## Run
 
