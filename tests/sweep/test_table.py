@@ -13,95 +13,11 @@ from flatppl_testsuite.sweep.space import Base, Probe, Wrap
 
 def _row(probe_id="p", outcome="LOWERS", oracle=-1.0, value=-1.0, marker=None,
          spec_justified=None, oracle_unvalidated=False, known_defect=False,
-         known_defect_reason=None, spec_wording_pending=False,
-         spec_wording_note=None, oracle_alt_reading=None):
+         known_defect_reason=None):
     return table.Row(probe_id=probe_id, outcome=outcome, oracle=oracle, value=value,
                       marker=marker, spec_justified=spec_justified,
                       oracle_unvalidated=oracle_unvalidated, known_defect=known_defect,
-                      known_defect_reason=known_defect_reason,
-                      spec_wording_pending=spec_wording_pending,
-                      spec_wording_note=spec_wording_note,
-                      oracle_alt_reading=oracle_alt_reading)
-
-
-# --------------------------------------------------------------------------
-# The unresolved Dirichlet reference-measure WORDING (S1)
-# --------------------------------------------------------------------------
-
-def _vec_probe(kind, wrap, point):
-    from flatppl_testsuite.sweep.space import VECTOR_BASES
-    base = next(b for b in VECTOR_BASES if b.kind == kind)
-    return Probe(id=f"{kind}.t", base=base, wraps=(wrap,), spelling="direct",
-                 ordering="single", consumer=False, point=point)
-
-
-def test_a_dirichlet_row_is_flagged_spec_wording_pending_with_both_readings():
-    """§08's Dirichlet formula normalises against the chart measure; §03 "Standard
-    simplex" and §06 "Lebesgue" define `Lebesgue(stdsimplex(n))` as surface area on
-    the embedded simplex. The row keeps the CHART value (numerical parity with
-    Stan/NumPyro/scipy is required, so it will not move) and carries the other
-    reading alongside, so a future spec ruling is a mechanical check."""
-    probe = _vec_probe("dirichlet", Wrap("identity", ()), (0.2, 0.3, 0.5))
-    got = table._spec_wording_pending(probe, true_logpdf(probe))
-    assert got is not None, "a Dirichlet row must carry the open wording question"
-    note, alt = got
-    assert "§03" in note and "§06" in note and "§08" in note
-    assert "sqrt(n)" in note
-    assert alt == pytest.approx(1.4735650458573875, abs=1e-12)
-    # And the shipped reading is the chart one, unchanged by the flag.
-    assert true_logpdf(probe) == pytest.approx(2.0228711901914425, abs=1e-12)
-
-
-def test_multinomial_carries_no_wording_question():
-    """§08 gives Multinomial's density w.r.t. `iid(Counting(integers), k)`, and no
-    section words a counting reference two ways. Flagging it would dilute the flag."""
-    probe = _vec_probe("multinomial", Wrap("identity", ()), (1.0, 2.0, 2.0))
-    assert table._spec_wording_pending(probe, true_logpdf(probe)) is None
-
-
-def test_a_scalar_probe_carries_no_wording_question():
-    probe = Probe(id="s", base=Base("normal", (0.0, 1.0)),
-                  wraps=(Wrap("identity", ()),), spelling="direct",
-                  ordering="single", consumer=False, point=0.5)
-    assert table._spec_wording_pending(probe, true_logpdf(probe)) is None
-
-
-def test_a_withheld_dirichlet_shape_still_carries_the_note_without_an_alternative():
-    """A refused or withheld row has no value to convert, but the open question still
-    applies to it — the note must survive with `None` rather than the row losing the
-    flag entirely."""
-    probe = _vec_probe("dirichlet", Wrap("truncate", (0.0, 1.0)), (0.2, 0.3, 0.5))
-    # The oracle withholds for this shape, so the caller passes None.
-    got = table._spec_wording_pending(probe, None)
-    assert got is not None
-    note, alt = got
-    assert alt is None and "§03" in note
-
-
-def test_the_wording_fields_round_trip_through_the_table(tmp_path):
-    rows = [_row("d", spec_wording_pending=True, spec_wording_note="because §03",
-                 oracle_alt_reading=1.4735650458573875)]
-    path = tmp_path / "t.json"
-    table.save(path, rows, commit="deadbeef")
-    loaded = table.load(path)["d"]
-    assert loaded.spec_wording_pending is True
-    assert loaded.spec_wording_note == "because §03"
-    assert loaded.oracle_alt_reading == pytest.approx(1.4735650458573875, abs=1e-15)
-
-
-def test_an_older_table_without_the_wording_fields_still_loads(tmp_path):
-    """The fields are additive, so a table written before them must not fail to load
-    — `load` is what the CI gate reads the committed artifact with."""
-    import json
-    path = tmp_path / "old.json"
-    path.write_text(json.dumps({"metadata": {}, "rows": [
-        {"probe_id": "p", "outcome": "LOWERS", "oracle": 1.0, "value": 1.0,
-         "marker": None, "spec_justified": None, "oracle_unvalidated": False},
-    ]}))
-    row = table.load(path)["p"]
-    assert row.spec_wording_pending is False
-    assert row.spec_wording_note is None
-    assert row.oracle_alt_reading is None
+                      known_defect_reason=known_defect_reason)
 
 
 # --------------------------------------------------------------------------

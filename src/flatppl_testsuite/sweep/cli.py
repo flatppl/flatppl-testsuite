@@ -74,17 +74,6 @@ def _report(argv: list[str]) -> int:
     print(f"  MALFORMED   {len(malformed)}")
     print(f"  oracle-unvalidated  {len(unvalidated)}")
 
-    # Not folded into the counts above: these rows' VALUES are settled (they are the
-    # numerical-parity ones). What is open is which normative wording their reference
-    # measure follows, so they are reported as a separate standing question rather
-    # than as a defect or an unvalidated row.
-    pending = [r for r in rows if r.spec_wording_pending]
-    if pending:
-        print(f"  spec-wording pending  {len(pending)}  "
-              "(value settled, reference-measure WORDING unresolved)")
-        for note in sorted({r.spec_wording_note for r in pending
-                            if r.spec_wording_note}):
-            print(f"    {note}")
     return 0
 
 
