@@ -1,0 +1,4 @@
+z = draw(Normal(mu = 0.0, sigma = 1.0))
+y1 = draw(Normal(mu = z, sigma = 1.0))
+y2 = draw(Normal(mu = z, sigma = 1.0))
+lp = logdensityof(lawof(record(y1 = y1, y2 = y2)), record(y1 = 0.5, y2 = 0.7))
