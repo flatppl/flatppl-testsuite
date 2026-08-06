@@ -11,7 +11,7 @@ append and no theta: it determinizes and scores `lp` directly.
 
 ## Contents
 
-One directory per fragment (18 in total), each a unified test dir:
+One directory per fragment (21 in total), each a unified test dir:
 
 | Path | What |
 |------|------|
@@ -36,6 +36,19 @@ record fields drawn over one shared latent are correlated, so the joint is
 `MvNormal` with a rank-one-plus-diagonal covariance, not the product of the two
 per-field marginals. The product is 0.199 nats away at the frozen point, which is
 what the case discriminates against.
+
+`shared_latent_joint` and `shared_latent_joint_positional` are the `joint`
+spellings of the same shared-latent shape (keyword `joint(y1 = lawof(y1), y2 =
+lawof(y2))` and positional `joint(lawof(y1), lawof(y2))`): §06 "Equivalent record law" makes a `joint` over two reified components
+equivalent to the plain record law, so both freeze the SAME expected value as
+`shared_latent_record`.
+
+`joint_singular_refusal` gates the degenerate case: `joint(a = lawof(y), b =
+lawof(y))` reifies the SAME draw into both components, which has no density
+w.r.t. the product reference measure. There is no closed-form value to
+freeze, so this dir has no `oracle()`; it sets `"allow_skip": true` and
+relies on the determiniser's exit-3 refusal producing a tolerated
+`skipped`/`DETERMINIZE_SKIP` result instead.
 
 ## Run
 

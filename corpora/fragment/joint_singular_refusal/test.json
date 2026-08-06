@@ -1,0 +1,15 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "joint_singular_refusal.flatppl",
+  "binding": "lp",
+  "expected": "nan",
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "none -- refusal fixture, see test.py",
+  "allow_skip": true
+}

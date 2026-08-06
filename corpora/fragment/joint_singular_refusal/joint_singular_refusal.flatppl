@@ -1,0 +1,2 @@
+y = draw(Normal(mu = 0.0, sigma = 1.0))
+lp = logdensityof(joint(a = lawof(y), b = lawof(y)), record(a = 0.5, b = 0.7))

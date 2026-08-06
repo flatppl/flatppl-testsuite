@@ -1,0 +1,4 @@
+z = draw(Normal(mu = 0.0, sigma = 1.0))
+y1 = draw(Normal(mu = z, sigma = 1.0))
+y2 = draw(Normal(mu = z, sigma = 1.0))
+lp = logdensityof(joint(lawof(y1), lawof(y2)), [0.5, 0.7])
