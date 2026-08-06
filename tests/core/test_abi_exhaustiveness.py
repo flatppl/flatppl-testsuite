@@ -40,6 +40,13 @@ _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
 _ELEMENTOF = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*elementof\s*\(", re.M)
 # `inputs = x` or `inputs = (x, y, ...)`
 _INPUTS = re.compile(r"^\s*inputs\s*=\s*(.+?)\s*$", re.M)
+# `name = load_data(...)` at the start of a line (top-level binding).
+_LOAD_DATA = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*load_data\s*\(", re.M)
+# `key = src.field` anywhere -- used to spot a param PINNED to a load_data
+# column (`x_data = data.x`), the one feeding route that is not `inputs`.
+_FIELD_PIN = re.compile(
+    r"([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([A-Za-z_][A-Za-z0-9_]*)\.[A-Za-z_]"
+)
 
 
 def _abi_dirs() -> list[Path]:
@@ -67,7 +74,18 @@ def test_inputs_lists_every_parameterized_param(dir: Path):
     params = set(_ELEMENTOF.findall(model)) | set(_ELEMENTOF.findall(query))
     listed = set(_declared_inputs(query))
 
-    unlisted = sorted(params - listed)
+    # A param pinned to a load_data column (`x_data = data.x` at the density
+    # point, with `data = load_data(...)` in `inputs`) is fed and substituted
+    # away, not dead -- the one accounted-for route besides `inputs` itself.
+    # Scoped to load_data sources so an ordinary shadowing slip still fails.
+    load_data_names = set(_LOAD_DATA.findall(query))
+    pinned = {
+        key
+        for key, src in _FIELD_PIN.findall(query)
+        if src in load_data_names
+    }
+
+    unlisted = sorted(params - listed - pinned)
     assert not unlisted, (
         f"{dir.name}: parameterized elementof binding(s) {unlisted} are not listed "
         f"in `inputs` ({sorted(listed)}). If an output depends on it the module is "
