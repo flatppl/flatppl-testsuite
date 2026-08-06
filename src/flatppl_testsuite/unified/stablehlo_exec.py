@@ -29,6 +29,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import tempfile
 from functools import lru_cache
 from pathlib import Path
 
@@ -72,6 +73,52 @@ def emit(model_path: Path, mode: str) -> str:
         )
     text = proc.stdout
     return re.sub(r"@(logdensity|sample)\b", "@main", text)
+
+
+def emit_concat(dir: Path, mode: str, query_name: str = "query.flatppl") -> str:
+    """Emit ``model.flatppl`` + ``query_name`` concatenated into one module.
+
+    The combined temporary module is written INSIDE ``dir`` because the CLI
+    resolves relative `load_data("x.csv", ...)` sources against the model
+    file's own location — a temp file in the system temp dir would break
+    every load_data fixture at emit time."""
+    model = (dir / "model.flatppl").read_text()
+    query = (dir / query_name).read_text()
+    src_text = model.rstrip() + "\n" + query.lstrip()
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".flatppl", prefix=".concat-", dir=dir, delete=False
+    ) as f:
+        f.write(src_text)
+        tmp = Path(f.name)
+    try:
+        return emit(tmp, mode)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def load_data_bindings(dir: Path) -> dict[str, Path]:
+    """``name -> source path`` for the `load_data` bindings of a fixture
+    (textual scan; corpus fixtures use literal relative sources). The emitter
+    never opens the source (§13: shape from the declared valueset) — the
+    harness loads it and feeds it as the runtime argument."""
+    src = "".join((dir / f).read_text() for f in ("model.flatppl", "query.flatppl"))
+    return {m[1]: dir / m[2]
+            for m in re.finditer(r'^\s*(\w+)\s*=\s*load_data\(\s*"([^"]+)"', src, re.M)}
+
+
+def data_columns(path: Path) -> list[list]:
+    """A data file's columns, in source order — the feed order, since a table
+    input destructures into one tensor arg per column in declared order and
+    fixtures declare their columns in source order. JSON struct-of-arrays
+    (vector cells allowed) or header-row CSV (scalar cells)."""
+    if path.suffix == ".json":
+        import json
+
+        return list(json.loads(path.read_text()).values())
+    import polars as pl
+
+    df = pl.read_csv(path)
+    return [df[c].to_list() for c in df.columns]
 
 
 # --- JAX/Enzyme plumbing (imported lazily so the module is importable, and the

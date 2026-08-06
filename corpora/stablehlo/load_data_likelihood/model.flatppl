@@ -1,9 +1,7 @@
 alpha = elementof(reals)
-beta = elementof(reals)
+beta = elementof(cartpow(reals, 3))
 sigma = elementof(posreals)
-x_data = elementof(cartpow(reals, 4))
-y_data = elementof(cartpow(reals, 4))
-means = alpha .+ beta .* x_data
+x_data = elementof(cartpow(reals, [20, 3]))
+means = alpha .+ x_data * beta
 y ~ Normal.(means, sigma)
-k = kernelof(record(y = y), alpha = alpha, beta = beta, sigma = sigma)
-L = likelihoodof(k, record(y = y_data))
+k = kernelof(record(y = y), alpha = alpha, beta = beta, sigma = sigma, x_data = x_data)

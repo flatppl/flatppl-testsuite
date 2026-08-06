@@ -21,6 +21,7 @@ rust = ">=1.75"
 # offline path (closed-form Normal/mixture/truncation/log-normal densities,
 # etc.) — never the sibling engine.
 scipy = ">=1.11"
+polars = ">=1.43.2,<2"
 
 [pypi-dependencies]
 pytest = ">=8"
@@ -90,6 +91,7 @@ python = "3.12.*"
 # INDEPENDENT oracle (scipy) + numpy; kept <2.1 for the enzyme/jaxlib ABI era.
 scipy = ">=1.11"
 numpy = "<2.1"
+polars = ">=1.43.2,<2"
 
 [feature.stablehlo.pypi-dependencies]
 # enzyme_ad.jax.hlo_call imports emitted StableHLO (@main) as a jit-able +

@@ -9,7 +9,6 @@ fan-out check instead concatenates model.flatppl + query_iid.flatppl (the
 """
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -22,21 +21,8 @@ from flatppl_testsuite.unified.loader import TestSpec
 _SCALAR_CHECKS = {"distribution", "independence", "key_reproducibility", "key_advance"}
 
 
-def _concat(model_text: str, query_text: str) -> str:
-    return model_text.rstrip() + "\n" + query_text.lstrip()
-
-
 def _emit(dir: Path, query_name: str) -> str:
-    model = (dir / "model.flatppl").read_text()
-    query = (dir / query_name).read_text()
-    src_text = _concat(model, query)
-    with tempfile.NamedTemporaryFile("w", suffix=".flatppl", delete=False) as f:
-        f.write(src_text)
-        tmp = Path(f.name)
-    try:
-        return ex.emit(tmp, "sample")
-    finally:
-        tmp.unlink(missing_ok=True)
+    return ex.emit_concat(dir, "sample", query_name)
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
