@@ -14,7 +14,6 @@ used).
 """
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -22,12 +21,6 @@ import numpy as np
 from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSCOREABLE
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from flatppl_testsuite.unified.loader import TestSpec
-
-
-def _concat(dir: Path) -> str:
-    model = (dir / "model.flatppl").read_text()
-    query = (dir / "query.flatppl").read_text()
-    return model.rstrip() + "\n" + query.lstrip()
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
@@ -46,16 +39,10 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
 
     argnums = [inputs.index(p) for p in grad_params]
 
-    src_text = _concat(dir)
-    with tempfile.NamedTemporaryFile("w", suffix=".flatppl", delete=False) as f:
-        f.write(src_text)
-        tmp = Path(f.name)
     try:
-        src = ex.emit(tmp, "logdensity")
+        src = ex.emit_concat(dir, "logdensity")
     except ex.EmitRefused as e:
         return [CheckResult(tid, "gradient", "failed", UNSCOREABLE, f"emit refused: {e}")]
-    finally:
-        tmp.unlink(missing_ok=True)
 
     results: list[CheckResult] = []
     for i, (pt, want) in enumerate(zip(points, expected_grad)):

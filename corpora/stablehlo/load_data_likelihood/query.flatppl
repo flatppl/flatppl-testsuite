@@ -1,3 +1,5 @@
-lp = logdensityof(L, record(alpha = alpha, beta = beta, sigma = sigma))
-inputs = (alpha, beta, sigma, x_data, y_data)
+data = load_data("data.json", cartpow(cartprod(x = cartpow(reals, 3), y = reals), 20))
+L = likelihoodof(k, record(y = data.y))
+lp = logdensityof(L, record(alpha = alpha, beta = beta, sigma = sigma, x_data = data.x))
+inputs = (alpha, beta, sigma, data)
 outputs = (lp)

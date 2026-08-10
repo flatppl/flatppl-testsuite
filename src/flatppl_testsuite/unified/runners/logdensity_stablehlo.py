@@ -18,7 +18,6 @@ map's f32 overflow the correctly rounded density IS `-inf`.
 """
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 from flatppl_testsuite.scoring.compare import compare_scalar
@@ -26,12 +25,6 @@ from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSC
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from flatppl_testsuite.unified.detjs_exec import parse_expected
 from flatppl_testsuite.unified.loader import TestSpec
-
-
-def _concat(dir: Path) -> str:
-    model = (dir / "model.flatppl").read_text()
-    query = (dir / "query.flatppl").read_text()
-    return model.rstrip() + "\n" + query.lstrip()
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
@@ -49,20 +42,23 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                             f"{len(points)} points but {len(expected)} expected values "
                             "(run regen)")]
 
-    src_text = _concat(dir)
-    with tempfile.NamedTemporaryFile("w", suffix=".flatppl", delete=False) as f:
-        f.write(src_text)
-        tmp = Path(f.name)
     try:
-        src = ex.emit(tmp, "logdensity")
+        src = ex.emit_concat(dir, "logdensity")
     except ex.EmitRefused as e:
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, f"emit refused: {e}")]
-    finally:
-        tmp.unlink(missing_ok=True)
+
+    ld_sources = ex.load_data_bindings(dir)
 
     results: list[CheckResult] = []
     for i, (pt, want) in enumerate(zip(points, expected)):
-        arg_values = [pt[name] for name in inputs]  # ABI order
+        # ABI order; a load_data input not in the point expands to one tensor
+        # per column of its source file (declared order).
+        arg_values: list = []
+        for name in inputs:
+            if name in pt:
+                arg_values.append(pt[name])
+            else:
+                arg_values.extend(ex.data_columns(ld_sources[name]))
         got = ex.value(src, arg_values)
         want = parse_expected(want)
         try:
