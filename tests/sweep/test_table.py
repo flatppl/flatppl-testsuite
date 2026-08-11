@@ -8,7 +8,13 @@ import pytest
 
 from flatppl_testsuite.sweep import table
 from flatppl_testsuite.sweep.oracle import true_logpdf
-from flatppl_testsuite.sweep.space import Base, Probe, Wrap
+from flatppl_testsuite.sweep.space import (
+    Base,
+    Probe,
+    SharedLatentProbe,
+    Wrap,
+    shared_latent_shapes,
+)
 
 
 def _row(probe_id="p", outcome="LOWERS", oracle=-1.0, value=-1.0, marker=None,
@@ -214,6 +220,74 @@ def test_diff_flags_a_wrong_number():
 def test_diff_does_not_flag_a_known_defects_wrong_number():
     e = {"p": _row("p", outcome="LOWERS", value=-math.inf, oracle=-1.0, known_defect=True)}
     a = {"p": _row("p", outcome="LOWERS", value=-math.inf, oracle=-1.0, known_defect=True)}
+    assert table.diff(e, a) == []
+
+
+def _shared(shape, spelling="record_law", n=2):
+    return SharedLatentProbe(id=f"shared.{shape}.n{n}.{spelling}.none", shape=shape,
+                             n=n, spelling=spelling, latent_query="none",
+                             point=(0.5, 0.7))
+
+
+def test_a_singular_joints_refusal_is_spec_justified():
+    """§06 "Singular joints": the joint law "has no density w.r.t. the product
+    reference measure ... a density query is a static error where statically
+    detectable, and is otherwise refused by the engine." Refusing is conformance."""
+    assert table._spec_justified(_shared("singular"), "REFUSES") is True
+    assert table._spec_justified(_shared("singular", "joint_pos"), "REFUSES") is True
+
+
+@pytest.mark.parametrize("shape", ["fan", "chain", "disjoint"])
+def test_every_other_shared_latent_refusal_is_an_over_refusal(shape):
+    """Not a default falling through. §06 "Equivalent record law" gives all three
+    equivalent spellings a density, §06 `iid` gives the product measure, and §06's
+    contrast sentence gives the constructor joint the product of its marginals —
+    every one closed-form, with the oracle carrying the value. So a refusal is a
+    tracked capability gap.
+
+    `chain` is the expected occupant if any: #131 lowered the FAN arm.
+    """
+    assert table._spec_justified(_shared(shape), "REFUSES") is False
+
+
+def test_a_shared_latent_probe_is_never_a_flagged_known_defect():
+    """This sweep has investigated no defect in the family, so nothing there may be
+    frozen as an excused mismatch — an unflagged one fails the gate, which is the
+    right outcome for a wrong number nobody has looked at."""
+    for shape in ("fan", "chain", "disjoint", "singular"):
+        for spelling in ("record_law", "joint_kw", "joint_pos"):
+            assert table._known_defect_reason(_shared(shape, spelling)) is None
+
+
+def test_the_slice_covers_every_shared_latent_shape_and_spelling():
+    """The fast gate must see every (shape, spelling) pair, or a joint arm is only
+    checked by a `--full` run that CI does not do."""
+    ids = {p.id for p in table._slice_probes()}
+    for shape, spelling in shared_latent_shapes():
+        assert f"shared.{shape}.n2.{spelling}.none" in ids, (
+            f"{shape}/{spelling} is outside the CI slice")
+
+
+def test_diff_flags_a_value_the_oracle_withheld():
+    """The signal `test_diff_flags_a_wrong_number`'s guard cannot reach.
+
+    Its comparison is conditioned on `oracle is not None`, so before this check a
+    LOWERS row for a shape the oracle refused to value produced NO problem line —
+    which is how a pre-#137 determiniser's finite answer for
+    `joint(lawof(y), lawof(y))` (§06: no density) would have passed the gate.
+    """
+    e = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None)}
+    a = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None)}
+    problems = table.diff(e, a)
+    assert len(problems) == 1 and "withholds any value" in problems[0]
+
+
+def test_diff_does_not_flag_a_withheld_value_on_an_investigated_shape():
+    """`known_defect` excuses it, exactly as it excuses a wrong number — the point
+    is that an UNINVESTIGATED one is reported, not that the check cannot be
+    satisfied."""
+    e = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None, known_defect=True)}
+    a = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None, known_defect=True)}
     assert table.diff(e, a) == []
 
 

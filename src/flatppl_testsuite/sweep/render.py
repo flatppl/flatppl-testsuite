@@ -8,7 +8,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from flatppl_testsuite.sweep.space import Base, Probe, Wrap
+from flatppl_testsuite.sweep.space import (
+    SHARED_LATENT_FIELD_NAMES,
+    SHARED_LATENT_LATENT_POINT,
+    Base,
+    NormalNode,
+    Probe,
+    SharedLatentProbe,
+    Wrap,
+    _latent_name,
+    is_shared_latent,
+    shared_latent_graph,
+)
 
 # Parameter names are §08's, and they have to be exactly right: a wrong one is
 # silent everywhere downstream. `Poisson(lambda = 3.0)` parses, converts to
@@ -77,7 +88,96 @@ def _fold(wraps: tuple[Wrap, ...], inner: str) -> str:
     return inner
 
 
-def render(probe: Probe) -> RenderedProbe:
+def _normal_src(node: NormalNode) -> str:
+    """`Normal(mu = ..., sigma = ...)` for one graph node. `mu` is the parent's
+    name when there is one, which is what makes the graph shared rather than
+    replicated — a literal `mu` at a child would be a different model with the
+    same marginals, i.e. the `joint_ctor` arm."""
+    mu = node.parent if node.parent is not None else _value_src(node.mu)
+    return f"Normal(mu = {mu}, sigma = {_value_src(node.sigma)})"
+
+
+def _record_src(pairs: list[tuple[str, str]]) -> str:
+    return "record(" + ", ".join(f"{k} = {v}" for k, v in pairs) + ")"
+
+
+def _shared_measure_src(probe: SharedLatentProbe, nodes: dict[str, NormalNode],
+                        field_nodes: tuple[str, ...]) -> str:
+    """The measure expression a shared-latent probe queries, per §06's spellings."""
+    labels = SHARED_LATENT_FIELD_NAMES[:probe.n]
+    s = probe.spelling
+    if s == "record_law":
+        return f"lawof({_record_src(list(zip(labels, field_nodes)))})"
+    if s == "joint_kw":
+        return "joint(" + ", ".join(
+            f"{lab} = lawof({node})" for lab, node in zip(labels, field_nodes)) + ")"
+    if s == "joint_pos":
+        return "joint(" + ", ".join(f"lawof({node})" for node in field_nodes) + ")"
+    if s == "joint_ctor":
+        return "joint(" + ", ".join(
+            f"{lab} = {_normal_src(nodes[lab])}" for lab in labels) + ")"
+    if s == "iid":
+        # §06 `iid(M, size)`: the product measure. `size` is "an integer (1-D
+        # length)", so it is emitted as an integer literal, not `2.0`.
+        return f"iid(lawof({field_nodes[0]}), {probe.n})"
+    raise ValueError(f"unrendered shared-latent spelling: {s}")
+
+
+def _render_shared_latent(probe: SharedLatentProbe) -> RenderedProbe:
+    """A shared-latent probe's source: the draw graph, then one `logdensityof`.
+
+    The graph is emitted from `space.shared_latent_graph` in insertion order,
+    which is dependency order by construction — a node's `mu` names its parent, so
+    a parent emitted after its child would not even parse, and that is a stronger
+    guard than a topological sort with nothing to check it.
+
+    `joint_ctor` emits NO field draws. Its components are fresh constructors, so a
+    drawn `f1` would sit in the model unconsumed by the query, and an unconsumed
+    draw is a determiniser refusal in its own right (`determinize` refuses them by
+    design) — the row would then report that refusal rather than the
+    product-of-marginals arm it exists for. The latent is still emitted when the
+    `latent_query` axis asks for it, because that query consumes it.
+    """
+    nodes, field_nodes = shared_latent_graph(probe.shape, probe.n, probe.spelling)
+    latent = _latent_name(probe.shape)
+    lines: list[str] = []
+
+    if probe.spelling == "joint_ctor":
+        if probe.latent_query != "none":
+            traced, _ = shared_latent_graph(probe.shape, probe.n, "record_law")
+            lines.append(f"{latent} = draw({_normal_src(traced[latent])})")
+    else:
+        for name, node in nodes.items():
+            lines.append(f"{name} = draw({_normal_src(node)})")
+
+    labels = SHARED_LATENT_FIELD_NAMES[:probe.n]
+    measure = _shared_measure_src(probe, nodes, field_nodes)
+    if probe.spelling in ("joint_pos", "iid"):
+        # §06: a POSITIONAL `joint` combines the component variates via `cat`, and
+        # `iid` over a scalar law is an array — both are vector variates, so the
+        # query point is an array literal and not a record.
+        point = _value_src(list(probe.point))
+    else:
+        point = _record_src([(lab, _value_src(v))
+                             for lab, v in zip(labels, probe.point)])
+    query = f"lp = logdensityof({measure}, {point})"
+
+    latent_query = (f"lp_latent = logdensityof(lawof({latent}), "
+                    f"{_value_src(SHARED_LATENT_LATENT_POINT)})")
+    if probe.latent_query == "before":
+        lines += [latent_query, query]
+    elif probe.latent_query == "after":
+        lines += [query, latent_query]
+    else:
+        lines.append(query)
+
+    return RenderedProbe(source="\n".join(lines) + "\n", binding="lp")
+
+
+def render(probe: Probe | SharedLatentProbe) -> RenderedProbe:
+    if is_shared_latent(probe):
+        return _render_shared_latent(probe)
+
     lines: list[str] = []
     if probe.spelling == "direct":
         lines.append(f"m = {_fold(probe.wraps, _base_src(probe.base))}")

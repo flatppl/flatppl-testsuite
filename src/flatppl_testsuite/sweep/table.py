@@ -32,6 +32,12 @@ second `logdensityof` query against one measure refuses every
 `pinned_earlier`/`pinned_later` probe outright, regardless of spelling, and
 those correctly show up as unjustified over-refusals here, not this guard.)
 
+The shared-latent family classifies on its own axis, `probe.shape`, for the same
+structural reason -- see `_spec_justified`. Exactly one of its shapes has a
+conformant refusal (`singular`, per §06 "Singular joints"); every other shape's
+density is closed-form and carried by the oracle, so a refusal there is a tracked
+capability gap.
+
 `known_defect` marks a LOWERS row whose value does not match its oracle AND
 whose (base, wrap, spelling) matches a defect this sweep has actually
 investigated (see `_known_defect_reason` below) -- never merely "this row
@@ -55,15 +61,19 @@ from flatppl_testsuite.sweep.oracle import OracleUnsupported, true_logpdf
 from flatppl_testsuite.sweep.space import (
     BASES,
     ORDERINGS,
+    SHARED_LATENT_POINTS,
     WRAPS,
     Probe,
+    SharedLatentProbe,
     Wrap,
     _point_for,
     _supported,
     _vector_point_for,
     _wrap_name,
     enumerate_probes,
+    is_shared_latent,
     is_vector_base,
+    shared_latent_shapes,
     vector_shapes,
 )
 
@@ -95,9 +105,29 @@ class Row:
     known_defect_reason: str | None = None
 
 
-def _spec_justified(probe: Probe, outcome: str) -> bool | None:
+def _spec_justified(probe: Probe | SharedLatentProbe, outcome: str) -> bool | None:
     if outcome != Outcome.REFUSES.value:
         return None
+
+    if is_shared_latent(probe):
+        # ONE shared-latent shape has a spec-justified refusal, and it is the
+        # `singular` one. §06 "Singular joints": "the joint law has no density
+        # w.r.t. the product reference measure ... a density query is a static
+        # error where statically detectable, and is otherwise refused by the
+        # engine." Refusing is the conformant answer, and the oracle withholds the
+        # same shape for the same reason (`oracle._refuse_singular_joint`).
+        #
+        # Every OTHER shared-latent refusal is an over-refusal, and that is a
+        # claim about the spec rather than a default falling through. §06
+        # "Equivalent record law" gives `record_law`, `joint_kw` and `joint_pos`
+        # one density; §06 `iid` gives the product measure; §06's contrast
+        # sentence gives `joint_ctor` the product of its marginals. Each is
+        # closed-form, this family is linear-Gaussian throughout, and the oracle
+        # carries the value — so a refusal is a capability gap, tracked, not a
+        # pass. The `chain` shape is the expected occupant (#131 lowered the FAN
+        # arm only), and it must read as a gap rather than as conformance.
+        return probe.shape == "singular"
+
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind in _AUTO_SPLAT_REFUSAL_WRAPS:
         return True
@@ -136,7 +166,15 @@ def _known_defect_reason(probe: Probe) -> str | None:
     FlatPDL. Both are since fixed in the determiniser (the truncate shape now
     refuses at lowering; the discrete preimage is snapped to the lattice), so
     these entries are regression tripwires: a row matching one again means the
-    fix regressed."""
+    fix regressed.
+
+    Returns `None` for every `SharedLatentProbe`: this sweep has investigated no
+    defect in that family, so nothing there is allowed to be a flagged mismatch.
+    A shared-latent row that LOWERS and disagrees with its oracle therefore fails
+    `test_gate.py::test_the_table_flags_no_unreviewed_wrong_numbers`, which is the
+    correct outcome for a wrong number nobody has looked at yet."""
+    if is_shared_latent(probe):
+        return None
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind == "truncate":
         # NOT "the gate should have compared the field". §06's ν(A) = M(A ∩ S)
@@ -186,7 +224,7 @@ def _known_defect_reason(probe: Probe) -> str | None:
     return None
 
 
-def _row_for(probe: Probe) -> Row:
+def _row_for(probe: Probe | SharedLatentProbe) -> Row:
     v = classify(probe)
     try:
         oracle_val = true_logpdf(probe)
@@ -251,6 +289,12 @@ SLICE_EXCLUDED_AXES = {
                       "(dirichlet + pushfwd(exp)) is not in the family at all "
                       "(space._HELD_OUT) and is pinned instead by "
                       "tests/sweep/test_vector_arms.py"),
+    "shared_latent_family": ("one probe per (shape, spelling) pair "
+                             "space.shared_latent_shapes() generates, at n=2 "
+                             "latent_query='none'; excludes n=3 (the off-diagonal "
+                             "STRUCTURE check) and both latent_query values (the "
+                             "two-query ordering check), which the --full run "
+                             "covers"),
 }
 SLICE_DESCRIPTION = (
     "every (wrap, ordering) pair, spelling='direct', consumer=False; "
@@ -259,7 +303,9 @@ SLICE_DESCRIPTION = (
     "a handful of extra probes so the two known defects are inside the "
     "slice (see SLICE_EXCLUDED_AXES / _KNOWN_DEFECT_COVERAGE); plus one probe "
     "per vector-family (base, wrap) shape, so every vector arm the family "
-    "covers is inside the fast gate rather than only in a --full run"
+    "covers is inside the fast gate rather than only in a --full run; plus one "
+    "probe per shared-latent (shape, spelling) pair, so every joint spelling and "
+    "every ancestry graph is in the fast gate too"
 )
 
 # Minimal punch-through of the excluded spelling/base axes: enough probes,
@@ -272,7 +318,7 @@ _KNOWN_DEFECT_COVERAGE = [
 ]
 
 
-def _slice_probes() -> list[Probe]:
+def _slice_probes() -> list[Probe | SharedLatentProbe]:
     by_kind = {b.kind: b for b in BASES}
     normal, gamma = by_kind["normal"], by_kind["gamma"]
     out: list[Probe] = []
@@ -305,6 +351,18 @@ def _slice_probes() -> list[Probe]:
         out.append(Probe(
             id=pid, base=base, wraps=(wrap,), spelling="direct",
             ordering="single", consumer=False, point=_vector_point_for(base, wrap),
+        ))
+    # One probe per shared-latent (shape, spelling) PAIR, for the reason the vector
+    # family takes one per (base, wrap): the pair is what decides which
+    # determiniser arm the probe reaches, while `n` and `latent_query` vary the
+    # arithmetic within an arm already gated. So every joint spelling and every
+    # ancestry graph -- including the `singular` refusal and the `disjoint` control
+    # -- is inside the fast gate, and only the off-diagonal-structure and
+    # two-query-ordering checks wait for a --full run.
+    for shape, spelling in shared_latent_shapes():
+        out.append(SharedLatentProbe(
+            id=f"shared.{shape}.n2.{spelling}.none", shape=shape, n=2,
+            spelling=spelling, latent_query="none", point=SHARED_LATENT_POINTS[:2],
         ))
     return out
 
@@ -527,4 +585,26 @@ def diff(expected: dict[str, Row], actual: dict[str, Row]) -> list[str]:
                 compare_scalar(a.value, a.oracle, _TOLERANCE)
             except AssertionError as err:
                 problems.append(f"{pid}: LOWERS but value != oracle: {err}")
+
+        # A LOWERS row whose ORACLE WITHHELD is its own signal, and it had no check
+        # at all before the shared-latent family exposed the hole: the comparison
+        # above is guarded on `a.oracle is not None`, so a determiniser that emitted
+        # a number for a shape no spec rule values passed the gate in silence.
+        #
+        # The shape that found it is `joint(lawof(y), lawof(y))` in the positional
+        # spelling. §06 "Singular joints" gives it no density w.r.t. the product
+        # reference, the oracle withholds accordingly, and the pre-#137 determiniser
+        # returns a plausible finite number anyway -- the product of two identical
+        # marginals, which is the density of nothing. That is exactly the class this
+        # sweep exists to surface, and it was invisible.
+        #
+        # `known_defect` still excuses it, so an INVESTIGATED shape can be frozen
+        # with its reason (`_known_defect_reason`), which is the same contract the
+        # value comparison has. Unflagged means reported.
+        if (a.outcome == Outcome.LOWERS.value and not a.known_defect
+                and a.value is not None and a.oracle is None):
+            problems.append(
+                f"{pid}: LOWERS ({a.value}) but the oracle withholds any value for "
+                f"this shape -- either a spec rule licenses the number and the "
+                f"oracle should supply it, or the shape should be refused")
     return problems

@@ -3,15 +3,22 @@
 Transcribes a SUBSET of §13 "Output reduction"'s enumerated rules over scipy
 base densities — the ones the probe space generates: `weighted`, `logweighted`,
 `normalize`, `truncate`, and `pushfwd` (including its `affine`/`locscale`
-spellings). §13's remaining rules are **not** implemented: `superpose`,
-`joint`, `iid`, `jointchain`, and `kchain` all raise `OracleUnsupported`, as
-does any base outside the four in `space.BASES` and the two in
-`space.VECTOR_BASES`. That list is the module's scope, stated here rather than
-left to be discovered at runtime.
+spellings), plus `joint` and `iid` over the LINEAR-GAUSSIAN family only
+(`linear_gaussian_logpdf`). §13's remaining rules are **not** implemented:
+`superpose`, `jointchain` and `kchain` raise `OracleUnsupported`, as does any
+base outside the four in `space.BASES` and the two in `space.VECTOR_BASES`, and
+so does a `joint` whose components are not `Normal` draws over `Normal` parents.
+That list is the module's scope, stated here rather than left to be discovered
+at runtime.
 
 The vector family (`space.VECTOR_BASES`) has its own fold, `_vector_logpdf`:
 the same rules applied cell-wise, with `pushfwd` over a manifold support
 withheld rather than guessed (`_MANIFOLD_SAFE_FORWARDS`).
+
+The shared-latent family (`space.SharedLatentProbe`) is not a fold at all:
+`_shared_latent_logpdf` assembles the multivariate normal the draw graph
+implies, because a cross-covariance is not expressible as a composition of
+scalar rules.
 
 It walks the `Probe` — the structure the generator built — so it needs no
 parser and no type inference, and it never reads the determiniser's output.
@@ -25,15 +32,25 @@ from __future__ import annotations
 
 import math
 
-from scipy import stats
+# `scipy.linalg`, not `numpy.linalg`: `scipy` is a declared pixi dependency and
+# numpy is only a transitive one, so importing numpy directly would work today and
+# break the day scipy's own dependency changed shape.
+from scipy import linalg, stats
 
 from flatppl_testsuite.sweep.space import (
+    SHARED_LATENT_COMPOSITION,
     VECTOR_SUPPORT_IS_MANIFOLD,
     Base,
+    LinearGaussianProbe,
+    NormalNode,
     Probe,
+    SharedLatentProbe,
     Wrap,
     in_support,
+    is_linear_gaussian,
+    is_shared_latent,
     is_vector_base,
+    shared_latent_graph,
 )
 
 
@@ -427,7 +444,180 @@ _IN_FORWARD_IMAGE = {
 }
 
 
-def true_logpdf(probe: Probe) -> float:
+# --------------------------------------------------------------------------
+# The shared-latent family: a multivariate composition, not a scalar fold.
+# --------------------------------------------------------------------------
+
+# Relative tolerance for calling a covariance SINGULAR: the smallest eigenvalue
+# measured against the largest, so the test is scale-free.
+#
+# A structural threshold, not a fudge factor. The family's singular shape has an
+# EXACTLY zero eigenvalue in exact arithmetic (two rows of the loading matrix are
+# identical), so the only thing the tolerance absorbs is the float error of
+# `eigvalsh` on a 2x2 or 3x3 matrix, which is a few ULP of the largest eigenvalue.
+# The nearest NON-singular member is `chain`, whose worst conditioning in this
+# family is around 1e-2 -- five orders of magnitude away from this threshold, so no
+# admissible probe is anywhere near it and no singular one escapes.
+# `test_shared_latent` asserts both directions rather than leaving that as prose.
+_SINGULAR_EIGENVALUE_RATIO = 1e-12
+
+
+def _linear_gaussian_moments(nodes: dict[str, NormalNode],
+                            fields: tuple[str, ...]) -> tuple[list[float], list[list[float]]]:
+    """`(mean, cov)` of the named nodes, for a graph of `Normal` draws whose
+    locations are their parents.
+
+    Derived through the LOADING MATRIX, not through a covariance recursion. Give
+    every node its own independent standard normal, write each node as an affine
+    function of them,
+
+        f = mu_f + sum_k L[f][k] * eps_k,      eps ~ N(0, I)
+
+    and read off `mean[i] = mu_of(fields[i])` and `cov = L L^T`. A root contributes
+    `L[root] = sigma_root * e_root`; a child inherits its parent's whole row and
+    adds its own noise, `L[child] = L[parent] + sigma_child * e_child`. That is the
+    definition of the model, so it needs no per-shape case analysis and it handles
+    `fan`, `chain`, `disjoint` and `singular` with the same six lines — which is
+    the point, because a per-shape covariance formula is where a hand-derived
+    off-diagonal goes wrong unseen.
+
+    **A repeated name in `fields` is meaningful and is not deduplicated.** `singular`
+    binds every field to one draw, so two rows of `L` are identical and `cov` is
+    rank-deficient. `_refuse_singular_joint` is what turns that into §06's refusal;
+    silently collapsing the duplicate here would answer a question about a
+    2-dimensional law with the density of a 1-dimensional one.
+    """
+    order: list[str] = list(nodes)
+    index = {name: i for i, name in enumerate(order)}
+    loading: dict[str, list[float]] = {}
+    mean: dict[str, float] = {}
+
+    def resolve(name: str) -> list[float]:
+        """`name`'s loading row and mean, memoized.
+
+        Recursive rather than a single pass over `nodes`, so a graph listing a child
+        before its parent resolves the same — `curated.py` builds its graph from
+        parsed source, where the declaration order is the model author's and not
+        this module's to require.
+        """
+        if name in loading:
+            return loading[name]
+        node = nodes[name]
+        if node.parent is not None:
+            row = list(resolve(node.parent))
+            mean[name] = mean[node.parent] + node.mu
+        else:
+            row = [0.0] * len(order)
+            mean[name] = node.mu
+        row[index[name]] += node.sigma
+        loading[name] = row
+        return row
+
+    rows = [resolve(f) for f in fields]
+    cov = [[math.fsum(a * b for a, b in zip(ri, rj)) for rj in rows] for ri in rows]
+    return [mean[f] for f in fields], cov
+
+
+def _refuse_singular_joint(cov: list[list[float]]) -> None:
+    """Raise when `cov` has no density w.r.t. the product reference measure.
+
+    §06 "Singular joints", verbatim:
+
+        When one component's variate is determined by the others given the shared
+        ancestors (the same draw referenced twice, a deterministic transform of
+        another component), the joint law has no density w.r.t. the product
+        reference measure. Sampling is well-defined; a density query is a static
+        error where statically detectable, and is otherwise refused by the engine.
+
+    So the oracle WITHHOLDS rather than returning a number, per
+    `flatppl-dev/density-sweep-notes.md`'s rule ("when a probe's model is ill-typed
+    or unspecified, the oracle must WITHHOLD a value"). There is a number available
+    here and it is the trap: the product of the two marginals is finite, plausible,
+    and not the density of anything.
+
+    Decided from the COVARIANCE, never from `probe.shape`. Keying on the shape name
+    would make the withholding a property of this family's labels instead of a
+    property of the law, so a future shape that happened to be singular for a
+    different reason (a deterministic transform of a field) would take the
+    non-singular path and produce that plausible wrong number.
+
+    scipy is also not asked: `multivariate_normal` raises on a singular covariance
+    rather than returning `-inf`, and an exception escaping mid-sweep aborts the run
+    instead of scoring a probe (the same reason `_vector_base_logpdf` gates the
+    support itself).
+    """
+    eig = sorted(float(v) for v in linalg.eigvalsh(cov))
+    if eig[-1] <= 0.0 or eig[0] / eig[-1] < _SINGULAR_EIGENVALUE_RATIO:
+        raise OracleUnsupported(
+            "singular joint: the covariance is rank-deficient (smallest eigenvalue "
+            f"{eig[0]:.3e} against largest {eig[-1]:.3e}), so §06 'Singular joints' "
+            "gives the law no density w.r.t. the product reference measure and the "
+            "query is refused rather than valued")
+
+
+def linear_gaussian_logpdf(nodes: dict[str, NormalNode], fields: tuple[str, ...],
+                           point: tuple[float, ...], composition: str) -> float:
+    """The log-density of a composed linear-Gaussian law at `point`.
+
+    Shared by the generated family and by `curated.py`'s matcher, so the committed
+    corpus's frozen shared-latent values are what license this path — the same
+    relation the scalar fold has to its 56 curated cases. Taking the two apart
+    would leave the multivariate oracle ungated, which is the gap
+    `flatppl-dev/density-sweep-notes.md` records against `Multinomial`.
+
+    `composition` selects §06's rule:
+
+    * `"traced"` — §06 "Equivalent record law": `joint(a = lawof(a), b = lawof(b))`
+      "is equivalent to `lawof(record(a = a, b = b))`", and a node shared between
+      component traces "remains a single node of the composed trace". So the
+      covariance is the graph's own, cross-terms included, and §06's worked example
+      is this family's `fan`: "`joint(a = lawof(a), b = lawof(b))` has
+      cross-covariance Var(z) = s^2".
+    * `"iid"` — §06 `iid(M, size)`: "the product measure M^(x)N". N independent
+      copies of ONE marginal, so the covariance is diagonal with that marginal's
+      variance repeated, whatever ancestry the marginal itself has.
+
+    The reference measure is the product Lebesgue measure over the fields (§06
+    "Reference measure for product measures": "the reference for the product is the
+    product rho_1 (x) rho_2 (x) ... on the joint variate space"), every component
+    being a continuous scalar — which is exactly what
+    `scipy.stats.multivariate_normal.logpdf` is normalised against.
+
+    scipy shares no algebra with the determiniser here, so this is a genuinely
+    independent check and not the same-source agreement the Dirichlet rows have:
+    the determiniser lowers the record law symbolically through a Sherman-Morrison
+    plus matrix-determinant-lemma expression, while this assembles L L^T and calls a
+    Cholesky.
+    """
+    mean, cov = _linear_gaussian_moments(nodes, fields)
+    if composition == "iid":
+        mean = [mean[0]] * len(fields)
+        v = cov[0][0]
+        cov = [[v if i == j else 0.0 for j in range(len(fields))]
+               for i in range(len(fields))]
+    elif composition != "traced":
+        raise OracleUnsupported(f"composition {composition}")
+    _refuse_singular_joint(cov)
+    return float(stats.multivariate_normal(mean=mean, cov=cov).logpdf(list(point)))
+
+
+def _shared_latent_logpdf(probe: SharedLatentProbe) -> float:
+    """`true_logpdf` for a `SharedLatentProbe`.
+
+    The `latent_query` axis contributes NOTHING to this value, deliberately and not
+    by omission. §04 makes `logdensityof` a query on a measure, not a conditioning
+    of the model, so a second query on the shared latent cannot move the joint's
+    density — which is the invariant the axis exists to test. The three
+    `latent_query` rows of one (shape, n, spelling) therefore carry the same oracle,
+    and a determiniser that answers them differently is caught by the rows
+    disagreeing with each other before the oracle is even consulted.
+    """
+    nodes, fields = shared_latent_graph(probe.shape, probe.n, probe.spelling)
+    return linear_gaussian_logpdf(
+        nodes, fields, probe.point, SHARED_LATENT_COMPOSITION[probe.spelling])
+
+
+def true_logpdf(probe: Probe | SharedLatentProbe | LinearGaussianProbe) -> float:
     """Fold the wraps, per §13's rules.
 
     **Wraps are peeled OUTERMOST FIRST.** `probe.wraps` is innermost-first (that
@@ -449,8 +639,17 @@ def true_logpdf(probe: Probe) -> float:
     to probe, and it would report the error as the determiniser's.
 
     A `VECTOR_BASES` probe is delegated to `_vector_logpdf`, which is the same
-    algebra applied cell-wise.
+    algebra applied cell-wise. A `SharedLatentProbe` is delegated to
+    `_shared_latent_logpdf`, which is not the same algebra at all — a joint over N
+    fields is a multivariate law, and no fold over scalar §13 rules expresses a
+    cross-covariance.
     """
+    if is_shared_latent(probe):
+        return _shared_latent_logpdf(probe)
+    if is_linear_gaussian(probe):
+        return linear_gaussian_logpdf(probe.graph(), probe.fields, probe.point,
+                                      probe.composition)
+
     if is_vector_base(probe.base):
         return _vector_logpdf(probe)
 

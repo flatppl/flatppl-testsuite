@@ -12,15 +12,16 @@ import sys
 from collections import Counter
 
 from flatppl_testsuite.sweep import table
-from flatppl_testsuite.sweep.space import enumerate_probes
+from flatppl_testsuite.sweep.space import enumerate_probes, is_shared_latent
 
 
 def _regen(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="sweep regen")
     ap.add_argument("--full", action="store_true",
-                     help="sweep the whole probe space (768 probes: the scalar "
-                          "axes' cross-product plus the targeted vector family); "
-                          "default is the CI slice (see table.SLICE_DESCRIPTION)")
+                     help="sweep the whole probe space (the scalar axes' "
+                          "cross-product plus the targeted vector and "
+                          "shared-latent families); default is the CI slice "
+                          "(see table.SLICE_DESCRIPTION)")
     ap.add_argument("--commit", default=None,
                      help="the flatppl determinizer commit this table is generated against; "
                           "recorded in the table's metadata. Defaults to "
@@ -48,7 +49,10 @@ def _report(argv: list[str]) -> int:
     if not rows:
         print("no committed verdict table -- run `pixi run sweep-regen`", file=sys.stderr)
         return 1
-    wrap_of = {p.id: p.wraps[0].kind for p in enumerate_probes()}
+    # A shared-latent probe has no wrap stack; its analogous grouping key is the
+    # ancestry graph, so it is reported by `shape` in the same column.
+    wrap_of = {p.id: (f"shared:{p.shape}" if is_shared_latent(p) else p.wraps[0].kind)
+               for p in enumerate_probes()}
 
     lowers = [r for r in rows if r.outcome == "LOWERS"]
     lowers_wrong = [r for r in lowers if r.known_defect]

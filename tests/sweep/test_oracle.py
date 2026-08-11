@@ -26,6 +26,8 @@ from flatppl_testsuite.sweep.space import (
     Wrap,
     enumerate_probes,
     in_support,
+    is_linear_gaussian,
+    is_shared_latent,
     is_vector_base,
     vector_shapes,
 )
@@ -408,7 +410,10 @@ def _unique_shapes():
     `test_every_vector_measure_carries_the_mass_the_algebra_requires` instead."""
     shapes = {}
     for p in enumerate_probes():
-        if is_vector_base(p.base):
+        if is_shared_latent(p) or is_vector_base(p.base):
+            # A shared-latent probe has no base and no wrap stack, and its total
+            # mass is 1 by construction (every composition here is of probability
+            # measures), so there is no mass invariant to integrate.
             continue
         shapes.setdefault((p.base, p.wraps), p)
     return sorted(shapes.values(), key=lambda p: p.id)
@@ -778,15 +783,19 @@ def test_the_vector_oracle_has_a_curated_reproduction_gate_for_dirichlet_only():
     """
     from flatppl_testsuite.sweep.curated import curated_probes
 
-    kinds = {p.base.kind for _n, p, _e in curated_probes()}
+    # A `LinearGaussianProbe` has no `base` at all -- it is the shared-latent
+    # family's path, whose own reproduction gate is asserted in
+    # `test_shared_latent.py`. Skipping it here keeps this test about the VECTOR
+    # family's coverage, which is what its name claims.
+    scalar = [p for _n, p, _e in curated_probes() if not is_linear_gaussian(p)]
+    kinds = {p.base.kind for p in scalar}
     assert "dirichlet" in kinds, (
         "the curated matcher no longer expresses corpora/stablehlo/dirichlet — the "
         "vector oracle just lost its only reproduction gate")
     assert "multinomial" not in kinds, (
         "a curated Multinomial case now exists; add it to the reproduction gate and "
         "update this test rather than leaving the coverage claim stale")
-    n_dirichlet = sum(1 for _n, p, _e in curated_probes()
-                      if p.base.kind == "dirichlet")
+    n_dirichlet = sum(1 for p in scalar if p.base.kind == "dirichlet")
     assert n_dirichlet == 11, f"expected 11 curated Dirichlet cases, got {n_dirichlet}"
 
 

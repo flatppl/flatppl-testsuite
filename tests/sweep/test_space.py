@@ -19,6 +19,7 @@ from flatppl_testsuite.sweep.space import (
     Wrap,
     enumerate_probes,
     in_support,
+    is_shared_latent,
     is_vector_base,
 )
 from flatppl_testsuite.sweep.render import render
@@ -156,7 +157,7 @@ def test_every_vector_probe_point_is_on_its_supports_constraint_surface():
     """
     inverse = {"exp": math.log, "neg": lambda y: -y}
     for p in enumerate_probes():
-        if not is_vector_base(p.base):
+        if is_shared_latent(p) or not is_vector_base(p.base):
             continue
         w = p.wraps[0]
         pre = list(p.point)
@@ -186,8 +187,15 @@ def test_every_wrap_is_present_across_all_three_spellings():
     the SAME measure, so a wrap that one spelling composes and another drops
     is a correctness bug in the sweep itself, not a cosmetic gap — it would
     manufacture false "the determiniser is wrong" findings once Tasks 2-4
-    start comparing spellings against each other and the oracle."""
+    start comparing spellings against each other and the oracle.
+
+    The shared-latent family has no wrap axis; its own equivalent — that every
+    spelling of one measure renders the measure it claims — is
+    `test_shared_latent.test_each_spelling_renders_the_construct_it_names`.
+    """
     for p in enumerate_probes():
+        if is_shared_latent(p):
+            continue
         w = p.wraps[0]
         if w.kind == "identity":
             continue
@@ -219,6 +227,8 @@ def test_pushfwd_points_are_derived_not_hardcoded():
     constant, so also pin the preimage to `INNER[base]` exactly -- that is
     what forces "derived", not just "happens to work"."""
     for p in enumerate_probes():
+        if is_shared_latent(p):
+            continue          # no wrap axis, so no pushforward point to derive
         w = p.wraps[0]
         if w.kind != "pushfwd" or is_vector_base(p.base):
             # The vector family has its own version of this check, cell-wise:
