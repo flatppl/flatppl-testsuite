@@ -586,17 +586,24 @@ def diff(expected: dict[str, Row], actual: dict[str, Row]) -> list[str]:
             except AssertionError as err:
                 problems.append(f"{pid}: LOWERS but value != oracle: {err}")
 
-        # A LOWERS row whose ORACLE WITHHELD is its own signal, and it had no check
-        # at all before the shared-latent family exposed the hole: the comparison
-        # above is guarded on `a.oracle is not None`, so a determiniser that emitted
-        # a number for a shape no spec rule values passed the gate in silence.
+        # A LOWERS row whose ORACLE WITHHELD is its own signal: the comparison above
+        # is guarded on `a.oracle is not None`, so it says nothing about a shape no
+        # spec rule values.
+        #
+        # **Scope it honestly -- this is the FREEZE path, not every path.** While the
+        # committed table still says REFUSES for such a shape, the
+        # `newly LOWERS where the table REFUSES` branch above already fires, so the
+        # first appearance of a determiniser answering it is NOT silent. What was
+        # silent is the row surviving a REGEN: once it is frozen as LOWERS on both
+        # sides that branch goes quiet, the comparison is skipped for want of an
+        # oracle, and `test_the_table_flags_no_unreviewed_wrong_numbers` skips it on
+        # the same condition. So the row reads as covered forever after.
         #
         # The shape that found it is `joint(lawof(y), lawof(y))` in the positional
         # spelling. §06 "Singular joints" gives it no density w.r.t. the product
         # reference, the oracle withholds accordingly, and the pre-#137 determiniser
         # returns a plausible finite number anyway -- the product of two identical
-        # marginals, which is the density of nothing. That is exactly the class this
-        # sweep exists to surface, and it was invisible.
+        # marginals, which is the density of nothing.
         #
         # `known_defect` still excuses it, so an INVESTIGATED shape can be frozen
         # with its reason (`_known_defect_reason`), which is the same contract the

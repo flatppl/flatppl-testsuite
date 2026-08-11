@@ -104,6 +104,11 @@ def test_the_table_freezes_no_value_the_oracle_withheld():
     one is a number for a shape no spec rule gives a density to at all, so there is
     nothing to disagree with and the comparison above silently passes it.
 
+    **This is the freeze path specifically.** While the table still says REFUSES,
+    `diff`'s `newly LOWERS where the table REFUSES` branch already reports the first
+    appearance. The gap is the row surviving into the committed table, after which
+    nothing looked at it again.
+
     Found by the shared-latent family's `singular` shape: the pre-#137 determiniser
     LOWERS `logdensityof(joint(lawof(y), lawof(y)), [0.5, 0.7])` to a finite value,
     while §06 "Singular joints" says the joint law "has no density w.r.t. the product

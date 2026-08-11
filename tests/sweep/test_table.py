@@ -274,12 +274,33 @@ def test_diff_flags_a_value_the_oracle_withheld():
     Its comparison is conditioned on `oracle is not None`, so before this check a
     LOWERS row for a shape the oracle refused to value produced NO problem line —
     which is how a pre-#137 determiniser's finite answer for
-    `joint(lawof(y), lawof(y))` (§06: no density) would have passed the gate.
+    `joint(lawof(y), lawof(y))` (§06: no density) would have survived a regen.
+
+    Both sides LOWERS on purpose: that is the FROZEN state, the one that was silent.
+    The transitional state is covered by
+    `test_the_first_appearance_of_such_a_row_was_already_reported` below — the two
+    together are what make the scoping claim in `diff`'s comment checkable.
     """
     e = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None)}
     a = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None)}
     problems = table.diff(e, a)
     assert len(problems) == 1 and "withholds any value" in problems[0]
+
+
+def test_the_first_appearance_of_such_a_row_was_already_reported():
+    """The honest scope of the check above: while the table still says REFUSES, the
+    pre-existing `newly LOWERS where the table REFUSES` branch fires, so a
+    determiniser answering a no-density shape for the FIRST time was never silent.
+
+    Pinned so the comment in `diff` cannot overstate what the new signal added — the
+    gap it closes is the frozen row, not the first sighting.
+    """
+    e = {"p": _row("p", outcome="REFUSES", value=None, oracle=None,
+                   spec_justified=True)}
+    a = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=None)}
+    problems = table.diff(e, a)
+    assert any("newly LOWERS" in p for p in problems), problems
+    assert any("withholds any value" in p for p in problems), problems
 
 
 def test_diff_does_not_flag_a_withheld_value_on_an_investigated_shape():

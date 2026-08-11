@@ -498,6 +498,25 @@ pytestmark_binary = pytest.mark.skipif(
     not CONFIG.flatppl_bin.exists(), reason="needs the flatppl binary")
 
 
+def _binding(emitted: str, name: str) -> str:
+    """One binding's right-hand side from emitted FlatPDL, continuation lines included.
+
+    A binding opens at column 0 as `<name> = `; the fan's `lp` spans several indented
+    lines, so "the line starting with `lp =`" is not enough. Comparing whole MODULES
+    instead would not work either: the latent's own binding differs across the
+    `latent_query` values (`z = 0.0` unqueried versus `z = 0.1` queried), which is a
+    difference in the pinned draw and not in the family's answer.
+    """
+    lines = emitted.splitlines()
+    start = next(i for i, ln in enumerate(lines) if ln.startswith(f"{name} = "))
+    out = [lines[start]]
+    for ln in lines[start + 1:]:
+        if ln and not ln[0].isspace():
+            break
+        out.append(ln)
+    return "\n".join(out).strip()
+
+
 def _determinize(probe) -> tuple[int, str, str]:
     """`(exit code, emitted FlatPDL, stderr)` for one probe."""
     with tempfile.TemporaryDirectory() as tmp:
@@ -549,6 +568,68 @@ def test_the_shared_ancestor_arm_lowers_a_correlated_form_not_two_marginals():
         assert shared != ctor, (
             "the shared-ancestor law and the matched-marginal product emit "
             "IDENTICAL FlatPDL, so the correlated arm is not being reached")
+
+
+@pytestmark_binary
+@pytest.mark.parametrize("latent_query", ["before", "after"])
+def test_the_latent_query_survives_into_the_emitted_flatpdl(latent_query):
+    """The `latent_query` axis's arm assertion — without it the axis is unpinned
+    where it matters.
+
+    Every other test of this axis stops short of the determiniser: the render test
+    checks the source text, and the oracle test asserts the three rows share one
+    value. **Both would still pass if the second query were eliminated as dead
+    code.** The rows would agree trivially, the table would report the axis
+    covered, and this family's own rule — a row whose gate never emitted proves
+    nothing — would be unmet on exactly one axis.
+
+    So assert the `lp_latent` binding survives AND that its right-hand side is the
+    latent's own scalar law. Asserted on THAT LINE, not by counting
+    `builtin_logdensityof` over the whole module: the `fan` record law lowers to a
+    closed-form rank-1-update expression carrying no `builtin_logdensityof` at all,
+    so a global count of two is simply false here — the family's query contributes
+    none and `lp_latent` contributes the only one.
+    """
+    code, emitted, stderr = _determinize(
+        _probe("fan", "record_law", latent_query=latent_query))
+    assert code == 0, f"determinize refused: {stderr.strip()}"
+    line = next((ln for ln in emitted.splitlines()
+                 if ln.startswith("lp_latent =")), None)
+    assert line is not None, (
+        f"the second query's binding was eliminated:\n{emitted}")
+    # §08's `Normal(mu, sigma)` for the latent prior, scored at
+    # SHARED_LATENT_LATENT_POINT. Named rather than counted, so an unrelated call
+    # elsewhere in the module cannot satisfy this.
+    assert "builtin_logdensityof(Normal, record(mu = 0.4, sigma = 1.0), 0.1)" in line, (
+        f"lp_latent survived but is not the latent's own law: {line}")
+
+
+@pytestmark_binary
+def test_the_latent_query_does_not_perturb_the_familys_own_lowering():
+    """The invariant the `latent_query` axis exists for, asserted on the emitted
+    FlatPDL rather than on the oracle.
+
+    §04 makes `logdensityof` a query on a measure, not a conditioning of the model,
+    so a second query on the shared latent must not change the joint's density. The
+    oracle enforces that by construction (it never reads `latent_query`), which is
+    exactly why the oracle cannot detect a violation — a determiniser that DID
+    perturb the joint would show up as three disagreeing rows, and this pins the
+    stronger statement: the `lp` expression is byte-identical across all three
+    values of the axis.
+
+    Worth pinning because the determiniser binds the latent to the query's point
+    (`z = 0.1` appears in the emitted module), so there IS a mechanism by which a
+    second query could reach the family's own answer.
+    """
+    exprs = {}
+    for latent_query in ("none", "before", "after"):
+        code, emitted, stderr = _determinize(
+            _probe("fan", "record_law", latent_query=latent_query))
+        assert code == 0, f"{latent_query}: determinize refused: {stderr.strip()}"
+        exprs[latent_query] = _binding(emitted, "lp")
+    assert len(set(exprs.values())) == 1, (
+        "the latent query changed the family's own lowering:\n"
+        + "\n".join(f"{k}: {v}" for k, v in exprs.items()))
 
 
 @pytestmark_binary
