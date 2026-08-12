@@ -645,43 +645,28 @@ def test_the_shared_ancestor_arm_lowers_a_correlated_form_not_two_marginals():
 
 @pytestmark_binary
 @pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
-def test_the_chain_constructor_holdout_still_mislowers(spelling):
-    """The hold-out pin for `chain` + `ctor_shared_*`, on all three of its legs.
+def test_the_chain_constructor_source_is_refused(spelling):
+    """The retirement record for the `chain` + `ctor_shared_*` hold-out.
 
     The shape has no constructor spelling — a component's parameter can only name a
     BINDING, and a sibling component of the same `joint` is not one — so the source a
-    renderer produces for it references an UNBOUND `f1`. That should be a static error.
-    It is not: at flatppl-rust `9eefb43` the toolchain accepts it and emits FlatPDL
-    containing a FREE VARIABLE, which is a refuse-don't-mislower violation.
+    renderer produces for it references an UNBOUND `f1`. Until flatppl-rust 499f39c
+    the toolchain MISLOWERED that source (exit 0 emitting a free variable, pinned here
+    on all three legs); 499f39c makes an unresolvable name a static error, the pin
+    reddened as designed, and the hold-out was retired per its own disposition.
 
-    Pinned rather than merely documented, for the reason the vector family's hold-outs
-    are: nobody has to remember, and the gap cannot outlive its cause. All three legs
-    are asserted, so a change in ANY of them reddens this test — determinize still
-    exiting 0, the emitted text still carrying the unbound name, and `classify` still
-    calling it MALFORMED.
-
-    **When it does redden, re-inclusion is a judgement call, not the default.** If the
-    toolchain starts refusing the unbound name, that refusal tests SCOPING rather than
-    the joint algebra, so the right move is to retire the hold-out entry — not to admit
-    the pair as a density probe. The upstream defect is filed separately; this repo only
-    records the observation.
+    The pair did NOT rejoin the family: the refusal is a SCOPING verdict, not a
+    joint-algebra one, so there is no density row to generate. This test keeps the
+    scoping observation pinned — if the refusal ever regresses back to a mislowering,
+    the exit-0 assertion below fails and the free-variable bug is back.
     """
     probe = _probe("chain", spelling)
     code, emitted, stderr = _determinize(probe)
-    assert code == 0, (
-        f"determinize now exits {code} on chain/{spelling} (stderr: {stderr.strip()}) "
-        "-- the mislowering may be fixed upstream. Re-read "
-        "space._SHARED_LATENT_HELD_OUT and decide whether to retire the entry (a "
-        "refusal on an unbound name is a scoping verdict, not a joint-algebra one)")
-    assert "mu = f1" in emitted, (
-        "the emitted FlatPDL no longer carries the unbound `f1`, so the mislowering "
-        f"moved -- re-read the hold-out entry:\n{emitted}")
-    assert "f1 = " not in emitted, (
-        f"something now binds `f1`, so this is no longer a free variable:\n{emitted}")
-    v = classify(probe)
-    assert v.outcome == Outcome.MALFORMED, (
-        f"chain/{spelling} now classifies {v.outcome} rather than MALFORMED -- the "
-        "hold-out's premise moved")
+    assert code != 0, (
+        f"determinize exits 0 again on chain/{spelling} -- the unbound-name refusal "
+        f"regressed; check the emitted text for a free `f1`:\n{emitted}")
+    assert "f1" in stderr, (
+        f"the refusal no longer names the unbound identifier `f1`:\n{stderr}")
 
 
 def test_every_shared_latent_holdout_is_excluded_and_carries_a_category():

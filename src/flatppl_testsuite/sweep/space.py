@@ -512,36 +512,15 @@ def shared_latent_graph(shape: str, n: int, spelling: str,
 # table and which is indistinguishable there from a determiniser defect). Retires on an
 # upstream change.
 _SHARED_LATENT_HELD_OUT = {
-    ("chain", "ctor_shared_kw"): (
-        "engine",
-        "the determiniser MISLOWERS this shape instead of refusing it. A constructor "
-        "component's parameter can only name a BINDING, and a sibling component of the "
-        "same `joint` is not one — so the chain shape has no constructor spelling and "
-        "`Normal(mu = f1, ...)` references an UNBOUND name. That is a modelling error "
-        "and should be a static one. Observed at flatppl-rust 9eefb43 instead: `infer` "
-        "exits 0 with `f1` absorbed as a `%fixed` scalar, and `determinize` exits 0 "
-        "emitting `builtin_logdensityof(Normal, record(mu = f1, sigma = 1.5), 0.7)` "
-        "with NOTHING binding `f1` — a free variable in FlatPDL, i.e. a "
-        "refuse-don't-mislower violation. Through `classify` that is MALFORMED / "
-        "`crash:derivation`, so generating it would freeze an upstream bug as a banned "
-        "row rather than reporting it. Pinned by "
-        "`tests/sweep/test_shared_latent.py::test_the_chain_constructor_holdout_still_"
-        "mislowers`, which fails the day the behaviour moves. **The right resolution "
-        "when it does is a judgement call, not automatic re-inclusion**: if the "
-        "toolchain starts REFUSING the unbound name, that refusal tests SCOPING and "
-        "not the joint algebra, so the entry should be retired rather than the pair "
-        "admitted as a density probe. NOTE deleting this entry ADMITS the pair "
-        "(`shared_latent_supported` checks the hold-out first, then the shape tuple): "
-        "retiring means removing this entry AND dropping `chain` from the ctor_shared "
-        "arm of the supported tuple, in the same edit.",
-    ),
-    ("chain", "ctor_shared_pos"): (
-        "engine",
-        "the positional spelling of the shape above, with the identical observed "
-        "behaviour at flatppl-rust 9eefb43 — `determinize` exits 0 emitting a free "
-        "`f1`, `classify` reports MALFORMED / `crash:derivation`. Same reason, same "
-        "pin, same resolution question.",
-    ),
+    # Empty since the chain + ctor_shared_* retirement. Those two pairs sat here while
+    # the toolchain MISLOWERED their source (an unbound `f1` was absorbed as `%fixed`
+    # and determinize emitted a free variable — observed at flatppl-rust 9eefb43,
+    # pinned on all three legs). flatppl-rust 499f39c makes an unresolvable name a
+    # static error, so the pin reddened as designed and the entries were retired per
+    # their own disposition: the refusal tests SCOPING, not the joint algebra, so the
+    # pairs left the supported tuple (below) rather than becoming density probes.
+    # `tests/sweep/test_shared_latent.py::test_the_chain_constructor_source_is_refused`
+    # keeps the scoping observation pinned.
 }
 
 # The engine-gap category, derived rather than hand-maintained, for `_ENGINE_BLOCKED`'s
@@ -574,21 +553,23 @@ def shared_latent_supported(shape: str, spelling: str) -> bool:
         # stochastic-parameter constructors is caught.
         #
         # `chain` has no constructor spelling, because a component's parameter can only
-        # name a BINDING and a sibling component of the same `joint` is not one. But
-        # note WHAT THAT DOES AND DOES NOT LICENSE: the SHAPE does not exist, while the
-        # SOURCE a renderer would emit for it is accepted and mislowered rather than
-        # rejected. That is an upstream bug worth pinning, so the pair is an explicit
-        # `_SHARED_LATENT_HELD_OUT` entry with the observed behaviour recorded, not a
-        # silent "inexpressible" here. (An earlier revision of this comment claimed the
-        # model itself was inexpressible, which is false and is exactly the kind of
-        # unverified premise a hold-out reason is supposed to stop.)
+        # name a BINDING and a sibling component of the same `joint` is not one. The
+        # source a renderer would emit for it references an unbound `f1`, which the
+        # toolchain REFUSES since flatppl-rust 499f39c (it mislowered before — the
+        # retired `_SHARED_LATENT_HELD_OUT` entries above record that history). The
+        # refusal is a SCOPING verdict, not a joint-algebra one, so the pair stays out
+        # of the family rather than becoming a density probe;
+        # `test_the_chain_constructor_source_is_refused` pins the refusal. (An earlier
+        # revision of this comment claimed the model itself was inexpressible, which is
+        # false and is exactly the kind of unverified premise a hold-out reason is
+        # supposed to stop.)
         #
         # `singular` does not apply: two fresh draws with identical parameters are
         # conditionally independent given the latent, never the same draw, so §06's
         # singular case is not reachable through constructors at all.
         if (shape, spelling) in _SHARED_LATENT_HELD_OUT:
             return False
-        return shape in ("fan", "disjoint", "chain")
+        return shape in ("fan", "disjoint")
     if shape == "singular":
         return spelling in ("record_law", "joint_kw", "joint_pos")
     return True
