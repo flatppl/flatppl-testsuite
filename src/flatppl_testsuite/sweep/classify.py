@@ -50,7 +50,7 @@ from pathlib import Path
 from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.engine import DeterminizeRefused, score_binding
 from flatppl_testsuite.sweep.render import render
-from flatppl_testsuite.sweep.space import Probe
+from flatppl_testsuite.sweep.space import Probe, SharedLatentProbe
 
 
 class Outcome(str, Enum):
@@ -145,7 +145,7 @@ def classify_source(source: str, binding: str) -> Verdict:
         return Verdict("", Outcome.LOWERS, float(value), None)
 
 
-def classify(probe: Probe) -> Verdict:
+def classify(probe: Probe | SharedLatentProbe) -> Verdict:
     r = render(probe)
     v = classify_source(r.source, r.binding)
     return Verdict(probe.id, v.outcome, v.value, v.marker)

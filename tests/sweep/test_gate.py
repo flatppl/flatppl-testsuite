@@ -1,7 +1,8 @@
 """The gate: the sweep's live verdicts must match the committed table.
 
-Four signals, per the spec:
+Five signals:
   LOWERS but value != oracle   -> a wrong number (the class this exists to find)
+  LOWERS but oracle withheld   -> a number for a shape no spec rule values
   LOWERS where table REFUSES   -> newly admitted; needs an oracle value
   REFUSES where table LOWERS   -> a regression, or an over-refusal
   MALFORMED anywhere           -> always a defect
@@ -93,3 +94,30 @@ def test_the_table_flags_no_unreviewed_wrong_numbers():
         except AssertionError:
             unflagged.append(r.probe_id)
     assert not unflagged, f"unreviewed wrong numbers frozen in the table: {unflagged}"
+
+
+def test_the_table_freezes_no_value_the_oracle_withheld():
+    """The companion signal to the test above, which its `r.oracle is None` skip
+    cannot see: a LOWERS row for a shape the ORACLE REFUSED TO VALUE.
+
+    Those are not the same defect. A wrong number disagrees with a known truth; this
+    one is a number for a shape no spec rule gives a density to at all, so there is
+    nothing to disagree with and the comparison above silently passes it.
+
+    **This is the freeze path specifically.** While the table still says REFUSES,
+    `diff`'s `newly LOWERS where the table REFUSES` branch already reports the first
+    appearance. The gap is the row surviving into the committed table, after which
+    nothing looked at it again.
+
+    Found by the shared-latent family's `singular` shape: the pre-#137 determiniser
+    LOWERS `logdensityof(joint(lawof(y), lawof(y)), [0.5, 0.7])` to a finite value,
+    while §06 "Singular joints" says the joint law "has no density w.r.t. the product
+    reference measure". `known_defect` still excuses an investigated shape, same as
+    for a wrong number.
+    """
+    rows = table.load(table.DEFAULT_PATH).values()
+    unvalued = [r.probe_id for r in rows
+                if r.outcome == "LOWERS" and not r.known_defect
+                and r.value is not None and r.oracle is None]
+    assert not unvalued, (
+        "rows frozen with a value the oracle withheld: " + str(unvalued))

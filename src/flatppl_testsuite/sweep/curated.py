@@ -23,6 +23,17 @@ Two model shapes are recognized:
    point becomes its own case, suffixed `#<index>`. These need no ABI or engine
    — the oracle walks structure, and a point dict is exactly the binding it
    needs.
+
+A case whose query is a MULTI-FIELD joint or record law is expressed as a
+`space.LinearGaussianProbe` instead of a `Probe` (`_joint_measure`), because those
+are the `oracle.linear_gaussian_logpdf` path and not the scalar §13 fold. Without this,
+the multivariate oracle would ship with no curated reproduction gate at all —
+the gap `flatppl-dev/density-sweep-notes.md` records against `Multinomial`, which
+is licensed by "the hand-derived log-gamma form plus the exact lattice-mass sum,
+not a frozen independent value". Three corpus dirs supply that gate here
+(`fragment/shared_latent_record`, `fragment/shared_latent_joint`,
+`fragment/shared_latent_joint_positional`), each frozen against a `test.py` that
+derives `MvNormal(mu0 * 1, s0**2 * J + diag(sigma**2))` by hand.
 """
 from __future__ import annotations
 
@@ -30,7 +41,13 @@ import json
 import re
 from pathlib import Path
 
-from flatppl_testsuite.sweep.space import Base, Probe, Wrap
+from flatppl_testsuite.sweep.space import (
+    Base,
+    LinearGaussianProbe,
+    NormalNode,
+    Probe,
+    Wrap,
+)
 
 REPO = Path(__file__).resolve().parents[3]
 
@@ -311,6 +328,181 @@ def _ctor_params(head: str, names: tuple[str, ...], pos: list[str],
     return tuple(one(n, p) for n, p in zip(names, pos))
 
 
+# --------------------------------------------------------------------------
+# The multi-field joint recognizer -> LinearGaussianProbe
+# --------------------------------------------------------------------------
+
+def _joint_shaped(expr: str, ctx: _Ctx) -> bool:
+    """Whether `expr` is a MULTI-FIELD joint/record law, i.e. this recognizer's
+    business rather than `_peel`'s.
+
+    Dispatch is on the construct, not on "did `_peel` fail". Falling back on
+    `_peel`'s failure would report `_peel`'s reason for a case that is plainly a
+    `joint` — the matcher is fail-closed to keep its reasons truthful, and a
+    misattributed reason is the same defect in a quieter form.
+    """
+    call = _as_call(expr.strip())
+    if not call:
+        return False
+    head, argstr = call
+    if head in ("joint", "iid"):
+        return True
+    if head == "lawof":
+        pos, kw = _args(argstr)
+        if kw or len(pos) != 1:
+            return False
+        rec = _as_call(pos[0])
+        if rec and rec[0] == "record":
+            rpos, rkw = _args(rec[1])
+            return not rpos and len(rkw) >= 2
+    return False
+
+
+def _normal_draw(name: str, ctx: _Ctx, nodes: dict[str, NormalNode]) -> None:
+    """Resolve `name` to a `NormalNode` and record it, recursing on its parent.
+
+    Accepts exactly `name = draw(Normal(mu = <parent-or-literal>, sigma = <literal>))`
+    — §08's own keyword names, matched strictly for `_BASE_SPECS`' reason. Anything
+    else is `_NoMatch`: a non-`Normal` draw is not linear-Gaussian, a stochastic
+    `sigma` is not either, and an affine `mu` (`2.0 * z`) is a different model whose
+    loading `NormalNode` cannot express. Each of those has a defensible law and none
+    of them has THIS law, so guessing would validate the oracle against the wrong
+    value — the one failure this module is built to avoid.
+    """
+    if name in nodes:
+        return
+    expr = ctx.bindings.get(name)
+    if expr is None:
+        raise _NoMatch(f"joint component {name!r} is not a binding")
+    call = _as_call(expr)
+    if not call or call[0] != "draw":
+        raise _NoMatch(f"joint component {name!r} is not a draw: {expr!r}")
+    dpos, dkw = _args(call[1])
+    if dkw or len(dpos) != 1:
+        raise _NoMatch("draw arity")
+    ctor = _as_call(dpos[0])
+    if not ctor or ctor[0] != "Normal":
+        raise _NoMatch(f"joint component {name!r} is not a Normal draw: {dpos[0]!r}")
+    cpos, ckw = _args(ctor[1])
+    if cpos or set(ckw) != {"mu", "sigma"}:
+        raise _NoMatch(f"{name}: Normal must be spelled Normal(mu = ..., sigma = ...)")
+    sigma = _literal(ckw["sigma"])
+    if sigma is None:
+        raise _NoMatch(f"{name}: a non-literal sigma is not linear-Gaussian")
+    mu_lit = _literal(ckw["mu"])
+    if mu_lit is not None:
+        nodes[name] = NormalNode(name, None, mu_lit, sigma)
+        return
+    parent = ckw["mu"].strip()
+    if not re.fullmatch(_IDENT, parent):
+        raise _NoMatch(f"{name}: mu {ckw['mu']!r} is neither a literal nor a node")
+    _normal_draw(parent, ctx, nodes)
+    # A child's own `mu` is the parent alone: `NormalNode.mu` is an OFFSET here, and
+    # `Normal(mu = z, ...)` adds none.
+    nodes[name] = NormalNode(name, parent, 0.0, sigma)
+
+
+def _lawof_arg(expr: str) -> str:
+    """`lawof(x)` -> `"x"`. Anything else is not a reified component."""
+    call = _as_call(expr.strip())
+    if not call or call[0] != "lawof":
+        raise _NoMatch(f"joint component is not a lawof: {expr!r}")
+    pos, kw = _args(call[1])
+    if kw or len(pos) != 1 or not re.fullmatch(_IDENT, pos[0].strip()):
+        raise _NoMatch(f"lawof argument is not a plain name: {expr!r}")
+    return pos[0].strip()
+
+
+def _joint_measure(expr: str, ctx: _Ctx,
+                   ) -> tuple[dict[str, NormalNode], tuple[str, ...], str, bool]:
+    """`(nodes, fields, composition, point_is_record)` for a multi-field joint.
+
+    The three spellings §06 "Equivalent record law" declares equivalent, plus `iid`:
+
+    * `lawof(record(a = x, b = y))` and `joint(a = lawof(x), b = lawof(y))` — a
+      RECORD variate, so the query point is a record;
+    * `joint(lawof(x), lawof(y))` — §06 combines positional component variates via
+      `cat`, so the variate is a vector and the point is an array;
+    * `iid(lawof(x), n)` — §06's product measure, so `composition` is `"iid"` and the
+      variate is an array.
+
+    A `joint` mixing reified components with constructors is refused: §06 makes a
+    constructor share no stochastic node, so the law is a product of one traced
+    marginal and one fresh measure, and `linear_gaussian_logpdf` has no composition
+    for that mixture. Nothing in the corpus spells it; refusing is how it stays
+    that way rather than being answered wrongly.
+    """
+    call = _as_call(expr.strip())
+    head, argstr = call
+    pos, kw = _args(argstr)
+    nodes: dict[str, NormalNode] = {}
+
+    if head == "lawof":
+        rec = _as_call(pos[0])
+        rpos, rkw = _args(rec[1])
+        names = [_name_of(v) for v in rkw.values()]
+        for n in names:
+            _normal_draw(n, ctx, nodes)
+        return nodes, tuple(names), "traced", True
+
+    if head == "iid":
+        if kw or len(pos) != 2:
+            raise _NoMatch("iid arity")
+        size = _literal(pos[1])
+        if size is None or size != int(size) or int(size) < 2:
+            raise _NoMatch(f"iid size is not an integer >= 2: {pos[1]!r}")
+        name = _lawof_arg(pos[0])
+        _normal_draw(name, ctx, nodes)
+        return nodes, (name,) * int(size), "iid", False
+
+    # `joint`, keyword or positional.
+    if pos and kw:
+        raise _NoMatch("joint: mixed positional and keyword components")
+    components = list(kw.values()) if kw else pos
+    if len(components) < 2:
+        raise _NoMatch("joint with fewer than two components")
+    names = [_lawof_arg(c) for c in components]
+    for n in names:
+        _normal_draw(n, ctx, nodes)
+    return nodes, tuple(names), "traced", bool(kw)
+
+
+def _name_of(tok: str) -> str:
+    tok = tok.strip()
+    if not re.fullmatch(_IDENT, tok):
+        raise _NoMatch(f"record field value is not a plain name: {tok!r}")
+    return tok
+
+
+def _joint_point(expr: str, ctx: _Ctx, arity: int, is_record: bool,
+                 ) -> tuple[float, ...]:
+    """The query point of a multi-field joint, in field order.
+
+    A record point's fields are taken IN THE ORDER WRITTEN, matching the order
+    `_joint_measure` reads the components — both come from `_args`, which preserves
+    source order. A record whose field order differed from the measure's would bind
+    a cell to the wrong field, so the arity check below is not the only guard that
+    matters: `test_the_curated_matcher_maps_a_known_case_to_the_structure_we_expect`
+    pins the mapping against the model text.
+    """
+    rec = _as_call(expr.strip())
+    if is_record:
+        if not rec or rec[0] != "record":
+            raise _NoMatch(f"a record variate needs a record point: {expr!r}")
+        rpos, rkw = _args(rec[1])
+        if rpos:
+            raise _NoMatch("record point mixes positional and keyword fields")
+        cells = [ctx.number(v) for v in rkw.values()]
+    else:
+        tok = expr.strip()
+        if not (tok.startswith("[") and tok.endswith("]")):
+            raise _NoMatch(f"a vector variate needs an array point: {expr!r}")
+        cells = list(ctx.vector(tok))
+    if len(cells) != arity:
+        raise _NoMatch(f"point has {len(cells)} cells for {arity} components")
+    return tuple(cells)
+
+
 def _query_point(expr: str, ctx: _Ctx) -> float | tuple[float, ...]:
     """The second argument of `logdensityof`, as a scalar or vector point.
 
@@ -385,7 +577,7 @@ def _bindings(text: str) -> tuple[dict[str, str], dict[str, str], set[str],
 
 
 def _case(directory: Path, text: str, binding: str,
-          point: dict[str, float] | None) -> Probe:
+          point: dict[str, float] | None) -> Probe | LinearGaussianProbe:
     bindings, aliases, params, queries = _bindings(text)
     matching = [q for q in queries if q[0] == binding]
     if not matching:
@@ -397,13 +589,21 @@ def _case(directory: Path, text: str, binding: str,
     if len(qargs) != 2:
         raise _NoMatch("logdensityof arity")
     ctx = _Ctx(bindings, aliases, params, point)
+
+    if _joint_shaped(qargs[0], ctx):
+        nodes, fields, composition, is_record = _joint_measure(qargs[0], ctx)
+        return LinearGaussianProbe(
+            id=directory.name, nodes=tuple(nodes.values()), fields=fields,
+            composition=composition,
+            point=_joint_point(qargs[1], ctx, len(fields), is_record))
+
     base, wraps = _peel(qargs[0], ctx)
     pt = _query_point(qargs[1], ctx)
     return Probe(id=directory.name, base=base, wraps=wraps, spelling="curated",
                  ordering="single", consumer=False, point=pt)
 
 
-def _load(directory: Path) -> tuple[list[tuple[str, Probe, float]], str | None]:
+def _load(directory: Path) -> tuple[list[tuple[str, Probe | LinearGaussianProbe, float]], str | None]:
     """One directory -> its expressible cases, or a reason it has none."""
     meta = json.loads((directory / "test.json").read_text())
     if meta.get("test_type") != "logdensity":
@@ -434,6 +634,15 @@ def _load(directory: Path) -> tuple[list[tuple[str, Probe, float]], str | None]:
             expected = float(expected)        # "-inf" cannot round-trip through JSON
         if not isinstance(expected, (int, float)):
             raise _NoMatch(f"non-scalar expected: {type(expected).__name__}")
+        if isinstance(expected, float) and expected != expected:
+            # A NaN `expected` is a REFUSAL fixture's sentinel, not a value: it is
+            # chosen precisely because "NaN never matches" (see
+            # corpora/fragment/joint_singular_refusal/test.py), so the dir freezes
+            # no number for this gate to reproduce. Admitting it would add a case
+            # that validates nothing AND could report agreement the day the oracle
+            # itself returned NaN, since a NaN-vs-NaN comparison is never equal.
+            raise _NoMatch("expected is NaN: a refusal fixture freezes no value to "
+                           "reproduce")
         probe = _case(directory, (directory / model_name).read_text(), binding, None)
         return [(name, probe, float(expected))], None
     except _NoMatch as e:
@@ -444,10 +653,10 @@ def _dirs() -> list[Path]:
     return sorted(p.parent for p in (REPO / "corpora").glob("*/*/test.json"))
 
 
-def curated_probes() -> list[tuple[str, Probe, float]]:
+def curated_probes() -> list[tuple[str, Probe | LinearGaussianProbe, float]]:
     """Every curated `logdensity` case expressible as a Probe, with its FROZEN
     expected value carried through unchanged (never recomputed here)."""
-    out: list[tuple[str, Probe, float]] = []
+    out: list[tuple[str, Probe | LinearGaussianProbe, float]] = []
     for d in _dirs():
         cases, _ = _load(d)
         out.extend(cases)

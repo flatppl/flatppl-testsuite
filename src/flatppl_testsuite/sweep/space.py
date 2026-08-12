@@ -27,6 +27,69 @@ vector gate arm in the determiniser obliges a new member of this family** — th
 coverage invariant is one oracle-checked row per emitted vector arm, and
 `tests/sweep/test_vector_arms.py` asserts each targeted arm actually FIRES in
 the probe that claims it. A row whose gate never emitted proves nothing.
+
+## The shared-latent family
+
+`SHARED_LATENT_SHAPES` × `SHARED_LATENT_SPELLINGS` is a THIRD targeted family,
+for the joint constructs. It exists because the two families above cannot reach
+them at all: the scalar `record` spelling wraps exactly ONE bare draw, so no
+probe there has two fields, let alone two fields sharing a stochastic ancestor.
+That blind spot was measured, not assumed — the repin to flatppl-rust `ebed88b`
+(#131, which taught the record path to lower the shared-latent record law) left
+all 780 rows byte-identical, so a green sweep said nothing whatever about it
+(`flatppl-dev/density-sweep-notes.md`, "A determiniser feature the probe space
+cannot reach at all").
+
+Every member is linear-Gaussian, so its true law is a multivariate normal whose
+mean and covariance follow from the draw graph (`NormalNode`,
+`shared_latent_graph`) — `oracle._linear_gaussian_moments` derives them from the
+loading matrix, and `scipy.stats.multivariate_normal` scores the point. That is
+the "multivariate composition" this family needs and the scalar §13 fold cannot
+express.
+
+The axes, and what each one buys:
+
+* **shape** — the ancestry graph. `fan` (z → f_i for every i) is #131's own arm.
+  `chain` (z → f_1 → f_2 → …) is the composed-affine case flatppl-js #134 taught
+  the engine's recogniser; the determiniser is a separate question, which is the
+  point of probing it. `disjoint` (a private z_i per field) is the DISJOINTNESS
+  CONTROL: nothing is shared, so the traced law and the product of the marginals
+  must coincide, and a lowering that manufactures correlation is caught by the
+  same rows that would otherwise prove nothing. `singular` references ONE draw
+  from every field, which §06 "Singular joints" says has no density.
+* **spelling** — §06 "Equivalent record law" declares `record_law`, `joint_kw`
+  and `joint_pos` three spellings of ONE measure, which is the same
+  oracle-independent correctness signal the scalar `SPELLINGS` axis gives: three
+  spellings that lower to different densities are wrong even before a value is
+  compared. `joint_ctor` is §06's own contrast in the sentence right after —
+  "a `joint` of two constructor measures with the same marginals has
+  cross-covariance 0" — so it is the product-of-marginals arm, and it must
+  DIFFER from `record_law` wherever a node is shared and AGREE with it on
+  `disjoint`. `ctor_shared_kw` / `ctor_shared_pos` are the OTHER constructor
+  case: components sharing the latent through a stochastic PARAMETER rather
+  than through a reified law, which §06 keeps as one node of the composed
+  trace — so they must agree with `record_law`, not with `joint_ctor`. That
+  pair is what flatppl-rust #156 taught the determiniser to lower, and before
+  it they refused. `iid` is independent by construction (§06 `iid`), so it must
+  not pick up the shared ancestor either.
+* **n** — 2 and 3 fields. `n = 3` is what makes the off-diagonal STRUCTURE
+  checkable rather than a single number: `fan`'s off-diagonals are all `Var(z)`
+  while `chain`'s are nested (`cov[i][j] = Var(f_min(i,j))`), and at n = 2 those
+  two are indistinguishable in shape.
+* **latent_query** — a SECOND `logdensityof`, on the shared latent itself,
+  before or after the family's own query. `logdensityof` is a query and not a
+  conditioning, so the joint's density must not move; the scalar family's
+  `ORDERINGS` axis exists because two silent wrong densities were found by hand
+  in exactly this two-query region, and here the second query lands on the node
+  the whole family shares.
+
+**Not crossed in full, for the vector family's reason.** `latent_query` is
+crossed only at `n = 2`, and `n = 3` runs at `latent_query = "none"`: the
+ordering hazard is a property of the two-query lowering and does not interact
+with how many fields the record has. `iid` runs on `fan` alone, because its
+independence is a property of the construct rather than of the ancestry graph.
+`singular` runs at `latent_query = "none"`, because a shape that has no density
+has no ordering behaviour to probe.
 """
 from __future__ import annotations
 
@@ -243,6 +306,373 @@ _HELD_OUT = {
 _ENGINE_BLOCKED = {k: v[1] for k, v in _HELD_OUT.items() if v[0] == "engine"}
 
 
+# --------------------------------------------------------------------------
+# The shared-latent family (see the module docstring)
+# --------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class NormalNode:
+    """One `Normal` draw in a linear-Gaussian graph.
+
+    `parent` names the node this one's `mu` references, or is `None` for an
+    ancestor-free prior. `mu` is the LITERAL location: the prior's own mean when
+    `parent is None`, and an offset added to the parent otherwise. Every shape this
+    family generates uses offset 0, so `mu` is only nonzero at the root — the field
+    is kept general because the moment recursion is no harder for it and a
+    hardcoded 0 would read as an invariant of the maths rather than of this family.
+
+    `sigma` is a literal, never a reference: a stochastic SCALE is a different
+    construct (it is not linear-Gaussian, so no multivariate normal is its law) and
+    the oracle would have nothing to say about it.
+    """
+    name: str
+    parent: str | None
+    mu: float
+    sigma: float
+
+
+@dataclass(frozen=True)
+class SharedLatentProbe:
+    """A joint/record probe over N >= 2 fields of one linear-Gaussian graph.
+
+    A separate type from `Probe` rather than more fields on it. `Probe` is a base
+    plus a wrap stack, and this family has neither: its measure is composed from
+    several DRAWS, and what varies is the ancestry graph between them. Threading
+    `base: Base | None` and `wraps: () ` through `Probe` would make every existing
+    reader of those two fields conditional, and the verdict table is frozen
+    history keyed on `probe_id` — the scalar and vector rows have to keep coming
+    out bit-identical.
+    """
+    id: str
+    shape: str            # one of SHARED_LATENT_SHAPES
+    n: int                # number of fields, >= 2
+    spelling: str         # one of SHARED_LATENT_SPELLINGS
+    latent_query: str     # "none" | "before" | "after"
+    # One cell per field. A TUPLE for `Probe.point`'s reason: the record is frozen
+    # and hashable only if every field is.
+    point: tuple[float, ...]
+
+
+# The latent prior, and the per-field conditional scales. Distinct sigmas on
+# purpose: with one shared sigma the covariance is invariant under permuting the
+# fields, so a lowering that transposed or mis-paired two fields would produce the
+# right number anyway. `mu` is nonzero for the same reason applied to the location
+# — every mean in every shape here is `SHARED_LATENT_MU`, so a dropped mean shifts
+# every row rather than cancelling.
+SHARED_LATENT_MU = 0.4
+SHARED_LATENT_SIGMA_Z = 1.0
+SHARED_LATENT_FIELD_SIGMAS = (0.5, 1.5, 2.0)
+
+# Query points, one per field, and the point for the second (latent) query.
+# Asymmetric and not all positive, so a sign or an index slip does not cancel.
+SHARED_LATENT_POINTS = (0.5, 0.7, -0.3)
+SHARED_LATENT_LATENT_POINT = 0.1
+
+# Field NAMES are the record's, and they are what the query point is keyed by. They
+# are distinct even where the underlying NODES are not (`singular` binds every
+# field to one draw), which is what makes the singular shape expressible at all.
+SHARED_LATENT_FIELD_NAMES = ("f1", "f2", "f3")
+
+SHARED_LATENT_SHAPES = ["fan", "chain", "disjoint", "singular"]
+SHARED_LATENT_SPELLINGS = ["record_law", "joint_kw", "joint_pos", "joint_ctor",
+                           "ctor_shared_kw", "ctor_shared_pos", "iid"]
+SHARED_LATENT_QUERIES = ["none", "before", "after"]
+SHARED_LATENT_NS = [2, 3]
+
+# How each spelling composes its components, which is what decides the oracle's
+# covariance and is NOT derivable from the spelling's syntax alone:
+#
+# * "traced"  — §06 "Equivalent record law": the shared stochastic node stays a
+#   single node of the composed trace, so the covariance is the graph's own. All
+#   three of `record_law`, `joint_kw` and `joint_pos` are this, which is exactly
+#   what makes them an equivalence check.
+#   `joint_ctor` is ALSO "traced" and needs no product-measure special case: its
+#   graph (see `shared_latent_graph`) is n ancestor-free priors, so the traced
+#   covariance of that graph is already diagonal. One code path, no branch that
+#   could disagree with the branch beside it.
+# * "iid" — §06 `iid`: the product measure M^{(x)N}, so N independent copies of ONE
+#   marginal whatever ancestry that marginal has.
+SHARED_LATENT_COMPOSITION = {
+    "record_law": "traced",
+    "joint_kw": "traced",
+    "joint_pos": "traced",
+    "joint_ctor": "traced",
+    # The CONSTRUCTOR components that share a node through their PARAMETERS -- §06's
+    # "a stochastic node shared between component traces (through a reified component
+    # ... or a stochastic constructor parameter) remains a single node of the composed
+    # trace". So the composed law is the compound one, which is the record law of two
+    # fresh draws, which is this family's `fan` graph exactly. Hence "traced" over the
+    # SAME graph `record_law` uses -- not a fourth composition rule.
+    "ctor_shared_kw": "traced",
+    "ctor_shared_pos": "traced",
+    "iid": "iid",
+}
+
+
+def _latent_name(shape: str) -> str:
+    """The node the `latent_query` axis queries.
+
+    `disjoint` has one private latent per field and no shared one; its first,
+    `z1`, is queried, which is the honest analogue — the axis asks whether a
+    second query on an ANCESTOR of a field perturbs the answer, and `z1` is one.
+    """
+    return "z1" if shape == "disjoint" else "z"
+
+
+def shared_latent_variance(nodes: dict[str, NormalNode], name: str) -> float:
+    """`Var(name)` from the graph, by the scalar recursion: a root's variance is
+    its own `sigma**2`, and a child adds `sigma**2` to its parent's.
+
+    Deliberately a SECOND derivation of what `oracle._linear_gaussian_moments`
+    produces on the diagonal — that one goes through the loading matrix, this one
+    through the recursion, and
+    `test_shared_latent.test_the_two_variance_derivations_agree` asserts they
+    match. `render` needs the marginal variance to spell `joint_ctor`'s matched
+    constructors, so a copy exists either way; making it an independently checked
+    copy is cheaper than making the oracle import from the renderer's needs.
+    """
+    node = nodes[name]
+    own = node.sigma ** 2
+    return own if node.parent is None else own + shared_latent_variance(nodes, node.parent)
+
+
+def shared_latent_graph(shape: str, n: int, spelling: str,
+                        ) -> tuple[dict[str, NormalNode], tuple[str, ...]]:
+    """`(nodes, field_nodes)` for one probe: the draw graph, and the NODE each
+    record field resolves to, in field order.
+
+    `field_nodes` may repeat a name — that is the `singular` shape, and it is why
+    the fields are addressed by `SHARED_LATENT_FIELD_NAMES` rather than by node.
+
+    `joint_ctor` gets its OWN graph: n ancestor-free priors whose variances are the
+    other spellings' MARGINAL variances. That is §06's contrast verbatim — "a
+    `joint` of two constructor measures with the same marginals has
+    cross-covariance 0" — so the arm is only the contrast it claims to be if the
+    marginals really do match, which is what deriving them from the traced graph
+    guarantees.
+
+    `ctor_shared_kw` / `ctor_shared_pos` deliberately fall through to the shape
+    branches and get the SAME graph as `record_law`. Their components are
+    constructors whose `mu` names the latent, and §06 keeps a node shared through a
+    stochastic constructor parameter as one node of the composed trace — so the
+    composed law IS the record law of two fresh draws, and giving them their own
+    graph would be a second way to spell one thing.
+    """
+    sig = SHARED_LATENT_FIELD_SIGMAS
+    fields = SHARED_LATENT_FIELD_NAMES[:n]
+
+    if spelling == "joint_ctor":
+        traced, traced_fields = shared_latent_graph(shape, n, "record_law")
+        return ({f: NormalNode(f, None, SHARED_LATENT_MU,
+                               math.sqrt(shared_latent_variance(traced, node)))
+                 for f, node in zip(fields, traced_fields)}, fields)
+
+    if shape == "fan":
+        nodes = {"z": NormalNode("z", None, SHARED_LATENT_MU, SHARED_LATENT_SIGMA_Z)}
+        nodes.update({f: NormalNode(f, "z", 0.0, sig[i]) for i, f in enumerate(fields)})
+        return nodes, fields
+
+    if shape == "chain":
+        nodes = {"z": NormalNode("z", None, SHARED_LATENT_MU, SHARED_LATENT_SIGMA_Z)}
+        parent = "z"
+        for i, f in enumerate(fields):
+            nodes[f] = NormalNode(f, parent, 0.0, sig[i])
+            parent = f
+        return nodes, fields
+
+    if shape == "disjoint":
+        nodes: dict[str, NormalNode] = {}
+        for i, f in enumerate(fields):
+            z = f"z{i + 1}"
+            nodes[z] = NormalNode(z, None, SHARED_LATENT_MU, SHARED_LATENT_SIGMA_Z)
+            nodes[f] = NormalNode(f, z, 0.0, sig[i])
+        return nodes, fields
+
+    if shape == "singular":
+        # ONE draw, bound to every field. §06 "Singular joints": "the same draw
+        # referenced twice" — the law is carried by the diagonal {f1 = f2 = ...},
+        # so it has no density w.r.t. the product reference measure.
+        nodes = {
+            "z": NormalNode("z", None, SHARED_LATENT_MU, SHARED_LATENT_SIGMA_Z),
+            "f1": NormalNode("f1", "z", 0.0, sig[0]),
+        }
+        return nodes, ("f1",) * n
+
+    raise ValueError(f"unknown shared-latent shape: {shape}")
+
+
+# (shape, spelling) pairs held OUT of the generated family, each with the CATEGORY of
+# reason and the reason itself — the same machinery, and the same two categories, as
+# the vector family's `_HELD_OUT`. Separate from `shared_latent_supported`'s
+# well-formedness rules below: those are shapes that DO NOT EXIST, this is for shapes
+# that exist and cannot currently yield a usable row.
+#
+# `"engine"` — the probe is well formed as a probe, but the toolchain's behaviour on it
+# makes the row unusable (a `MALFORMED` verdict, which `test_gate.py` bans from the
+# table and which is indistinguishable there from a determiniser defect). Retires on an
+# upstream change.
+_SHARED_LATENT_HELD_OUT = {
+    ("chain", "ctor_shared_kw"): (
+        "engine",
+        "the determiniser MISLOWERS this shape instead of refusing it. A constructor "
+        "component's parameter can only name a BINDING, and a sibling component of the "
+        "same `joint` is not one — so the chain shape has no constructor spelling and "
+        "`Normal(mu = f1, ...)` references an UNBOUND name. That is a modelling error "
+        "and should be a static one. Observed at flatppl-rust 9eefb43 instead: `infer` "
+        "exits 0 with `f1` absorbed as a `%fixed` scalar, and `determinize` exits 0 "
+        "emitting `builtin_logdensityof(Normal, record(mu = f1, sigma = 1.5), 0.7)` "
+        "with NOTHING binding `f1` — a free variable in FlatPDL, i.e. a "
+        "refuse-don't-mislower violation. Through `classify` that is MALFORMED / "
+        "`crash:derivation`, so generating it would freeze an upstream bug as a banned "
+        "row rather than reporting it. Pinned by "
+        "`tests/sweep/test_shared_latent.py::test_the_chain_constructor_holdout_still_"
+        "mislowers`, which fails the day the behaviour moves. **The right resolution "
+        "when it does is a judgement call, not automatic re-inclusion**: if the "
+        "toolchain starts REFUSING the unbound name, that refusal tests SCOPING and "
+        "not the joint algebra, so the entry should be retired rather than the pair "
+        "admitted as a density probe. NOTE deleting this entry ADMITS the pair "
+        "(`shared_latent_supported` checks the hold-out first, then the shape tuple): "
+        "retiring means removing this entry AND dropping `chain` from the ctor_shared "
+        "arm of the supported tuple, in the same edit.",
+    ),
+    ("chain", "ctor_shared_pos"): (
+        "engine",
+        "the positional spelling of the shape above, with the identical observed "
+        "behaviour at flatppl-rust 9eefb43 — `determinize` exits 0 emitting a free "
+        "`f1`, `classify` reports MALFORMED / `crash:derivation`. Same reason, same "
+        "pin, same resolution question.",
+    ),
+}
+
+# The engine-gap category, derived rather than hand-maintained, for `_ENGINE_BLOCKED`'s
+# reason: it records that the category exists and what retires it.
+_SHARED_LATENT_ENGINE_BLOCKED = {
+    k: v[1] for k, v in _SHARED_LATENT_HELD_OUT.items() if v[0] == "engine"
+}
+
+
+def shared_latent_supported(shape: str, spelling: str) -> bool:
+    """Which (shape, spelling) pairs the family generates — see the module
+    docstring's "not crossed in full" paragraph.
+
+    `iid` on `fan` only: `iid`'s independence is a property of the construct (§06
+    gives it as the product measure M^{(x)N}), so repeating it under `chain` and
+    `disjoint` would add rows whose oracle value is the same product of the same
+    marginal, differing only in a sibling definition the query never reaches.
+
+    `joint_ctor` and `iid` are excluded from `singular`: neither is singular.
+    `joint_ctor` composes fresh constructors, which share no node with anything,
+    and `iid` is a product by construction — writing "the singular spelling" of
+    either would be a probe of a shape that does not exist.
+    """
+    if spelling == "iid":
+        return shape == "fan"
+    if spelling in ("ctor_shared_kw", "ctor_shared_pos"):
+        # `fan` is the shape this spelling IS -- every component's `mu` names the one
+        # latent. `disjoint` is its control: distinct latents per component, so §06
+        # gives back the independent product and a lowering that correlates any two
+        # stochastic-parameter constructors is caught.
+        #
+        # `chain` has no constructor spelling, because a component's parameter can only
+        # name a BINDING and a sibling component of the same `joint` is not one. But
+        # note WHAT THAT DOES AND DOES NOT LICENSE: the SHAPE does not exist, while the
+        # SOURCE a renderer would emit for it is accepted and mislowered rather than
+        # rejected. That is an upstream bug worth pinning, so the pair is an explicit
+        # `_SHARED_LATENT_HELD_OUT` entry with the observed behaviour recorded, not a
+        # silent "inexpressible" here. (An earlier revision of this comment claimed the
+        # model itself was inexpressible, which is false and is exactly the kind of
+        # unverified premise a hold-out reason is supposed to stop.)
+        #
+        # `singular` does not apply: two fresh draws with identical parameters are
+        # conditionally independent given the latent, never the same draw, so §06's
+        # singular case is not reachable through constructors at all.
+        if (shape, spelling) in _SHARED_LATENT_HELD_OUT:
+            return False
+        return shape in ("fan", "disjoint", "chain")
+    if shape == "singular":
+        return spelling in ("record_law", "joint_kw", "joint_pos")
+    return True
+
+
+def shared_latent_shapes() -> list[tuple[str, str]]:
+    """The (shape, spelling) pairs the family generates.
+
+    Separate from `enumerate_shared_latent_probes` for `vector_shapes`' reason:
+    `table._slice_probes` takes one probe per pair and must not re-derive which
+    pairs exist.
+    """
+    return [(shape, spelling)
+            for shape in SHARED_LATENT_SHAPES
+            for spelling in SHARED_LATENT_SPELLINGS
+            if shared_latent_supported(shape, spelling)]
+
+
+def _shared_latent_queries(shape: str, n: int) -> list[str]:
+    """Which `latent_query` values a (shape, n) runs — the trimming the module
+    docstring justifies. `n = 3` and `singular` run the unqueried case only."""
+    if n != 2 or shape == "singular":
+        return ["none"]
+    return SHARED_LATENT_QUERIES
+
+
+def enumerate_shared_latent_probes() -> list[SharedLatentProbe]:
+    out: list[SharedLatentProbe] = []
+    for shape, spelling in shared_latent_shapes():
+        for n in SHARED_LATENT_NS:
+            for latent_query in _shared_latent_queries(shape, n):
+                pid = f"shared.{shape}.n{n}.{spelling}.{latent_query}"
+                out.append(SharedLatentProbe(
+                    id=pid, shape=shape, n=n, spelling=spelling,
+                    latent_query=latent_query, point=SHARED_LATENT_POINTS[:n],
+                ))
+    return out
+
+
+@dataclass(frozen=True)
+class LinearGaussianProbe:
+    """An EXPLICIT linear-Gaussian graph plus the rule composing its fields.
+
+    What `SharedLatentProbe` becomes once the (shape, n, spelling) labels are gone:
+    it names the graph directly instead of deriving it. That is what a PARSED model
+    gives you — `curated.py` reads a corpus dir whose graph is whatever its author
+    wrote, with no shape label to key off — and it is why the two types are not one.
+    A generated probe must be identified by its axes (the verdict table's ids and
+    `table._spec_justified` are keyed on them); a curated one has no axes at all.
+
+    Both reach the same oracle (`oracle.linear_gaussian_logpdf`), which is the whole
+    point: the frozen corpus values then license the code the generated family runs
+    on, rather than each side validating itself.
+
+    `nodes` is a tuple and not a dict so the record stays frozen and hashable, for
+    `Probe`'s reason. Node order carries no meaning —
+    `oracle._linear_gaussian_moments` resolves parents by recursion, so a child may
+    be listed before its parent.
+    """
+    id: str
+    nodes: tuple[NormalNode, ...]
+    fields: tuple[str, ...]
+    composition: str          # a SHARED_LATENT_COMPOSITION value
+    point: tuple[float, ...]
+
+    def graph(self) -> dict[str, NormalNode]:
+        return {node.name: node for node in self.nodes}
+
+
+def is_linear_gaussian(probe) -> bool:
+    """Whether `probe` is a `LinearGaussianProbe` (see `is_shared_latent`)."""
+    return isinstance(probe, LinearGaussianProbe)
+
+
+def is_shared_latent(probe) -> bool:
+    """Whether `probe` is a `SharedLatentProbe`.
+
+    A named predicate rather than a bare `isinstance` at every call site: the
+    union `Probe | SharedLatentProbe` is threaded through `render`, `oracle` and
+    `table`, and each of those reads fields the other type does not have.
+    """
+    return isinstance(probe, SharedLatentProbe)
+
+
 def _supported(base: Base, wrap: Wrap) -> bool:
     """Skip combinations that are ill-formed rather than merely refused.
 
@@ -384,12 +814,19 @@ def enumerate_vector_probes() -> list[Probe]:
     return out
 
 
-def enumerate_probes() -> list[Probe]:
-    """The scalar axes' full cross-product, then the targeted vector family.
+def enumerate_probes() -> list[Probe | SharedLatentProbe]:
+    """The scalar axes' full cross-product, then each targeted family.
 
-    The vector probes are APPENDED, and the scalar loop below is untouched: the
-    verdict table is frozen history keyed on `probe_id`, so every existing id and
-    its `expected` value has to survive this addition byte-identically.
+    The targeted families are APPENDED, and the scalar loop below is untouched:
+    the verdict table is frozen history keyed on `probe_id`, so every existing id
+    and its `expected` value has to survive this addition byte-identically.
+
+    This returns THE WHOLE SPACE, mixed types included, rather than the scalar
+    space with the families reachable through separate calls. A reader who
+    enumerates the space and quietly misses a family is the failure this shape
+    prevents; the cost is that a caller touching `Probe`-only fields has to skip
+    the shared-latent rows explicitly (`is_shared_latent`), which is a visible
+    conditional rather than a silent omission.
     """
     out: list[Probe] = []
     for base in BASES:
@@ -411,4 +848,4 @@ def enumerate_probes() -> list[Probe]:
                             ordering=ordering, consumer=consumer,
                             point=_point_for(base, wrap),
                         ))
-    return out + enumerate_vector_probes()
+    return out + enumerate_vector_probes() + enumerate_shared_latent_probes()
