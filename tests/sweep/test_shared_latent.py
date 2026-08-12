@@ -34,6 +34,7 @@ from flatppl_testsuite.sweep.space import (
     enumerate_shared_latent_probes,
     is_linear_gaussian,
     shared_latent_graph,
+    _SHARED_LATENT_HELD_OUT,
     shared_latent_shapes,
     shared_latent_variance,
 )
@@ -643,64 +644,101 @@ def test_the_shared_ancestor_arm_lowers_a_correlated_form_not_two_marginals():
 
 
 @pytestmark_binary
-@pytest.mark.parametrize("latent_query", ["before", "after"])
-def test_the_latent_query_survives_into_the_emitted_flatpdl(latent_query):
-    """The `latent_query` axis's arm assertion — without it the axis is unpinned
-    where it matters.
+@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
+def test_the_chain_constructor_holdout_still_mislowers(spelling):
+    """The hold-out pin for `chain` + `ctor_shared_*`, on all three of its legs.
 
-    Every other test of this axis stops short of the determiniser: the render test
-    checks the source text, and the oracle test asserts the three rows share one
-    value. **Both would still pass if the second query were eliminated as dead
-    code.** The rows would agree trivially, the table would report the axis
-    covered, and this family's own rule — a row whose gate never emitted proves
-    nothing — would be unmet on exactly one axis.
+    The shape has no constructor spelling — a component's parameter can only name a
+    BINDING, and a sibling component of the same `joint` is not one — so the source a
+    renderer produces for it references an UNBOUND `f1`. That should be a static error.
+    It is not: at flatppl-rust `9eefb43` the toolchain accepts it and emits FlatPDL
+    containing a FREE VARIABLE, which is a refuse-don't-mislower violation.
 
-    So assert the `lp_latent` binding survives AND that its right-hand side is the
-    latent's own scalar law. Asserted on THAT LINE, not by counting
-    `builtin_logdensityof` over the whole module: the `fan` record law lowers to a
-    closed-form rank-1-update expression carrying no `builtin_logdensityof` at all,
-    so a global count of two is simply false here — the family's query contributes
-    none and `lp_latent` contributes the only one.
+    Pinned rather than merely documented, for the reason the vector family's hold-outs
+    are: nobody has to remember, and the gap cannot outlive its cause. All three legs
+    are asserted, so a change in ANY of them reddens this test — determinize still
+    exiting 0, the emitted text still carrying the unbound name, and `classify` still
+    calling it MALFORMED.
+
+    **When it does redden, re-inclusion is a judgement call, not the default.** If the
+    toolchain starts refusing the unbound name, that refusal tests SCOPING rather than
+    the joint algebra, so the right move is to retire the hold-out entry — not to admit
+    the pair as a density probe. The upstream defect is filed separately; this repo only
+    records the observation.
     """
-    code, emitted, stderr = _determinize(
-        _probe("fan", "record_law", latent_query=latent_query))
-    assert code == 0, f"determinize refused: {stderr.strip()}"
-    line = next((ln for ln in emitted.splitlines()
-                 if ln.startswith("lp_latent =")), None)
-    assert line is not None, (
-        f"the second query's binding was eliminated:\n{emitted}")
-    # §08's `Normal(mu, sigma)` for the latent prior, scored at
-    # SHARED_LATENT_LATENT_POINT. Named rather than counted, so an unrelated call
-    # elsewhere in the module cannot satisfy this.
-    assert "builtin_logdensityof(Normal, record(mu = 0.4, sigma = 1.0), 0.1)" in line, (
-        f"lp_latent survived but is not the latent's own law: {line}")
+    probe = _probe("chain", spelling)
+    code, emitted, stderr = _determinize(probe)
+    assert code == 0, (
+        f"determinize now exits {code} on chain/{spelling} (stderr: {stderr.strip()}) "
+        "-- the mislowering may be fixed upstream. Re-read "
+        "space._SHARED_LATENT_HELD_OUT and decide whether to retire the entry (a "
+        "refusal on an unbound name is a scoping verdict, not a joint-algebra one)")
+    assert "mu = f1" in emitted, (
+        "the emitted FlatPDL no longer carries the unbound `f1`, so the mislowering "
+        f"moved -- re-read the hold-out entry:\n{emitted}")
+    assert "f1 = " not in emitted, (
+        f"something now binds `f1`, so this is no longer a free variable:\n{emitted}")
+    v = classify(probe)
+    assert v.outcome == Outcome.MALFORMED, (
+        f"chain/{spelling} now classifies {v.outcome} rather than MALFORMED -- the "
+        "hold-out's premise moved")
+
+
+def test_every_shared_latent_holdout_is_excluded_and_carries_a_category():
+    """`_SHARED_LATENT_HELD_OUT` drives the exclusion, so the roster and the generated
+    family cannot drift apart, and every entry must declare a category — the vector
+    family's `_HELD_OUT` discipline, for the same reason: two kinds of hold-out retire
+    on different events, and treating them alike sweeps an unjudgeable row back in."""
+    pairs = set(shared_latent_shapes())
+    for key, (category, reason) in _SHARED_LATENT_HELD_OUT.items():
+        assert key not in pairs, f"{key} is held out but still generated"
+        assert category in ("engine", "oracle"), f"{key}: unknown category {category!r}"
+        assert len(reason) > 80, f"{key}: reason is too thin to triage from"
+
+
+# Every (shape, spelling) pair that HAS a latent query to survive. `singular` is
+# excluded because the family's own query refuses there (§06 "Singular joints"), so
+# determinize exits 3 and there is no emitted module to inspect.
+_QUERYABLE_PAIRS = [(sh, sp) for sh, sp in shared_latent_shapes() if sh != "singular"]
 
 
 @pytestmark_binary
-def test_the_latent_query_does_not_perturb_the_familys_own_lowering():
-    """The invariant the `latent_query` axis exists for, asserted on the emitted
-    FlatPDL rather than on the oracle.
+@pytest.mark.parametrize("shape,spelling", _QUERYABLE_PAIRS, ids=lambda v: str(v))
+@pytest.mark.parametrize("latent_query", ["before", "after"])
+def test_the_latent_query_survives_under_every_pair(shape, spelling, latent_query):
+    """`test_the_latent_query_survives_into_the_emitted_flatpdl` generalised.
 
-    §04 makes `logdensityof` a query on a measure, not a conditioning of the model,
-    so a second query on the shared latent must not change the joint's density. The
-    oracle enforces that by construction (it never reads `latent_query`), which is
-    exactly why the oracle cannot detect a violation — a determiniser that DID
-    perturb the joint would show up as three disagreeing rows, and this pins the
-    stronger statement: the `lp` expression is byte-identical across all three
-    values of the axis.
-
-    Worth pinning because the determiniser binds the latent to the query's point
-    (`z = 0.1` appears in the emitted module), so there IS a mechanism by which a
-    second query could reach the family's own answer.
+    The asserted string is the LATENT's own law, which is the same
+    `Normal(mu = 0.4, sigma = 1.0)` in every shape (`disjoint` queries `z1`, with the
+    same parameters) — so nothing about the pin was fan/record_law-specific, and fixing
+    it to one pair meant elimination under any OTHER pair would have gone unnoticed.
     """
+    code, emitted, stderr = _determinize(
+        _probe(shape, spelling, latent_query=latent_query))
+    assert code == 0, f"{shape}/{spelling}: determinize refused: {stderr.strip()}"
+    line = next((ln for ln in emitted.splitlines()
+                 if ln.startswith("lp_latent =")), None)
+    assert line is not None, (
+        f"{shape}/{spelling}: the second query's binding was eliminated:\n{emitted}")
+    assert "builtin_logdensityof(Normal, record(mu = 0.4, sigma = 1.0), 0.1)" in line, (
+        f"{shape}/{spelling}: lp_latent is not the latent's own law: {line}")
+
+
+@pytestmark_binary
+@pytest.mark.parametrize("shape,spelling", _QUERYABLE_PAIRS, ids=lambda v: str(v))
+def test_the_latent_query_perturbs_no_pairs_own_lowering(shape, spelling):
+    """`test_the_latent_query_does_not_perturb_the_familys_own_lowering` generalised to
+    every pair, for the same reason: the invariant is §04's (a query is not a
+    conditioning) and has nothing to do with which spelling is being queried."""
     exprs = {}
     for latent_query in ("none", "before", "after"):
         code, emitted, stderr = _determinize(
-            _probe("fan", "record_law", latent_query=latent_query))
-        assert code == 0, f"{latent_query}: determinize refused: {stderr.strip()}"
+            _probe(shape, spelling, latent_query=latent_query))
+        assert code == 0, (
+            f"{shape}/{spelling}/{latent_query}: determinize refused: {stderr.strip()}")
         exprs[latent_query] = _binding(emitted, "lp")
     assert len(set(exprs.values())) == 1, (
-        "the latent query changed the family's own lowering:\n"
+        f"{shape}/{spelling}: the latent query changed the lowering:\n"
         + "\n".join(f"{k}: {v}" for k, v in exprs.items()))
 
 

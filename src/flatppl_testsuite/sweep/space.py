@@ -501,6 +501,53 @@ def shared_latent_graph(shape: str, n: int, spelling: str,
     raise ValueError(f"unknown shared-latent shape: {shape}")
 
 
+# (shape, spelling) pairs held OUT of the generated family, each with the CATEGORY of
+# reason and the reason itself — the same machinery, and the same two categories, as
+# the vector family's `_HELD_OUT`. Separate from `shared_latent_supported`'s
+# well-formedness rules below: those are shapes that DO NOT EXIST, this is for shapes
+# that exist and cannot currently yield a usable row.
+#
+# `"engine"` — the probe is well formed as a probe, but the toolchain's behaviour on it
+# makes the row unusable (a `MALFORMED` verdict, which `test_gate.py` bans from the
+# table and which is indistinguishable there from a determiniser defect). Retires on an
+# upstream change.
+_SHARED_LATENT_HELD_OUT = {
+    ("chain", "ctor_shared_kw"): (
+        "engine",
+        "the determiniser MISLOWERS this shape instead of refusing it. A constructor "
+        "component's parameter can only name a BINDING, and a sibling component of the "
+        "same `joint` is not one — so the chain shape has no constructor spelling and "
+        "`Normal(mu = f1, ...)` references an UNBOUND name. That is a modelling error "
+        "and should be a static one. Observed at flatppl-rust 9eefb43 instead: `infer` "
+        "exits 0 with `f1` absorbed as a `%fixed` scalar, and `determinize` exits 0 "
+        "emitting `builtin_logdensityof(Normal, record(mu = f1, sigma = 1.5), 0.7)` "
+        "with NOTHING binding `f1` — a free variable in FlatPDL, i.e. a "
+        "refuse-don't-mislower violation. Through `classify` that is MALFORMED / "
+        "`crash:derivation`, so generating it would freeze an upstream bug as a banned "
+        "row rather than reporting it. Pinned by "
+        "`tests/sweep/test_shared_latent.py::test_the_chain_constructor_holdout_still_"
+        "mislowers`, which fails the day the behaviour moves. **The right resolution "
+        "when it does is a judgement call, not automatic re-inclusion**: if the "
+        "toolchain starts REFUSING the unbound name, that refusal tests SCOPING and "
+        "not the joint algebra, so the entry should be retired rather than the pair "
+        "admitted as a density probe.",
+    ),
+    ("chain", "ctor_shared_pos"): (
+        "engine",
+        "the positional spelling of the shape above, with the identical observed "
+        "behaviour at flatppl-rust 9eefb43 — `determinize` exits 0 emitting a free "
+        "`f1`, `classify` reports MALFORMED / `crash:derivation`. Same reason, same "
+        "pin, same resolution question.",
+    ),
+}
+
+# The engine-gap category, derived rather than hand-maintained, for `_ENGINE_BLOCKED`'s
+# reason: it records that the category exists and what retires it.
+_SHARED_LATENT_ENGINE_BLOCKED = {
+    k: v[1] for k, v in _SHARED_LATENT_HELD_OUT.items() if v[0] == "engine"
+}
+
+
 def shared_latent_supported(shape: str, spelling: str) -> bool:
     """Which (shape, spelling) pairs the family generates — see the module
     docstring's "not crossed in full" paragraph.
@@ -523,15 +570,22 @@ def shared_latent_supported(shape: str, spelling: str) -> bool:
         # gives back the independent product and a lowering that correlates any two
         # stochastic-parameter constructors is caught.
         #
-        # `chain` is NOT EXPRESSIBLE, not merely skipped: a constructor component's
-        # parameter can only name a BINDING, and `f1` here is a component of the
-        # joint rather than a bound draw, so there is nothing for `f2`'s `mu` to
-        # reference. The chain shape needs the drawn spellings.
+        # `chain` has no constructor spelling, because a component's parameter can only
+        # name a BINDING and a sibling component of the same `joint` is not one. But
+        # note WHAT THAT DOES AND DOES NOT LICENSE: the SHAPE does not exist, while the
+        # SOURCE a renderer would emit for it is accepted and mislowered rather than
+        # rejected. That is an upstream bug worth pinning, so the pair is an explicit
+        # `_SHARED_LATENT_HELD_OUT` entry with the observed behaviour recorded, not a
+        # silent "inexpressible" here. (An earlier revision of this comment claimed the
+        # model itself was inexpressible, which is false and is exactly the kind of
+        # unverified premise a hold-out reason is supposed to stop.)
         #
         # `singular` does not apply: two fresh draws with identical parameters are
         # conditionally independent given the latent, never the same draw, so §06's
         # singular case is not reachable through constructors at all.
-        return shape in ("fan", "disjoint")
+        if (shape, spelling) in _SHARED_LATENT_HELD_OUT:
+            return False
+        return shape in ("fan", "disjoint", "chain")
     if shape == "singular":
         return spelling in ("record_law", "joint_kw", "joint_pos")
     return True
