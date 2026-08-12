@@ -530,7 +530,10 @@ _SHARED_LATENT_HELD_OUT = {
         "when it does is a judgement call, not automatic re-inclusion**: if the "
         "toolchain starts REFUSING the unbound name, that refusal tests SCOPING and "
         "not the joint algebra, so the entry should be retired rather than the pair "
-        "admitted as a density probe.",
+        "admitted as a density probe. NOTE deleting this entry ADMITS the pair "
+        "(`shared_latent_supported` checks the hold-out first, then the shape tuple): "
+        "retiring means removing this entry AND dropping `chain` from the ctor_shared "
+        "arm of the supported tuple, in the same edit.",
     ),
     ("chain", "ctor_shared_pos"): (
         "engine",
