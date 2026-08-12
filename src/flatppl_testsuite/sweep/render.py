@@ -116,6 +116,16 @@ def _shared_measure_src(probe: SharedLatentProbe, nodes: dict[str, NormalNode],
     if s == "joint_ctor":
         return "joint(" + ", ".join(
             f"{lab} = {_normal_src(nodes[lab])}" for lab in labels) + ")"
+    if s in ("ctor_shared_kw", "ctor_shared_pos"):
+        # Each component is the CONSTRUCTOR of the corresponding field's draw, so its
+        # `mu` names that field's parent -- the latent. §06 keeps a node shared through
+        # a stochastic constructor parameter as one node of the composed trace, which
+        # is what makes this the compound law rather than a product.
+        ctors = [_normal_src(nodes[node]) for node in field_nodes]
+        if s == "ctor_shared_pos":
+            return "joint(" + ", ".join(ctors) + ")"
+        return "joint(" + ", ".join(
+            f"{lab} = {c}" for lab, c in zip(labels, ctors)) + ")"
     if s == "iid":
         # §06 `iid(M, size)`: the product measure. `size` is "an integer (1-D
         # length)", so it is emitted as an integer literal, not `2.0`.
@@ -146,13 +156,21 @@ def _render_shared_latent(probe: SharedLatentProbe) -> RenderedProbe:
         if probe.latent_query != "none":
             traced, _ = shared_latent_graph(probe.shape, probe.n, "record_law")
             lines.append(f"{latent} = draw({_normal_src(traced[latent])})")
+    elif probe.spelling in ("ctor_shared_kw", "ctor_shared_pos"):
+        # Emit the LATENTS only. The fields are the joint's own constructor
+        # components -- fresh draws made inside the measure -- so drawing them as
+        # bindings too would both change the model and leave an unconsumed draw. Every
+        # latent IS consumed, by the constructor parameter that names it.
+        for name, node in nodes.items():
+            if name not in field_nodes:
+                lines.append(f"{name} = draw({_normal_src(node)})")
     else:
         for name, node in nodes.items():
             lines.append(f"{name} = draw({_normal_src(node)})")
 
     labels = SHARED_LATENT_FIELD_NAMES[:probe.n]
     measure = _shared_measure_src(probe, nodes, field_nodes)
-    if probe.spelling in ("joint_pos", "iid"):
+    if probe.spelling in ("joint_pos", "iid", "ctor_shared_pos"):
         # §06: a POSITIONAL `joint` combines the component variates via `cat`, and
         # `iid` over a scalar law is an array — both are vector variates, so the
         # query point is an array literal and not a record.

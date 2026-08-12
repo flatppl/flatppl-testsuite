@@ -65,8 +65,13 @@ The axes, and what each one buys:
   "a `joint` of two constructor measures with the same marginals has
   cross-covariance 0" — so it is the product-of-marginals arm, and it must
   DIFFER from `record_law` wherever a node is shared and AGREE with it on
-  `disjoint`. `iid` is independent by construction (§06 `iid`), so it must not
-  pick up the shared ancestor either.
+  `disjoint`. `ctor_shared_kw` / `ctor_shared_pos` are the OTHER constructor
+  case: components sharing the latent through a stochastic PARAMETER rather
+  than through a reified law, which §06 keeps as one node of the composed
+  trace — so they must agree with `record_law`, not with `joint_ctor`. That
+  pair is what flatppl-rust #156 taught the determiniser to lower, and before
+  it they refused. `iid` is independent by construction (§06 `iid`), so it must
+  not pick up the shared ancestor either.
 * **n** — 2 and 3 fields. `n = 3` is what makes the off-diagonal STRUCTURE
   checkable rather than a single number: `fan`'s off-diagonals are all `Var(z)`
   while `chain`'s are nested (`cov[i][j] = Var(f_min(i,j))`), and at n = 2 those
@@ -369,7 +374,8 @@ SHARED_LATENT_LATENT_POINT = 0.1
 SHARED_LATENT_FIELD_NAMES = ("f1", "f2", "f3")
 
 SHARED_LATENT_SHAPES = ["fan", "chain", "disjoint", "singular"]
-SHARED_LATENT_SPELLINGS = ["record_law", "joint_kw", "joint_pos", "joint_ctor", "iid"]
+SHARED_LATENT_SPELLINGS = ["record_law", "joint_kw", "joint_pos", "joint_ctor",
+                           "ctor_shared_kw", "ctor_shared_pos", "iid"]
 SHARED_LATENT_QUERIES = ["none", "before", "after"]
 SHARED_LATENT_NS = [2, 3]
 
@@ -391,6 +397,14 @@ SHARED_LATENT_COMPOSITION = {
     "joint_kw": "traced",
     "joint_pos": "traced",
     "joint_ctor": "traced",
+    # The CONSTRUCTOR components that share a node through their PARAMETERS -- §06's
+    # "a stochastic node shared between component traces (through a reified component
+    # ... or a stochastic constructor parameter) remains a single node of the composed
+    # trace". So the composed law is the compound one, which is the record law of two
+    # fresh draws, which is this family's `fan` graph exactly. Hence "traced" over the
+    # SAME graph `record_law` uses -- not a fourth composition rule.
+    "ctor_shared_kw": "traced",
+    "ctor_shared_pos": "traced",
     "iid": "iid",
 }
 
@@ -436,6 +450,13 @@ def shared_latent_graph(shape: str, n: int, spelling: str,
     cross-covariance 0" — so the arm is only the contrast it claims to be if the
     marginals really do match, which is what deriving them from the traced graph
     guarantees.
+
+    `ctor_shared_kw` / `ctor_shared_pos` deliberately fall through to the shape
+    branches and get the SAME graph as `record_law`. Their components are
+    constructors whose `mu` names the latent, and §06 keeps a node shared through a
+    stochastic constructor parameter as one node of the composed trace — so the
+    composed law IS the record law of two fresh draws, and giving them their own
+    graph would be a second way to spell one thing.
     """
     sig = SHARED_LATENT_FIELD_SIGMAS
     fields = SHARED_LATENT_FIELD_NAMES[:n]
@@ -496,6 +517,21 @@ def shared_latent_supported(shape: str, spelling: str) -> bool:
     """
     if spelling == "iid":
         return shape == "fan"
+    if spelling in ("ctor_shared_kw", "ctor_shared_pos"):
+        # `fan` is the shape this spelling IS -- every component's `mu` names the one
+        # latent. `disjoint` is its control: distinct latents per component, so §06
+        # gives back the independent product and a lowering that correlates any two
+        # stochastic-parameter constructors is caught.
+        #
+        # `chain` is NOT EXPRESSIBLE, not merely skipped: a constructor component's
+        # parameter can only name a BINDING, and `f1` here is a component of the
+        # joint rather than a bound draw, so there is nothing for `f2`'s `mu` to
+        # reference. The chain shape needs the drawn spellings.
+        #
+        # `singular` does not apply: two fresh draws with identical parameters are
+        # conditionally independent given the latent, never the same draw, so §06's
+        # singular case is not reachable through constructors at all.
+        return shape in ("fan", "disjoint")
     if shape == "singular":
         return spelling in ("record_law", "joint_kw", "joint_pos")
     return True

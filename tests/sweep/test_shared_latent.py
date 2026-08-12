@@ -134,6 +134,32 @@ lp = logdensityof(joint(lawof(f1), lawof(f2)), [0.5, 0.7])
 lp = logdensityof(joint(f1 = Normal(mu = 0.4, sigma = 1.118033988749895), \
 f2 = Normal(mu = 0.4, sigma = 1.8027756377319946)), record(f1 = 0.5, f2 = 0.7))
 """,
+    # flatppl-rust #156's shape: the components are CONSTRUCTORS whose `mu` names the
+    # latent, so they share a node through a stochastic parameter rather than through a
+    # reified law. No field is drawn -- each component is a fresh draw made inside the
+    # measure -- while the latent is, and is consumed by the parameters naming it.
+    ("fan", "ctor_shared_kw"): """\
+z = draw(Normal(mu = 0.4, sigma = 1.0))
+lp = logdensityof(joint(f1 = Normal(mu = z, sigma = 0.5), \
+f2 = Normal(mu = z, sigma = 1.5)), record(f1 = 0.5, f2 = 0.7))
+""",
+    ("fan", "ctor_shared_pos"): """\
+z = draw(Normal(mu = 0.4, sigma = 1.0))
+lp = logdensityof(joint(Normal(mu = z, sigma = 0.5), \
+Normal(mu = z, sigma = 1.5)), [0.5, 0.7])
+""",
+    ("disjoint", "ctor_shared_kw"): """\
+z1 = draw(Normal(mu = 0.4, sigma = 1.0))
+z2 = draw(Normal(mu = 0.4, sigma = 1.0))
+lp = logdensityof(joint(f1 = Normal(mu = z1, sigma = 0.5), \
+f2 = Normal(mu = z2, sigma = 1.5)), record(f1 = 0.5, f2 = 0.7))
+""",
+    ("disjoint", "ctor_shared_pos"): """\
+z1 = draw(Normal(mu = 0.4, sigma = 1.0))
+z2 = draw(Normal(mu = 0.4, sigma = 1.0))
+lp = logdensityof(joint(Normal(mu = z1, sigma = 0.5), \
+Normal(mu = z2, sigma = 1.5)), [0.5, 0.7])
+""",
     ("singular", "record_law"): """\
 z = draw(Normal(mu = 0.4, sigma = 1.0))
 f1 = draw(Normal(mu = z, sigma = 0.5))
@@ -169,7 +195,7 @@ def test_the_positional_spellings_query_a_vector_and_the_keyword_ones_a_record()
     for shape, spelling in shared_latent_shapes():
         src = render(_probe(shape, spelling)).source
         query = [ln for ln in src.splitlines() if ln.startswith("lp =")][0]
-        if spelling in ("joint_pos", "iid"):
+        if spelling in ("joint_pos", "iid", "ctor_shared_pos"):
             assert "[0.5, 0.7]" in query, f"{shape}/{spelling}: {query}"
         else:
             assert "record(f1 = 0.5, f2 = 0.7)" in query, f"{shape}/{spelling}: {query}"
@@ -331,6 +357,52 @@ def test_the_constructor_joint_is_the_product_of_the_matched_marginals(shape, n)
                    scale=math.sqrt(shared_latent_variance(nodes, f))).logpdf(p)
         for f, p in zip(fields, SHARED_LATENT_POINTS[:n]))
     compare_scalar(true_logpdf(_probe(shape, "joint_ctor", n)), want, TOL)
+
+
+@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
+@pytest.mark.parametrize("n", [2, 3])
+def test_a_stochastic_parameter_shares_the_node_so_the_law_is_the_compound_one(
+        spelling, n):
+    """flatppl-rust #156's semantics, and §06's own wording for it: a node shared
+    "through a reified component ... OR A STOCHASTIC CONSTRUCTOR PARAMETER remains a
+    single node of the composed trace".
+
+    So `joint(a = Normal(mu = z, s_a), b = Normal(mu = z, s_b))` is the COMPOUND law —
+    the record law of two fresh draws — and must equal `record_law`, NOT `joint_ctor`.
+    Both are asserted: agreeing with the record law is the claim, and differing from
+    the ancestor-free constructor product is what stops the row passing on a lowering
+    that treats every constructor joint as independent.
+    """
+    compound = true_logpdf(_probe("fan", spelling, n))
+    compare_scalar(compound, true_logpdf(_probe("fan", "record_law", n)), TOL)
+    product = true_logpdf(_probe("fan", "joint_ctor", n))
+    assert abs(compound - product) > 1e-3, (
+        f"the compound law {compound} and the ancestor-free product {product} agree, "
+        "so this shape's shared stochastic parameter is not exercised")
+
+
+@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
+@pytest.mark.parametrize("n", [2, 3])
+def test_distinct_stochastic_parameters_stay_independent(spelling, n):
+    """The control for the arm above. `disjoint` gives each component its OWN latent,
+    so no node is shared and §06 hands back the independent product — a lowering that
+    correlates any two stochastic-parameter constructors, rather than only those
+    naming the same node, is caught here and nowhere else."""
+    compare_scalar(true_logpdf(_probe("disjoint", spelling, n)),
+                   true_logpdf(_probe("disjoint", "joint_ctor", n)), TOL)
+
+
+def test_a_constructor_component_is_never_drawn_as_a_binding():
+    """The `ctor_shared_*` spellings must draw the LATENTS and nothing else. A drawn
+    `f1` would be a different model — the reified spellings' one — and the row would
+    duplicate `joint_kw` instead of probing the constructor path."""
+    for shape in ("fan", "disjoint"):
+        for spelling in ("ctor_shared_kw", "ctor_shared_pos"):
+            src = render(_probe(shape, spelling)).source
+            assert "f1 = draw(" not in src, f"{shape}/{spelling} drew a field:\n{src}"
+            assert "f2 = draw(" not in src, f"{shape}/{spelling} drew a field:\n{src}"
+            # The latent IS drawn, and is consumed by the parameter naming it.
+            assert "z" in src and "= draw(" in src, src
 
 
 @pytest.mark.parametrize("shape,n", [(s, n) for s in ("fan", "chain") for n in (2, 3)])
