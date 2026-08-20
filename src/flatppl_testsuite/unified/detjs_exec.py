@@ -214,12 +214,18 @@ def _score_flatpdl_batch(sources: list[str], binding: str) -> list[PointScore]:
         raise RuntimeError(
             f"score_flatpdl_batch returned {len(rows)} rows for {len(sources)} sources"
         )
-    return [
-        PointScore(value=float(row["value"]), error=None)
-        if row.get("ok")
-        else PointScore(value=None, error=row.get("error", "unknown error"))
-        for row in rows
-    ]
+
+    out: list[PointScore] = []
+    for row in rows:
+        # `row.get(...)` rather than `row["value"]`/truthy `ok`: a missing or
+        # null `value` (e.g. a dropped-by-JSON.stringify `undefined`, or any
+        # future serialization surprise) degrades to this point's own error
+        # instead of KeyError/TypeError escaping the whole batch.
+        if row.get("ok") and row.get("value") is not None:
+            out.append(PointScore(value=float(row["value"]), error=None))
+        else:
+            out.append(PointScore(value=None, error=row.get("error") or "score_flatpdl_batch row missing a value"))
+    return out
 
 
 @lru_cache(maxsize=1)

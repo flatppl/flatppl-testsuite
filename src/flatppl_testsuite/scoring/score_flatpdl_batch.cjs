@@ -120,7 +120,12 @@ async function main() {
   for (let i = 0; i < sources.length; i++) {
     try {
       const value = await scoreOne(sources[i], binding, processSource, orchestrator, materialiser, w);
-      results[i] = { ok: true, value };
+      // JSON has no encoding for NaN/±Infinity (JSON.stringify(-Infinity) is
+      // null) -- an out-of-support point's log-density is exactly -inf, and
+      // this corpus carries that shape (score_abi_points' caller compares
+      // against frozen "-inf"/"nan" strings). Send those through as strings;
+      // Python's float() already parses "Infinity"/"-Infinity"/"NaN" natively.
+      results[i] = { ok: true, value: Number.isFinite(value) ? value : String(value) };
     } catch (e) {
       results[i] = { ok: false, error: e && e.message ? e.message : String(e) };
     }

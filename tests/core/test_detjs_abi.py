@@ -76,3 +76,31 @@ def test_abi_scoring_matches_the_frozen_oracle(dir: Path):
 
 def test_the_guard_sees_the_corpus():
     assert _DIRS, "no ABI example dirs found -- this test is vacuous"
+
+
+@pytest.mark.skipif(not ex.engine_available(), reason="det-js path unavailable")
+def test_an_out_of_support_point_scores_as_minus_inf_not_a_crash():
+    """A point outside a parameter's support has a log-density of exactly
+    -inf -- a live corpus shape (`detjs_exec.parse_expected`'s docstring names
+    it, e.g. fragment/trunc_out), not a broken point. The batched scorer sends
+    non-finite values through JSON as strings (`Number.isFinite` guards it in
+    `score_flatpdl_batch.cjs`) because `JSON.stringify(-Infinity)` is `null`;
+    without that, this point comes back as a `None` value and blows up the
+    whole batch instead of scoring as `-inf`."""
+    dir = _CORPORA / "examples" / "ex_best_estimation"
+    body = json.loads((dir / "test.json").read_text())
+
+    point = dict(body["points"][0])
+    point["sigma1"] = 50.0  # outside Uniform(interval(0.1, 20.0)) in model.flatppl
+
+    scores = ex.score_abi_points(
+        model=dir / body["model"],
+        query=dir / "query.flatppl",
+        fields=body["inputs"],
+        points=[point],
+    )
+
+    assert len(scores) == 1
+    score = scores[0]
+    assert score.error is None, f"out-of-support point should score, not error: {score.error}"
+    assert score.value == float("-inf"), f"expected -inf, got {score.value!r}"
