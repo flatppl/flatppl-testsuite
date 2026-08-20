@@ -8,9 +8,11 @@ rather than reaching into the legacy scoring package directly.
 """
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import tempfile
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
@@ -119,16 +121,28 @@ def determinize_abi(model: Path, query: Path) -> str:
         return out_path.read_text()
 
 
+@dataclass
+class PointScore:
+    """One ABI point's scoring outcome. `error` set means this point's
+    binding could not be evaluated -- the caller turns that into a failed
+    CheckResult for this point alone, leaving every other point's outcome
+    (in the same batch) unaffected."""
+    value: float | None
+    error: str | None = None
+
+
 def score_abi_points(
     model: Path, query: Path, fields: list[str], points: list[dict]
-) -> list[float]:
+) -> list[PointScore]:
     """Score an ABI query module at each point, in order.
 
     `fields` names the point-dict keys in ABI order (the `inputs` key of a test
     dir's `test.json`); it is zipped positionally with the module's own `inputs`
     binding names, since the two orders are the same ABI order by construction.
     Raises `DeterminizeRefused` if the module is outside the determiniser's
-    density fragment."""
+    density fragment. Determinizes once, then batches all points' `outputs`
+    evaluation into ONE Node process (see `_score_flatpdl_batch`) instead of
+    spawning one process per point."""
     flatpdl = determinize_abi(model, query)
     names = abi_input_names(flatpdl)
     if len(names) != len(fields):
@@ -137,7 +151,7 @@ def score_abi_points(
             f"but test.json declares fields {fields}"
         )
 
-    out: list[float] = []
+    sources: list[str] = []
     for pt in points:
         src = flatpdl
         for name, field in zip(names, fields):
@@ -150,11 +164,9 @@ def score_abi_points(
                     f"could not bind ABI input {name!r}: no top-level "
                     f"`{name} = elementof(...)` binding in the determinized module"
                 )
-        with tempfile.TemporaryDirectory() as tmp:
-            bound = Path(tmp) / "bound.flatpdl.flatppl"
-            bound.write_text(src)
-            out.append(_score_flatpdl_binding(bound, "outputs"))
-    return out
+        sources.append(src)
+
+    return _score_flatpdl_batch(sources, "outputs")
 
 
 def _score_flatpdl_binding(flatpdl_path: Path, binding: str) -> float:
@@ -169,6 +181,45 @@ def _score_flatpdl_binding(flatpdl_path: Path, binding: str) -> float:
     if proc.returncode != 0:
         raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
     return float(proc.stdout.strip())
+
+
+def _score_flatpdl_batch(sources: list[str], binding: str) -> list[PointScore]:
+    """Evaluate `binding` in each of `sources`, in ONE Node process -- the
+    `sample_sweep.cjs` pattern applied to the ABI-point path (see
+    `scoring/score_flatpdl_batch.cjs`'s header). Pays the ~0.3s engine-load
+    cost once for the whole batch instead of once per point.
+
+    A source that fails to evaluate comes back as `{"ok": false, "error":
+    ...}` from the batch script rather than a nonzero exit, so one bad point
+    surfaces as that point's `PointScore.error` -- the rest of the batch's
+    results are still returned."""
+    with tempfile.TemporaryDirectory() as tmp:
+        sources_path = Path(tmp) / "sources.json"
+        sources_path.write_text(json.dumps(sources))
+        proc = subprocess.run(
+            [
+                CONFIG.node_bin, str(CONFIG.flatpdl_batch_scorer), str(sources_path), binding,
+                "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
+            ],
+            capture_output=True, text=True,
+        )
+        if proc.returncode != 0:
+            # The batch process itself failed (bad args, engine unresolvable,
+            # etc.) -- distinct from a per-point failure, which the script
+            # reports as an {"ok": false, ...} row instead of a nonzero exit.
+            raise RuntimeError(f"score_flatpdl_batch failed: {proc.stderr.strip()}")
+        rows = json.loads(proc.stdout)
+
+    if len(rows) != len(sources):
+        raise RuntimeError(
+            f"score_flatpdl_batch returned {len(rows)} rows for {len(sources)} sources"
+        )
+    return [
+        PointScore(value=float(row["value"]), error=None)
+        if row.get("ok")
+        else PointScore(value=None, error=row.get("error", "unknown error"))
+        for row in rows
+    ]
 
 
 @lru_cache(maxsize=1)

@@ -37,6 +37,12 @@ class Config:
     sample_sweep_scorer: Path = (
         _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "sample_sweep.cjs"
     )
+    # Batch scorer for an ABI query's `outputs` binding across many already-
+    # bound FlatPDL sources (one point each), all in ONE Node process; used by
+    # unified/detjs_exec.py's score_abi_points().
+    flatpdl_batch_scorer: Path = (
+        _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_flatpdl_batch.cjs"
+    )
 
 
 CONFIG = Config()

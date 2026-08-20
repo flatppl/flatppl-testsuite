@@ -63,7 +63,11 @@ def test_abi_scoring_matches_the_frozen_oracle(dir: Path):
         f"{len(body['points'])} points and {len(want)} expected values "
         f"-> {len(got)} scores"
     )
-    for i, (g, w) in enumerate(zip(got, want)):
+    for i, (score, w) in enumerate(zip(got, want)):
+        assert score.error is None, (
+            f"{dir.name} point {i} {body['points'][i]}: det-js-via-ABI failed: {score.error}"
+        )
+        g = score.value
         assert abs(g - w) <= _ATOL + _RTOL * abs(w), (
             f"{dir.name} point {i} {body['points'][i]}: det-js-via-ABI gave {g!r}, "
             f"frozen independent oracle is {w!r}"

@@ -81,17 +81,23 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                                     "`inputs` (ABI field order)")]
             scores = ex.score_abi_points(model, query, fields, points)
         else:                                                # Mode B (splice)
-            scores = [ex.log_density_at(model, binding, pt) for pt in points]
+            scores = [ex.PointScore(value=ex.log_density_at(model, binding, pt)) for pt in points]
 
         out = []
-        for i, (pt, raw, got) in enumerate(zip(points, expected, scores)):
+        for i, (pt, raw, score) in enumerate(zip(points, expected, scores)):
+            if score.error is not None:                       # this point alone failed
+                out.append(CheckResult(
+                    tid, f"logdensity[{i}]", "failed", UNSCOREABLE,
+                    f"point {pt}: {score.error}",
+                ))
+                continue
             want = ex.parse_expected(raw)
-            ok = _close(got, want, atol, rtol)
+            ok = _close(score.value, want, atol, rtol)
             out.append(CheckResult(
                 tid, f"logdensity[{i}]",
                 "passed" if ok else "failed",
                 "" if ok else NUMERIC_MISMATCH,
-                "" if ok else f"point {pt}: got {got!r}, want {want!r} "
+                "" if ok else f"point {pt}: got {score.value!r}, want {want!r} "
                               f"(atol {atol}, rtol {rtol})",
             ))
         return out
