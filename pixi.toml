@@ -119,7 +119,11 @@ regen = "python -m flatppl_testsuite.unified.regen"
 # listing "stablehlo" among its engines), executed via Enzyme-JAX:
 #   FLATPPL_BIN=/path/to/target/release/flatppl PYTHONPATH=$PWD/src \
 #     pixi run -e stablehlo unified
-unified = "python -m pytest tests/test_unified.py -q"
+# `-m stablehlo_only` scopes collection to the stablehlo cases: this env has
+# no `nodejs` dependency of its own, so without the filter it also re-runs
+# every det-js case here against whatever unpinned system Node is on PATH --
+# pure duplicate work already covered, correctly, by `pixi run test`.
+unified = "python -m pytest tests/test_unified.py -q -m stablehlo_only"
 
 [environments]
 root = ["root"]

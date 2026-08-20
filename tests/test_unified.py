@@ -30,6 +30,20 @@ _DIRS = discover_test_dirs(_CORPORA)
 _CASES = [(d, engine) for d in _DIRS for engine in load_test(d).engines]
 _CASE_IDS = [f"{d.relative_to(_CORPORA)}::{engine}" for d, engine in _CASES]
 
+# Marked by the real `engine` field, not by matching the test id string --
+# a dir named `corpora/stablehlo/...` running under `det-js` would still
+# match an id substring like `-k stablehlo`, so a marker keyed off the
+# field itself is what `pixi run -e stablehlo unified` selects with `-m
+# stablehlo_only` to scope that env to its own 76 cases instead of
+# re-running every det-js case too (see pixi.toml's stablehlo `unified`
+# task). A future third engine falls out of this the same way: it gets no
+# mark and stays out of the stablehlo-only selection without anyone having
+# to touch this file again.
+_CASE_PARAMS = [
+    pytest.param(d, engine, marks=pytest.mark.stablehlo_only if engine == "stablehlo" else ())
+    for d, engine in _CASES
+]
+
 
 # Engines whose prerequisites must be PRESENT: a missing prerequisite for one of
 # these fails instead of skipping. Without it an environment fault degrades the
@@ -111,7 +125,7 @@ def assert_results_acceptable(results, allow_skip: bool) -> None:
         )
 
 
-@pytest.mark.parametrize("test_dir,engine", _CASES, ids=_CASE_IDS)
+@pytest.mark.parametrize("test_dir,engine", _CASE_PARAMS, ids=_CASE_IDS)
 def test_unified_dir(test_dir, engine):
     _gate_engine(engine)
     results = run_test_dir(test_dir, engines=[engine])
