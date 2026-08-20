@@ -58,6 +58,16 @@ sweep = "python -m flatppl_testsuite.sweep.cli report"
 # FLATPPL_JS_DIR). Slow -- see sweep/table.py's SLICE_DESCRIPTION for the
 # faster CI-only slice `tests/sweep/test_gate.py` runs instead.
 sweep-regen = "python -m flatppl_testsuite.sweep.cli regen --full"
+# The SAMPLER sweep's sized report, from the committed table
+# (verdicts/sampler-sweep.json) -- no engine calls, just reads the file.
+sampler-sweep = "python -m flatppl_testsuite.sampler_sweep.cli report"
+# The sampler roster itself (families x wraps x checks), no engine calls.
+sampler-sweep-roster = "python -m flatppl_testsuite.sampler_sweep.cli roster"
+# Regenerate the sampler table from a live run (needs FLATPPL_JS_DIR only --
+# this sweep drives the JS sampler directly and never invokes the determiniser,
+# so it needs no FLATPPL_BIN; see scoring/sampler_sweep.cjs's header for why).
+# The whole 71-row roster takes ~12 s.
+sampler-sweep-regen = "python -m flatppl_testsuite.sampler_sweep.cli regen"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,

@@ -1,0 +1,5150 @@
+{
+ "metadata": {
+  "generated_at": "2026-08-20T12:19:24+00:00",
+  "engine_commit": "af0bab9d426d02d877e1c336d3e9766f6d286d01",
+  "seed": 47710,
+  "n_draws": 200000,
+  "ks_subsample": 20000,
+  "sigma": 5.0,
+  "probe_count": 71,
+  "outcome_counts": {
+   "DRAWS": 70,
+   "REFUSES": 1
+  },
+  "failing_rows": []
+ },
+ "rows": [
+  {
+   "probe_id": "normal.identity",
+   "family": "normal",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.998811 vs 1.000000 (|d|=0.00119, band 0.0224 = 5 SE, 0.27 sigma)",
+     "got": 0.998810743666928,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.2659258003421092,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "4.025867 vs 4.000000 (|d|=0.0259, band 0.0632 = 5 SE, 2.05 sigma)",
+     "got": 4.025867480518541,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 2.0450038942155953,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "exponential.identity",
+   "family": "exponential",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.500777 vs 0.500000 (|d|=0.000777, band 0.00559 = 5 SE, 0.69 sigma)",
+     "got": 0.500776988719811,
+     "want": 0.5,
+     "band": 0.005590169943749475,
+     "sigma": 0.6949598380991936,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.252029 vs 0.250000 (|d|=0.00203, band 0.00791 = 5 SE, 1.28 sigma)",
+     "got": 0.2520289224816792,
+     "want": 0.25,
+     "band": 0.007905694150420948,
+     "sigma": 1.2832032476054949,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "uniform.identity",
+   "family": "uniform",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.999341 vs 1.000000 (|d|=0.000659, band 0.0129 = 5 SE, 0.26 sigma)",
+     "got": 0.9993414105358162,
+     "want": 1.0,
+     "band": 0.012909944487358056,
+     "sigma": 0.25507060267716986,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.340535 vs 1.333333 (|d|=0.0072, band 0.0133 = 5 SE, 2.70 sigma)",
+     "got": 1.3405352371930812,
+     "want": 1.3333333333333333,
+     "band": 0.013333333333333336,
+     "sigma": 2.7007139474054807,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "logistic.identity",
+   "family": "logistic",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.998321 vs 1.000000 (|d|=0.00168, band 0.0406 = 5 SE, 0.21 sigma)",
+     "got": 0.9983206280042172,
+     "want": 1.0,
+     "band": 0.04055778675973612,
+     "sigma": 0.20703447228659339,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "13.242438 vs 13.159473 (|d|=0.083, band 0.263 = 5 SE, 1.58 sigma)",
+     "got": 13.242437863049691,
+     "want": 13.159472534785811,
+     "band": 0.2631894506957162,
+     "sigma": 1.576152236432138,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0060011309102177,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "weibull.identity",
+   "family": "weibull",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.329440 vs 1.329340 (|d|=9.94e-05, band 0.00777 = 5 SE, 0.06 sigma)",
+     "got": 1.3294397719040023,
+     "want": 1.3293403881791368,
+     "band": 0.007768961741730215,
+     "sigma": 0.06396203776605018,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.486086 vs 0.482854 (|d|=0.00323, band 0.00809 = 5 SE, 2.00 sigma)",
+     "got": 0.48608634211905444,
+     "want": 0.48285413235574215,
+     "band": 0.008088868387095188,
+     "sigma": 1.9979369230861066,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "pareto.identity",
+   "family": "pareto",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.334246 vs 1.333333 (|d|=0.000913, band 0.00527 = 5 SE, 0.87 sigma)",
+     "got": 1.3342461379954202,
+     "want": 1.3333333333333333,
+     "band": 0.005270462766947298,
+     "sigma": 0.8659625373045664,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.220480 vs 0.222222 (|d|=0.00174, band 0.00667 = 3% rel; fourth moment diverges, so no sigma band)",
+     "got": 0.22047956539223246,
+     "want": 0.2222222222222222,
+     "band": 0.006666666666666666,
+     "sigma": null,
+     "fallback": true
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "shape = 4: variance finite (needs > 2), fourth moment DIVERGES (needs > 4), so the variance band is the relative one"
+  },
+  {
+   "probe_id": "lognormal.identity",
+   "family": "lognormal",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.133771 vs 1.133148 (|d|=0.000622, band 0.00675 = 5 SE, 0.46 sigma)",
+     "got": 1.1337707878864558,
+     "want": 1.1331484530668263,
+     "band": 0.006751813219539498,
+     "sigma": 0.46086495537855193,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.367668 vs 0.364696 (|d|=0.00297, band 0.0115 = 5 SE, 1.30 sigma)",
+     "got": 0.36766847338331266,
+     "want": 0.3646958540123865,
+     "band": 0.011459262032986549,
+     "sigma": 1.297037873106127,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "beta_2_2.identity",
+   "family": "beta_2_2",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.499391 vs 0.500000 (|d|=0.000609, band 0.0025 = 5 SE, 1.22 sigma)",
+     "got": 0.499390631922631,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 1.2187361547379982,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.050114 vs 0.050000 (|d|=0.000114, band 0.000598 = 5 SE, 0.95 sigma)",
+     "got": 0.050114128698435706,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.9548691986390211,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006256 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006256347015822561,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "regression row for the @stdlib symmetric-Beta variance defect"
+  },
+  {
+   "probe_id": "beta_2_5.identity",
+   "family": "beta_2_5",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.285481 vs 0.285714 (|d|=0.000234, band 0.00179 = 5 SE, 0.65 sigma)",
+     "got": 0.28548056766247293,
+     "want": 0.2857142857142857,
+     "band": 0.0017857142857142857,
+     "sigma": 0.6544105450757565,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.025473 vs 0.025510 (|d|=3.71e-05, band 0.000391 = 5 SE, 0.47 sigma)",
+     "got": 0.025473070270374668,
+     "want": 0.025510204081632654,
+     "band": 0.0003910640233250581,
+     "sigma": 0.4747791799185773,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005257 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0052570863623649655,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "gamma.identity",
+   "family": "gamma",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.500102 vs 1.500000 (|d|=0.000102, band 0.00968 = 5 SE, 0.05 sigma)",
+     "got": 1.5001023140005503,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.052834722695342506,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.750606 vs 0.750000 (|d|=0.000606, band 0.0168 = 5 SE, 0.18 sigma)",
+     "got": 0.7506062732207228,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.18075575126319443,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003485 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.003484839844633769,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "cauchy.identity",
+   "family": "cauchy",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "skipped",
+     "detail": "distribution has no mean (Cauchy)",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "skipped",
+     "detail": "distribution has no variance (Cauchy)",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006655 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006654766991036842,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "no mean, no variance: moment check skipped by construction, KS only"
+  },
+  {
+   "probe_id": "studentt.identity",
+   "family": "studentt",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.007187 vs 0.000000 (|d|=0.00719, band 0.0144 = 5 SE, 2.49 sigma)",
+     "got": 0.007186957574231917,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 2.48963513408233,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.652776 vs 1.666667 (|d|=0.0139, band 0.0527 = 5 SE, 1.32 sigma)",
+     "got": 1.6527762395994534,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 1.3177616161454069,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005724 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005723763060098808,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "nu = 5: variance 5/3; fourth moment 3nu^2/((nu-2)(nu-4)) = 25, finite but heavy \u2014 the variance SE is correspondingly wide"
+  },
+  {
+   "probe_id": "gennormal.identity",
+   "family": "gennormal",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.003579 vs 0.000000 (|d|=0.00358, band 0.00683 = 5 SE, 2.62 sigma)",
+     "got": 0.003579390572977884,
+     "want": 0.0,
+     "band": 0.006830832433783192,
+     "sigma": 2.6200251636062113,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.372814 vs 0.373282 (|d|=0.000468, band 0.00497 = 5 SE, 0.47 sigma)",
+     "got": 0.3728144092711175,
+     "want": 0.3732821739073952,
+     "band": 0.004970401695033929,
+     "sigma": 0.47055013354865405,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005981 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005981005102900228,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "invgamma.identity",
+   "family": "invgamma",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.499828 vs 0.500000 (|d|=0.000172, band 0.00323 = 5 SE, 0.27 sigma)",
+     "got": 0.4998278224552604,
+     "want": 0.5,
+     "band": 0.003227486121839514,
+     "sigma": 0.26673630534691395,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.082238 vs 0.083333 (|d|=0.0011, band 0.00618 = 5 SE, 0.89 sigma)",
+     "got": 0.08223812926639551,
+     "want": 0.08333333333333333,
+     "band": 0.006180165405913052,
+     "sigma": 0.886063717558393,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005021 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005021427140413481,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "chisquared.identity",
+   "family": "chisquared",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "4.001140 vs 4.000000 (|d|=0.00114, band 0.0316 = 5 SE, 0.18 sigma)",
+     "got": 4.001139855945665,
+     "want": 4.0,
+     "band": 0.03162277660168379,
+     "sigma": 0.18022704963929362,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "8.012955 vs 8.000000 (|d|=0.013, band 0.2 = 5 SE, 0.32 sigma)",
+     "got": 8.012955235901568,
+     "want": 8.0,
+     "band": 0.2,
+     "sigma": 0.32388089753920823,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.009050 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.009049771559536346,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "vonmises.identity",
+   "family": "vonmises",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.000942 vs 0.000000 (|d|=0.000942, band 0.00978 = 5 SE, 0.48 sigma)",
+     "got": -0.0009417392087697042,
+     "want": 0.0,
+     "band": 0.00977536360342713,
+     "sigma": 0.4816901176133957,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.765736 vs 0.764462 (|d|=0.00127, band 0.0145 = 5 SE, 0.44 sigma)",
+     "got": 0.7657360518722195,
+     "want": 0.7644618686336627,
+     "band": 0.014516541886616491,
+     "sigma": 0.43887285570797735,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.004370 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.004370473113263995,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "linear variance on the [-pi, pi] fundamental domain, not circular variance"
+  },
+  {
+   "probe_id": "laplace.identity",
+   "family": "laplace",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.998742 vs 1.000000 (|d|=0.00126, band 0.0316 = 5 SE, 0.20 sigma)",
+     "got": 0.9987417597532221,
+     "want": 1.0,
+     "band": 0.03162277660168379,
+     "sigma": 0.1989452511755247,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "8.051588 vs 8.000000 (|d|=0.0516, band 0.2 = 5 SE, 1.29 sigma)",
+     "got": 8.051587502538542,
+     "want": 8.0,
+     "band": 0.2,
+     "sigma": 1.2896875634635485,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "dirac.identity",
+   "family": "dirac",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "degenerate: 3 vs 3 (|d|=0, atol 1e-12)",
+     "got": 3.0,
+     "want": 3.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "degenerate: 0 vs 0 (|d|=0, atol 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "degenerate: variance exactly 0, so the variance band is absolute"
+  },
+  {
+   "probe_id": "bernoulli.identity",
+   "family": "bernoulli",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.301165 vs 0.300000 (|d|=0.00117, band 0.00512 = 5 SE, 1.14 sigma)",
+     "got": 0.301165,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 1.1369235849850676,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.210465 vs 0.210000 (|d|=0.000465, band 0.00205 = 5 SE, 1.13 sigma)",
+     "got": 0.210464642775,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 1.1336122950437622,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "binomial.identity",
+   "family": "binomial",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.001305 vs 3.000000 (|d|=0.0013, band 0.0162 = 5 SE, 0.40 sigma)",
+     "got": 3.001305,
+     "want": 3.0,
+     "band": 0.01620185174601965,
+     "sigma": 0.40273174340102585,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.112303 vs 2.100000 (|d|=0.0123, band 0.0322 = 5 SE, 1.91 sigma)",
+     "got": 2.112303296975,
+     "want": 2.0999999999999996,
+     "band": 0.03215975746177201,
+     "sigma": 1.9128404481322865,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "geometric.identity",
+   "family": "geometric",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "2.338495 vs 2.333333 (|d|=0.00516, band 0.0312 = 5 SE, 0.83 sigma)",
+     "got": 2.338495,
+     "want": 2.3333333333333335,
+     "band": 0.031180478223116176,
+     "sigma": 0.8277080662027531,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "7.838986 vs 7.777778 (|d|=0.0612, band 0.248 = 5 SE, 1.23 sigma)",
+     "got": 7.838986134974999,
+     "want": 7.777777777777778,
+     "band": 0.24792347485205216,
+     "sigma": 1.2344203636575297,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "failures-before-success convention: scipy needs loc = -1"
+  },
+  {
+   "probe_id": "negbinomial.identity",
+   "family": "negbinomial",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.498110 vs 1.500000 (|d|=0.00189, band 0.0168 = 5 SE, 0.56 sigma)",
+     "got": 1.49811,
+     "want": 1.5,
+     "band": 0.016770509831248424,
+     "sigma": 0.5634891303299312,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.259036 vs 2.250000 (|d|=0.00904, band 0.053 = 5 SE, 0.85 sigma)",
+     "got": 2.2590364279000004,
+     "want": 2.25,
+     "band": 0.05303300858899107,
+     "sigma": 0.8519625927724762,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "shape/rate form: scipy p = beta/(beta+1)"
+  },
+  {
+   "probe_id": "negbinomial2.identity",
+   "family": "negbinomial2",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.992030 vs 4.000000 (|d|=0.00797, band 0.0342 = 5 SE, 1.17 sigma)",
+     "got": 3.99203,
+     "want": 4.0,
+     "band": 0.03415650255319866,
+     "sigma": 1.1666885372099438,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "9.399066 vs 9.333333 (|d|=0.0657, band 0.211 = 5 SE, 1.55 sigma)",
+     "got": 9.3990664791,
+     "want": 9.333333333333332,
+     "band": 0.21147629234082538,
+     "sigma": 1.5541492864062791,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "scipy n = psi, p = psi/(mu+psi)"
+  },
+  {
+   "probe_id": "categorical.identity",
+   "family": "categorical",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "2.298205 vs 2.300000 (|d|=0.00179, band 0.00873 = 5 SE, 1.03 sigma)",
+     "got": 2.298205,
+     "want": 2.3,
+     "band": 0.00873212459828649,
+     "sigma": 1.0278140100933884,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.612439 vs 0.610000 (|d|=0.00244, band 0.00634 = 5 SE, 1.92 sigma)",
+     "got": 0.6124387779750009,
+     "want": 0.61,
+     "band": 0.0063403469936589435,
+     "sigma": 1.923221219154068,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "1-based support per \u00a708"
+  },
+  {
+   "probe_id": "categorical0.identity",
+   "family": "categorical0",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.298205 vs 1.300000 (|d|=0.00179, band 0.00873 = 5 SE, 1.03 sigma)",
+     "got": 1.298205,
+     "want": 1.3,
+     "band": 0.00873212459828649,
+     "sigma": 1.0278140100933884,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.612439 vs 0.610000 (|d|=0.00244, band 0.00634 = 5 SE, 1.92 sigma)",
+     "got": 0.612438777975,
+     "want": 0.61,
+     "band": 0.0063403469936589435,
+     "sigma": 1.9232212191533675,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "0-based support per \u00a708"
+  },
+  {
+   "probe_id": "poisson.identity",
+   "family": "poisson",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.997485 vs 4.000000 (|d|=0.00251, band 0.0224 = 5 SE, 0.56 sigma)",
+     "got": 3.997485,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.5623710963411575,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "4.007439 vs 4.000000 (|d|=0.00744, band 0.0671 = 5 SE, 0.55 sigma)",
+     "got": 4.007438674774997,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.554446081980228,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "normal.iid3",
+   "family": "normal",
+   "wrap": "iid3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.988208 vs 1.000000 (|d|=0.0118, band 0.0224 = 5 SE, 2.64 sigma)",
+     "got": 0.9882082199476818,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 2.6367221772709475,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.995529 vs 4.000000 (|d|=0.00447, band 0.0632 = 5 SE, 0.35 sigma)",
+     "got": 3.9955293658898814,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 0.35343465933037055,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.991783 vs 1.000000 (|d|=0.00822, band 0.0224 = 5 SE, 1.84 sigma)",
+     "got": 0.9917829871357219,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 1.8373799336516121,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "3.976536 vs 4.000000 (|d|=0.0235, band 0.0632 = 5 SE, 1.85 sigma)",
+     "got": 3.9765361899228093,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 1.854977060738344,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.007806 vs +0.000000 (|d|=0.00781, band 0.0447 = 5 SE, 0.87 sigma)",
+     "got": 0.007805771992221322,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.8727118395735417,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.997048 vs 1.000000 (|d|=0.00295, band 0.0224 = 5 SE, 0.66 sigma)",
+     "got": 0.997047852219342,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.6601203117176424,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "3.968637 vs 4.000000 (|d|=0.0314, band 0.0632 = 5 SE, 2.48 sigma)",
+     "got": 3.968636640862026,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 2.4794912487463114,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.012642 vs +0.000000 (|d|=0.0126, band 0.0447 = 5 SE, 1.41 sigma)",
+     "got": -0.012641801824947008,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 1.4133964119331202,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.004646 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0046458982534706705,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "product measure: per-coordinate marginals are the base, cov 0"
+  },
+  {
+   "probe_id": "normal.iid4",
+   "family": "normal",
+   "wrap": "iid4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.999782 vs 1.000000 (|d|=0.000218, band 0.0224 = 5 SE, 0.05 sigma)",
+     "got": 0.9997824458524135,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.0486465862790452,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.997594 vs 4.000000 (|d|=0.00241, band 0.0632 = 5 SE, 0.19 sigma)",
+     "got": 3.997594061601778,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 0.19020613121095115,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.996418 vs 1.000000 (|d|=0.00358, band 0.0224 = 5 SE, 0.80 sigma)",
+     "got": 0.9964179122101122,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.8009791799561055,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "3.973518 vs 4.000000 (|d|=0.0265, band 0.0632 = 5 SE, 2.09 sigma)",
+     "got": 3.9735181126856034,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 2.093577016335319,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.019243 vs +0.000000 (|d|=0.0192, band 0.0447 = 5 SE, 2.15 sigma)",
+     "got": 0.019242605516289535,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 2.1513886999317915,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.988480 vs 1.000000 (|d|=0.0115, band 0.0224 = 5 SE, 2.58 sigma)",
+     "got": 0.9884798074891397,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 2.57599335681677,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "3.969101 vs 4.000000 (|d|=0.0309, band 0.0632 = 5 SE, 2.44 sigma)",
+     "got": 3.9691009833184694,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 2.4427817543293586,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.018357 vs +0.000000 (|d|=0.0184, band 0.0447 = 5 SE, 2.05 sigma)",
+     "got": -0.018357155147624038,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 2.052392339179877,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.991341 vs 1.000000 (|d|=0.00866, band 0.0224 = 5 SE, 1.94 sigma)",
+     "got": 0.9913407816465933,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 1.936260087023109,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "3.991301 vs 4.000000 (|d|=0.0087, band 0.0632 = 5 SE, 0.69 sigma)",
+     "got": 3.991301283813773,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 0.6876938966962748,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "+0.003042 vs +0.000000 (|d|=0.00304, band 0.0447 = 5 SE, 0.34 sigma)",
+     "got": 0.003042174022629629,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.34012539569919165,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.007659 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.007658544211462143,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "normal.weighted2",
+   "family": "normal",
+   "wrap": "weighted2",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.998811 vs 1.000000 (|d|=0.00119, band 0.0224 = 5 SE, 0.27 sigma)",
+     "got": 0.998810743666928,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.2659258003421092,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "4.025867 vs 4.000000 (|d|=0.0259, band 0.0632 = 5 SE, 2.05 sigma)",
+     "got": 4.025867480518541,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 2.0450038942155953,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2, positions unchanged: total mass is the whole check here"
+  },
+  {
+   "probe_id": "normal.normalize_prob",
+   "family": "normal",
+   "wrap": "normalize_prob",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.998811 vs 1.000000 (|d|=0.00119, band 0.0224 = 5 SE, 0.27 sigma)",
+     "got": 0.998810743666928,
+     "want": 1.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.2659258003421092,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "4.025867 vs 4.000000 (|d|=0.0259, band 0.0632 = 5 SE, 2.05 sigma)",
+     "got": 4.025867480518541,
+     "want": 4.0,
+     "band": 0.06324555320336758,
+     "sigma": 2.0450038942155953,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "normalize of a probability measure is the identity, mass exactly 1"
+  },
+  {
+   "probe_id": "normal.pushfwd_affine",
+   "family": "normal",
+   "wrap": "pushfwd_affine",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "2.997621 vs 3.000000 (|d|=0.00238, band 0.0447 = 5 SE, 0.27 sigma)",
+     "got": 2.9976214873338694,
+     "want": 3.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.26592580034061974,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "16.103470 vs 16.000000 (|d|=0.103, band 0.253 = 5 SE, 2.05 sigma)",
+     "got": 16.103469922074307,
+     "want": 16.0,
+     "band": 0.25298221281347033,
+     "sigma": 2.0450038942184037,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006001 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006001130910217811,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "y = 2.0x + 1.0: mean and variance must both move"
+  },
+  {
+   "probe_id": "normal.iid_pushfwd3",
+   "family": "normal",
+   "wrap": "iid_pushfwd3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.004926 vs 3.000000 (|d|=0.00493, band 0.0447 = 5 SE, 0.55 sigma)",
+     "got": 3.0049260717636668,
+     "want": 3.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.5507515662800591,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "15.934121 vs 16.000000 (|d|=0.0659, band 0.253 = 5 SE, 1.30 sigma)",
+     "got": 15.934121310398043,
+     "want": 16.0,
+     "band": 0.25298221281347033,
+     "sigma": 1.3020419275589803,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "2.986728 vs 3.000000 (|d|=0.0133, band 0.0447 = 5 SE, 1.48 sigma)",
+     "got": 2.986728063224752,
+     "want": 3.0,
+     "band": 0.0447213595499958,
+     "sigma": 1.4838476411267019,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "15.956555 vs 16.000000 (|d|=0.0434, band 0.253 = 5 SE, 0.86 sigma)",
+     "got": 15.956554932653521,
+     "want": 16.0,
+     "band": 0.25298221281347033,
+     "sigma": 0.8586585369642539,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.004607 vs +0.000000 (|d|=0.00461, band 0.179 = 5 SE, 0.13 sigma)",
+     "got": 0.004606703749422181,
+     "want": 0.0,
+     "band": 0.1788854381999832,
+     "sigma": 0.1287612841988894,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "3.002194 vs 3.000000 (|d|=0.00219, band 0.0447 = 5 SE, 0.25 sigma)",
+     "got": 3.0021941504928282,
+     "want": 3.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.24531348274142917,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "16.007708 vs 16.000000 (|d|=0.00771, band 0.253 = 5 SE, 0.15 sigma)",
+     "got": 16.007707720091307,
+     "want": 16.0,
+     "band": 0.25298221281347033,
+     "sigma": 0.1523371940973269,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.027285 vs +0.000000 (|d|=0.0273, band 0.179 = 5 SE, 0.76 sigma)",
+     "got": -0.027285171947273312,
+     "want": 0.0,
+     "band": 0.1788854381999832,
+     "sigma": 0.7626437406484179,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006377 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006377287225425299,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a transformed base: the composite-fallback iid path"
+  },
+  {
+   "probe_id": "beta_2_2.iid3",
+   "family": "beta_2_2",
+   "wrap": "iid3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.499765 vs 0.500000 (|d|=0.000235, band 0.0025 = 5 SE, 0.47 sigma)",
+     "got": 0.4997648296452149,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.4703407095701939,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.050047 vs 0.050000 (|d|=4.75e-05, band 0.000598 = 5 SE, 0.40 sigma)",
+     "got": 0.05004747603848214,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.39721303617192055,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.500260 vs 0.500000 (|d|=0.00026, band 0.0025 = 5 SE, 0.52 sigma)",
+     "got": 0.5002602965945175,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.520593189035079,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.049971 vs 0.050000 (|d|=2.93e-05, band 0.000598 = 5 SE, 0.25 sigma)",
+     "got": 0.049970707532431546,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.24507836693685964,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.000138 vs +0.000000 (|d|=0.000138, band 0.000559 = 5 SE, 1.24 sigma)",
+     "got": 0.00013834118980693422,
+     "want": 0.0,
+     "band": 0.0005590169943749475,
+     "sigma": 1.2373612179860236,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.500152 vs 0.500000 (|d|=0.000152, band 0.0025 = 5 SE, 0.30 sigma)",
+     "got": 0.5001522858179441,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.3045716358882622,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.050083 vs 0.050000 (|d|=8.3e-05, band 0.000598 = 5 SE, 0.69 sigma)",
+     "got": 0.05008300731093901,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.6944889897448784,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.000181 vs +0.000000 (|d|=0.000181, band 0.000559 = 5 SE, 1.62 sigma)",
+     "got": -0.00018099358109380237,
+     "want": 0.0,
+     "band": 0.0005590169943749475,
+     "sigma": 1.6188558032674514,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003358 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0033579654207916143,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "product measure: per-coordinate marginals are the base, cov 0"
+  },
+  {
+   "probe_id": "beta_2_2.iid4",
+   "family": "beta_2_2",
+   "wrap": "iid4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.499982 vs 0.500000 (|d|=1.84e-05, band 0.0025 = 5 SE, 0.04 sigma)",
+     "got": 0.49998159549715215,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.036809005695692676,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.049940 vs 0.050000 (|d|=5.98e-05, band 0.000598 = 5 SE, 0.50 sigma)",
+     "got": 0.04994023491698274,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.5000305594428459,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.500291 vs 0.500000 (|d|=0.000291, band 0.0025 = 5 SE, 0.58 sigma)",
+     "got": 0.5002911252362612,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.582250472522361,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.050122 vs 0.050000 (|d|=0.000122, band 0.000598 = 5 SE, 1.02 sigma)",
+     "got": 0.050121502997457545,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 1.016567010793388,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.000092 vs +0.000000 (|d|=9.23e-05, band 0.000559 = 5 SE, 0.83 sigma)",
+     "got": -9.232828342298216e-05,
+     "want": 0.0,
+     "band": 0.0005590169943749475,
+     "sigma": 0.8258092719186203,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.500279 vs 0.500000 (|d|=0.000279, band 0.0025 = 5 SE, 0.56 sigma)",
+     "got": 0.500279165344035,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.5583306880700967,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.050034 vs 0.050000 (|d|=3.36e-05, band 0.000598 = 5 SE, 0.28 sigma)",
+     "got": 0.050033595731393654,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.2810820551994672,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.000138 vs +0.000000 (|d|=0.000138, band 0.000559 = 5 SE, 1.23 sigma)",
+     "got": -0.00013758127744126214,
+     "want": 0.0,
+     "band": 0.0005590169943749475,
+     "sigma": 1.2305643551596819,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.499597 vs 0.500000 (|d|=0.000403, band 0.0025 = 5 SE, 0.81 sigma)",
+     "got": 0.499597346301096,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 0.8053073978080416,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "0.049990 vs 0.050000 (|d|=1.01e-05, band 0.000598 = 5 SE, 0.08 sigma)",
+     "got": 0.04998990120817362,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.08449255437634345,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "+0.000140 vs +0.000000 (|d|=0.00014, band 0.000559 = 5 SE, 1.25 sigma)",
+     "got": 0.00013957880739015605,
+     "want": 0.0,
+     "band": 0.0005590169943749475,
+     "sigma": 1.2484308061709557,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005272 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005272019359262692,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "beta_2_2.weighted2",
+   "family": "beta_2_2",
+   "wrap": "weighted2",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.499391 vs 0.500000 (|d|=0.000609, band 0.0025 = 5 SE, 1.22 sigma)",
+     "got": 0.499390631922631,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 1.2187361547379982,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.050114 vs 0.050000 (|d|=0.000114, band 0.000598 = 5 SE, 0.95 sigma)",
+     "got": 0.050114128698435706,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.9548691986390211,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006256 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006256347015822561,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2, positions unchanged: total mass is the whole check here"
+  },
+  {
+   "probe_id": "beta_2_2.normalize_prob",
+   "family": "beta_2_2",
+   "wrap": "normalize_prob",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.499391 vs 0.500000 (|d|=0.000609, band 0.0025 = 5 SE, 1.22 sigma)",
+     "got": 0.499390631922631,
+     "want": 0.5,
+     "band": 0.0025,
+     "sigma": 1.2187361547379982,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.050114 vs 0.050000 (|d|=0.000114, band 0.000598 = 5 SE, 0.95 sigma)",
+     "got": 0.050114128698435706,
+     "want": 0.05,
+     "band": 0.0005976143046522563,
+     "sigma": 0.9548691986390211,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006256 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006256347015822561,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "normalize of a probability measure is the identity, mass exactly 1"
+  },
+  {
+   "probe_id": "beta_2_2.pushfwd_affine",
+   "family": "beta_2_2",
+   "wrap": "pushfwd_affine",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.998781 vs 2.000000 (|d|=0.00122, band 0.005 = 5 SE, 1.22 sigma)",
+     "got": 1.9987812638452551,
+     "want": 2.0,
+     "band": 0.005,
+     "sigma": 1.2187361547448816,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.200457 vs 0.200000 (|d|=0.000457, band 0.00239 = 5 SE, 0.95 sigma)",
+     "got": 0.20045651479374405,
+     "want": 0.2,
+     "band": 0.0023904572186090253,
+     "sigma": 0.9548691986415755,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006256 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.00625634701582245,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "y = 2.0x + 1.0: mean and variance must both move"
+  },
+  {
+   "probe_id": "beta_2_2.iid_pushfwd3",
+   "family": "beta_2_2",
+   "wrap": "iid_pushfwd3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "2.000573 vs 2.000000 (|d|=0.000573, band 0.005 = 5 SE, 0.57 sigma)",
+     "got": 2.0005726781626096,
+     "want": 2.0,
+     "band": 0.005,
+     "sigma": 0.5726781626096411,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.199344 vs 0.200000 (|d|=0.000656, band 0.00239 = 5 SE, 1.37 sigma)",
+     "got": 0.19934355136978077,
+     "want": 0.2,
+     "band": 0.0023904572186090253,
+     "sigma": 1.3730608209780477,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.999791 vs 2.000000 (|d|=0.000209, band 0.005 = 5 SE, 0.21 sigma)",
+     "got": 1.9997906365528662,
+     "want": 2.0,
+     "band": 0.005,
+     "sigma": 0.2093634471338479,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.200161 vs 0.200000 (|d|=0.000161, band 0.00239 = 5 SE, 0.34 sigma)",
+     "got": 0.20016057748476834,
+     "want": 0.2,
+     "band": 0.0023904572186090253,
+     "sigma": 0.3358719066760156,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.000401 vs +0.000000 (|d|=0.000401, band 0.00224 = 5 SE, 0.90 sigma)",
+     "got": -0.0004014990170349009,
+     "want": 0.0,
+     "band": 0.00223606797749979,
+     "sigma": 0.8977790949893844,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "1.997419 vs 2.000000 (|d|=0.00258, band 0.005 = 5 SE, 2.58 sigma)",
+     "got": 1.9974190953501334,
+     "want": 2.0,
+     "band": 0.005,
+     "sigma": 2.5809046498666,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.199836 vs 0.200000 (|d|=0.000164, band 0.00239 = 5 SE, 0.34 sigma)",
+     "got": 0.1998357730804039,
+     "want": 0.2,
+     "band": 0.0023904572186090253,
+     "sigma": 0.343505247275817,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.000419 vs +0.000000 (|d|=0.000419, band 0.00224 = 5 SE, 0.94 sigma)",
+     "got": 0.0004187681884264549,
+     "want": 0.0,
+     "band": 0.00223606797749979,
+     "sigma": 0.9363941361359939,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006263 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006263067494104657,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a transformed base: the composite-fallback iid path"
+  },
+  {
+   "probe_id": "gamma.iid3",
+   "family": "gamma",
+   "wrap": "iid3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.499609 vs 1.500000 (|d|=0.000391, band 0.00968 = 5 SE, 0.20 sigma)",
+     "got": 1.4996088235180505,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.20200266666913758,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.748118 vs 0.750000 (|d|=0.00188, band 0.0168 = 5 SE, 0.56 sigma)",
+     "got": 0.7481180224506923,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.561097297650744,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.497528 vs 1.500000 (|d|=0.00247, band 0.00968 = 5 SE, 1.28 sigma)",
+     "got": 1.4975276651692164,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 1.2767082167831083,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.750130 vs 0.750000 (|d|=0.00013, band 0.0168 = 5 SE, 0.04 sigma)",
+     "got": 0.7501303242011756,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.03885516972561386,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.001226 vs +0.000000 (|d|=0.00123, band 0.00839 = 5 SE, 0.73 sigma)",
+     "got": -0.0012255927156181734,
+     "want": 0.0,
+     "band": 0.00838525491562421,
+     "sigma": 0.7308022999602144,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "1.498315 vs 1.500000 (|d|=0.00168, band 0.00968 = 5 SE, 0.87 sigma)",
+     "got": 1.49831521361116,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.8700199501192674,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.745279 vs 0.750000 (|d|=0.00472, band 0.0168 = 5 SE, 1.41 sigma)",
+     "got": 0.7452788921548659,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 1.4075624094436623,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.003195 vs +0.000000 (|d|=0.00319, band 0.00839 = 5 SE, 1.91 sigma)",
+     "got": 0.0031948114971567243,
+     "want": 0.0,
+     "band": 0.00838525491562421,
+     "sigma": 1.9050175154507498,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003310 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0033103191883293304,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "product measure: per-coordinate marginals are the base, cov 0"
+  },
+  {
+   "probe_id": "gamma.iid4",
+   "family": "gamma",
+   "wrap": "iid4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.499018 vs 1.500000 (|d|=0.000982, band 0.00968 = 5 SE, 0.51 sigma)",
+     "got": 1.4990177608378883,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.50722612224685,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.750150 vs 0.750000 (|d|=0.00015, band 0.0168 = 5 SE, 0.04 sigma)",
+     "got": 0.7501502794953314,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.04480468895805503,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.500386 vs 1.500000 (|d|=0.000386, band 0.00968 = 5 SE, 0.20 sigma)",
+     "got": 1.5003859473595593,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.19930235947813188,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.750367 vs 0.750000 (|d|=0.000367, band 0.0168 = 5 SE, 0.11 sigma)",
+     "got": 0.7503674523203228,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.10955311556422877,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.000985 vs +0.000000 (|d|=0.000985, band 0.00839 = 5 SE, 0.59 sigma)",
+     "got": 0.0009848706295181309,
+     "want": 0.0,
+     "band": 0.00838525491562421,
+     "sigma": 0.5872633804388138,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "1.500263 vs 1.500000 (|d|=0.000263, band 0.00968 = 5 SE, 0.14 sigma)",
+     "got": 1.5002631252976903,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.13587731945607798,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.751225 vs 0.750000 (|d|=0.00122, band 0.0168 = 5 SE, 0.37 sigma)",
+     "got": 0.7512247883984737,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.3651613489387148,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.000453 vs +0.000000 (|d|=0.000453, band 0.00839 = 5 SE, 0.27 sigma)",
+     "got": -0.0004527364064936812,
+     "want": 0.0,
+     "band": 0.00838525491562421,
+     "sigma": 0.2699598348823596,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "1.497479 vs 1.500000 (|d|=0.00252, band 0.00968 = 5 SE, 1.30 sigma)",
+     "got": 1.497478938870263,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 1.3018703693656577,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "0.742634 vs 0.750000 (|d|=0.00737, band 0.0168 = 5 SE, 2.20 sigma)",
+     "got": 0.7426339147710928,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 2.196142306652494,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "-0.002255 vs +0.000000 (|d|=0.00226, band 0.00839 = 5 SE, 1.34 sigma)",
+     "got": -0.002255444427247344,
+     "want": 0.0,
+     "band": 0.00838525491562421,
+     "sigma": 1.344887215679504,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005454 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005454461069853922,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "gamma.weighted2",
+   "family": "gamma",
+   "wrap": "weighted2",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.500102 vs 1.500000 (|d|=0.000102, band 0.00968 = 5 SE, 0.05 sigma)",
+     "got": 1.5001023140005503,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.052834722695342506,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.750606 vs 0.750000 (|d|=0.000606, band 0.0168 = 5 SE, 0.18 sigma)",
+     "got": 0.7506062732207228,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.18075575126319443,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003485 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.003484839844633769,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2, positions unchanged: total mass is the whole check here"
+  },
+  {
+   "probe_id": "gamma.normalize_prob",
+   "family": "gamma",
+   "wrap": "normalize_prob",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.500102 vs 1.500000 (|d|=0.000102, band 0.00968 = 5 SE, 0.05 sigma)",
+     "got": 1.5001023140005503,
+     "want": 1.5,
+     "band": 0.009682458365518542,
+     "sigma": 0.052834722695342506,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.750606 vs 0.750000 (|d|=0.000606, band 0.0168 = 5 SE, 0.18 sigma)",
+     "got": 0.7506062732207228,
+     "want": 0.75,
+     "band": 0.016770509831248424,
+     "sigma": 0.18075575126319443,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003485 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.003484839844633769,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "normalize of a probability measure is the identity, mass exactly 1"
+  },
+  {
+   "probe_id": "gamma.pushfwd_affine",
+   "family": "gamma",
+   "wrap": "pushfwd_affine",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "4.000205 vs 4.000000 (|d|=0.000205, band 0.0194 = 5 SE, 0.05 sigma)",
+     "got": 4.0002046280011765,
+     "want": 4.0,
+     "band": 0.019364916731037084,
+     "sigma": 0.05283472271494994,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.002425 vs 3.000000 (|d|=0.00243, band 0.0671 = 5 SE, 0.18 sigma)",
+     "got": 3.0024250928823832,
+     "want": 3.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.18075575122532753,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003485 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.003484839844633769,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "y = 2.0x + 1.0: mean and variance must both move"
+  },
+  {
+   "probe_id": "gamma.iid_pushfwd3",
+   "family": "gamma",
+   "wrap": "iid_pushfwd3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.995679 vs 4.000000 (|d|=0.00432, band 0.0194 = 5 SE, 1.12 sigma)",
+     "got": 3.9956785179506413,
+     "want": 4.0,
+     "band": 0.019364916731037084,
+     "sigma": 1.1158018672066956,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.983960 vs 3.000000 (|d|=0.016, band 0.0671 = 5 SE, 1.20 sigma)",
+     "got": 2.983959967015265,
+     "want": 3.0,
+     "band": 0.0670820393249937,
+     "sigma": 1.195553470506893,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "3.999987 vs 4.000000 (|d|=1.27e-05, band 0.0194 = 5 SE, 0.00 sigma)",
+     "got": 3.9999873047119396,
+     "want": 4.0,
+     "band": 0.019364916731037084,
+     "sigma": 0.0032779092822054342,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "2.997545 vs 3.000000 (|d|=0.00246, band 0.0671 = 5 SE, 0.18 sigma)",
+     "got": 2.9975446511163124,
+     "want": 3.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.18301090041345594,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.006633 vs +0.000000 (|d|=0.00663, band 0.0335 = 5 SE, 0.99 sigma)",
+     "got": 0.006632572387088587,
+     "want": 0.0,
+     "band": 0.03354101966249684,
+     "sigma": 0.9887255148812086,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "3.996715 vs 4.000000 (|d|=0.00329, band 0.0194 = 5 SE, 0.85 sigma)",
+     "got": 3.9967147406299857,
+     "want": 4.0,
+     "band": 0.019364916731037084,
+     "sigma": 0.8482503218691599,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "2.994361 vs 3.000000 (|d|=0.00564, band 0.0671 = 5 SE, 0.42 sigma)",
+     "got": 2.9943605632935473,
+     "want": 3.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.4203387943478608,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.002085 vs +0.000000 (|d|=0.00209, band 0.0335 = 5 SE, 0.31 sigma)",
+     "got": 0.002085175587158261,
+     "want": 0.0,
+     "band": 0.03354101966249684,
+     "sigma": 0.310839623860594,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.007379 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.007379245862401795,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a transformed base: the composite-fallback iid path"
+  },
+  {
+   "probe_id": "studentt.iid3",
+   "family": "studentt",
+   "wrap": "iid3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.001420 vs 0.000000 (|d|=0.00142, band 0.0144 = 5 SE, 0.49 sigma)",
+     "got": -0.0014196351171044679,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 0.49177603020678623,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.678479 vs 1.666667 (|d|=0.0118, band 0.0527 = 5 SE, 1.12 sigma)",
+     "got": 1.6784786978572022,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 1.120587670651268,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "-0.004220 vs 0.000000 (|d|=0.00422, band 0.0144 = 5 SE, 1.46 sigma)",
+     "got": -0.0042199494851519834,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 1.461833382731472,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.643801 vs 1.666667 (|d|=0.0229, band 0.0527 = 5 SE, 2.17 sigma)",
+     "got": 1.6438009424989009,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 2.1692330615789484,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.001276 vs +0.000000 (|d|=0.00128, band 0.0186 = 5 SE, 0.34 sigma)",
+     "got": -0.0012757970884809948,
+     "want": 0.0,
+     "band": 0.018633899812498248,
+     "sigma": 0.3423322818407782,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "-0.002087 vs 0.000000 (|d|=0.00209, band 0.0144 = 5 SE, 0.72 sigma)",
+     "got": -0.002086881792222027,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 0.7229170587037896,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "1.651945 vs 1.666667 (|d|=0.0147, band 0.0527 = 5 SE, 1.40 sigma)",
+     "got": 1.6519445315919008,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 1.3966643657074103,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.003160 vs +0.000000 (|d|=0.00316, band 0.0186 = 5 SE, 0.85 sigma)",
+     "got": -0.003159760620036029,
+     "want": 0.0,
+     "band": 0.018633899812498248,
+     "sigma": 0.8478527446832934,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005051 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005050815939296571,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "product measure: per-coordinate marginals are the base, cov 0"
+  },
+  {
+   "probe_id": "studentt.iid4",
+   "family": "studentt",
+   "wrap": "iid4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.004316 vs 0.000000 (|d|=0.00432, band 0.0144 = 5 SE, 1.49 sigma)",
+     "got": -0.004315550288705342,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 1.494950472531238,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.669161 vs 1.666667 (|d|=0.00249, band 0.0527 = 5 SE, 0.24 sigma)",
+     "got": 1.669161176187309,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 0.23664995190613822,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "-0.003084 vs 0.000000 (|d|=0.00308, band 0.0144 = 5 SE, 1.07 sigma)",
+     "got": -0.003084052156934411,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 1.0683470058005569,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.662259 vs 1.666667 (|d|=0.00441, band 0.0527 = 5 SE, 0.42 sigma)",
+     "got": 1.6622586775410122,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 0.41817856614967536,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.000097 vs +0.000000 (|d|=9.65e-05, band 0.0186 = 5 SE, 0.03 sigma)",
+     "got": -9.65251178797484e-05,
+     "want": 0.0,
+     "band": 0.018633899812498248,
+     "sigma": 0.025900407013835735,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.001693 vs 0.000000 (|d|=0.00169, band 0.0144 = 5 SE, 0.59 sigma)",
+     "got": 0.0016928845928893704,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 0.5864324252469888,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "1.651632 vs 1.666667 (|d|=0.015, band 0.0527 = 5 SE, 1.43 sigma)",
+     "got": 1.6516322519320423,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 1.426289815470273,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.001261 vs +0.000000 (|d|=0.00126, band 0.0186 = 5 SE, 0.34 sigma)",
+     "got": 0.0012610027226873648,
+     "want": 0.0,
+     "band": 0.018633899812498248,
+     "sigma": 0.33836253692895163,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "-0.001060 vs 0.000000 (|d|=0.00106, band 0.0144 = 5 SE, 0.37 sigma)",
+     "got": -0.0010596025166908643,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 0.36705707894728523,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "1.662326 vs 1.666667 (|d|=0.00434, band 0.0527 = 5 SE, 0.41 sigma)",
+     "got": 1.6623262141155628,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 0.41177148412130476,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "-0.003876 vs +0.000000 (|d|=0.00388, band 0.0186 = 5 SE, 1.04 sigma)",
+     "got": -0.0038757821208049857,
+     "want": 0.0,
+     "band": 0.018633899812498248,
+     "sigma": 1.03998147457179,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006128 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006127614438626305,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "studentt.weighted2",
+   "family": "studentt",
+   "wrap": "weighted2",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.007187 vs 0.000000 (|d|=0.00719, band 0.0144 = 5 SE, 2.49 sigma)",
+     "got": 0.007186957574231917,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 2.48963513408233,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.652776 vs 1.666667 (|d|=0.0139, band 0.0527 = 5 SE, 1.32 sigma)",
+     "got": 1.6527762395994534,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 1.3177616161454069,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005724 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005723763060098808,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2, positions unchanged: total mass is the whole check here"
+  },
+  {
+   "probe_id": "studentt.normalize_prob",
+   "family": "studentt",
+   "wrap": "normalize_prob",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.007187 vs 0.000000 (|d|=0.00719, band 0.0144 = 5 SE, 2.49 sigma)",
+     "got": 0.007186957574231917,
+     "want": 0.0,
+     "band": 0.014433756729740645,
+     "sigma": 2.48963513408233,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.652776 vs 1.666667 (|d|=0.0139, band 0.0527 = 5 SE, 1.32 sigma)",
+     "got": 1.6527762395994534,
+     "want": 1.6666666666666667,
+     "band": 0.05270462766947298,
+     "sigma": 1.3177616161454069,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005724 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005723763060098808,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "normalize of a probability measure is the identity, mass exactly 1"
+  },
+  {
+   "probe_id": "studentt.pushfwd_affine",
+   "family": "studentt",
+   "wrap": "pushfwd_affine",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.014374 vs 1.000000 (|d|=0.0144, band 0.0289 = 5 SE, 2.49 sigma)",
+     "got": 1.0143739151484643,
+     "want": 1.0,
+     "band": 0.02886751345948129,
+     "sigma": 2.489635134082413,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "6.611105 vs 6.666667 (|d|=0.0556, band 0.211 = 5 SE, 1.32 sigma)",
+     "got": 6.611104958397668,
+     "want": 6.666666666666667,
+     "band": 0.21081851067789192,
+     "sigma": 1.3177616161488614,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005724 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005723763060098808,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "y = 2.0x + 1.0: mean and variance must both move"
+  },
+  {
+   "probe_id": "studentt.iid_pushfwd3",
+   "family": "studentt",
+   "wrap": "iid_pushfwd3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.001437 vs 1.000000 (|d|=0.00144, band 0.0289 = 5 SE, 0.25 sigma)",
+     "got": 1.001437429652744,
+     "want": 1.0,
+     "band": 0.02886751345948129,
+     "sigma": 0.24897011908586267,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "6.626105 vs 6.666667 (|d|=0.0406, band 0.211 = 5 SE, 0.96 sigma)",
+     "got": 6.6261051069606625,
+     "want": 6.666666666666667,
+     "band": 0.21081851067789192,
+     "sigma": 0.9620018558991296,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.007513 vs 1.000000 (|d|=0.00751, band 0.0289 = 5 SE, 1.30 sigma)",
+     "got": 1.007512807540548,
+     "want": 1.0,
+     "band": 0.02886751345948129,
+     "sigma": 1.3012564367715627,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "6.650864 vs 6.666667 (|d|=0.0158, band 0.211 = 5 SE, 0.37 sigma)",
+     "got": 6.650863684386083,
+     "want": 6.666666666666667,
+     "band": 0.21081851067789192,
+     "sigma": 0.3748006337244531,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.007734 vs +0.000000 (|d|=0.00773, band 0.0745 = 5 SE, 0.52 sigma)",
+     "got": -0.007733966956302574,
+     "want": 0.0,
+     "band": 0.07453559924999299,
+     "sigma": 0.518810275500891,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "1.008709 vs 1.000000 (|d|=0.00871, band 0.0289 = 5 SE, 1.51 sigma)",
+     "got": 1.0087093964372968,
+     "want": 1.0,
+     "band": 0.02886751345948129,
+     "sigma": 1.5085117132657504,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "6.674607 vs 6.666667 (|d|=0.00794, band 0.211 = 5 SE, 0.19 sigma)",
+     "got": 6.6746068935952305,
+     "want": 6.666666666666667,
+     "band": 0.21081851067789192,
+     "sigma": 0.18831901674647936,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.003099 vs +0.000000 (|d|=0.0031, band 0.0745 = 5 SE, 0.21 sigma)",
+     "got": 0.003098676772726572,
+     "want": 0.0,
+     "band": 0.07453559924999299,
+     "sigma": 0.20786555712348842,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006781 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006781406701898973,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a transformed base: the composite-fallback iid path"
+  },
+  {
+   "probe_id": "poisson.iid3",
+   "family": "poisson",
+   "wrap": "iid3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "4.008295 vs 4.000000 (|d|=0.0083, band 0.0224 = 5 SE, 1.85 sigma)",
+     "got": 4.008295,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 1.8548183873361617,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.989706 vs 4.000000 (|d|=0.0103, band 0.0671 = 5 SE, 0.77 sigma)",
+     "got": 3.9897061929749995,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.767255075172199,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "3.995840 vs 4.000000 (|d|=0.00416, band 0.0224 = 5 SE, 0.93 sigma)",
+     "got": 3.99584,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.930204278639949,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "3.984833 vs 4.000000 (|d|=0.0152, band 0.0671 = 5 SE, 1.13 sigma)",
+     "got": 3.9848326944000014,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 1.130504211903668,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.010605 vs +0.000000 (|d|=0.0106, band 0.0447 = 5 SE, 1.19 sigma)",
+     "got": -0.010605492799999894,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 1.1857301417842172,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "3.992830 vs 4.000000 (|d|=0.00717, band 0.0224 = 5 SE, 1.60 sigma)",
+     "got": 3.99283,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 1.6032607398673264,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "3.978539 vs 4.000000 (|d|=0.0215, band 0.0671 = 5 SE, 1.60 sigma)",
+     "got": 3.9785385911000013,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 1.599638973110536,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.015474 vs +0.000000 (|d|=0.0155, band 0.0447 = 5 SE, 1.73 sigma)",
+     "got": 0.015474475150000444,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 1.7300989175766122,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "product measure: per-coordinate marginals are the base, cov 0"
+  },
+  {
+   "probe_id": "poisson.iid4",
+   "family": "poisson",
+   "wrap": "iid4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.999735 vs 4.000000 (|d|=0.000265, band 0.0224 = 5 SE, 0.06 sigma)",
+     "got": 3.999735,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.059255801403785065,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.987525 vs 4.000000 (|d|=0.0125, band 0.0671 = 5 SE, 0.93 sigma)",
+     "got": 3.9875249297750024,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.9298368349059416,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "3.995540 vs 4.000000 (|d|=0.00446, band 0.0224 = 5 SE, 1.00 sigma)",
+     "got": 3.99554,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.9972863179648856,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "3.983700 vs 4.000000 (|d|=0.0163, band 0.0671 = 5 SE, 1.21 sigma)",
+     "got": 3.983700108399999,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 1.2149221881160017,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.008004 vs +0.000000 (|d|=0.008, band 0.0447 = 5 SE, 0.89 sigma)",
+     "got": 0.008003818100000615,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.8948540675572292,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "4.003050 vs 4.000000 (|d|=0.00305, band 0.0224 = 5 SE, 0.68 sigma)",
+     "got": 4.00305,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.6820007331374351,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "4.004131 vs 4.000000 (|d|=0.00413, band 0.0671 = 5 SE, 0.31 sigma)",
+     "got": 4.004130697499999,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.30788401348287775,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.008549 vs +0.000000 (|d|=0.00855, band 0.0447 = 5 SE, 0.96 sigma)",
+     "got": -0.008549191749999352,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.9558286952839469,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "3.991775 vs 4.000000 (|d|=0.00822, band 0.0224 = 5 SE, 1.84 sigma)",
+     "got": 3.991775,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 1.8391659114935606,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "3.982997 vs 4.000000 (|d|=0.017, band 0.0671 = 5 SE, 1.27 sigma)",
+     "got": 3.9829973493749993,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 1.2673027531726968,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "+0.000673 vs +0.000000 (|d|=0.000673, band 0.0447 = 5 SE, 0.08 sigma)",
+     "got": 0.0006728203750014927,
+     "want": 0.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.07522360475751189,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "poisson.weighted2",
+   "family": "poisson",
+   "wrap": "weighted2",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.997485 vs 4.000000 (|d|=0.00251, band 0.0224 = 5 SE, 0.56 sigma)",
+     "got": 3.997485,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.5623710963411575,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "4.007439 vs 4.000000 (|d|=0.00744, band 0.0671 = 5 SE, 0.55 sigma)",
+     "got": 4.007438674774997,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.554446081980228,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2, positions unchanged: total mass is the whole check here"
+  },
+  {
+   "probe_id": "poisson.normalize_prob",
+   "family": "poisson",
+   "wrap": "normalize_prob",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "3.997485 vs 4.000000 (|d|=0.00251, band 0.0224 = 5 SE, 0.56 sigma)",
+     "got": 3.997485,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.5623710963411575,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "4.007439 vs 4.000000 (|d|=0.00744, band 0.0671 = 5 SE, 0.55 sigma)",
+     "got": 4.007438674774997,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.554446081980228,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "normalize of a probability measure is the identity, mass exactly 1"
+  },
+  {
+   "probe_id": "poisson.pushfwd_affine",
+   "family": "poisson",
+   "wrap": "pushfwd_affine",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "8.994970 vs 9.000000 (|d|=0.00503, band 0.0447 = 5 SE, 0.56 sigma)",
+     "got": 8.99497,
+     "want": 9.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.5623710963411575,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "16.029755 vs 16.000000 (|d|=0.0298, band 0.268 = 5 SE, 0.55 sigma)",
+     "got": 16.029754699099996,
+     "want": 16.0,
+     "band": 0.2683281572999748,
+     "sigma": 0.5544460819803604,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "y = 2.0x + 1.0: mean and variance must both move"
+  },
+  {
+   "probe_id": "poisson.iid_pushfwd3",
+   "family": "poisson",
+   "wrap": "iid_pushfwd3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "9.001790 vs 9.000000 (|d|=0.00179, band 0.0447 = 5 SE, 0.20 sigma)",
+     "got": 9.00179,
+     "want": 9.0,
+     "band": 0.0447213595499958,
+     "sigma": 0.20012808398620166,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "16.089897 vs 16.000000 (|d|=0.0899, band 0.268 = 5 SE, 1.68 sigma)",
+     "got": 16.089896795900003,
+     "want": 16.0,
+     "band": 0.2683281572999748,
+     "sigma": 1.675127888265263,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "9.014740 vs 9.000000 (|d|=0.0147, band 0.0447 = 5 SE, 1.65 sigma)",
+     "got": 9.01474,
+     "want": 9.0,
+     "band": 0.0447213595499958,
+     "sigma": 1.6479820994173173,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "16.025063 vs 16.000000 (|d|=0.0251, band 0.268 = 5 SE, 0.47 sigma)",
+     "got": 16.025062732400002,
+     "want": 16.0,
+     "band": 0.2683281572999748,
+     "sigma": 0.4670164445690932,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.019174 vs +0.000000 (|d|=0.0192, band 0.179 = 5 SE, 0.54 sigma)",
+     "got": 0.019173615400006838,
+     "want": 0.0,
+     "band": 0.1788854381999832,
+     "sigma": 0.5359188426106514,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "9.012110 vs 9.000000 (|d|=0.0121, band 0.0447 = 5 SE, 1.35 sigma)",
+     "got": 9.01211,
+     "want": 9.0,
+     "band": 0.0447213595499958,
+     "sigma": 1.353939160376105,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "16.076033 vs 16.000000 (|d|=0.076, band 0.268 = 5 SE, 1.42 sigma)",
+     "got": 16.076033347900008,
+     "want": 16.0,
+     "band": 0.2683281572999748,
+     "sigma": 1.4167977871775759,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.091538 vs +0.000000 (|d|=0.0915, band 0.179 = 5 SE, 2.56 sigma)",
+     "got": 0.09153832310001064,
+     "want": 0.0,
+     "band": 0.1788854381999832,
+     "sigma": 2.558573912474538,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a transformed base: the composite-fallback iid path"
+  },
+  {
+   "probe_id": "bernoulli.iid3",
+   "family": "bernoulli",
+   "wrap": "iid3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.301340 vs 0.300000 (|d|=0.00134, band 0.00512 = 5 SE, 1.31 sigma)",
+     "got": 0.30134,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 1.3077060977510422,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.210534 vs 0.210000 (|d|=0.000534, band 0.00205 = 5 SE, 1.30 sigma)",
+     "got": 0.21053420439999998,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 1.3033252823235388,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.300965 vs 0.300000 (|d|=0.000965, band 0.00512 = 5 SE, 0.94 sigma)",
+     "got": 0.300965,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 0.9417435703953284,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.210385 vs 0.210000 (|d|=0.000385, band 0.00205 = 5 SE, 0.94 sigma)",
+     "got": 0.210385068775,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 0.9394716140317484,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.000167 vs +0.000000 (|d|=0.000167, band 0.00235 = 5 SE, 0.36 sigma)",
+     "got": 0.00016720690000000815,
+     "want": 0.0,
+     "band": 0.002347871376374779,
+     "sigma": 0.35608189972097887,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.299070 vs 0.300000 (|d|=0.00093, band 0.00512 = 5 SE, 0.91 sigma)",
+     "got": 0.29907,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 0.9075870678421226,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.209627 vs 0.210000 (|d|=0.000373, band 0.00205 = 5 SE, 0.91 sigma)",
+     "got": 0.2096271351,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 0.9096972077748485,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.001007 vs +0.000000 (|d|=0.00101, band 0.00235 = 5 SE, 2.14 sigma)",
+     "got": -0.001006753799999996,
+     "want": 0.0,
+     "band": 0.002347871376374779,
+     "sigma": 2.1439713651487797,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "product measure: per-coordinate marginals are the base, cov 0"
+  },
+  {
+   "probe_id": "bernoulli.iid4",
+   "family": "bernoulli",
+   "wrap": "iid4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.298910 vs 0.300000 (|d|=0.00109, band 0.00512 = 5 SE, 1.06 sigma)",
+     "got": 0.29891,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 1.0637310795138817,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.209563 vs 0.210000 (|d|=0.000437, band 0.00205 = 5 SE, 1.07 sigma)",
+     "got": 0.2095628119,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 1.066629746705541,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.300010 vs 0.300000 (|d|=1e-05, band 0.00512 = 5 SE, 0.01 sigma)",
+     "got": 0.30001,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 0.009759000729495093,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.210004 vs 0.210000 (|d|=4e-06, band 0.00205 = 5 SE, 0.01 sigma)",
+     "got": 0.21000399990000002,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 0.009758756754524383,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.001414 vs +0.000000 (|d|=0.00141, band 0.00235 = 5 SE, 3.01 sigma)",
+     "got": 0.0014140108999999984,
+     "want": 0.0,
+     "band": 0.002347871376374779,
+     "sigma": 3.0112614222149086,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.300745 vs 0.300000 (|d|=0.000745, band 0.00512 = 5 SE, 0.73 sigma)",
+     "got": 0.300745,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 0.7270455543466531,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.210297 vs 0.210000 (|d|=0.000297, band 0.00205 = 5 SE, 0.73 sigma)",
+     "got": 0.210297444975,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 0.7256914320016992,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.000431 vs +0.000000 (|d|=0.000431, band 0.00235 = 5 SE, 0.92 sigma)",
+     "got": -0.0004306879499999944,
+     "want": 0.0,
+     "band": 0.002347871376374779,
+     "sigma": 0.9171881269428743,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.300940 vs 0.300000 (|d|=0.00094, band 0.00512 = 5 SE, 0.92 sigma)",
+     "got": 0.30094,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 0.9173460685716177,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "0.210375 vs 0.210000 (|d|=0.000375, band 0.00205 = 5 SE, 0.92 sigma)",
+     "got": 0.2103751164,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 0.9151903053105119,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "-0.000194 vs +0.000000 (|d|=0.000194, band 0.00235 = 5 SE, 0.41 sigma)",
+     "got": -0.00019397539999999047,
+     "want": 0.0,
+     "band": 0.002347871376374779,
+     "sigma": 0.41308779082161085,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "bernoulli.weighted2",
+   "family": "bernoulli",
+   "wrap": "weighted2",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.301165 vs 0.300000 (|d|=0.00117, band 0.00512 = 5 SE, 1.14 sigma)",
+     "got": 0.301165,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 1.1369235849850676,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.210465 vs 0.210000 (|d|=0.000465, band 0.00205 = 5 SE, 1.13 sigma)",
+     "got": 0.210464642775,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 1.1336122950437622,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2, positions unchanged: total mass is the whole check here"
+  },
+  {
+   "probe_id": "bernoulli.normalize_prob",
+   "family": "bernoulli",
+   "wrap": "normalize_prob",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.301165 vs 0.300000 (|d|=0.00117, band 0.00512 = 5 SE, 1.14 sigma)",
+     "got": 0.301165,
+     "want": 0.3,
+     "band": 0.005123475382979799,
+     "sigma": 1.1369235849850676,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.210465 vs 0.210000 (|d|=0.000465, band 0.00205 = 5 SE, 1.13 sigma)",
+     "got": 0.210464642775,
+     "want": 0.21,
+     "band": 0.00204939015319192,
+     "sigma": 1.1336122950437622,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "normalize of a probability measure is the identity, mass exactly 1"
+  },
+  {
+   "probe_id": "bernoulli.pushfwd_affine",
+   "family": "bernoulli",
+   "wrap": "pushfwd_affine",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.602330 vs 1.600000 (|d|=0.00233, band 0.0102 = 5 SE, 1.14 sigma)",
+     "got": 1.60233,
+     "want": 1.6,
+     "band": 0.010246950765959597,
+     "sigma": 1.1369235849850134,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.841859 vs 0.840000 (|d|=0.00186, band 0.0082 = 5 SE, 1.13 sigma)",
+     "got": 0.8418585711,
+     "want": 0.84,
+     "band": 0.00819756061276768,
+     "sigma": 1.1336122950437622,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "y = 2.0x + 1.0: mean and variance must both move"
+  },
+  {
+   "probe_id": "bernoulli.iid_pushfwd3",
+   "family": "bernoulli",
+   "wrap": "iid_pushfwd3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.599190 vs 1.600000 (|d|=0.00081, band 0.0102 = 5 SE, 0.40 sigma)",
+     "got": 1.59919,
+     "want": 1.6,
+     "band": 0.010246950765959597,
+     "sigma": 0.3952395295442533,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.839351 vs 0.840000 (|d|=0.000649, band 0.0082 = 5 SE, 0.40 sigma)",
+     "got": 0.8393513439000002,
+     "want": 0.84,
+     "band": 0.00819756061276768,
+     "sigma": 0.3956397095676705,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.600060 vs 1.600000 (|d|=6e-05, band 0.0102 = 5 SE, 0.03 sigma)",
+     "got": 1.60006,
+     "want": 1.6,
+     "band": 0.010246950765959597,
+     "sigma": 0.029277002188431104,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "0.840048 vs 0.840000 (|d|=4.8e-05, band 0.0082 = 5 SE, 0.03 sigma)",
+     "got": 0.8400479964,
+     "want": 0.84,
+     "band": 0.00819756061276768,
+     "sigma": 0.029274806413342607,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.000970 vs +0.000000 (|d|=0.00097, band 0.00939 = 5 SE, 0.52 sigma)",
+     "got": -0.000969951399999669,
+     "want": 0.0,
+     "band": 0.009391485505499116,
+     "sigma": 0.5163993488738927,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "1.597640 vs 1.600000 (|d|=0.00236, band 0.0102 = 5 SE, 1.15 sigma)",
+     "got": 1.59764,
+     "want": 1.6,
+     "band": 0.010246950765959597,
+     "sigma": 1.1515620860793374,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "0.838106 vs 0.840000 (|d|=0.00189, band 0.0082 = 5 SE, 1.15 sigma)",
+     "got": 0.8381064303999999,
+     "want": 0.84,
+     "band": 0.00819756061276768,
+     "sigma": 1.154959194233257,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.000140 vs +0.000000 (|d|=0.00014, band 0.00939 = 5 SE, 0.07 sigma)",
+     "got": 0.0001400884000002378,
+     "want": 0.0,
+     "band": 0.009391485505499116,
+     "sigma": 0.0745826631570746,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a transformed base: the composite-fallback iid path"
+  },
+  {
+   "probe_id": "normal.superpose_sym",
+   "family": "normal",
+   "wrap": "superpose_sym",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.014092 vs 0.000000 (|d|=0.0141, band 0.0354 = 5 SE, 1.99 sigma)",
+     "got": -0.014092336439660264,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 1.992957331849212,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "9.992894 vs 10.000000 (|d|=0.00711, band 0.0689 = 5 SE, 0.52 sigma)",
+     "got": 9.992894136909081,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.5155134908994962,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006224 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006224011566734189,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "equal-weight mixture of N(-3,1) and N(3,1); total mass 0.5+0.5 = 1"
+  },
+  {
+   "probe_id": "normal.superpose_asym",
+   "family": "normal",
+   "wrap": "superpose_asym",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.182180 vs 1.200000 (|d|=0.0178, band 0.0327 = 5 SE, 2.72 sigma)",
+     "got": 1.1821798123871448,
+     "want": 1.2,
+     "band": 0.032710854467592254,
+     "sigma": 2.7238951569593297,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "8.579021 vs 8.560000 (|d|=0.019, band 0.0973 = 5 SE, 0.98 sigma)",
+     "got": 8.57902100277764,
+     "want": 8.56,
+     "band": 0.09733036525154933,
+     "sigma": 0.97713610385003,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.004979 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.004978705258024019,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass -6.57252030578093e-13 vs 0 (|d|=6.57e-13, band 1e-12)",
+     "got": -6.572520305780927e-13,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "unequal weights break the symmetry that hides a swapped branch"
+  },
+  {
+   "probe_id": "normal.normalize_superpose",
+   "family": "normal",
+   "wrap": "normalize_superpose",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.014092 vs 0.000000 (|d|=0.0141, band 0.0354 = 5 SE, 1.99 sigma)",
+     "got": -0.014092336439660264,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 1.992957331849212,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "9.992894 vs 10.000000 (|d|=0.00711, band 0.0689 = 5 SE, 0.52 sigma)",
+     "got": 9.992894136909081,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.5155134908994962,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006224 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006224011566734189,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass is already 1, so normalize must be the identity here"
+  },
+  {
+   "probe_id": "normal.weighted_superpose",
+   "family": "normal",
+   "wrap": "weighted_superpose",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.014092 vs 0.000000 (|d|=0.0141, band 0.0354 = 5 SE, 1.99 sigma)",
+     "got": -0.014092336439660264,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 1.992957331849212,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "9.992894 vs 10.000000 (|d|=0.00711, band 0.0689 = 5 SE, 0.52 sigma)",
+     "got": 9.992894136909081,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.5155134908994962,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006224 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006224011566734189,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0.693147180559945 vs 0.693147180559945 (|d|=0, band 6.94e-10)",
+     "got": 0.6931471805599453,
+     "want": 0.6931471805599453,
+     "band": 6.941471805599453e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "mass 2 over a mixture: positions unchanged, mass doubled"
+  },
+  {
+   "probe_id": "normal.iid_superpose3",
+   "family": "normal",
+   "wrap": "iid_superpose3",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.012095 vs 0.000000 (|d|=0.0121, band 0.0354 = 5 SE, 1.71 sigma)",
+     "got": 0.012094955986870583,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 1.710485079293804,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "9.976558 vs 10.000000 (|d|=0.0234, band 0.0689 = 5 SE, 1.70 sigma)",
+     "got": 9.976558232586727,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 1.7006445518932023,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "-0.008315 vs 0.000000 (|d|=0.00832, band 0.0354 = 5 SE, 1.18 sigma)",
+     "got": -0.00831541658231307,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 1.1759774907489273,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "9.990697 vs 10.000000 (|d|=0.0093, band 0.0689 = 5 SE, 0.67 sigma)",
+     "got": 9.990697414165272,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.6748805087705131,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.002926 vs +0.000000 (|d|=0.00293, band 0.112 = 5 SE, 0.13 sigma)",
+     "got": 0.0029262874291709623,
+     "want": 0.0,
+     "band": 0.11180339887498948,
+     "sigma": 0.13086755226658744,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "-0.003163 vs 0.000000 (|d|=0.00316, band 0.0354 = 5 SE, 0.45 sigma)",
+     "got": -0.0031625426674513585,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 0.4472510731893296,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "9.982346 vs 10.000000 (|d|=0.0177, band 0.0689 = 5 SE, 1.28 sigma)",
+     "got": 9.982345680820886,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 1.2807789276308625,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "-0.032470 vs +0.000000 (|d|=0.0325, band 0.112 = 5 SE, 1.45 sigma)",
+     "got": -0.032470193280500305,
+     "want": 0.0,
+     "band": 0.11180339887498948,
+     "sigma": 1.4521111883551117,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003289 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.003289226033657222,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "IIDSUPER class: each coordinate must select its OWN component"
+  },
+  {
+   "probe_id": "normal.iid_superpose4",
+   "family": "normal",
+   "wrap": "iid_superpose4",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.002183 vs 0.000000 (|d|=0.00218, band 0.0354 = 5 SE, 0.31 sigma)",
+     "got": -0.0021828164710362237,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 0.3086968657510806,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "9.988927 vs 10.000000 (|d|=0.0111, band 0.0689 = 5 SE, 0.80 sigma)",
+     "got": 9.988926740237162,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.8033386969238124,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "-0.001347 vs 0.000000 (|d|=0.00135, band 0.0354 = 5 SE, 0.19 sigma)",
+     "got": -0.0013472726310321537,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 0.19053312270197545,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "9.967105 vs 10.000000 (|d|=0.0329, band 0.0689 = 5 SE, 2.39 sigma)",
+     "got": 9.967104883975932,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 2.386462542007495,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.006287 vs +0.000000 (|d|=0.00629, band 0.112 = 5 SE, 0.28 sigma)",
+     "got": -0.006286793436668541,
+     "want": 0.0,
+     "band": 0.11180339887498948,
+     "sigma": 0.28115394969780755,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.000946 vs 0.000000 (|d|=0.000946, band 0.0354 = 5 SE, 0.13 sigma)",
+     "got": 0.0009464065567034747,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 0.13384209880088754,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "9.990715 vs 10.000000 (|d|=0.00928, band 0.0689 = 5 SE, 0.67 sigma)",
+     "got": 9.990715011771654,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.67360384422163,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.018575 vs +0.000000 (|d|=0.0186, band 0.112 = 5 SE, 0.83 sigma)",
+     "got": 0.01857549629226604,
+     "want": 0.0,
+     "band": 0.11180339887498948,
+     "sigma": 0.8307214485060433,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.003297 vs 0.000000 (|d|=0.0033, band 0.0354 = 5 SE, 0.47 sigma)",
+     "got": 0.0032970100750263805,
+     "want": 0.0,
+     "band": 0.035355339059327376,
+     "sigma": 0.46626763633830426,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "10.008413 vs 10.000000 (|d|=0.00841, band 0.0689 = 5 SE, 0.61 sigma)",
+     "got": 10.008412616259363,
+     "want": 10.0,
+     "band": 0.06892024376045111,
+     "sigma": 0.6103153297457475,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "-0.014856 vs +0.000000 (|d|=0.0149, band 0.112 = 5 SE, 0.66 sigma)",
+     "got": -0.014855577905821343,
+     "want": 0.0,
+     "band": 0.11180339887498948,
+     "sigma": 0.6643616408492099,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.006203 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.006202593961463443,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "IIDSUPER class at even k, where every coordinate was pinned"
+  },
+  {
+   "probe_id": "normal.truncate",
+   "family": "normal",
+   "wrap": "truncate",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "-0.001358 vs 0.000000 (|d|=0.00136, band 0.00603 = 5 SE, 1.13 sigma)",
+     "got": -0.0013583435667864358,
+     "want": 0.0,
+     "band": 0.0060324652379105444,
+     "sigma": 1.1258610810138072,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.291272 vs 0.291125 (|d|=0.000147, band 0.00316 = 5 SE, 0.23 sigma)",
+     "got": 0.29127185520766125,
+     "want": 0.291125094772793,
+     "band": 0.003157264604937024,
+     "sigma": 0.23241706545395469,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.009225 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.009225344962999205,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass -0.381715146302126 vs -0.381715146302126 (|d|=5.55e-17, band 3.83e-10)",
+     "got": -0.3817151463021261,
+     "want": -0.38171514630212616,
+     "band": 3.827151463021262e-10,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "the total mass 2*Phi(1)-1 is a closed form the engine must reproduce"
+  },
+  {
+   "probe_id": "normal.kchain",
+   "family": "normal",
+   "wrap": "kchain",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.001701 vs 0.000000 (|d|=0.0017, band 0.0158 = 5 SE, 0.54 sigma)",
+     "got": 0.0017014975213361433,
+     "want": 0.0,
+     "band": 0.015811388300841896,
+     "sigma": 0.5380607600553156,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.012047 vs 2.000000 (|d|=0.012, band 0.0316 = 5 SE, 1.90 sigma)",
+     "got": 2.012047437087603,
+     "want": 2.0,
+     "band": 0.03162277660168379,
+     "sigma": 1.9048670582205356,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.004806 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.004806448299437993,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "record-valued: the kept variate is the marginal y ~ N(0, 2)"
+  },
+  {
+   "probe_id": "normal.iid_kchain3",
+   "family": "normal",
+   "wrap": "iid_kchain3",
+   "outcome": "REFUSES",
+   "n": 200000,
+   "k": 3,
+   "marker": "is-not-supported",
+   "error": "iid: sampling iid over a record measure at >1 atoms (an ensemble of tables) is not supported; sample a single dataset (1 atom)",
+   "checks": [],
+   "note": "carded OPEN in TODO-flatppl-js.md: iid over a kchain shares the base draw"
+  }
+ ]
+}

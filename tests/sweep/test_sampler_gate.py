@@ -1,0 +1,266 @@
+"""The sampler sweep's CI gate.
+
+Five signals, mirroring the density gate's (`tests/sweep/test_gate.py`) but on
+the sample path:
+
+    DRAWS but a check failed      -> a wrong number (the class this exists to find)
+    DRAWS where the table REFUSES -> newly admitted; needs an oracle verdict
+    REFUSES where the table DRAWS -> a regression, or an over-refusal
+    a changed refusal marker      -> the reason moved; re-read it
+    MALFORMED anywhere            -> always a defect
+
+Plus two guards the density gate has no equivalent of, both specific to a
+STATISTICAL gate:
+
+* THE TEETH TESTS. A statistical gate whose bands are too wide passes
+  everything and proves nothing, and that failure mode is invisible from a green
+  run. So the tolerance arithmetic is tested directly against the magnitudes of
+  the two defects this sweep was built for — the `@stdlib` symmetric-Beta
+  variance bias and the `iid(superpose(...))` branch pinning — asserting each
+  would be caught, and by how many sigma. These need no engine and run in
+  milliseconds.
+
+* ROSTER COMPLETENESS. The roster claims to cover every sampleable REGISTRY
+  entry. That claim decays silently the moment a new distribution lands in
+  flatppl-js, so it is asserted against `sampler-registry.ts` itself rather than
+  maintained by hand.
+"""
+from __future__ import annotations
+
+import math
+import re
+
+import pytest
+
+from flatppl_testsuite.config import CONFIG
+from flatppl_testsuite.sampler_sweep import checks as C
+from flatppl_testsuite.sampler_sweep import space, table
+from flatppl_testsuite.sampler_sweep.oracle import DENSITY_ONLY, FAMILIES
+
+N = space.N_DRAWS
+
+
+# ---------------------------------------------------------------------------
+# Teeth. No engine, no table — pure tolerance arithmetic against known defects.
+# ---------------------------------------------------------------------------
+
+# From flatppl-dev/TODO-flatppl-js.md: `@stdlib/random-base-beta@0.2.2` draws
+# every symmetric `Beta(a, a)` with `a > 1.5` with a variance biased LOW, by
+# 3.09% at a = 2. flatppl-js routes that region through two gammas
+# (`randBetaFixed` in sampler-registry.ts) to avoid it.
+BETA_22_VAR = 0.05
+BETA_22_MU4 = 0.005357142857
+BETA_DEFECT_REL = 0.0309
+
+# The mixture the IIDSUPER rows use: Normal(-3,1) / Normal(+3,1), equal weights.
+MIX_VAR = 10.0
+MIX_MU4 = 138.0
+
+
+def test_the_beta_vendor_variance_defect_would_be_caught():
+    biased = BETA_22_VAR * (1 - BETA_DEFECT_REL)
+    chk = C.check_var(0, biased, BETA_22_VAR, BETA_22_MU4, N)
+    assert chk.status == "failed", f"the Beta(2,2) vendor defect would pass: {chk.detail}"
+    assert chk.sigma > 10, f"caught, but only at {chk.sigma:.1f} sigma: {chk.detail}"
+
+
+def test_the_beta_row_resolves_a_variance_bias_well_under_the_defect():
+    """The band must be tight enough that the defect is not a borderline catch."""
+    se = math.sqrt((BETA_22_MU4 - BETA_22_VAR ** 2) / N)
+    resolvable_rel = C.SIGMA * se / BETA_22_VAR
+    assert resolvable_rel < BETA_DEFECT_REL / 2, (
+        f"the row resolves only a {100 * resolvable_rel:.2f}% variance bias, "
+        f"which leaves no margin under the {100 * BETA_DEFECT_REL:.2f}% defect")
+
+
+def test_iid_superpose_branch_pinning_would_be_caught_on_covariance():
+    """The check that actually catches pinning.
+
+    A pinned coordinate locks to one component, so cov(0, i) goes to the mixture
+    variance instead of 0. This is the signal that does NOT depend on a marginal
+    looking wrong — see the next test for why that matters.
+    """
+    chk = C.check_cov(1, MIX_VAR, 0.0, MIX_VAR, N)
+    assert chk.status == "failed"
+    assert chk.sigma > 100, f"only {chk.sigma:.1f} sigma: {chk.detail}"
+
+
+def test_a_pinned_coordinate_can_have_a_plausible_marginal_variance():
+    """Why the covariance check is not redundant with the moment checks.
+
+    The historically observed pinning left the MIDDLE coordinate's variance at
+    9.9860 against an oracle of 10.0 — 1.0 sigma, a clean pass. The defect was
+    only visible across coordinates. A gate with moment checks alone would have
+    missed it on that coordinate.
+    """
+    marginal = C.check_var(1, 9.9860, MIX_VAR, MIX_MU4, N)
+    assert marginal.status == "passed", (
+        "this test encodes the historical observation that a pinned coordinate's "
+        "own variance looked fine; if it now fails, re-read the premise")
+    cross = C.check_cov(1, MIX_VAR, 0.0, MIX_VAR, N)
+    assert cross.status == "failed", "the cross-coordinate check must catch what the marginal missed"
+
+
+def test_the_carded_residual_covariance_would_be_caught():
+    """TODO-flatppl-js.md still cards `iid(kchain(superpose, K), n)` with a
+    residual covariance of 0.4791 against an oracle of 0. Far smaller than full
+    pinning, so it is the real sensitivity floor for this class."""
+    chk = C.check_cov(1, 0.4791, 0.0, MIX_VAR, N)
+    assert chk.status == "failed", f"the carded residual would pass: {chk.detail}"
+    assert chk.sigma > 10, f"only {chk.sigma:.1f} sigma: {chk.detail}"
+
+
+def test_the_bands_do_not_fire_on_true_null_noise():
+    """A 5-sigma band must not cost false positives, or the gate becomes noise
+    everyone learns to ignore. 4000 true-null draws of each estimator."""
+    import numpy as np
+
+    rng = np.random.default_rng(0)
+    mean_se = math.sqrt(MIX_VAR / N)
+    var_se = math.sqrt((MIX_MU4 - MIX_VAR ** 2) / N)
+    mean_fp = sum(1 for _ in range(4000)
+                  if C.check_mean(0, rng.normal(0.0, mean_se), 0.0, MIX_VAR, N).status == "failed")
+    var_fp = sum(1 for _ in range(4000)
+                 if C.check_var(0, MIX_VAR + rng.normal(0.0, var_se),
+                                MIX_VAR, MIX_MU4, N).status == "failed")
+    assert mean_fp == 0, f"{mean_fp}/4000 false positives on the mean band"
+    assert var_fp == 0, f"{var_fp}/4000 false positives on the variance band"
+
+
+def test_ks_catches_a_shape_defect_the_moments_would_miss():
+    """A mis-weighted mixture keeps a plausible spread but the wrong shape."""
+    import numpy as np
+    from scipy import stats
+
+    spec = ("mix", (0.5, 0.5), (("norm", (-3.0, 1.0), {}), ("norm", (3.0, 1.0), {})))
+    # True 0.5/0.5 mixture: passes.
+    good = np.concatenate([stats.norm(-3, 1).rvs(10000, random_state=2),
+                           stats.norm(3, 1).rvs(10000, random_state=3)])
+    assert C.check_ks(list(good), spec, 20000).status == "passed"
+    # 0.4/0.6 instead: caught.
+    bad = np.concatenate([stats.norm(-3, 1).rvs(8000, random_state=4),
+                          stats.norm(3, 1).rvs(12000, random_state=5)])
+    chk = C.check_ks(list(bad), spec, 20000)
+    assert chk.status == "failed", f"a 0.4/0.6 mis-weighting would pass KS: {chk.detail}"
+    # A pinned coordinate: caught by a wide margin.
+    pinned = stats.norm(-3, 1).rvs(20000, random_state=1)
+    assert C.check_ks(list(pinned), spec, 20000).status == "failed"
+
+
+def test_totalmass_catches_a_mass_confusion():
+    """`weighted(2.0, M)` has mass 2, not 1. The band is float-precision, since
+    the engine computes this in closed form rather than estimating it."""
+    log2 = 0.6931471805599453
+    assert C.check_totalmass(log2, log2).status == "passed"
+    assert C.check_totalmass(0.0, log2).status == "failed", "mass 1 vs 2 must not pass"
+    assert C.check_totalmass(log2 * (1 + 1e-6), log2).status == "failed", \
+        "a 1e-6 relative mass error must not pass"
+
+
+# ---------------------------------------------------------------------------
+# Roster completeness — asserted against the engine, not maintained by hand.
+# ---------------------------------------------------------------------------
+
+def test_the_roster_covers_every_sampleable_registry_entry():
+    registry = CONFIG.flatppl_js_dir / "packages" / "engine" / "sampler-registry.ts"
+    if not registry.exists():
+        pytest.skip(f"no flatppl-js engine at {registry}")
+    src = registry.read_text()
+    body = src[src.index("const REGISTRY = {"):]
+    body = body[:body.index("\n};")]
+
+    # Top-level entries are `  Name: {` at exactly two spaces of indent; an
+    # entry is density-only when its block carries `densityOnly: true`.
+    entries = re.findall(r"^  ([A-Za-z0-9_]+): \{$", body, re.M)
+    assert len(entries) > 20, f"parsed only {len(entries)} REGISTRY entries — did the file move?"
+
+    blocks = re.split(r"^  (?=[A-Za-z0-9_]+: \{$)", body, flags=re.M)
+    density_only = set()
+    for b in blocks:
+        m = re.match(r"([A-Za-z0-9_]+): \{", b)
+        if m and "densityOnly: true" in b:
+            density_only.add(m.group(1))
+
+    sampleable = set(entries) - density_only
+    covered = {f.measure.split("(")[0] for f in FAMILIES}
+
+    assert density_only == {name for name, _why in DENSITY_ONLY}, (
+        "oracle.DENSITY_ONLY disagrees with sampler-registry.ts:\n"
+        f"  registry says: {sorted(density_only)}\n"
+        f"  oracle says:   {sorted(name for name, _ in DENSITY_ONLY)}")
+    assert sampleable == covered, (
+        "the roster no longer matches the engine's sampleable REGISTRY:\n"
+        f"  in the registry but not the roster: {sorted(sampleable - covered)}\n"
+        f"  in the roster but not the registry: {sorted(covered - sampleable)}")
+
+
+def test_every_probe_has_at_least_one_checkable_oracle():
+    """A row that checks nothing is a row that proves nothing."""
+    for p in space.enumerate_probes():
+        checkable = (p.mean is not None or p.var is not None
+                     or p.cov is not None or p.ks is not None
+                     or p.logtotalmass is not None)
+        assert checkable, f"{p.id} carries no oracle of any kind"
+
+
+def test_replicated_wraps_all_carry_a_covariance_oracle():
+    """§06 makes `iid` a product measure, so every k > 1 row must assert
+    independence. A k > 1 row without it is the IIDSUPER blind spot re-opened."""
+    for p in space.enumerate_probes():
+        if p.k > 1:
+            assert p.cov == 0.0, f"{p.id} has k={p.k} but no cov-0 oracle"
+
+
+# ---------------------------------------------------------------------------
+# The live diff against the frozen table.
+# ---------------------------------------------------------------------------
+
+def _engine_available() -> bool:
+    return (CONFIG.flatppl_js_dir / "packages" / "engine" / "index.ts").exists()
+
+
+def test_the_frozen_table_exists_and_is_self_consistent():
+    meta, rows = table.load()
+    if not rows:
+        pytest.skip("no committed sampler table — run `pixi run sampler-sweep-regen`")
+    assert meta["probe_count"] == len(rows)
+    assert meta["n_draws"] == space.N_DRAWS, (
+        "the table was frozen at a different draw count, so its tolerances are not "
+        "this code's tolerances — refreeze")
+    assert meta["seed"] == space.SEED, "the table was frozen at a different seed — refreeze"
+    assert set(rows) == {p.id for p in space.enumerate_probes()}, \
+        "the frozen table's probe set differs from the current space — refreeze"
+
+
+def test_no_malformed_row_is_frozen():
+    """MALFORMED is always a defect, so none may be baked in as expected."""
+    _meta, rows = table.load()
+    if not rows:
+        pytest.skip("no committed sampler table")
+    bad = {pid: r.error for pid, r in rows.items() if r.outcome == "MALFORMED"}
+    assert not bad, f"MALFORMED rows frozen in the table: {bad}"
+
+
+def test_no_failing_check_is_frozen_without_being_listed():
+    """A failing row may exist — it is a finding — but it must be declared in the
+    metadata, so a NEW one cannot hide among the old ones."""
+    meta, rows = table.load()
+    if not rows:
+        pytest.skip("no committed sampler table")
+    failing = sorted(pid for pid, r in rows.items() if r.failed)
+    assert failing == sorted(meta.get("failing_rows", [])), (
+        "rows with a failing check do not match metadata.failing_rows — refreeze")
+
+
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js engine configured")
+def test_live_sweep_matches_the_committed_table():
+    meta, expected = table.load()
+    if not expected:
+        pytest.skip("no committed sampler table — run `pixi run sampler-sweep-regen`")
+    if meta.get("engine_commit") not in ("unknown", table.engine_commit()):
+        pytest.skip(
+            f"table was frozen against engine {meta.get('engine_commit', '?')[:12]}, "
+            f"running {table.engine_commit()[:12]} — refreeze before diffing")
+    actual = {r.probe_id: r for r in table.sweep()}
+    problems = table.diff(expected, actual)
+    assert not problems, "sampler sweep diverged from the committed table:\n" + "\n".join(problems)
