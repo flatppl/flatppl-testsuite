@@ -248,13 +248,28 @@ COMPOSED: tuple[Probe, ...] = (
           0.0, 2.0, 12.0, None, 0.0, ("dist", "norm", (0.0, 2.0 ** 0.5), {}),
           "normal", "kchain",
           note="record-valued: the kept variate is the marginal y ~ N(0, 2)"),
-    # Carded OPEN in flatppl-dev/TODO-flatppl-js.md: `iid(kchain(M, K), n)`
-    # shares the chain's base draw across copies. Kept in the roster so its
-    # status is asserted rather than remembered; whichever way it lands is a
-    # recorded outcome, not a surprise.
+    # WHAT THIS ROW PINS, AND WHAT IT DOES NOT.
+    #
+    # It pins the engine's ensemble-of-tables refusal: materialising a
+    # record-valued measure at more than one atom raises "iid: sampling iid over
+    # a record measure at >1 atoms (an ensemble of tables) is not supported".
+    #
+    # It does NOT test the defect carded in flatppl-dev/TODO-flatppl-js.md, that
+    # `iid(kchain(M, K), n)` shares the chain's base draw across copies. That
+    # guard trips on the SAMPLE COUNT, not on the `iid` count: the same source
+    # materialises fine at n = 1, and the moment checks need n large. Verified
+    # against the `iid-kchain` branch head as well as main — the message is
+    # identical there — so this row will not go green when that branch lands and
+    # will produce no diff for it.
+    #
+    # The base-draw-sharing class is therefore UNCOVERED by this sweep, and not
+    # reachable at its shape (moments need n > 1; the guard forbids n > 1 for a
+    # record variate). Covering it needs a per-draw harness rather than a
+    # moment sweep. Carded in the report as out of scope for v1.
     Probe("normal.iid_kchain3", _KCHAIN + "b ~ iid(C, 3)\n", "b", 3, "y",
           0.0, 2.0, 12.0, 0.0, 0.0, None, "normal", "iid_kchain3",
-          note="carded OPEN in TODO-flatppl-js.md: iid over a kchain shares the base draw"),
+          note="pins the >1-atoms ensemble-of-tables refusal; the carded "
+               "base-draw-sharing defect is NOT reachable at this shape"),
 )
 
 

@@ -194,6 +194,43 @@ def test_the_roster_covers_every_sampleable_registry_entry():
         f"  in the roster but not the registry: {sorted(covered - sampleable)}")
 
 
+def test_engine_resolution_does_not_pick_a_checkout_parked_under_worktrees():
+    """A flatppl-js clone inside `flatppl-testsuite/.worktrees/` is another
+    repo's tree parked in this repo's worktree directory, and is never the engine
+    a testsuite worktree means to load. One is parked there today at a commit
+    months behind main, and it is a REAL checkout, so only this rule excludes it.
+    """
+    from flatppl_testsuite.sampler_sweep import engine
+
+    root, why = engine.resolve_engine_dir()
+    assert ".worktrees" not in root.resolve().parts, (
+        f"resolved the engine to {root} ({why}), which sits under a .worktrees "
+        f"directory — the sweep would draw from a parked, probably stale checkout")
+
+
+def test_a_changed_refusal_reason_diffs_even_when_the_marker_is_unchanged():
+    """M1: distinct engine guards share a coarse marker, so the gate compares
+    the full normalised message. The `iid-kchain` branch's tuple-variate guard
+    and the current ensemble guard both say "is not supported" and so both land
+    on marker `is-not-supported`; only the message tells them apart.
+    """
+    ensemble = ("iid: sampling iid over a record measure at >1 atoms "
+                "(an ensemble of tables) is not supported; sample a single dataset (1 atom)")
+    tuple_guard = "iid: sampling iid over a tuple variate is not supported"
+    assert table._marker(ensemble) == table._marker(tuple_guard), (
+        "premise of this test: both guards share one marker")
+
+    def row(err):
+        return table.Row(probe_id="p", family="f", wrap="w", outcome="REFUSES",
+                         n=1, k=1, marker=table._marker(err), error=err)
+
+    problems = table.diff({"p": row(ensemble)}, {"p": row(tuple_guard)})
+    assert problems, "a changed refusal reason produced no diff"
+    assert "the reason changed" in problems[0]
+    # And an unchanged reason must stay quiet.
+    assert not table.diff({"p": row(ensemble)}, {"p": row(ensemble)})
+
+
 def test_every_probe_has_at_least_one_checkable_oracle():
     """A row that checks nothing is a row that proves nothing."""
     for p in space.enumerate_probes():
@@ -216,7 +253,60 @@ def test_replicated_wraps_all_carry_a_covariance_oracle():
 # ---------------------------------------------------------------------------
 
 def _engine_available() -> bool:
-    return (CONFIG.flatppl_js_dir / "packages" / "engine" / "index.ts").exists()
+    from flatppl_testsuite.sampler_sweep import engine
+
+    try:
+        engine.resolve_engine_dir()
+    except RuntimeError:
+        return False
+    return True
+
+
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
+def test_the_running_engine_matches_the_table_it_is_compared_against():
+    """The provenance gate, and it FAILS rather than skips.
+
+    A statistical gate that goes quiet when the engine moves is silent exactly
+    when it has something to say — and the engine moving is the single most
+    likely reason for this sweep's numbers to change. An unknown commit on
+    either side fails here too, deliberately, rather than letting an
+    unverifiable comparison report green. Same stance as the density gate's
+    `test_the_running_binary_matches_the_table_it_is_compared_against`.
+    """
+    problem = table.check_provenance()
+    assert problem is None, problem
+
+
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
+def test_the_provenance_gate_rejects_a_stale_unknown_or_missing_commit():
+    """The provenance gate must actually fire — including on UNKNOWN.
+
+    Exercised by mutating a copy of the frozen table rather than by moving the
+    engine, so the shared flatppl-js checkout is never touched.
+    """
+    import json
+    import tempfile
+    from pathlib import Path
+
+    payload = json.loads(table.DEFAULT_PATH.read_text())
+    cases = {
+        "stale": "e9803b6afdf9e183f9e0616697fc4523ac700e68",
+        "unknown": "unknown",
+        "missing": None,
+    }
+    for label, commit in cases.items():
+        mutated = json.loads(json.dumps(payload))
+        if commit is None:
+            mutated["metadata"].pop("engine_commit", None)
+        else:
+            mutated["metadata"]["engine_commit"] = commit
+        path = Path(tempfile.mkdtemp()) / "mutated.json"
+        path.write_text(json.dumps(mutated))
+        problem = table.check_provenance(path)
+        assert problem is not None, f"a {label} engine_commit was accepted as provenance"
+        assert "provenance mismatch" in problem
+        assert table.engine_commit()[:12] in problem, \
+            "the message must name the commit actually running"
 
 
 def test_the_frozen_table_exists_and_is_self_consistent():
@@ -252,15 +342,17 @@ def test_no_failing_check_is_frozen_without_being_listed():
         "rows with a failing check do not match metadata.failing_rows — refreeze")
 
 
-@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js engine configured")
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
 def test_live_sweep_matches_the_committed_table():
-    meta, expected = table.load()
+    """The diff itself.
+
+    Runs even on a provenance mismatch: the dedicated provenance test above
+    already names that cause, and seeing the actual damage is more useful than
+    suppressing it. Two red tests, one of which explains the other.
+    """
+    _meta, expected = table.load()
     if not expected:
         pytest.skip("no committed sampler table — run `pixi run sampler-sweep-regen`")
-    if meta.get("engine_commit") not in ("unknown", table.engine_commit()):
-        pytest.skip(
-            f"table was frozen against engine {meta.get('engine_commit', '?')[:12]}, "
-            f"running {table.engine_commit()[:12]} — refreeze before diffing")
     actual = {r.probe_id: r for r in table.sweep()}
     problems = table.diff(expected, actual)
     assert not problems, "sampler sweep diverged from the committed table:\n" + "\n".join(problems)

@@ -28,12 +28,24 @@ obvious ones and leg 2 is what settled them:
 - `NegativeBinomial2(mu, psi)` is `nbinom(n=psi, p=psi/(mu+psi))`. Mean `mu`,
   variance `mu + mu^2/psi`.
 
-`VonMises` also needed leg 2. §08 "VonMises" gives a `2*pi`-periodic density on
-`reals` whose "canonical fundamental domain is [mu - pi, mu + pi]", so the
-LINEAR variance of a draw is the quadrature of `x^2 p(x)` over that interval,
-not the circular variance `1 - I1/I0`. Quadrature over `[-pi, pi]` at
-`kappa = 2` gives 0.7644619, which is also what `scipy.stats.vonmises(2).var()`
-returns — so scipy's `vonmises` is the wrapped linear moment and the two agree.
+`VonMises` also needed leg 2, and it is the one row where reaching for the
+obvious oracle would have frozen the WRONG QUANTITY. §08 "VonMises" gives a
+`2*pi`-periodic density on `reals` whose "canonical fundamental domain is
+[mu - pi, mu + pi]", and quadrature confirms it integrates to exactly 1 over
+that interval. So the variance of a draw is the LINEAR second central moment
+there — `quad` of `x^2 p(x)` over `[-pi, pi]` — which at `kappa = 2` gives
+0.7644619, matching `scipy.stats.vonmises(2).var()`.
+
+`Distributions.jl`'s `var(VonMises(0, 2))` returns 0.30222534 instead. That is
+the CIRCULAR variance `1 - I1(k)/I0(k)`, a different quantity, and it is what
+this row would have been frozen at had the Julia oracle been trusted by default.
+Do not "correct" this entry towards it.
+
+One caveat on the frozen digits: 0.7644618686336627 is scipy's value.
+Independent `quadgk` at `rtol = 1e-13` gives 0.764461879811127, so scipy's own
+integration is off by 1.1e-8 — immaterial here (4e-6 sigma against a 0.0145
+band), but if this row ever needs more precision, the quadrature leg is the
+more accurate one, not scipy.
 
 Nothing here is taken from a FlatPPL engine. The engines are the SUBJECT of the
 sweep; using either as the source of an expected value is the contamination the

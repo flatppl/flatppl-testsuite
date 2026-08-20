@@ -22,6 +22,15 @@ exists for: a number the engine was willing to produce and got wrong.
 WHY THE PATTERNS LIVE IN PYTHON. The driver reports only `THREW` plus the
 message. Classifying here keeps the pattern list and its rationale in one
 reviewable place instead of splitting the judgement across two languages.
+
+WHAT `diff` COMPARES, AND WHAT IT DELIBERATELY DOES NOT. Outcome, refusal
+message, and each check's passed/failed/skipped STATUS. It does NOT compare the
+numeric `got` values: any two runs of a Monte-Carlo estimator differ, and at a
+5-sigma band a value diff would fire on drift that the gate has already judged
+insignificant. So the frozen `got` numbers are documentation — read them to see
+where a row sits inside its band — while the gate itself is the status.
+A regression therefore has to cross a 5-sigma band to be caught, which is the
+intended sensitivity, not an oversight.
 """
 from __future__ import annotations
 
@@ -68,10 +77,19 @@ REFUSAL_PATTERNS: tuple[tuple[str, str], ...] = (
 
 
 def _marker(message: str) -> str:
-    """A short, stable tag for the reason a row refused.
+    """A short, human-readable CLASS for the reason a row refused.
 
-    Frozen in the table so a CHANGED refusal reason is a diff, not just a
-    still-refusing row. Mirrors the density sweep's `marker` field.
+    This is a label for the report's grouping, NOT the thing `diff` compares.
+    It is deliberately coarse and several distinct guards share one label — the
+    engine's ensemble-of-tables guard and the tuple-variate guard that the
+    `iid-kchain` branch adds both say "is not supported", so both land on
+    `is-not-supported`. A marker alone therefore cannot tell a changed refusal
+    reason from an unchanged one.
+
+    What makes a changed reason diff is `Row.error`: the full normalised message
+    is frozen per row and compared verbatim (see `diff`). Keep it that way — do
+    not make the gate depend on this label being fine-grained, because it is not
+    and cannot be without duplicating the engine's message catalogue here.
     """
     for pat, _why in REFUSAL_PATTERNS:
         if pat in message:
@@ -168,16 +186,50 @@ def sweep(*, engine_dir: Path | None = None, probes=None) -> list[Row]:
 
 # ---------------------------------------------------------------------------
 # Provenance. A frozen table is only meaningful against the engine that produced
-# it, so the engine commit is recorded and the gate checks it before diffing —
-# the same guard `sweep/table.py::check_provenance` applies on the density side.
+# it, so the engine commit is recorded and gated BEFORE the diff runs — the same
+# guard `sweep/table.py::check_provenance` applies on the density side.
 # ---------------------------------------------------------------------------
-def engine_commit() -> str:
+def engine_commit(engine_dir: Path | None = None) -> str:
+    root = Path(engine_dir) if engine_dir else engine.resolve_engine_dir()[0]
     try:
-        out = subprocess.run(["git", "-C", str(CONFIG.flatppl_js_dir), "rev-parse", "HEAD"],
+        out = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
                              capture_output=True, text=True, check=True)
         return out.stdout.strip()
-    except Exception:  # noqa: BLE001 — provenance is best-effort, never fatal
+    except Exception:  # noqa: BLE001 — a non-git checkout is still usable
         return "unknown"
+
+
+def check_provenance(path: Path = DEFAULT_PATH) -> str | None:
+    """None when the running engine is the one the table was frozen against.
+
+    Otherwise a single message naming both commits and the resolved checkout.
+
+    An UNKNOWN commit on either side is a mismatch here, deliberately, exactly
+    as on the density side: a comparison whose subject cannot be identified
+    cannot be trusted, and reporting green for it is worse than reporting red.
+    This must FAIL rather than skip — a gate that goes quiet the moment the
+    engine moves is silent precisely when it has something to say.
+    """
+    meta, rows = load(path)
+    if not rows:
+        return None  # nothing frozen yet; the caller's own guard handles that
+    try:
+        root, why = engine.resolve_engine_dir()
+    except RuntimeError as e:
+        return str(e)
+    running = engine_commit(root)
+    frozen = meta.get("engine_commit", "missing")
+    if frozen == running and running != "unknown":
+        return None
+    return (
+        f"engine provenance mismatch — the table cannot be diffed against this engine.\n"
+        f"    table frozen against: {frozen}\n"
+        f"    engine now running:   {running}\n"
+        f"    resolved checkout:    {root}  ({why})\n"
+        f"    table frozen from:    {meta.get('engine_dir', 'not recorded')}\n"
+        f"  Refreeze with `pixi run sampler-sweep-regen`, or point the engine at "
+        f"the commit the table was frozen against."
+    )
 
 
 def store(rows: list[Row], path: Path = DEFAULT_PATH) -> None:
@@ -186,11 +238,14 @@ def store(rows: list[Row], path: Path = DEFAULT_PATH) -> None:
     counts: dict[str, int] = {}
     for r in rows:
         counts[r.outcome] = counts.get(r.outcome, 0) + 1
+    root, why = engine.resolve_engine_dir()
     payload = {
         "metadata": {
             "generated_at": datetime.datetime.now(datetime.timezone.utc)
             .replace(microsecond=0).isoformat(),
-            "engine_commit": engine_commit(),
+            "engine_commit": engine_commit(root),
+            "engine_dir": str(root),
+            "engine_resolved_by": why,
             "seed": space.SEED,
             "n_draws": space.N_DRAWS,
             "ks_subsample": space.KS_SUBSAMPLE,
@@ -240,8 +295,13 @@ def diff(expected: dict[str, Row], actual: dict[str, Row]) -> list[str]:
             problems.append(f"{pid}: outcome {e.outcome} -> {a.outcome}"
                             + (f" ({a.error})" if a.error else ""))
             continue
-        if a.outcome == Outcome.REFUSES.value and e.marker != a.marker:
-            problems.append(f"{pid}: refusal marker {e.marker!r} -> {a.marker!r}")
+        # The full normalised message, not the coarse marker: distinct guards
+        # share a marker (see `_marker`), so only the message itself can show
+        # that the REASON for a refusal moved while the row kept refusing.
+        if a.outcome == Outcome.REFUSES.value and e.error != a.error:
+            problems.append(
+                f"{pid}: still REFUSES but the reason changed:\n"
+                f"    was: {e.error}\n    now: {a.error}")
             continue
         was = {c["name"]: c["status"] for c in e.checks}
         for c in a.checks:
