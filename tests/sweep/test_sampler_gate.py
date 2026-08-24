@@ -207,12 +207,17 @@ def test_the_roster_covers_every_sampleable_registry_entry():
         f"  in the roster but not the registry: {sorted(covered - sampleable)}")
 
 
-def test_engine_resolution_does_not_pick_a_checkout_parked_under_worktrees():
+def test_engine_resolution_does_not_pick_a_checkout_parked_under_worktrees(monkeypatch):
     """A flatppl-js clone inside `flatppl-testsuite/.worktrees/` is another
     repo's tree parked in this repo's worktree directory, and is never the engine
     a testsuite worktree means to load. One is parked there today at a commit
     months behind main, and it is a REAL checkout, so only this rule excludes it.
+
+    This guards the DEFAULT resolution: a deliberate `FLATPPL_JS_DIR` override
+    may legitimately name a worktree (a branch landing gate, a bisect), so the
+    ambient variable is cleared here rather than inherited.
     """
+    monkeypatch.delenv("FLATPPL_JS_DIR", raising=False)
     root, why = engine.resolve_engine_dir()
     assert ".worktrees" not in root.resolve().parts, (
         f"resolved the engine to {root} ({why}), which sits under a .worktrees "
