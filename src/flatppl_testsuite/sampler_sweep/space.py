@@ -257,10 +257,13 @@ COMPOSED: tuple[Probe, ...] = (
     # It does NOT test the defect carded in flatppl-dev/TODO-flatppl-js.md, that
     # `iid(kchain(M, K), n)` shares the chain's base draw across copies. That
     # guard trips on the SAMPLE COUNT, not on the `iid` count: the same source
-    # materialises fine at n = 1, and the moment checks need n large. Verified
-    # against the `iid-kchain` branch head as well as main — the message is
-    # identical there — so this row will not go green when that branch lands and
-    # will produce no diff for it.
+    # materialises fine at n = 1, and the moment checks need n large. So this row
+    # cannot observe the base-draw fix either way.
+    #
+    # That prediction was made against the `iid-kchain` branch head and has since
+    # been confirmed by the merge. flatppl-js #164 landed as 255261f — the card in
+    # flatppl-dev/TODO-flatppl-js.md is [x] FIXED 2026-08-20 — and this row still
+    # REFUSES with the byte-identical message, producing no diff.
     #
     # The base-draw-sharing class is therefore UNCOVERED by this sweep, and not
     # reachable at its shape (moments need n > 1; the guard forbids n > 1 for a

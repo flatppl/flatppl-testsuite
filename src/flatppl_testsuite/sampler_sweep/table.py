@@ -80,11 +80,12 @@ def _marker(message: str) -> str:
     """A short, human-readable CLASS for the reason a row refused.
 
     This is a label for the report's grouping, NOT the thing `diff` compares.
-    It is deliberately coarse and several distinct guards share one label — the
-    engine's ensemble-of-tables guard and the tuple-variate guard that the
-    `iid-kchain` branch adds both say "is not supported", so both land on
-    `is-not-supported`. A marker alone therefore cannot tell a changed refusal
-    reason from an unchanged one.
+    It is deliberately coarse and many distinct guards share one label: four
+    unrelated `is not supported` messages live in the engine today
+    (`materialiser.ts:517`, `mat-density.ts:851`, `mat-broadcast.ts:1116`,
+    `sampler-aggregate.ts:930`), and all four land on `is-not-supported`. A
+    marker alone therefore cannot tell a changed refusal reason from an
+    unchanged one.
 
     What makes a changed reason diff is `Row.error`: the full normalised message
     is frozen per row and compared verbatim (see `diff`). Keep it that way — do
@@ -226,7 +227,7 @@ def check_provenance(path: Path = DEFAULT_PATH) -> str | None:
         f"    table frozen against: {frozen}\n"
         f"    engine now running:   {running}\n"
         f"    resolved checkout:    {root}  ({why})\n"
-        f"    table frozen from:    {meta.get('engine_dir', 'not recorded')}\n"
+        f"    table resolved by:    {meta.get('engine_resolved_by', 'not recorded')}\n"
         f"  Refreeze with `pixi run sampler-sweep-regen`, or point the engine at "
         f"the commit the table was frozen against."
     )
@@ -244,7 +245,9 @@ def store(rows: list[Row], path: Path = DEFAULT_PATH) -> None:
             "generated_at": datetime.datetime.now(datetime.timezone.utc)
             .replace(microsecond=0).isoformat(),
             "engine_commit": engine_commit(root),
-            "engine_dir": str(root),
+            # The resolution KIND, not `root`: this file is tracked, so an
+            # absolute local path would churn per machine and diverge on CI.
+            # The commit already identifies the engine.
             "engine_resolved_by": why,
             "seed": space.SEED,
             "n_draws": space.N_DRAWS,

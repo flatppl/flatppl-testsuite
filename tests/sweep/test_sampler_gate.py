@@ -29,15 +29,23 @@ from __future__ import annotations
 
 import math
 import re
+from types import SimpleNamespace
 
 import pytest
 
-from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.sampler_sweep import checks as C
-from flatppl_testsuite.sampler_sweep import space, table
+from flatppl_testsuite.sampler_sweep import engine, space, table
 from flatppl_testsuite.sampler_sweep.oracle import DENSITY_ONLY, FAMILIES
 
 N = space.N_DRAWS
+
+
+def _engine_available() -> bool:
+    try:
+        engine.resolve_engine_dir()
+    except RuntimeError:
+        return False
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -161,8 +169,13 @@ def test_totalmass_catches_a_mass_confusion():
 # Roster completeness — asserted against the engine, not maintained by hand.
 # ---------------------------------------------------------------------------
 
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
 def test_the_roster_covers_every_sampleable_registry_entry():
-    registry = CONFIG.flatppl_js_dir / "packages" / "engine" / "sampler-registry.ts"
+    # `resolve_engine_dir`, not `CONFIG.flatppl_js_dir`: from a testsuite worktree
+    # the CONFIG sibling is the parked stale flatppl-js clone, so this assertion
+    # would validate the roster against a months-old registry and report green.
+    root, _why = engine.resolve_engine_dir()
+    registry = root / "packages" / "engine" / "sampler-registry.ts"
     if not registry.exists():
         pytest.skip(f"no flatppl-js engine at {registry}")
     src = registry.read_text()
@@ -200,31 +213,78 @@ def test_engine_resolution_does_not_pick_a_checkout_parked_under_worktrees():
     a testsuite worktree means to load. One is parked there today at a commit
     months behind main, and it is a REAL checkout, so only this rule excludes it.
     """
-    from flatppl_testsuite.sampler_sweep import engine
-
     root, why = engine.resolve_engine_dir()
     assert ".worktrees" not in root.resolve().parts, (
         f"resolved the engine to {root} ({why}), which sits under a .worktrees "
         f"directory — the sweep would draw from a parked, probably stale checkout")
 
 
+def test_a_named_engine_checkout_that_does_not_exist_is_an_error(monkeypatch, tmp_path):
+    """A typo'd `FLATPPL_JS_DIR` must not resolve to a different engine.
+
+    Falling through to the workspace root hands the operator a tree they did not
+    name, and the sweep then reports green against it. The path is non-default, so
+    it is a deliberate choice, and a deliberate choice is never substituted.
+    """
+    missing = tmp_path / "nope-js"
+    monkeypatch.setattr(engine, "CONFIG", SimpleNamespace(flatppl_js_dir=missing))
+    with pytest.raises(RuntimeError) as excinfo:
+        engine.resolve_engine_dir()
+    assert str(missing) in str(excinfo.value), \
+        "the error must name the checkout the operator asked for"
+
+
+def test_the_accidental_default_still_falls_back_instead_of_erroring(monkeypatch):
+    """The N3 error must not swallow the H1 filtering.
+
+    A default-valued path parked under `.worktrees/` is an accident, not a
+    choice, so it still falls back to the workspace root rather than raising.
+    """
+    monkeypatch.setattr(
+        engine, "CONFIG", SimpleNamespace(flatppl_js_dir=engine._config_default_path()))
+    root, why = engine.resolve_engine_dir()
+    assert ".worktrees" not in root.resolve().parts, f"resolved to {root} ({why})"
+
+
+def test_the_frozen_metadata_carries_no_machine_local_path():
+    """The table is tracked, so an absolute path in it churns per machine and
+    diverges on CI. The engine commit identifies the engine; `engine_resolved_by`
+    records a resolution KIND, not a path."""
+    meta, rows = table.load()
+    if not rows:
+        pytest.skip("no committed sampler table")
+    local = {k: v for k, v in meta.items() if isinstance(v, str) and v.startswith("/")}
+    assert not local, f"absolute local paths frozen into the tracked table: {local}"
+
+
 def test_a_changed_refusal_reason_diffs_even_when_the_marker_is_unchanged():
     """M1: distinct engine guards share a coarse marker, so the gate compares
-    the full normalised message. The `iid-kchain` branch's tuple-variate guard
-    and the current ensemble guard both say "is not supported" and so both land
-    on marker `is-not-supported`; only the message tells them apart.
+    the full normalised message.
+
+    The premise is not one pair of guards but the density of the collision. Four
+    unrelated `is not supported` messages live in `packages/engine/*.ts` today
+    (`materialiser.ts:517`, `mat-density.ts:851`, `mat-broadcast.ts:1116`,
+    `sampler-aggregate.ts:930`), and `_marker` maps every one of them to
+    `is-not-supported`. Any refusal moving between two of them keeps the marker,
+    so only a verbatim message compare can show that the reason changed.
+
+    Both strings below are copied verbatim from the engine, so a reworded guard
+    breaks this test's premise assertion rather than letting it pass on
+    strings the test authored itself.
     """
     ensemble = ("iid: sampling iid over a record measure at >1 atoms "
                 "(an ensemble of tables) is not supported; sample a single dataset (1 atom)")
-    tuple_guard = "iid: sampling iid over a tuple variate is not supported"
-    assert table._marker(ensemble) == table._marker(tuple_guard), (
-        "premise of this test: both guards share one marker")
+    truncate_cap = ("density: normalize(truncate(M, cartprod)) — region dimension 4 "
+                    "exceeds the quadrature cap of 3; higher-dimensional truncation "
+                    "is not supported")
+    assert table._marker(ensemble) == table._marker(truncate_cap) == "is-not-supported", (
+        "premise of this test: two unrelated real guards share one marker")
 
     def row(err):
         return table.Row(probe_id="p", family="f", wrap="w", outcome="REFUSES",
                          n=1, k=1, marker=table._marker(err), error=err)
 
-    problems = table.diff({"p": row(ensemble)}, {"p": row(tuple_guard)})
+    problems = table.diff({"p": row(ensemble)}, {"p": row(truncate_cap)})
     assert problems, "a changed refusal reason produced no diff"
     assert "the reason changed" in problems[0]
     # And an unchanged reason must stay quiet.
@@ -251,16 +311,6 @@ def test_replicated_wraps_all_carry_a_covariance_oracle():
 # ---------------------------------------------------------------------------
 # The live diff against the frozen table.
 # ---------------------------------------------------------------------------
-
-def _engine_available() -> bool:
-    from flatppl_testsuite.sampler_sweep import engine
-
-    try:
-        engine.resolve_engine_dir()
-    except RuntimeError:
-        return False
-    return True
-
 
 @pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
 def test_the_running_engine_matches_the_table_it_is_compared_against():

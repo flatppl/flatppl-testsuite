@@ -28,8 +28,12 @@ being the directory holding the sibling `flatppl-*` repos, which is what
 `flatppl-testsuite/..` means from a normal checkout and what
 `flatppl-testsuite/.worktrees/<branch>/../../..` means from a worktree.
 
-Whichever path wins is recorded in the frozen table's metadata alongside the
+HOW the path was chosen is recorded in the frozen table's metadata alongside the
 engine commit, so a reader can always tell which engine produced the numbers.
+The path itself is NOT recorded: that file is tracked, and an absolute local path
+churns per machine and diverges on CI. The commit identifies the engine, and the
+resolution kind explains how it was found; the resolved path is printed at
+runtime, where it is useful and costs no churn.
 """
 from __future__ import annotations
 
@@ -78,13 +82,23 @@ def _config_default_path() -> Path:
 
 
 def resolve_engine_dir(explicit: Path | str | None = None) -> tuple[Path, str]:
-    """The flatppl-js checkout to draw from, plus how it was chosen.
+    """The flatppl-js checkout to draw from, plus HOW it was chosen.
+
+    The second element is a resolution KIND, not a path — it goes into the frozen
+    table's metadata, which is tracked, so it must not carry a local absolute
+    path that churns per machine. Callers that want the path print the first
+    element next to it.
 
     A DELIBERATE choice always wins — an explicit argument, or a
     `FLATPPL_JS_DIR` pointing somewhere other than the computed default. Pointing
     the sweep at a specific checkout is a legitimate thing to do (bisecting, or
     testing an unmerged engine branch), so this must not be second-guessed; the
     provenance gate is what catches a stale one, not this function.
+
+    A deliberate choice that holds no engine RAISES rather than falling through
+    to the default. Silently substituting the workspace root would hand back a
+    different engine than the operator named, so a typo'd path would report green
+    against a tree nobody asked for.
 
     Only the ACCIDENTAL default is filtered: an unset (or default-valued)
     `FLATPPL_JS_DIR` resolving under a `.worktrees/` directory means the sibling
@@ -95,24 +109,35 @@ def resolve_engine_dir(explicit: Path | str | None = None) -> tuple[Path, str]:
     is_default = cfg.resolve() == _config_default_path().resolve()
     ws = _workspace_root()
 
-    candidates: list[tuple[Path, str]] = []
+    deliberate: list[tuple[Path, str]] = []
     if explicit:
-        candidates.append((Path(explicit), "explicit argument"))
+        deliberate.append((Path(explicit), "explicit argument"))
     if not is_default:
-        candidates.append((cfg, "FLATPPL_JS_DIR override"))
-    elif not _parked_under_worktrees(cfg):
+        deliberate.append((cfg, "FLATPPL_JS_DIR override"))
+    for path, why in deliberate:
+        if _is_engine(path):
+            return path, why
+    if deliberate:
+        named = "; ".join(f"{p} ({w})" for p, w in deliberate)
+        raise RuntimeError(
+            f"no flatppl-js engine at the checkout you named: {named}. "
+            f"Each must hold packages/engine/index.ts. Fix the path, or unset "
+            f"FLATPPL_JS_DIR to fall back to the workspace default.")
+
+    candidates: list[tuple[Path, str]] = []
+    if not _parked_under_worktrees(cfg):
         candidates.append((cfg, "CONFIG default (sibling of the repo root)"))
     if ws:
-        candidates.append((ws / "flatppl-js", f"workspace root {ws}"))
+        candidates.append((ws / "flatppl-js", "workspace root"))
     # Last resort: the parked default, so an unusual layout still runs rather
     # than hard-failing — with the reason recorded so it is never a silent choice.
-    if is_default and _parked_under_worktrees(cfg):
+    if _parked_under_worktrees(cfg):
         candidates.append((cfg, "CONFIG default — parked under .worktrees, last resort"))
 
     for path, why in candidates:
         if _is_engine(path):
             return path, why
-    tried = ", ".join(f"{p} ({w})" for p, w in candidates) or "nothing"
+    tried = "; ".join(f"{p} ({w})" for p, w in candidates) or "nothing"
     raise RuntimeError(f"no flatppl-js engine found — tried: {tried}")
 
 
