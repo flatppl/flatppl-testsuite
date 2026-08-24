@@ -27,6 +27,7 @@ STATISTICAL gate:
 """
 from __future__ import annotations
 
+import dataclasses
 import math
 import re
 from types import SimpleNamespace
@@ -214,10 +215,16 @@ def test_engine_resolution_does_not_pick_a_checkout_parked_under_worktrees(monke
     months behind main, and it is a REAL checkout, so only this rule excludes it.
 
     This guards the DEFAULT resolution: a deliberate `FLATPPL_JS_DIR` override
-    may legitimately name a worktree (a branch landing gate, a bisect), so the
-    ambient variable is cleared here rather than inherited.
+    may legitimately name a worktree (a branch landing gate, a bisect). The
+    override lives in `CONFIG.flatppl_js_dir`, snapshotted at import — clearing
+    the environment variable is too late — so the CONFIG attribute is reset to
+    the computed default here.
     """
     monkeypatch.delenv("FLATPPL_JS_DIR", raising=False)
+    monkeypatch.setattr(
+        engine, "CONFIG",
+        dataclasses.replace(
+            engine.CONFIG, flatppl_js_dir=str(engine._config_default_path())))
     root, why = engine.resolve_engine_dir()
     assert ".worktrees" not in root.resolve().parts, (
         f"resolved the engine to {root} ({why}), which sits under a .worktrees "
