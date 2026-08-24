@@ -1,9 +1,8 @@
 {
  "metadata": {
-  "generated_at": "2026-08-20T13:00:16+00:00",
-  "engine_commit": "af0bab9d426d02d877e1c336d3e9766f6d286d01",
-  "engine_dir": "/Users/bcox/Code/flatppl/flatppl-js",
-  "engine_resolved_by": "workspace root /Users/bcox/Code/flatppl",
+  "generated_at": "2026-08-24T07:49:49+00:00",
+  "engine_commit": "34643c7065ae4f641858bec01cfa9689ede82409",
+  "engine_resolved_by": "workspace root",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
