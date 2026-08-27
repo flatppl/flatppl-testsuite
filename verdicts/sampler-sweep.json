@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-08-27T13:36:49+00:00",
-  "engine_commit": "d442fe9969e087b6c5910fcc0df8bef43c8afbc5",
+  "generated_at": "2026-08-27T14:00:40+00:00",
+  "engine_commit": "8033fe60dce9dea62e16878f10f9db8c074a51f7",
   "engine_resolved_by": "CONFIG default (sibling of the repo root)",
   "seed": 47710,
   "n_draws": 200000,
