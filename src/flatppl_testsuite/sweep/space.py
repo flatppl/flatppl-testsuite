@@ -639,6 +639,123 @@ class LinearGaussianProbe:
         return {node.name: node for node in self.nodes}
 
 
+# --------------------------------------------------------------------------
+# The literal family
+# --------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class LiteralProbe:
+    """A probe whose source and oracle are written out, not generated.
+
+    The three families above derive a source from axes and an oracle from the
+    §13 fold. That buys a cross product, and it costs every construct the axes
+    cannot express: `metricsum` is not a measure at all, and a scalar-affine map
+    over an `iid` vector base is not `WRAPS` x `BASES`. Both are load-bearing and
+    neither is in the table, so this family carries them as text plus a number
+    derived by hand.
+
+    Read `oracle` as the same contract the generated families meet: a value
+    derived from the spec and an independent computation, NEVER a value read off
+    the engine. Each entry's `note` states the derivation.
+
+    `refusal_spec_justified` decides `table._spec_justified` for this family,
+    which cannot key off `wraps`/`shape` here. False means a refusal is a
+    tracked capability gap, exactly as it does for the generated families.
+    """
+    id: str
+    source: str
+    binding: str
+    oracle: float | None
+    note: str
+    refusal_spec_justified: bool = False
+
+
+# The metric both metricsum entries use: `g^{ij} = diag(2, 3)`, NOT `eye`.
+# §04 "Equivalence to `aggregate` under identity metric" makes `metricsum(eye(n),
+# ...)` a plain `aggregate(sum, ...)`, so an identity metric cannot tell a
+# dropped `inv(metric)` insertion from a correct one -- the defect class the
+# batch audit's finding M2 names. Under `diag(2, 3)` the two spellings differ.
+_MS_METRIC = "g = rowstack([[2.0, 0.0], [0.0, 3.0]])\n"
+
+LITERAL_PROBES: tuple[LiteralProbe, ...] = (
+    # ---------------------------------------------------------------- metricsum
+    # §04 "Static checks" scopes its pairing rule to "Every REPEATED non-output
+    # index", so a non-output index occurring ONCE is legal and is summed. This
+    # is the spelling flatppl-js #219 and flatppl-rust dd2b39f settled, and no
+    # probe reached it.
+    #
+    # ORACLE. §04 "Lowering to `aggregate`": "Each `_` (lower-variance) axis name
+    # in `expr` becomes an `inv(metric)` contraction". With `A^{mu,nu} = [[1, 2],
+    # [3, 4]]` and `inv(g) = diag(1/2, 1/3)`, the empty output sums both indices:
+    #     sum_{mu,nu} sum_alpha A^{mu,alpha} inv(g)_{alpha,nu}
+    #   = sum_alpha (sum_mu A^{mu,alpha}) (sum_nu inv(g)_{alpha,nu})
+    #   = 4 * (1/2) + 6 * (1/3) = 4.0
+    # exactly. Under `eye(2)` the same body gives 10, so the metric is live in
+    # the number. The scalar feeds `Normal`'s `mu`, and the row's value is that
+    # normal's log-density at 0.5:
+    #     -log(sqrt(2 pi)) - (0.5 - 4)^2 / 2 = -7.043938533204672742
+    # (mpmath, 40 dps; the mean is derived above, not measured).
+    LiteralProbe(
+        id="metricsum.unpaired_lower.direct.single.noconsumer",
+        source=_MS_METRIC
+        + "A = rowstack([[1.0, 2.0], [3.0, 4.0]])\n"
+        + "g: s[] := A[.mu^, .nu_]\n"
+        + "m = Normal(mu = s, sigma = 1.0)\n"
+        + "lp = logdensityof(m, 0.5)\n",
+        binding="lp",
+        oracle=-7.043938533204672742,
+        note="single unpaired non-output index, one upper and one lower; "
+             "metricsum mean 4.0 under g = diag(2, 3), 10.0 under eye(2)",
+    ),
+    # The paired contraction the same clause governs from the other side: `.i`
+    # occurs twice, once upper and once lower, so the metric enters exactly once.
+    #     p^i p_i = sum_i p^i sum_alpha inv(g)_{i,alpha} p^alpha
+    #             = 9 * (1/2) + 4 * (1/3) = 35/6
+    # and the log-density at 0.5 is -15.141160755426894964 (mpmath, 40 dps).
+    LiteralProbe(
+        id="metricsum.paired_contraction.direct.single.noconsumer",
+        source=_MS_METRIC
+        + "p = [3.0, 2.0]\n"
+        + "g: s[] := p[.i^] * p[.i_]\n"
+        + "m = Normal(mu = s, sigma = 1.0)\n"
+        + "lp = logdensityof(m, 0.5)\n",
+        binding="lp",
+        oracle=-15.141160755426894964,
+        note="paired upper/lower contraction of one vector; metricsum mean 35/6 "
+             "under g = diag(2, 3), 13.0 under eye(2)",
+    ),
+    # ------------------------------------------------- scalar-affine pushfwd
+    # §06 "Engine contract for `pushfwd` density evaluation" case 1 requires a
+    # conforming engine to recognize "affine maps composed from
+    # `add`/`sub`/`neg`/`mul`/`divide` (with positive scaling)" by name and score
+    # them analytically. flatppl-js #224 taught its own density route the scalar
+    # spelling over a vector base; the determiniser this table drives still
+    # refuses it, so the row reads REFUSES and is NOT spec-justified -- a tracked
+    # capability gap against that clause, carrying the value it should have.
+    #
+    # ORACLE. The pushforward of `iid(Normal(0, 1), 2)` through `x -> 2 x` is a
+    # pair of independent `Normal(0, 2)`, so
+    #     sum_i [ log phi(y_i / 2) - log 2 ]  at  y = [1.5, -0.5]
+    #   = -3.536671427529236102
+    # (mpmath, 40 dps, from the closed-form normal log-density).
+    LiteralProbe(
+        id="pushfwd.scalar_affine_vector.direct.single.noconsumer",
+        source="m = pushfwd(x -> 2.0 * x, iid(Normal(mu = 0.0, sigma = 1.0), 2))\n"
+               "lp = logdensityof(m, [1.5, -0.5])\n",
+        binding="lp",
+        oracle=-3.536671427529236102,
+        note="scalar-affine map over an iid vector base; §06 case 1 names affine "
+             "maps as analytically scoreable, so a refusal is a capability gap",
+        refusal_spec_justified=False,
+    ),
+)
+
+
+def is_literal(probe) -> bool:
+    """Whether `probe` is a `LiteralProbe` (see `is_shared_latent`)."""
+    return isinstance(probe, LiteralProbe)
+
+
 def is_linear_gaussian(probe) -> bool:
     """Whether `probe` is a `LinearGaussianProbe` (see `is_shared_latent`)."""
     return isinstance(probe, LinearGaussianProbe)
@@ -829,4 +946,5 @@ def enumerate_probes() -> list[Probe | SharedLatentProbe]:
                             ordering=ordering, consumer=consumer,
                             point=_point_for(base, wrap),
                         ))
-    return out + enumerate_vector_probes() + enumerate_shared_latent_probes()
+    return (out + enumerate_vector_probes() + enumerate_shared_latent_probes()
+            + list(LITERAL_PROBES))

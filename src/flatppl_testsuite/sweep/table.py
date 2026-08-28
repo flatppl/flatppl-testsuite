@@ -60,6 +60,8 @@ from flatppl_testsuite.sweep.classify import Outcome, classify
 from flatppl_testsuite.sweep.oracle import OracleUnsupported, true_logpdf
 from flatppl_testsuite.sweep.space import (
     BASES,
+    LITERAL_PROBES,
+    LiteralProbe,
     ORDERINGS,
     SHARED_LATENT_POINTS,
     WRAPS,
@@ -71,6 +73,7 @@ from flatppl_testsuite.sweep.space import (
     _vector_point_for,
     _wrap_name,
     enumerate_probes,
+    is_literal,
     is_shared_latent,
     is_vector_base,
     shared_latent_shapes,
@@ -105,9 +108,17 @@ class Row:
     known_defect_reason: str | None = None
 
 
-def _spec_justified(probe: Probe | SharedLatentProbe, outcome: str) -> bool | None:
+def _spec_justified(probe: Probe | SharedLatentProbe | LiteralProbe,
+                    outcome: str) -> bool | None:
     if outcome != Outcome.REFUSES.value:
         return None
+
+    if is_literal(probe):
+        # This family has no `wraps`/`shape` to key off, so each entry states
+        # the verdict itself. The DEFAULT is False for the same reason every
+        # unrecognized refusal is False: an unreviewed refusal is a tracked gap,
+        # not a pass.
+        return probe.refusal_spec_justified
 
     if is_shared_latent(probe):
         # ONE shared-latent shape has a spec-justified refusal, and it is the
@@ -160,7 +171,7 @@ def _spec_justified(probe: Probe | SharedLatentProbe, outcome: str) -> bool | No
     return False  # an unrecognized refusal: a tracked over-refusal, not a pass
 
 
-def _known_defect_reason(probe: Probe) -> str | None:
+def _known_defect_reason(probe: Probe | SharedLatentProbe | LiteralProbe) -> str | None:
     """Investigated, cited defects only -- see the module docstring. Both were
     found and confirmed by hand against the pinned `c570844` binary's emitted
     FlatPDL. Both are since fixed in the determiniser (the truncate shape now
@@ -173,7 +184,7 @@ def _known_defect_reason(probe: Probe) -> str | None:
     A shared-latent row that LOWERS and disagrees with its oracle therefore fails
     `test_gate.py::test_the_table_flags_no_unreviewed_wrong_numbers`, which is the
     correct outcome for a wrong number nobody has looked at yet."""
-    if is_shared_latent(probe):
+    if is_shared_latent(probe) or is_literal(probe):
         return None
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind == "truncate":
@@ -224,7 +235,7 @@ def _known_defect_reason(probe: Probe) -> str | None:
     return None
 
 
-def _row_for(probe: Probe | SharedLatentProbe) -> Row:
+def _row_for(probe: Probe | SharedLatentProbe | LiteralProbe) -> Row:
     v = classify(probe)
     try:
         oracle_val = true_logpdf(probe)
@@ -295,6 +306,8 @@ SLICE_EXCLUDED_AXES = {
                              "STRUCTURE check) and both latent_query values (the "
                              "two-query ordering check), which the --full run "
                              "covers"),
+    "literal_family": ("excludes nothing -- every member is in the slice, "
+                       "because the family has no axes to slice along"),
 }
 SLICE_DESCRIPTION = (
     "every (wrap, ordering) pair, spelling='direct', consumer=False; "
@@ -364,6 +377,10 @@ def _slice_probes() -> list[Probe | SharedLatentProbe]:
             id=f"shared.{shape}.n2.{spelling}.none", shape=shape, n=2,
             spelling=spelling, latent_query="none", point=SHARED_LATENT_POINTS[:2],
         ))
+    # The literal family in FULL. It has no axes to slice along -- every member
+    # is one construct nothing else in the space reaches -- so slicing it would
+    # only drop coverage from the fast gate.
+    out.extend(LITERAL_PROBES)
     return out
 
 

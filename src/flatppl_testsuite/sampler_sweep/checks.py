@@ -104,10 +104,11 @@ def _verdict(name, got, want, band, se, detail_fmt, fallback=False) -> Check:
                  got=got, want=want, band=band, sigma=sigma, fallback=fallback)
 
 
-def check_mean(coord: int, emp: float, want: float | None, var: float | None, n: int) -> Check:
+def check_mean(coord: int, emp: float, want: float | None, var: float | None, n: int,
+               why: str | None = None) -> Check:
     name = f"mean[{coord}]"
     if want is None:
-        return Check(name, "skipped", "distribution has no mean (Cauchy)")
+        return Check(name, "skipped", why or "distribution has no mean (Cauchy)")
     if var is None:
         return Check(name, "skipped", "no closed-form variance, so no standard error to band with")
     if var == 0.0:
@@ -118,10 +119,11 @@ def check_mean(coord: int, emp: float, want: float | None, var: float | None, n:
                     "{got:.6f} vs {want:.6f} (|d|={delta:.3g}, band {band:.3g} = 5 SE, {sigma} sigma)")
 
 
-def check_var(coord: int, emp: float, want: float | None, fourth: float | None, n: int) -> Check:
+def check_var(coord: int, emp: float, want: float | None, fourth: float | None, n: int,
+              why: str | None = None) -> Check:
     name = f"var[{coord}]"
     if want is None:
-        return Check(name, "skipped", "distribution has no variance (Cauchy)")
+        return Check(name, "skipped", why or "distribution has no variance (Cauchy)")
     if want == 0.0:
         return _verdict(name, emp, want, DEGENERATE_ATOL, None,
                         "degenerate: {got:.15g} vs {want:.15g} (|d|={delta:.3g}, atol {band:.1g})")
@@ -203,6 +205,38 @@ def build_cdf(spec):
             raise ValueError(f"mixture KS reference weights sum to {sum(ws)}, not 1")
         return lambda y: sum(w * f.cdf(y) for w, f in zip(ws, frozen))
     raise ValueError(f"unknown KS reference kind {kind!r}")
+
+
+def check_latent_mean(emp: float | None, want: float | None, var: float | None,
+                      n_eff: float | None) -> Check:
+    """The WEIGHTED mean of a latent that drives a `normalize`'s mass.
+
+    §06 `normalize` makes every theta-slice of the measure a probability measure,
+    so the theta-marginal of the sampled joint is the PRIOR, unchanged. That is
+    the oracle, and it is exact -- no quadrature enters. The failing hypothesis
+    has its own closed form (the prior tilted by Z(theta)), which
+    `space.Probe.latent_tilt` records and `tests/sweep/test_sampler_gate.py`
+    asserts this band rejects.
+
+    The band is `SIGMA * sqrt(var / n_eff)`: `var` is the prior's closed-form
+    variance and `n_eff` the effective sample size the run's own weights give.
+    A self-normalised importance estimator's variance depends on the weights, so
+    the ESS cannot come from a closed form -- it is a run-reported diagnostic,
+    not an oracle, and it is the only part of the band that is.
+    """
+    name = "latent_mean"
+    if want is None:
+        return Check(name, "skipped", "row names no latent")
+    if emp is None:
+        return Check(name, "skipped", "driver reported no latent mean")
+    if var is None or var <= 0.0:
+        return Check(name, "skipped", "no closed-form prior variance to band with")
+    if not n_eff or n_eff <= 0:
+        return Check(name, "skipped", "no effective sample size reported")
+    se = math.sqrt(var / n_eff)
+    return _verdict(name, emp, want, SIGMA * se, se,
+                    "{got:.6f} vs {want:.6f} (|d|={delta:.3g}, band {band:.3g} = 5 SE, "
+                    "{sigma} sigma)")
 
 
 def check_totalmass(emp: float | None, want: float | None) -> Check:

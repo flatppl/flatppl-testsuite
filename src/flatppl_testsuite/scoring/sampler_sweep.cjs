@@ -38,8 +38,21 @@
 //                   "binding":<binding name to materialise>,
 //                   "n":      <draw count>,
 //                   "k":      <coordinates per draw>,
-//                   "field":  <record field name, or null for a plain measure> },
+//                   "field":  <record field name, or null for a plain measure>,
+//                   "latent": <a SECOND binding whose weighted marginal is
+//                              reported, or null> },
 //                 ... ] }
+//
+// WHY A LATENT, AND WHY ITS MOMENT IS WEIGHTED. A `normalize` whose mass moves
+// with a latent that is NOT the variate is corrected in the WEIGHTS, not in the
+// atom positions: the pooled-divisor defect leaves atom i the residue
+// Z(theta_i)/E[Z] while every atom keeps the position it had. An UNWEIGHTED
+// moment of the latent is therefore identical before and after the fix, and
+// blind to the whole class. So a probe naming a `latent` gets the
+// self-normalised weighted mean of that binding's samples under the TARGET
+// measure's `logWeights`, plus the effective sample size the same weights give
+// (`nEff` = 1 / sum of squared normalised weights), which is what the caller
+// bands with.
 //
 // stdout (one JSON object):
 //   { "results": [ { "id", "status", ... } ] }
@@ -215,6 +228,36 @@ async function drawRow(row, ctx, p, ksSub, t0) {
   if (measure.logTotalmass !== undefined && measure.logTotalmass !== null) {
     row.logTotalmass = Number(measure.logTotalmass);
   }
+
+  if (p.latent) {
+    const lat = await ctx.getMeasure(p.latent);
+    if (!lat || !lat.samples) throw new Error('no samples for latent binding ' + p.latent);
+    const ts = Array.from(lat.samples);
+    if (ts.length !== n) {
+      throw new Error(`latent layout: got ${ts.length} values, expected n = ${n}`);
+    }
+    // Absent weights means an equally-weighted ensemble, which is the uniform
+    // log-weight -- not an error, and the correct reading of a measure the
+    // engine reports no weights for.
+    const lw = measure.logWeights ? Array.from(measure.logWeights) : ts.map(() => 0);
+    let mx = -Infinity;
+    for (const v of lw) if (v > mx) mx = v;
+    let z = 0;
+    for (const v of lw) z += Math.exp(v - mx);
+    let et = 0;
+    let sw2 = 0;
+    for (let i = 0; i < n; i++) {
+      const w = Math.exp(lw[i] - mx) / z;
+      et += w * ts[i];
+      sw2 += w * w;
+    }
+    if (!Number.isFinite(et) || !Number.isFinite(sw2) || sw2 <= 0) {
+      throw new Error('latent weighted mean is not finite for ' + p.latent);
+    }
+    row.latentMean = et;
+    row.latentNEff = 1 / sw2;
+  }
+
   row.ms = Date.now() - t0;
   return row;
 }

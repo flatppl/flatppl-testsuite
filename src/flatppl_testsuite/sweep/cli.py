@@ -12,7 +12,11 @@ import sys
 from collections import Counter
 
 from flatppl_testsuite.sweep import table
-from flatppl_testsuite.sweep.space import enumerate_probes, is_shared_latent
+from flatppl_testsuite.sweep.space import (
+    enumerate_probes,
+    is_literal,
+    is_shared_latent,
+)
 
 
 def _regen(argv: list[str]) -> int:
@@ -51,8 +55,15 @@ def _report(argv: list[str]) -> int:
         return 1
     # A shared-latent probe has no wrap stack; its analogous grouping key is the
     # ancestry graph, so it is reported by `shape` in the same column.
-    wrap_of = {p.id: (f"shared:{p.shape}" if is_shared_latent(p) else p.wraps[0].kind)
-               for p in enumerate_probes()}
+    def _group(p):
+        if is_shared_latent(p):
+            return f"shared:{p.shape}"
+        if is_literal(p):
+            # No wrap stack either; the construct name is the grouping key.
+            return f"literal:{p.id.split('.')[0]}"
+        return p.wraps[0].kind
+
+    wrap_of = {p.id: _group(p) for p in enumerate_probes()}
 
     lowers = [r for r in rows if r.outcome == "LOWERS"]
     lowers_wrong = [r for r in lowers if r.known_defect]

@@ -1,6 +1,7 @@
 """The sampler sweep's probe space: base families x combinator wraps.
 
-SHAPE OF THE SPACE. Two axes, deliberately not one full cross product:
+SHAPE OF THE SPACE. Two generated axes plus a targeted list, deliberately not
+one full cross product:
 
 * Every base family from `oracle.FAMILIES` under the identity wrap. This is the
   per-distribution roster — one row per sampleable REGISTRY entry.
@@ -20,6 +21,13 @@ SHAPE OF THE SPACE. Two axes, deliberately not one full cross product:
   ill-typed or carry an oracle nobody can verify. The point of the space is that
   every row's expected value is independently derivable, so the space stops
   where the derivations do.
+
+* `TARGETED`, a written-out list for constructs NEITHER axis can express: a
+  scalar primitive mapped over a shaped atom batch, and a `normalize` whose mass
+  moves with a latent that is not the variate. Both are wraps over a shape the
+  `WRAP_BASES` roster has no member for (a vector variate) or over a second
+  binding the two axes never introduce (the latent). Each entry states its own
+  closed form, as `COMPOSED` does.
 
 WHY A MIXTURE NEEDS DISTINCT COMPONENTS. `superpose` of two copies of the SAME
 measure is that measure again, so its moments are unchanged no matter which
@@ -124,6 +132,32 @@ class Probe:
     """Draws for this row. One value across the roster (see N_DRAWS) so every
     tolerance derivation is comparable; a field rather than a constant only so a
     future heavy-tailed row can buy precision without moving the whole sweep."""
+
+    mean_by_coord: tuple[float, ...] | None = None
+    """Per-coordinate mean oracle, overriding `mean`. `mean` alone assumes every
+    coordinate has the SAME mean, which is true of every `iid` row and false of
+    a pushforward carrying a vector shift -- and a shift that is equal in every
+    coordinate cannot show a dropped or sign-flipped component."""
+
+    latent: str | None = None
+    """A second binding whose WEIGHTED marginal mean is checked (see
+    `checks.check_latent_mean`). None on every row that needs no such check."""
+    latent_mean: float | None = None
+    """The latent's closed-form PRIOR mean, which §06 `normalize` makes the exact
+    oracle for its marginal."""
+    latent_var: float | None = None
+    """The latent's closed-form prior variance, which bands the check."""
+    latent_tilt: float | None = None
+    """What the pooled-divisor defect gives instead: the prior tilted by Z(theta).
+    Checked by nothing at run time -- it is the number the gate's teeth test
+    asserts the band REJECTS, so a green row cannot mean 'landed somewhere
+    plausible'."""
+
+    variate_skip_reason: str | None = None
+    """Why this row's variate carries no mean/variance oracle, when the reason is
+    not the default one (a law with no such moment). It is reported in the
+    skipped check's detail, so a reader of the table sees WHY a row checks
+    nothing there rather than assuming an oversight."""
 
 
 # ---------------------------------------------------------------------------
@@ -276,6 +310,143 @@ COMPOSED: tuple[Probe, ...] = (
 )
 
 
+# ---------------------------------------------------------------------------
+# Targeted rows. Each one is a construct the two axes above cannot express, and
+# each was landed by an engine change no probe reached (the batch audit's
+# finding M18, flatppl-dev/spec-audit-batch-2026-08-27.md). Every oracle here is
+# closed form, computed with mpmath at 40 digits and cross-checked against a
+# second derivation; none is frozen from the engine.
+# ---------------------------------------------------------------------------
+
+# A scalar primitive mapped over a SHAPED atom batch: the base is a vector
+# variate and the map is scalar arithmetic, so `broadcastN` has to iterate the
+# cell rather than the atom. §04 "Broadcasting", "Non-collection inputs": a
+# scalar "is simply not iterated over but held constant while collection
+# arguments are iterated over".
+_VEC2 = "u ~ iid(Normal(mu = 0.0, sigma = 1.0), 2)\n"
+
+# LogNormal(0, 1) moments from the raw moments E[X^k] = exp(k^2 / 2):
+#   mean = e^(1/2)                                = 1.6487212707001282
+#   var  = e^2 - e                                = 4.670774270471605
+#   mu4  = e^8 - 4 e^(1/2) e^(9/2) + 6 e e^2 - 3 e^2
+#                                                 = 2485.651403873756
+# Each is the nearest double to the exact value (mpmath, 40 dps).
+_LOGNORMAL_MEAN = 1.6487212707001282
+_LOGNORMAL_VAR = 4.670774270471605
+_LOGNORMAL_MU4 = 2485.651403873756
+
+# Uniform(a, b) prior moments for the normalize rows: mean (a+b)/2, var
+# (b-a)^2/12. Both priors below span 4, so both variances are 16/12.
+_UNIFORM_SPAN4_VAR = 1.3333333333333333
+
+TARGETED: tuple[Probe, ...] = (
+    # The DOTTED spelling, and it has to be. §07 "Elementary functions": "All
+    # accept scalar arguments and return scalar results", so a bare `exp` over a
+    # vector variate is a static error -- flatppl-js #228 enforces exactly that,
+    # and the bare spelling this row first used stopped drawing the moment it
+    # landed. `exp.(_)` is §07's own elementwise form, and it is the spelling
+    # #218's LogNormal pins use.
+    Probe("normal.pushfwd_exp_vector", _VEC2 + "M = pushfwd(fn(exp.(_)), lawof(u))\n",
+          "M", 2, None,
+          _LOGNORMAL_MEAN, _LOGNORMAL_VAR, _LOGNORMAL_MU4, 0.0, 0.0,
+          ("dist", "lognorm", (1.0,), {"loc": 0.0, "scale": 1.0}),
+          "normal", "pushfwd_exp_vector",
+          note="a NONLINEAR elementwise primitive over a vector variate: each "
+               "coordinate is LogNormal(0, 1), and the coordinates stay independent"),
+    # The same route with an affine map, which §06 "Engine contract for `pushfwd`
+    # density evaluation" case 1 names by construction. y = 2x over a standard
+    # normal is Normal(0, 2): var 4, mu4 = 3 sigma^4 = 48.
+    Probe("normal.pushfwd_scalar_affine_vector", _VEC2 + "M = pushfwd(fn(2.0 * _), lawof(u))\n",
+          "M", 2, None,
+          0.0, 4.0, 48.0, 0.0, 0.0, ("dist", "norm", (0.0, 2.0), {}),
+          "normal", "pushfwd_scalar_affine_vector",
+          note="scalar-affine map over a vector variate: every coordinate is "
+               "Normal(0, 2)"),
+    # And with a vector SHIFT, whose components differ. A shift equal in every
+    # coordinate cannot show a dropped or sign-flipped component, so this row is
+    # the one that needs `mean_by_coord`: y_i = 2 x_i + b_i is Normal(b_i, 2).
+    Probe("normal.pushfwd_scalar_affine_shift_vector",
+          "b = [1.0, -1.0]\n" + _VEC2 + "M = pushfwd(x -> 2.0 * x + b, lawof(u))\n",
+          "M", 2, None,
+          None, 4.0, 48.0, 0.0, 0.0, ("dist", "norm", (1.0, 2.0), {}),
+          "normal", "pushfwd_scalar_affine_shift_vector",
+          note="vector shift with distinct components: coordinate i is "
+               "Normal(b_i, 2), so a dropped or negated shift moves one mean",
+          mean_by_coord=(1.0, -1.0)),
+    # ------------------------------------------------- theta-dependent normalize
+    # §06 "Normalization and mass": `normalize(M)` returns "the probability
+    # measure M / Z ... On a non-nullary kernel, normalizes the output measures".
+    # Every theta-slice is therefore a probability measure, so the theta-marginal
+    # of the sampled joint is the PRIOR, exactly -- no quadrature enters the
+    # oracle. The defect these rows exist for divides by the POOLED mass instead,
+    # leaving atom i the residue Z(theta_i)/E[Z]; that hypothesis has its own
+    # closed form, recorded as `latent_tilt`.
+    #
+    # Z(theta) = theta, theta ~ Uniform(1, 5). Tilted marginal
+    #   E[theta^2] / E[theta] = (124/12) / 3 = 31/9 = 3.4444444444444446,
+    # confirmed by quadrature. The measure itself is Normal(0, 1) at every theta
+    # (the factor divides straight out), so the variate's own moments are the
+    # standard normal's and the weights come back uniform.
+    Probe("normal.normalize_theta_weighted",
+          "theta ~ Uniform(interval(1.0, 5.0))\n"
+          "m = normalize(weighted(theta, Normal(mu = 0.0, sigma = 1.0)))\n"
+          "y ~ m\n",
+          "y", 1, None,
+          0.0, 1.0, 3.0, None, 0.0, ("dist", "norm", (0.0, 1.0), {}),
+          "normal", "normalize_theta_weighted",
+          note="a scalar theta-dependent mass factor over a probability leaf; "
+               "the theta-marginal must be the prior, not the Z-tilted 31/9",
+          latent="theta", latent_mean=3.0, latent_var=_UNIFORM_SPAN4_VAR,
+          latent_tilt=3.4444444444444446),
+    # The same factor in LOG space, which reaches the other arm of the sampler's
+    # per-atom divisor. Z(theta) = e^theta over Uniform(1, 5), so the tilted
+    # marginal is
+    #   int theta e^theta / int e^theta = 4 e^5 / (e^5 - e) = 4.074629441455096,
+    # closed form and quadrature agreeing to 20 digits. The correct value is the
+    # same prior mean as above -- both divisors are EXACT, so both rows leave the
+    # weights uniform and report the same number; what differs is the route.
+    Probe("normal.normalize_theta_logweighted",
+          "theta ~ Uniform(interval(1.0, 5.0))\n"
+          "m = normalize(logweighted(theta, Normal(mu = 0.0, sigma = 1.0)))\n"
+          "y ~ m\n",
+          "y", 1, None,
+          0.0, 1.0, 3.0, None, 0.0, ("dist", "norm", (0.0, 1.0), {}),
+          "normal", "normalize_theta_logweighted",
+          note="the same mass factor in log space; the tilted hypothesis is "
+               "4 e^5 / (e^5 - e), a full nat above the prior",
+          latent="theta", latent_mean=3.0, latent_var=_UNIFORM_SPAN4_VAR,
+          latent_tilt=4.074629441455096),
+    # The weighted-box witness. f = exp(theta x) on x in [0, 1], theta ~
+    # Uniform(0, 4), so Z(theta) = (e^theta - 1) / theta and the tilted marginal
+    # is
+    #   int_0^4 (e^theta - 1) dtheta / int_0^4 (e^theta - 1)/theta dtheta
+    #     = 2.8073315740022866
+    # (mpmath quadrature at 40 dps, cross-checked against the theta-marginal
+    # form). The prior mean is 2.0.
+    #
+    # THE VARIATE CHECKS ARE OFF HERE, and that is the point of
+    # `variate_skip_reason`: unlike the two rows above, the weights do NOT come
+    # back uniform (n_eff is about 144k of 200k), so an UNWEIGHTED moment of the
+    # variate measures the proposal and not the measure. Pinning it would freeze
+    # an implementation detail as if it were spec.
+    Probe("normal.normalize_theta_weighted_box",
+          "theta ~ Uniform(interval(0.0, 4.0))\n"
+          "m = normalize(weighted(fn(exp(theta * _)), "
+          "Lebesgue(support = interval(0.0, 1.0))))\n"
+          "y ~ m\n",
+          "y", 1, None,
+          None, None, None, None, 0.0, None,
+          "normal", "normalize_theta_weighted_box",
+          note="the weighted-box witness: a latent inside the weight of a "
+               "Lebesgue box, whose per-theta mass is a 128-point CRN estimate",
+          latent="theta", latent_mean=2.0, latent_var=_UNIFORM_SPAN4_VAR,
+          latent_tilt=2.8073315740022866,
+          variate_skip_reason="the atoms are importance-weighted and NOT "
+                              "equally weighted here, so an unweighted moment "
+                              "of the variate measures the proposal"),
+)
+
+
 def _apply(xform: str, m: float | None, v: float | None, m4: float | None):
     if xform == "identity":
         return m, v, m4
@@ -332,6 +503,8 @@ def enumerate_probes() -> list[Probe]:
 
     # Axis 3 — composed wraps, Normal base, oracles written out per row.
     out.extend(COMPOSED)
+    # Axis 4 — targeted rows for constructs no axis above reaches.
+    out.extend(TARGETED)
     return out
 
 

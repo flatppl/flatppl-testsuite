@@ -119,6 +119,60 @@ def test_the_carded_residual_covariance_would_be_caught():
     assert chk.sigma > 10, f"only {chk.sigma:.1f} sigma: {chk.detail}"
 
 
+# The pooled-divisor defect these rows exist for. A theta-dependent `normalize`
+# divided by the POOLED mass leaves atom i the residue Z(theta_i)/E[Z], which
+# tilts the theta-marginal from the prior to E[theta Z]/E[Z]. Every probe
+# carrying a `latent_tilt` records that closed form.
+#
+# The band is `5 * sqrt(prior var / n_eff)`, and `n_eff` comes from the run. This
+# test uses a PESSIMISTIC quarter of the draw count, well below the lowest ESS
+# any of these rows produces (about 144k of 200k on the weighted-box row), so a
+# green result here does not depend on the weights staying near-uniform.
+_PESSIMISTIC_N_EFF = N / 4
+
+
+def test_the_pooled_normalize_divisor_would_be_caught_on_every_theta_row():
+    rows = [p for p in space.enumerate_probes() if p.latent_tilt is not None]
+    assert rows, "no theta-dependent normalize rows in the space"
+    for p in rows:
+        chk = C.check_latent_mean(p.latent_tilt, p.latent_mean, p.latent_var,
+                                  _PESSIMISTIC_N_EFF)
+        assert chk.status == "failed", \
+            f"{p.id}: the Z-tilted marginal would pass: {chk.detail}"
+        assert chk.sigma > 20, \
+            f"{p.id}: caught, but only at {chk.sigma:.1f} sigma: {chk.detail}"
+
+
+def test_the_theta_rows_do_not_fire_on_the_prior_itself():
+    """The other half: the band must accept the value the spec requires."""
+    for p in space.enumerate_probes():
+        if p.latent_tilt is None:
+            continue
+        chk = C.check_latent_mean(p.latent_mean, p.latent_mean, p.latent_var,
+                                  _PESSIMISTIC_N_EFF)
+        assert chk.status == "passed", f"{p.id}: {chk.detail}"
+
+
+def test_a_dropped_or_negated_vector_shift_would_be_caught():
+    """Why `mean_by_coord` exists.
+
+    A shift whose components are equal is invisible to a dropped or sign-flipped
+    component. The one row that carries distinct components pins each coordinate
+    against its own mean, so both failure modes move a coordinate by the full
+    shift.
+    """
+    rows = [p for p in space.enumerate_probes() if p.mean_by_coord is not None]
+    assert rows, "no per-coordinate-mean rows in the space"
+    for p in rows:
+        for i, want in enumerate(p.mean_by_coord):
+            for wrong in (0.0, -want):           # shift dropped, shift negated
+                if wrong == want:
+                    continue
+                chk = C.check_mean(i, wrong, want, p.var, N)
+                assert chk.status == "failed", \
+                    f"{p.id} coord {i}: {wrong} would pass against {want}: {chk.detail}"
+
+
 def test_the_bands_do_not_fire_on_true_null_noise():
     """A 5-sigma band must not cost false positives, or the gate becomes noise
     everyone learns to ignore. 4000 true-null draws of each estimator."""
@@ -306,9 +360,11 @@ def test_a_changed_refusal_reason_diffs_even_when_the_marker_is_unchanged():
 def test_every_probe_has_at_least_one_checkable_oracle():
     """A row that checks nothing is a row that proves nothing."""
     for p in space.enumerate_probes():
-        checkable = (p.mean is not None or p.var is not None
+        checkable = (p.mean is not None or p.mean_by_coord is not None
+                     or p.var is not None
                      or p.cov is not None or p.ks is not None
-                     or p.logtotalmass is not None)
+                     or p.logtotalmass is not None
+                     or p.latent_mean is not None)
         assert checkable, f"{p.id} carries no oracle of any kind"
 
 

@@ -42,12 +42,14 @@ from flatppl_testsuite.sweep.space import (
     VECTOR_SUPPORT_IS_MANIFOLD,
     Base,
     LinearGaussianProbe,
+    LiteralProbe,
     NormalNode,
     Probe,
     SharedLatentProbe,
     Wrap,
     in_support,
     is_linear_gaussian,
+    is_literal,
     is_shared_latent,
     is_vector_base,
     shared_latent_graph,
@@ -644,6 +646,14 @@ def true_logpdf(probe: Probe | SharedLatentProbe | LinearGaussianProbe) -> float
     fields is a multivariate law, and no fold over scalar §13 rules expresses a
     cross-covariance.
     """
+    if is_literal(probe):
+        # This family carries its own hand-derived value (see
+        # `space.LiteralProbe`): its constructs are outside the §13 fold, so
+        # there is no structure here to walk. `oracle=None` is the same
+        # withholding every other branch expresses by raising.
+        if probe.oracle is None:
+            raise OracleUnsupported(f"{probe.id}: no value derived for this shape")
+        return probe.oracle
     if is_shared_latent(probe):
         return _shared_latent_logpdf(probe)
     if is_linear_gaussian(probe):

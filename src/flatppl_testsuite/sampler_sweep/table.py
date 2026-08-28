@@ -147,12 +147,18 @@ def evaluate(probe: space.Probe, draws: engine.Draws) -> Row:
 
     results: list[C.Check] = []
     for i in range(draws.k):
-        results.append(C.check_mean(i, draws.mean(i), probe.mean, probe.var, draws.n))
-        results.append(C.check_var(i, draws.var(i), probe.var, probe.fourth, draws.n))
+        want = probe.mean if probe.mean_by_coord is None else probe.mean_by_coord[i]
+        results.append(C.check_mean(i, draws.mean(i), want, probe.var, draws.n,
+                                    probe.variate_skip_reason))
+        results.append(C.check_var(i, draws.var(i), probe.var, probe.fourth, draws.n,
+                                   probe.variate_skip_reason))
         if i > 0:
             results.append(C.check_cov(i, draws.cov0(i), probe.cov, probe.var, draws.n))
     results.append(C.check_ks(list(draws.ks_sample), probe.ks, len(draws.ks_sample)))
     results.append(C.check_totalmass(draws.log_totalmass, probe.logtotalmass))
+    if probe.latent is not None:
+        results.append(C.check_latent_mean(draws.latent_mean, probe.latent_mean,
+                                           probe.latent_var, draws.latent_n_eff))
 
     row.checks = [
         {"name": c.name, "status": c.status, "detail": c.detail,

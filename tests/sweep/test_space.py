@@ -19,6 +19,7 @@ from flatppl_testsuite.sweep.space import (
     Wrap,
     enumerate_probes,
     in_support,
+    is_literal,
     is_shared_latent,
     is_vector_base,
 )
@@ -157,7 +158,7 @@ def test_every_vector_probe_point_is_on_its_supports_constraint_surface():
     """
     inverse = {"exp": math.log, "neg": lambda y: -y}
     for p in enumerate_probes():
-        if is_shared_latent(p) or not is_vector_base(p.base):
+        if is_shared_latent(p) or is_literal(p) or not is_vector_base(p.base):
             continue
         w = p.wraps[0]
         pre = list(p.point)
@@ -194,7 +195,7 @@ def test_every_wrap_is_present_across_all_three_spellings():
     `test_shared_latent.test_each_spelling_renders_the_construct_it_names`.
     """
     for p in enumerate_probes():
-        if is_shared_latent(p):
+        if is_shared_latent(p) or is_literal(p):
             continue
         w = p.wraps[0]
         if w.kind == "identity":
@@ -227,7 +228,7 @@ def test_pushfwd_points_are_derived_not_hardcoded():
     constant, so also pin the preimage to `INNER[base]` exactly -- that is
     what forces "derived", not just "happens to work"."""
     for p in enumerate_probes():
-        if is_shared_latent(p):
+        if is_shared_latent(p) or is_literal(p):
             continue          # no wrap axis, so no pushforward point to derive
         w = p.wraps[0]
         if w.kind != "pushfwd" or is_vector_base(p.base):

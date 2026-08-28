@@ -27,6 +27,7 @@ from flatppl_testsuite.sweep.space import (
     enumerate_probes,
     in_support,
     is_linear_gaussian,
+    is_literal,
     is_shared_latent,
     is_vector_base,
     vector_shapes,
@@ -410,7 +411,7 @@ def _unique_shapes():
     `test_every_vector_measure_carries_the_mass_the_algebra_requires` instead."""
     shapes = {}
     for p in enumerate_probes():
-        if is_shared_latent(p) or is_vector_base(p.base):
+        if is_shared_latent(p) or is_literal(p) or is_vector_base(p.base):
             # A shared-latent probe has no base and no wrap stack, and its total
             # mass is 1 by construction (every composition here is of probability
             # measures), so there is no mass invariant to integrate.

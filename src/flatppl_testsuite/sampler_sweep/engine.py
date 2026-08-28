@@ -156,6 +156,15 @@ class Draws:
     cross: tuple[float, ...] = ()
     ks_sample: tuple[float, ...] = ()
     log_totalmass: float | None = None
+    latent_mean: float | None = None
+    """Self-normalised WEIGHTED mean of the probe's `latent` binding, or None
+    when the probe names no latent. Weighted because the defect class it exists
+    for moves the weights and not the atom positions -- see the driver's
+    header."""
+    latent_n_eff: float | None = None
+    """Effective sample size of the same weights, `1 / sum(w_i^2)`. The band on
+    `latent_mean` is `sqrt(prior variance / n_eff)`: the variance is the
+    closed-form oracle, the ESS is the only part the run supplies."""
     error: str = ""
     ms: int = 0
 
@@ -182,7 +191,7 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
         "ksSubsample": ks_subsample,
         "probes": [
             {"id": p.id, "source": p.source, "binding": p.binding, "n": p.n_draws,
-             "k": p.k, "field": p.field}
+             "k": p.k, "field": p.field, "latent": p.latent}
             for p in probes
         ],
     }
@@ -207,6 +216,7 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
             cross=tuple(r.get("cross") or ()),
             ks_sample=tuple(r.get("ksSample") or ()),
             log_totalmass=r.get("logTotalmass"),
+            latent_mean=r.get("latentMean"), latent_n_eff=r.get("latentNEff"),
             error=r.get("error", ""), ms=r.get("ms", 0),
         )
     missing = {p.id for p in probes} - set(out)

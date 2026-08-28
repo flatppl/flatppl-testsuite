@@ -12,11 +12,13 @@ from flatppl_testsuite.sweep.space import (
     SHARED_LATENT_FIELD_NAMES,
     SHARED_LATENT_LATENT_POINT,
     Base,
+    LiteralProbe,
     NormalNode,
     Probe,
     SharedLatentProbe,
     Wrap,
     _latent_name,
+    is_literal,
     is_shared_latent,
     shared_latent_graph,
 )
@@ -192,7 +194,11 @@ def _render_shared_latent(probe: SharedLatentProbe) -> RenderedProbe:
     return RenderedProbe(source="\n".join(lines) + "\n", binding="lp")
 
 
-def render(probe: Probe | SharedLatentProbe) -> RenderedProbe:
+def render(probe: Probe | SharedLatentProbe | LiteralProbe) -> RenderedProbe:
+    if is_literal(probe):
+        # Already source text -- there is nothing to compose. The family exists
+        # because its constructs are not `BASES` x `WRAPS` (see `space`).
+        return RenderedProbe(source=probe.source, binding=probe.binding)
     if is_shared_latent(probe):
         return _render_shared_latent(probe)
 

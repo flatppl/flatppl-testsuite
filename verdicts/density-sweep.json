@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "generated_at": "2026-08-28T06:36:58.582086+00:00",
+    "generated_at": "2026-08-28T06:53:53.110043+00:00",
     "determinizer_commit": "95c897cf101fa8c8724f117c74e5ad721bdff651",
-    "engine_commit": "8f5ab0fd2850b51386c88218d427a59c3af09938",
-    "probe_count": 854,
+    "engine_commit": "3a175fc2c0e3276f246ff3acc7366dfeb17d5195",
+    "probe_count": 857,
     "outcome_counts": {
-      "LOWERS": 686,
-      "REFUSES": 168,
+      "LOWERS": 688,
+      "REFUSES": 169,
       "MALFORMED": 0
     },
     "ci_slice": {
@@ -16,7 +16,8 @@
         "base": "excludes beta entirely; excludes poisson except pushfwd(sqrt) at spelling=direct, covering the known float-roundtrip defect",
         "consumer": "fixed False (True excluded)",
         "vector_family": "one probe per (base, wrap) shape space.vector_shapes() generates, at spelling='direct' ordering='single'; the one shape whose reference measure \u00a706 does not give (dirichlet + pushfwd(exp)) is not in the family at all (space._HELD_OUT) and is pinned instead by tests/sweep/test_vector_arms.py",
-        "shared_latent_family": "one probe per (shape, spelling) pair space.shared_latent_shapes() generates, at n=2 latent_query='none'; excludes n=3 (the off-diagonal STRUCTURE check) and both latent_query values (the two-query ordering check), which the --full run covers"
+        "shared_latent_family": "one probe per (shape, spelling) pair space.shared_latent_shapes() generates, at n=2 latent_query='none'; excludes n=3 (the off-diagonal STRUCTURE check) and both latent_query values (the two-query ordering check), which the --full run covers",
+        "literal_family": "excludes nothing -- every member is in the slice, because the family has no axes to slice along"
       }
     }
   },
@@ -4576,6 +4577,28 @@
       "known_defect_reason": null
     },
     {
+      "probe_id": "metricsum.paired_contraction.direct.single.noconsumer",
+      "outcome": "LOWERS",
+      "oracle": -15.141160755426895,
+      "value": -15.141160755426894,
+      "marker": null,
+      "spec_justified": null,
+      "oracle_unvalidated": false,
+      "known_defect": false,
+      "known_defect_reason": null
+    },
+    {
+      "probe_id": "metricsum.unpaired_lower.direct.single.noconsumer",
+      "outcome": "LOWERS",
+      "oracle": -7.043938533204673,
+      "value": -7.043938533204673,
+      "marker": null,
+      "spec_justified": null,
+      "oracle_unvalidated": false,
+      "known_defect": false,
+      "known_defect_reason": null
+    },
+    {
       "probe_id": "multinomial.identity.direct.pinned_earlier.noconsumer",
       "outcome": "LOWERS",
       "oracle": -2.002480500543707,
@@ -8597,6 +8620,17 @@
       "value": -2.1890697837836717,
       "marker": null,
       "spec_justified": null,
+      "oracle_unvalidated": false,
+      "known_defect": false,
+      "known_defect_reason": null
+    },
+    {
+      "probe_id": "pushfwd.scalar_affine_vector.direct.single.noconsumer",
+      "outcome": "REFUSES",
+      "oracle": -3.536671427529236,
+      "value": null,
+      "marker": "functionof:refuse-functionof-node-nodeid-forward-over",
+      "spec_justified": false,
       "oracle_unvalidated": false,
       "known_defect": false,
       "known_defect_reason": null
