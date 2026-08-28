@@ -385,6 +385,38 @@ def test_replicated_wraps_all_carry_a_covariance_oracle():
             assert p.cov == 0.0, f"{p.id} has k={p.k} but no cov-0 oracle"
 
 
+# The margin the gate's stability rests on. `diff` compares each check's
+# STATUS, never its estimate, so a live engine that re-plumbs which RNG stream
+# feeds which distribution moves the digits without moving a verdict -- measured
+# 2026-08-28 by re-running the whole roster at a different seed, which is a
+# strictly stronger perturbation than any re-plumbing: 353 of 457 estimates
+# moved, `diff` reported nothing. What that argument needs is HEADROOM. A row
+# frozen at 4.9 sigma passes today and flips to red on the next reseed, which
+# would read as engine drift and is really an eroded band.
+#
+# The worst check measured 2.50 sigma as frozen and 2.72 at the other seed, so
+# 4.0 leaves room for ordinary movement while still catching erosion. Free: it
+# reads the committed table and calls no engine.
+_MARGIN_SIGMA = 4.0
+
+
+def test_no_frozen_check_sits_near_its_band():
+    _meta, rows = table.load()
+    if not rows:
+        pytest.skip("no committed sampler table")
+    near = []
+    for r in rows.values():
+        for c in r.checks:
+            if c["status"] == "skipped" or c.get("sigma") is None:
+                continue
+            if c["sigma"] > _MARGIN_SIGMA:
+                near.append(f"{r.probe_id} {c['name']}: {c['detail']}")
+    assert not near, (
+        f"checks frozen above {_MARGIN_SIGMA} sigma of their {C.SIGMA}-sigma band. "
+        "Either a real bias the band nearly catches, or a margin thin enough that "
+        "an unrelated engine change flips it to red:\n  " + "\n  ".join(near))
+
+
 # ---------------------------------------------------------------------------
 # The live diff against the frozen table.
 # ---------------------------------------------------------------------------
