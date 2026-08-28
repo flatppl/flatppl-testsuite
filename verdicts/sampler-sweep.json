@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-08-28T07:53:42+00:00",
-  "engine_commit": "5635b923e06fe13586ace33524403fb4a82f045e",
+  "generated_at": "2026-08-28T08:53:51+00:00",
+  "engine_commit": "c4c2603e892fc63bd6fdbcb8c514cc3238488890",
   "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 77,
+  "probe_count": 78,
   "outcome_counts": {
-   "DRAWS": 76,
+   "DRAWS": 77,
    "REFUSES": 1
   },
   "failing_rows": []
@@ -5584,6 +5584,119 @@
     }
    ],
    "note": "the weighted-box witness: a latent inside the weight of a Lebesgue box, whose per-theta mass is a 128-point CRN estimate"
+  },
+  {
+   "probe_id": "normal.iid_normalize_weighted_variate",
+   "family": "normal",
+   "wrap": "iid_normalize_weighted_variate",
+   "outcome": "DRAWS",
+   "n": 600000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.002928 vs 1.000000 (|d|=0.00293, band 0.0277 = 5 SE, 0.53 sigma)",
+     "got": 1.0029281153961958,
+     "want": 1.0,
+     "band": 0.027744370802746547,
+     "sigma": 0.527695404774846,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.993869 vs 1.000000 (|d|=0.00613, band 0.0392 = 5 SE, 0.78 sigma)",
+     "got": 0.99386912015224,
+     "want": 1.0,
+     "band": 0.039236465468752285,
+     "sigma": 0.7812732077819996,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.007252 vs 1.000000 (|d|=0.00725, band 0.0277 = 5 SE, 1.31 sigma)",
+     "got": 1.0072520919507395,
+     "want": 1.0,
+     "band": 0.027744370802746547,
+     "sigma": 1.3069483540101734,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.005830 vs 1.000000 (|d|=0.00583, band 0.0392 = 5 SE, 0.74 sigma)",
+     "got": 1.005830304664218,
+     "want": 1.0,
+     "band": 0.039236465468752285,
+     "sigma": 0.7429701674914247,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "-0.002302 vs +0.000000 (|d|=0.0023, band 0.0277 = 5 SE, 0.41 sigma)",
+     "got": -0.0023021611764939554,
+     "want": 0.0,
+     "band": 0.027744370802746547,
+     "sigma": 0.4148879772515968,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "1.001453 vs 1.000000 (|d|=0.00145, band 0.0277 = 5 SE, 0.26 sigma)",
+     "got": 1.001452528341743,
+     "want": 1.0,
+     "band": 0.027744370802746547,
+     "sigma": 0.2617699193955479,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "1.001518 vs 1.000000 (|d|=0.00152, band 0.0392 = 5 SE, 0.19 sigma)",
+     "got": 1.001517703486208,
+     "want": 1.0,
+     "band": 0.039236465468752285,
+     "sigma": 0.19340471524080516,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.004263 vs +0.000000 (|d|=0.00426, band 0.0277 = 5 SE, 0.77 sigma)",
+     "got": 0.004262698436772849,
+     "want": 0.0,
+     "band": 0.027744370802746547,
+     "sigma": 0.7682096067485633,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a normalize whose weights ARE the law: every coordinate is Normal(1, 1) by conjugacy, and the weights must fold as a product over the k coordinates"
   }
  ]
 }

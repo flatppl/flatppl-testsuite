@@ -23,11 +23,14 @@ one full cross product:
   where the derivations do.
 
 * `TARGETED`, a written-out list for constructs NEITHER axis can express: a
-  scalar primitive mapped over a shaped atom batch, and a `normalize` whose mass
-  moves with a latent that is not the variate. Both are wraps over a shape the
-  `WRAP_BASES` roster has no member for (a vector variate) or over a second
-  binding the two axes never introduce (the latent). Each entry states its own
-  closed form, as `COMPOSED` does.
+  scalar primitive mapped over a shaped atom batch, a `normalize` whose mass
+  moves with a latent that is not the variate, and an `iid` over a `normalize`
+  whose own IMPORTANCE WEIGHTS are the law. The first is a wrap over a shape the
+  `WRAP_BASES` roster has no member for (a vector variate); the second needs a
+  second binding the two axes never introduce (the latent); the third needs a
+  variate-dependent weight, which the agnostic `normalize_prob` wrap
+  deliberately excludes (its base is already a probability measure). Each entry
+  states its own closed form, as `COMPOSED` does.
 
 WHY A MIXTURE NEEDS DISTINCT COMPONENTS. `superpose` of two copies of the SAME
 measure is that measure again, so its moments are unchanged no matter which
@@ -152,6 +155,14 @@ class Probe:
     Checked by nothing at run time -- it is the number the gate's teeth test
     asserts the band REJECTS, so a green row cannot mean 'landed somewhere
     plausible'."""
+
+    weighted_variate: bool = False
+    """Take the variate's own moments under the measure's ATOM WEIGHTS, banded by
+    the ensemble's effective sample size instead of `n`. Set it on a measure that
+    represents its law by reweighting uniform positions -- `normalize(weighted(f,
+    Q))` draws at Q's positions and carries f/Z in the weights -- where an
+    unweighted moment measures Q and not the measure. A KS test cannot follow the
+    weights, so such a row carries `ks=None`."""
 
     variate_skip_reason: str | None = None
     """Why this row's variate carries no mean/variance oracle, when the reason is
@@ -444,6 +455,50 @@ TARGETED: tuple[Probe, ...] = (
           variate_skip_reason="the atoms are importance-weighted and NOT "
                               "equally weighted here, so an unweighted moment "
                               "of the variate measures the proposal"),
+    # ------------------------------------- iid over an importance-weighted normalize
+    # The dropped-weight witness (flatppl-js #232). §06 `normalize` returns "the
+    # probability measure M / Z" and §06 `iid` "the product measure
+    # $M^{\\otimes N}$", so this measure is EXACTLY Normal(1, 1)^{otimes 3} --
+    # e^x times the standard normal density is e^(1/2) times the Normal(1, 1)
+    # density, a conjugate tilt with Z = e^(1/2). Per coordinate: mean 1,
+    # variance 1, fourth central moment 3 sigma^4 = 3, and cov 0 across
+    # coordinates.
+    #
+    # `iid`'s composite fallback re-materialised the inner measure at N*k atoms
+    # and then rebuilt the output WITHOUT the per-position weights, so every
+    # coordinate came back at the unnormalized base's mean of 0 -- a full sigma
+    # out, and silent. `rand` refuses the identical weight-drop loudly, which is
+    # what made the gap visible.
+    #
+    # WEIGHTED MOMENTS, and this row is the reason the flag exists. The atoms sit
+    # at Normal(0, 1)'s positions and the whole reweighting rides in the atom
+    # weight, so an UNWEIGHTED moment here measures the proposal and reports 0 --
+    # bit-identical before and after the fix, exactly as the weighted-box row's
+    # `variate_skip_reason` describes. Weighted, the same three coordinates are
+    # the oracle's, and the covariance check is what separates a correct
+    # per-coordinate product from a mis-folded single-position weight (which
+    # leaves coordinate 0 at 1 and the rest at 0).
+    #
+    # No KS row: the subsample the driver ships cannot carry the weights.
+    #
+    # THE ONE ROW THAT BUYS PRECISION. The atom weight is a product of k = 3
+    # lognormal(0, 1) factors, so its log has variance 3 and the ensemble's
+    # ESS/n is about e^(-3) = 5% -- by far the thinnest on the roster. At the
+    # roster's 200k that leaves an effective count near 9.7k, an order of
+    # magnitude under every other row's, and the bands are computed from the
+    # effective count. 600k restores an effective count comparable to what the
+    # unweighted rows actually have. Derived from the weight's own distribution,
+    # not fitted to an observed sigma.
+    Probe("normal.iid_normalize_weighted_variate",
+          "m = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "y ~ iid(m, 3)\n",
+          "y", 3, None,
+          1.0, 1.0, 3.0, 0.0, 0.0, None,
+          "normal", "iid_normalize_weighted_variate",
+          note="iid over a normalize whose weights ARE the law: every coordinate "
+               "is Normal(1, 1) by conjugacy, and the weights must fold as a "
+               "product over the k coordinates",
+          n_draws=600_000, weighted_variate=True),
 )
 
 

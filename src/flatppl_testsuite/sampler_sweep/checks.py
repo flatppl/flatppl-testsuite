@@ -20,6 +20,12 @@ The KS threshold is the EXACT null distribution (`scipy.stats.kstwo`), not the
 asymptotic approximation — they agree to 5e-6 here, but the exact one costs
 nothing. 5 sigma two-sided is p = 5.733e-07.
 
+WEIGHTED MOMENTS TAKE AN EFFECTIVE `n`. A `space.Probe.weighted_variate` row's
+moments are self-normalised importance estimators, so `n` above is the
+ensemble's effective sample size rather than the draw count -- the same
+substitution `check_latent_mean` makes. The formulas are unchanged; only the
+count they divide by is.
+
 `totalmass` is NOT a Monte-Carlo quantity. `logTotalmass` is a deterministic
 closed-form number the engine computes from the measure algebra, so it gets a
 float-precision band, matching the density sweep's `_TOLERANCE` of 1e-9.
@@ -104,7 +110,7 @@ def _verdict(name, got, want, band, se, detail_fmt, fallback=False) -> Check:
                  got=got, want=want, band=band, sigma=sigma, fallback=fallback)
 
 
-def check_mean(coord: int, emp: float, want: float | None, var: float | None, n: int,
+def check_mean(coord: int, emp: float, want: float | None, var: float | None, n: float,
                why: str | None = None) -> Check:
     name = f"mean[{coord}]"
     if want is None:
@@ -119,7 +125,7 @@ def check_mean(coord: int, emp: float, want: float | None, var: float | None, n:
                     "{got:.6f} vs {want:.6f} (|d|={delta:.3g}, band {band:.3g} = 5 SE, {sigma} sigma)")
 
 
-def check_var(coord: int, emp: float, want: float | None, fourth: float | None, n: int,
+def check_var(coord: int, emp: float, want: float | None, fourth: float | None, n: float,
               why: str | None = None) -> Check:
     name = f"var[{coord}]"
     if want is None:
@@ -144,7 +150,7 @@ def check_var(coord: int, emp: float, want: float | None, fourth: float | None, 
                     "{got:.6f} vs {want:.6f} (|d|={delta:.3g}, band {band:.3g} = 5 SE, {sigma} sigma)")
 
 
-def check_cov(coord: int, emp: float, want: float | None, var: float | None, n: int) -> Check:
+def check_cov(coord: int, emp: float, want: float | None, var: float | None, n: float) -> Check:
     """Cross-coordinate covariance against coordinate 0.
 
     THE branch-pinning check. §06 "Joint composition" makes `iid(M, size)` the

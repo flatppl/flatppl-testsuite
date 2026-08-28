@@ -40,7 +40,9 @@
 //                   "k":      <coordinates per draw>,
 //                   "field":  <record field name, or null for a plain measure>,
 //                   "latent": <a SECOND binding whose weighted marginal is
-//                              reported, or null> },
+//                              reported, or null>,
+//                   "weightedVariate": <true to accumulate the variate's own
+//                              moments under the measure's atom weights> },
 //                 ... ] }
 //
 // WHY A LATENT, AND WHY ITS MOMENT IS WEIGHTED. A `normalize` whose mass moves
@@ -66,6 +68,15 @@
 // `cross[i]` = sum over atoms of x_0 * x_i (raw, uncentred — the caller
 // centres, so no second pass is needed). Plus `logTotalmass` when the engine
 // reported one, and `ksSample`, a strided subsample of coordinate 0.
+//
+// WHY A VARIATE MOMENT IS SOMETIMES WEIGHTED TOO. The same argument as the
+// latent's, one step over: `normalize(weighted(f, Q))` draws at Q's positions
+// and carries f/Z in the weights, so `iid` of it has the whole law in the ATOM
+// weight and an unweighted moment of the variate measures Q. A probe setting
+// `weightedVariate` gets the self-normalised weighted accumulators instead, and
+// `momentDenom` (1 rather than n) plus `variateNEff` tell the caller how to read
+// and band them. A KS test cannot follow: it needs the draws themselves, and
+// only a resample would turn a weighted ensemble into them.
 //
 // Engine resolution mirrors score_flatpdl.cjs (--engine, then $FLATPPL_JS_DIR,
 // then the ~/.cache/flatppl-js clone); keep them in sync if the API moves.
@@ -199,16 +210,27 @@ async function drawRow(row, ctx, p, ksSub, t0) {
   // Atom-major layout: atom a, coordinate i lives at flat[a*k + i]. Pinned by
   // the engine's own iid tests (packages/engine/test/
   // iid-superpose-branch-freshness.test.ts reads `flat[a * k + i]`).
+  //
+  // WEIGHTED VARIATE MOMENTS. A measure that represents its law by REWEIGHTING
+  // uniform positions -- `normalize(weighted(f, Q))`, whose atoms sit at Q's
+  // positions -- has an unweighted moment that measures Q, not the measure. The
+  // atom weights are the whole law there, so such a probe asks for the
+  // self-normalised WEIGHTED accumulators and the caller bands them with the
+  // ensemble's effective sample size rather than n. `momentDenom` carries the
+  // divisor the caller must use: n for a raw sum, 1 for an already-normalised
+  // weighted one.
+  const wts = p.weightedVariate ? normalisedWeights(measure, n) : null;
   const sum = new Array(k).fill(0);
   const sumsq = new Array(k).fill(0);
   const cross = new Array(k).fill(0);
   for (let a = 0; a < n; a++) {
     const x0 = flat[a * k];
+    const wa = wts ? wts.w[a] : 1;
     for (let i = 0; i < k; i++) {
       const x = flat[a * k + i];
-      sum[i] += x;
-      sumsq[i] += x * x;
-      cross[i] += x0 * x;
+      sum[i] += wa * x;
+      sumsq[i] += wa * x * x;
+      cross[i] += wa * x0 * x;
     }
   }
 
@@ -216,6 +238,8 @@ async function drawRow(row, ctx, p, ksSub, t0) {
   row.sum = sum;
   row.sumsq = sumsq;
   row.cross = cross;
+  row.momentDenom = wts ? 1 : n;
+  if (wts) row.variateNEff = wts.nEff;
 
   // Coordinate 0, strided down to at most ksSub values, for the scipy KS test.
   // A stride (not a head slice) keeps the subsample spread over the whole
@@ -236,30 +260,45 @@ async function drawRow(row, ctx, p, ksSub, t0) {
     if (ts.length !== n) {
       throw new Error(`latent layout: got ${ts.length} values, expected n = ${n}`);
     }
-    // Absent weights means an equally-weighted ensemble, which is the uniform
-    // log-weight -- not an error, and the correct reading of a measure the
-    // engine reports no weights for.
-    const lw = measure.logWeights ? Array.from(measure.logWeights) : ts.map(() => 0);
-    let mx = -Infinity;
-    for (const v of lw) if (v > mx) mx = v;
-    let z = 0;
-    for (const v of lw) z += Math.exp(v - mx);
+    const { w, nEff } = normalisedWeights(measure, n);
     let et = 0;
-    let sw2 = 0;
-    for (let i = 0; i < n; i++) {
-      const w = Math.exp(lw[i] - mx) / z;
-      et += w * ts[i];
-      sw2 += w * w;
-    }
-    if (!Number.isFinite(et) || !Number.isFinite(sw2) || sw2 <= 0) {
+    for (let i = 0; i < n; i++) et += w[i] * ts[i];
+    if (!Number.isFinite(et)) {
       throw new Error('latent weighted mean is not finite for ' + p.latent);
     }
     row.latentMean = et;
-    row.latentNEff = 1 / sw2;
+    row.latentNEff = nEff;
   }
 
   row.ms = Date.now() - t0;
   return row;
+}
+
+// A measure's atom weights, normalised to sum to one, plus their effective
+// sample size (1 / sum of squared normalised weights). Absent weights means an
+// equally-weighted ensemble, which is the uniform log-weight -- not an error,
+// and the correct reading of a measure the engine reports no weights for.
+function normalisedWeights(measure, n) {
+  const lw = measure.logWeights
+    ? Array.from(measure.logWeights)
+    : new Array(n).fill(0);
+  if (lw.length !== n) {
+    throw new Error(`weight layout: got ${lw.length} weights, expected n = ${n}`);
+  }
+  let mx = -Infinity;
+  for (const v of lw) if (v > mx) mx = v;
+  let z = 0;
+  for (const v of lw) z += Math.exp(v - mx);
+  const w = new Array(n);
+  let sw2 = 0;
+  for (let i = 0; i < n; i++) {
+    w[i] = Math.exp(lw[i] - mx) / z;
+    sw2 += w[i] * w[i];
+  }
+  if (!Number.isFinite(sw2) || sw2 <= 0) {
+    throw new Error('measure weights do not normalise to a finite ensemble');
+  }
+  return { w, nEff: 1 / sw2 };
 }
 
 // A plain measure exposes `samples`; a record-valued one (joint, kchain, …)

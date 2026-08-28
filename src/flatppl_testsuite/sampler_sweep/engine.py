@@ -165,20 +165,32 @@ class Draws:
     """Effective sample size of the same weights, `1 / sum(w_i^2)`. The band on
     `latent_mean` is `sqrt(prior variance / n_eff)`: the variance is the
     closed-form oracle, the ESS is the only part the run supplies."""
+    moment_denom: float | None = None
+    """What `sum`/`sumsq`/`cross` must be divided by: `n` for a raw sum, `1` for
+    an already-normalised WEIGHTED one (a `weighted_variate` probe). None means
+    `n`, so a driver that predates the field still reads correctly."""
+    variate_n_eff: float | None = None
+    """Effective sample size of the weights the variate moments were taken
+    under. Bands them the way `latent_n_eff` bands the latent's mean; None on a
+    row whose moments are unweighted, which bands with `n`."""
     error: str = ""
     ms: int = 0
 
+    @property
+    def denom(self) -> float:
+        return self.n if self.moment_denom is None else self.moment_denom
+
     def mean(self, i: int) -> float:
-        return self.sum[i] / self.n
+        return self.sum[i] / self.denom
 
     def var(self, i: int) -> float:
         """Population variance (ddof = 0); see checks.py on why the bias is moot."""
         m = self.mean(i)
-        return self.sumsq[i] / self.n - m * m
+        return self.sumsq[i] / self.denom - m * m
 
     def cov0(self, i: int) -> float:
         """Sample covariance of coordinate 0 with coordinate i, from raw sums."""
-        return self.cross[i] / self.n - self.mean(0) * self.mean(i)
+        return self.cross[i] / self.denom - self.mean(0) * self.mean(i)
 
 
 def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None) -> dict[str, Draws]:
@@ -191,7 +203,8 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
         "ksSubsample": ks_subsample,
         "probes": [
             {"id": p.id, "source": p.source, "binding": p.binding, "n": p.n_draws,
-             "k": p.k, "field": p.field, "latent": p.latent}
+             "k": p.k, "field": p.field, "latent": p.latent,
+             "weightedVariate": p.weighted_variate}
             for p in probes
         ],
     }
@@ -217,6 +230,7 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
             ks_sample=tuple(r.get("ksSample") or ()),
             log_totalmass=r.get("logTotalmass"),
             latent_mean=r.get("latentMean"), latent_n_eff=r.get("latentNEff"),
+            moment_denom=r.get("momentDenom"), variate_n_eff=r.get("variateNEff"),
             error=r.get("error", ""), ms=r.get("ms", 0),
         )
     missing = {p.id for p in probes} - set(out)

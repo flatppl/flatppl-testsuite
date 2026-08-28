@@ -162,6 +162,33 @@ def test_the_theta_rows_do_not_fire_on_the_prior_itself():
         assert chk.status == "passed", f"{p.id}: {chk.detail}"
 
 
+def test_a_dropped_iid_importance_weight_would_be_caught():
+    """The teeth of the `weighted_variate` row (flatppl-js #232).
+
+    `iid`'s composite fallback dropped the inner measure's per-position weights,
+    which leaves every coordinate at the UNNORMALIZED base's mean. Under
+    `normalize(weighted(fn(exp(_)), Normal(0, 1)))` the measure is Normal(1, 1)
+    by conjugacy, so the defect reports 0 where the oracle is 1. Banded at a
+    pessimistic quarter of the effective count, so the teeth do not rest on the
+    ESS the run happens to report.
+
+    A MIS-FOLD is the other failure this row must catch: reading one position's
+    weight instead of the block's product leaves coordinate 0 right and the rest
+    at the base's mean, which is why every coordinate is checked and not a pooled
+    mean.
+    """
+    rows = [p for p in space.enumerate_probes() if p.weighted_variate]
+    assert rows, "no weighted-variate rows in the space"
+    for p in rows:
+        n_eff = p.n_draws / 4 * math.exp(-3.0)   # the row's own ESS/n, quartered
+        for i in range(p.k):
+            chk = C.check_mean(i, 0.0, p.mean, p.var, n_eff)
+            assert chk.status == "failed", \
+                f"{p.id} coord {i}: the unnormalized base's mean would pass: {chk.detail}"
+            assert chk.sigma > 20, \
+                f"{p.id} coord {i}: caught, but only at {chk.sigma:.1f} sigma"
+
+
 def test_a_dropped_or_negated_vector_shift_would_be_caught():
     """Why `mean_by_coord` exists.
 

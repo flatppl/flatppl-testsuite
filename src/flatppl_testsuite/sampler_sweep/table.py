@@ -146,14 +146,25 @@ def evaluate(probe: space.Probe, draws: engine.Draws) -> Row:
         return row
 
     results: list[C.Check] = []
+    # A weighted-variate row's moments are self-normalised importance estimators,
+    # so their standard error carries the ensemble's effective sample size where
+    # an unweighted row carries n -- the same substitution `check_latent_mean`
+    # makes, for the same reason.
+    nb = draws.n
+    if probe.weighted_variate:
+        if not draws.variate_n_eff or draws.variate_n_eff <= 0:
+            raise RuntimeError(
+                f"{probe.id}: weighted_variate row but the driver reported no "
+                f"variate effective sample size; the bands would silently use n")
+        nb = draws.variate_n_eff
     for i in range(draws.k):
         want = probe.mean if probe.mean_by_coord is None else probe.mean_by_coord[i]
-        results.append(C.check_mean(i, draws.mean(i), want, probe.var, draws.n,
+        results.append(C.check_mean(i, draws.mean(i), want, probe.var, nb,
                                     probe.variate_skip_reason))
-        results.append(C.check_var(i, draws.var(i), probe.var, probe.fourth, draws.n,
+        results.append(C.check_var(i, draws.var(i), probe.var, probe.fourth, nb,
                                    probe.variate_skip_reason))
         if i > 0:
-            results.append(C.check_cov(i, draws.cov0(i), probe.cov, probe.var, draws.n))
+            results.append(C.check_cov(i, draws.cov0(i), probe.cov, probe.var, nb))
     results.append(C.check_ks(list(draws.ks_sample), probe.ks, len(draws.ks_sample)))
     results.append(C.check_totalmass(draws.log_totalmass, probe.logtotalmass))
     if probe.latent is not None:
