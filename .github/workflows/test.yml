@@ -21,8 +21,10 @@ jobs:
           environments: default stablehlo
 
       # Cache the cargo registry/git so the converter's dependencies are not
-      # re-downloaded each run. The converter binary itself is rebuilt every
-      # run, from the commit pinned below.
+      # re-downloaded each run. The converter binary itself is rebuilt from
+      # flatppl-rust@main every run, on purpose — that, and the flatppl-js@main
+      # clone setup.sh makes, are what put an upstream regression in front of the
+      # frozen values on the merge that introduces it.
       - uses: actions/cache@v4
         with:
           path: |
@@ -31,17 +33,7 @@ jobs:
           key: cargo-${{ runner.os }}-${{ hashFiles('pixi.toml') }}
           restore-keys: cargo-${{ runner.os }}-
 
-      # Build both engines at the commits the committed verdict tables were
-      # frozen against, rather than at main. The two sweep gates assert that the
-      # RUNNING determiniser/engine is the table's, so a main build makes this
-      # repo red on every unrelated flatppl-js or flatppl-rust merge — a
-      # provenance mismatch, never a number. Pinned, provenance holds by
-      # construction and the tables' frozen ROWS remain the behavioural check.
-      # Moving a pin is `pixi run repin`, which refuses to commit on row drift.
-      - name: Resolve the engine pins from the verdict tables
-        run: python3 scripts/engine-pins.py >> "$GITHUB_ENV"
-
-      - name: Install pinned converter + JS engine (no ROOT)
+      - name: Install converter + JS engine at main (no ROOT)
         run: pixi run setup
 
       # FLATPPL_REQUIRE_ENGINES makes a missing prerequisite for the named engine
@@ -50,6 +42,16 @@ jobs:
       # silently deleting the gate this step exists to be.
       - name: Run FlatPPL tests against frozen ROOT-verified values
         run: FLATPPL_REQUIRE_ENGINES=det-js pixi run test
+
+      # Provenance is INFORMATIONAL and this step never fails the run. Both
+      # engines are built at main above, so a verdict table pinned behind them is
+      # the normal state from the next merge onward — metadata skew, not a
+      # number. Blocking on it made every unrelated engine merge red while
+      # saying nothing about a value; the verdict comparison in the step above is
+      # what has teeth. The annotation says when `pixi run repin` is due.
+      - name: Report engine provenance skew (never blocks)
+        run: |
+          pixi run provenance || echo "::warning title=Engine provenance skew::A frozen verdict table is pinned to an engine commit other than the one built here, so its rows were produced by a different build. The verdict comparison above still passed. Run \`pixi run repin\` to re-freeze both tables against current engines."
 
       # StableHLO numeric-execution gate: the unified per-test-dir suite (one
       # dir per distribution/model under corpora/stablehlo/, each carrying its

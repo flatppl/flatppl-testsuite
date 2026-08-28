@@ -7,9 +7,9 @@
 # to iterate on the converter and the engine, so updating a pin and re-running is
 # the normal workflow. Either ref may be a branch or a 40-hex commit.
 #
-# CI sets both from the committed verdict tables (scripts/engine-pins.py), so
-# the two sweep provenance gates compare their frozen rows against the engines
-# those rows were generated from. `pixi run repin` moves those pins.
+# CI leaves both at `main`, on purpose: an upstream regression should meet the
+# frozen values on the merge that introduces it. Pass a commit to reproduce a
+# frozen table instead — the one a verdict table's metadata records.
 #
 # The JS engine is resolved at scoring time from FLATPPL_JS_DIR (pixi sets this to
 # ../flatppl-js by default). This script CLONES that location from GitHub when it
@@ -27,9 +27,9 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FLATPPL_RUST_REF="${FLATPPL_RUST_REF:-main}"
 
 # `cargo install --git` takes a commit through `--rev` and a branch through
-# `--branch`, so the form of the ref decides the flag. CI pins the commit the
-# verdict tables were frozen against (scripts/engine-pins.py), which is always
-# the 40-hex form.
+# `--branch`, so the form of the ref decides the flag. The 40-hex form is what
+# reproduces a frozen verdict table: its metadata records the determiniser
+# commit its rows were generated against.
 if [[ "$FLATPPL_RUST_REF" =~ ^[0-9a-f]{40}$ ]]; then
   REF_FLAG=(--rev "$FLATPPL_RUST_REF")
 else

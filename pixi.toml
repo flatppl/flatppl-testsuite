@@ -73,6 +73,10 @@ sampler-sweep-regen = "python -m flatppl_testsuite.sampler_sweep.cli regen"
 # Regenerates both tables and commits ONLY when no verdict moved -- see
 # scripts/repin.py. Never pushes.
 repin = "python scripts/repin.py"
+# The two provenance checks, which pytest.ini deselects from `pixi run test`: a
+# table pinned behind the engines is metadata skew, not a number, so it reports
+# here instead of failing a run. Non-zero means skew; `pixi run repin` clears it.
+provenance = "python -m pytest -m provenance -q"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,

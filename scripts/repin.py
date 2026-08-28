@@ -4,9 +4,10 @@
     pixi run repin
 
 Run this after a flatppl-js or flatppl-rust merge moves an engine past the
-commit a table was frozen against. CI builds both engines at the pins these
-tables carry (`scripts/engine-pins.py`), so a merge elsewhere can never redden
-this repo -- but the pins then only advance deliberately, here.
+commit a table was frozen against. Nothing forces it: CI builds both engines at
+main and reports the skew without failing (`pixi run provenance`). What a re-pin
+buys is a table whose rows were produced by the build CI is running, so the next
+reader of a row diff knows both sides are the same engine.
 
 It regenerates against the engines CURRENTLY configured and never installs one
 itself: the JS engine is the sibling checkout at its HEAD, and the determiniser
@@ -22,7 +23,8 @@ plus an independent oracle) and freeze it deliberately with
 `pixi run sweep-regen` / `pixi run sampler-sweep-regen` instead.
 
 WHAT COUNTS AS A MOVED VERDICT. Each sweep's own `table.diff` -- the comparison
-its CI gate runs -- not byte equality of the rows. The sampler table freezes
+its CI gate runs, and the one that actually blocks a run -- not byte equality of
+the rows. The sampler table freezes
 Monte-Carlo estimates whose last digits move whenever the sampler's RNG
 consumption does, and the density table freezes values compared against their
 ORACLE rather than against the previous run; `diff` is what both gates call

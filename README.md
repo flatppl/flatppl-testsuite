@@ -95,13 +95,23 @@ pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 
 ## Engine pins
 
-The two sweep tables under `verdicts/` are frozen against one determiniser
-commit (`density-sweep.json`, `metadata.determinizer_commit`) and one engine
-commit (`sampler-sweep.json`, `metadata.engine_commit`), and their gates assert
-that the build under test is that one. CI reads both pins with
-`scripts/engine-pins.py` and builds the engines at them, so provenance holds by
-construction and a merge in `flatppl-js` or `flatppl-rust` cannot redden this
-repo.
+The two sweep tables under `verdicts/` record which build produced their rows:
+`density-sweep.json`'s `metadata.determinizer_commit` and `sampler-sweep.json`'s
+`metadata.engine_commit`. CI builds both engines at **main**, so those pins fall
+behind on the next engine merge.
+
+That skew is **not** a failure. It is metadata, and it says nothing about a
+number, so `pixi run test` deselects the two provenance checks (see
+`pytest.ini`) and CI reports them in a step that annotates and exits 0:
+
+```sh
+pixi run provenance   # report the skew; non-zero means a pin is behind
+```
+
+What makes a run red is the verdict comparison — a row whose outcome moved, a
+value that no longer matches its oracle, a MALFORMED row. An upstream engine or
+converter regression therefore still meets the frozen values on the merge that
+introduces it.
 
 ```sh
 pixi run setup     # only when the DETERMINISER pin is the one to move
@@ -110,6 +120,4 @@ pixi run repin     # re-pin both tables to the engines now configured
 
 `repin` regenerates both tables and commits only when no verdict moved; a moved
 verdict is printed and nothing is committed, because a re-pin must never be the
-way a behavioural change gets frozen. Locally, a branch determiniser or engine
-fails the two provenance gates by construction — regenerate, read the diff,
-then discard the regenerated table (`git checkout -- verdicts/`).
+way a behavioural change gets frozen.
