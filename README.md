@@ -116,6 +116,10 @@ introduces it.
 ```sh
 pixi run setup     # only when the DETERMINISER pin is the one to move
 pixi run repin     # re-pin both tables to the engines now configured
+
+# Or go the other way — install the engines a frozen table was made with,
+# which is how a confusing row diff gets a like-for-like comparison:
+eval "$(python3 scripts/engine-pins.py)" && pixi run setup
 ```
 
 `repin` regenerates both tables and commits only when no verdict moved; a moved
