@@ -5,7 +5,11 @@
 # Both pins are bumpable: change FLATPPL_RUST_REF / FLATPPL_JS_REF (or the
 # defaults below) and re-run to pull changes. The whole point of the harness is
 # to iterate on the converter and the engine, so updating a pin and re-running is
-# the normal workflow.
+# the normal workflow. Either ref may be a branch or a 40-hex commit.
+#
+# CI sets both from the committed verdict tables (scripts/engine-pins.py), so
+# the two sweep provenance gates compare their frozen rows against the engines
+# those rows were generated from. `pixi run repin` moves those pins.
 #
 # The JS engine is resolved at scoring time from FLATPPL_JS_DIR (pixi sets this to
 # ../flatppl-js by default). This script CLONES that location from GitHub when it
@@ -22,6 +26,16 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 FLATPPL_RUST_REF="${FLATPPL_RUST_REF:-main}"
 
+# `cargo install --git` takes a commit through `--rev` and a branch through
+# `--branch`, so the form of the ref decides the flag. CI pins the commit the
+# verdict tables were frozen against (scripts/engine-pins.py), which is always
+# the 40-hex form.
+if [[ "$FLATPPL_RUST_REF" =~ ^[0-9a-f]{40}$ ]]; then
+  REF_FLAG=(--rev "$FLATPPL_RUST_REF")
+else
+  REF_FLAG=(--branch "$FLATPPL_RUST_REF")
+fi
+
 echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + stablehlo + default verbs incl. determinize)"
 # `--features hs3,stablehlo` ADDS to the default feature set (no --no-default-features),
 # so the installed binary carries the default verbs — including `determinize` (which
@@ -30,7 +44,7 @@ echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + sta
 # #61, `stablehlo` in #70; `FLATPPL_RUST_REF=main` (the default) tracks both.
 cargo install \
   --git https://github.com/flatppl/flatppl-rust \
-  --branch "${FLATPPL_RUST_REF}" \
+  "${REF_FLAG[@]}" \
   --features hs3,stablehlo \
   --root .pixi-bin \
   --locked \

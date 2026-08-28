@@ -6,6 +6,14 @@ Five signals:
   LOWERS where table REFUSES   -> newly admitted; needs an oracle value
   REFUSES where table LOWERS   -> a regression, or an over-refusal
   MALFORMED anywhere           -> always a defect
+
+RUNNING THIS AGAINST A BRANCH DETERMINISER. The provenance test below demands
+the exact commit the table was frozen against, so CI builds that commit
+(`scripts/engine-pins.py`) and a branch build fails it by construction. That is
+correct, not a nuisance: the frozen rows describe a different determiniser. To
+see what a branch does, regenerate (`pixi run sweep-regen`), read the row diff,
+then DISCARD the regenerated table -- `git checkout -- verdicts/`. The pin moves
+only through `pixi run repin`, against the sibling engines.
 """
 import pytest
 

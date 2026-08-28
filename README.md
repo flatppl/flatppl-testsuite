@@ -69,8 +69,9 @@ harness and the 2DeltaNLL math are all engine-agnostic.
 Everything runs through pixi.
 
 `pixi run setup` provisions both. The **converter** (`flatppl-rust`) is installed
-via `cargo install --git …/flatppl-rust --branch <ref> --features hs3 flatppl-cli`;
-bump `FLATPPL_RUST_REF` and re-run to pull changes. The default **engine**
+via `cargo install --git …/flatppl-rust --features hs3,stablehlo flatppl-cli` at
+`FLATPPL_RUST_REF` (a branch or a 40-hex commit); bump the ref and re-run to pull
+changes. The default **engine**
 (`flatppl-js`) is resolved at scoring time from `FLATPPL_JS_DIR` (default: sibling
 `../flatppl-js`), whose `.ts` Node 24 loads directly. Setup clones that location at
 `FLATPPL_JS_REF` when it is missing and leaves an existing checkout untouched — so a
@@ -91,3 +92,24 @@ FLATPPL_BIN=/path/to/flatppl PYTHONPATH=$PWD/src pixi run -e stablehlo unified
 # Regenerate a test dir's frozen expected/stat from its test.py oracle:
 pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 ```
+
+## Engine pins
+
+The two sweep tables under `verdicts/` are frozen against one determiniser
+commit (`density-sweep.json`, `metadata.determinizer_commit`) and one engine
+commit (`sampler-sweep.json`, `metadata.engine_commit`), and their gates assert
+that the build under test is that one. CI reads both pins with
+`scripts/engine-pins.py` and builds the engines at them, so provenance holds by
+construction and a merge in `flatppl-js` or `flatppl-rust` cannot redden this
+repo.
+
+```sh
+pixi run setup     # only when the DETERMINISER pin is the one to move
+pixi run repin     # re-pin both tables to the engines now configured
+```
+
+`repin` regenerates both tables and commits only when no verdict moved; a moved
+verdict is printed and nothing is committed, because a re-pin must never be the
+way a behavioural change gets frozen. Locally, a branch determiniser or engine
+fails the two provenance gates by construction — regenerate, read the diff,
+then discard the regenerated table (`git checkout -- verdicts/`).

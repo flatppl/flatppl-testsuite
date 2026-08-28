@@ -21,9 +21,8 @@ jobs:
           environments: default stablehlo
 
       # Cache the cargo registry/git so the converter's dependencies are not
-      # re-downloaded each run. The converter binary itself is rebuilt from
-      # flatppl-rust@main every run, on purpose — that is what catches converter
-      # regressions against the frozen values.
+      # re-downloaded each run. The converter binary itself is rebuilt every
+      # run, from the commit pinned below.
       - uses: actions/cache@v4
         with:
           path: |
@@ -31,6 +30,16 @@ jobs:
             ~/.cargo/git
           key: cargo-${{ runner.os }}-${{ hashFiles('pixi.toml') }}
           restore-keys: cargo-${{ runner.os }}-
+
+      # Build both engines at the commits the committed verdict tables were
+      # frozen against, rather than at main. The two sweep gates assert that the
+      # RUNNING determiniser/engine is the table's, so a main build makes this
+      # repo red on every unrelated flatppl-js or flatppl-rust merge — a
+      # provenance mismatch, never a number. Pinned, provenance holds by
+      # construction and the tables' frozen ROWS remain the behavioural check.
+      # Moving a pin is `pixi run repin`, which refuses to commit on row drift.
+      - name: Resolve the engine pins from the verdict tables
+        run: python3 scripts/engine-pins.py >> "$GITHUB_ENV"
 
       - name: Install pinned converter + JS engine (no ROOT)
         run: pixi run setup

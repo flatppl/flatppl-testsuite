@@ -68,6 +68,11 @@ sampler-sweep-roster = "python -m flatppl_testsuite.sampler_sweep.cli roster"
 # so it needs no FLATPPL_BIN; see scoring/sampler_sweep.cjs's header for why).
 # The whole 71-row roster takes ~12 s.
 sampler-sweep-regen = "python -m flatppl_testsuite.sampler_sweep.cli regen"
+# Move both sweeps' engine pins to the sibling engines' current commits, after
+# a flatppl-js / flatppl-rust merge leaves a table frozen against an older one.
+# Regenerates both tables and commits ONLY when no verdict moved -- see
+# scripts/repin.py. Never pushes.
+repin = "python scripts/repin.py"
 
 # ---------------------------------------------------------------------------
 # Oracle environments. ROOT and pyHS3 have disjoint heavy dependency stacks,

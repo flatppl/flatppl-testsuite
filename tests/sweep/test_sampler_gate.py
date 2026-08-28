@@ -20,6 +20,14 @@ STATISTICAL gate:
   would be caught, and by how many sigma. These need no engine and run in
   milliseconds.
 
+* RUNNING THIS AGAINST A BRANCH ENGINE. The provenance test demands the exact
+  engine commit the table was frozen against, so CI checks out that commit
+  (`scripts/engine-pins.py`) and a branch engine fails it by construction -- the
+  frozen rows describe a different engine. To see what a branch does, regenerate
+  (`pixi run sampler-sweep-regen`), read the row diff, then DISCARD the
+  regenerated table (`git checkout -- verdicts/`). The pin moves only through
+  `pixi run repin`, against the sibling engines.
+
 * ROSTER COMPLETENESS. The roster claims to cover every sampleable REGISTRY
   entry. That claim decays silently the moment a new distribution lands in
   flatppl-js, so it is asserted against `sampler-registry.ts` itself rather than
