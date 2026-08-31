@@ -1,8 +1,8 @@
 {
  "metadata": {
-  "generated_at": "2026-08-31T12:23:38+00:00",
-  "engine_commit": "e93509caac8e805c55a8355bef2523c3020c5ecc",
-  "engine_resolved_by": "FLATPPL_JS_DIR override",
+  "generated_at": "2026-08-31T12:44:37+00:00",
+  "engine_commit": "d6f243377ac09e75c83f08cdff17f1457f55f6ee",
+  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
