@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-08-31T09:45:34+00:00",
-  "engine_commit": "d7b8a65c0e749c382222fb7e52a3ddf4f43b6f94",
-  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
+  "generated_at": "2026-08-31T10:27:56+00:00",
+  "engine_commit": "ac6e95a3c9f27945080aa365a46f97b49ed71cd2",
+  "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 80,
+  "probe_count": 81,
   "outcome_counts": {
-   "DRAWS": 79,
+   "DRAWS": 80,
    "REFUSES": 1
   },
   "failing_rows": []
@@ -5800,6 +5800,139 @@
     }
    ],
    "note": "a draw conditioned on an importance-weighted parameter ensemble: \u00a706's bind integrates the kernel against the parameter measure, so theta's weights must reach y's atoms exactly once"
+  },
+  {
+   "probe_id": "normal.iid3_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "iid3_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 3,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.988014 vs 1.000000 (|d|=0.012, band 0.026 = 5 SE, 2.31 sigma)",
+     "got": 0.988013692966177,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 2.308164520118216,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.993837 vs 2.000000 (|d|=0.00616, band 0.0519 = 5 SE, 0.59 sigma)",
+     "got": 1.993837111274685,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 0.5933838110882865,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.988317 vs 1.000000 (|d|=0.0117, band 0.026 = 5 SE, 2.25 sigma)",
+     "got": 0.9883173600636451,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 2.2496883257136093,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.982837 vs 2.000000 (|d|=0.0172, band 0.0519 = 5 SE, 1.65 sigma)",
+     "got": 1.9828368093407356,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.6525301587866692,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.989607 vs +1.000000 (|d|=0.0104, band 0.0367 = 5 SE, 1.42 sigma)",
+     "got": 0.98960725079233,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 1.4151315458697258,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.998337 vs 1.000000 (|d|=0.00166, band 0.026 = 5 SE, 0.32 sigma)",
+     "got": 0.998337434483606,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 0.32015488394248814,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "2.010768 vs 2.000000 (|d|=0.0108, band 0.0519 = 5 SE, 1.04 sigma)",
+     "got": 2.010767620300925,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.0367429715661312,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+1.006581 vs +1.000000 (|d|=0.00658, band 0.0367 = 5 SE, 0.90 sigma)",
+     "got": 1.0065813519066515,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 0.8961515871757024,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.992228 vs 1.000000 (|d|=0.00777, band 0.0318 = 5 SE, 1.22 sigma)",
+     "got": 0.992227624398832,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 1.2220515131884173,
+     "fallback": false
+    }
+   ],
+   "note": "iid over a resolved leaf whose parameter is an importance-weighted ensemble: \u00a706's bind integrates each coordinate against the parameter measure, and the shared parameter draw enters an atom's weight exactly once"
   },
   {
    "probe_id": "normal.normalize_superpose_latent_mixing",

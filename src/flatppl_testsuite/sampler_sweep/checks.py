@@ -154,8 +154,13 @@ def check_cov(coord: int, emp: float, want: float | None, var: float | None, n: 
     """Cross-coordinate covariance against coordinate 0.
 
     THE branch-pinning check. §06 "Joint composition" makes `iid(M, size)` the
-    product measure, so distinct coordinates are independent and every one of
-    these is a test against exactly 0.
+    product measure, so distinct coordinates are independent and the oracle is
+    exactly 0 on every row whose parameters are fixed.
+
+    It is NOT 0 when the coordinates share a stochastic parameter: `iid` makes
+    them independent GIVEN that parameter, so they share its whole variance and
+    the oracle is that variance. Such a row states its own `cov`, and 0 is then
+    the failure it exists to catch -- a parameter re-drawn per coordinate.
     """
     name = f"cov[0,{coord}]"
     if want is None:

@@ -252,6 +252,25 @@ def test_a_dropped_importance_weight_would_be_caught_on_every_weighted_row():
                     f"{p.id} coord {i}: {why} caught, but only at {chk.sigma:.1f} sigma"
 
 
+def test_a_per_coordinate_parameter_redraw_would_be_caught_on_the_covariance():
+    """The teeth of every row whose coordinates share a stochastic parameter.
+
+    §06 `iid` makes the coordinates independent GIVEN the parameter, so they
+    share its whole variance. A fix that re-drew the parameter per coordinate
+    would leave every mean and variance right and read cov = 0 instead, so the
+    covariance is the only check that can see it.
+    """
+    rows = [p for p in space.enumerate_probes() if p.cov not in (None, 0.0)]
+    assert rows, "no shared-parameter rows in the space"
+    for p in rows:
+        for i in range(1, p.k):
+            chk = C.check_cov(i, 0.0, p.cov, p.var, _PESSIMISTIC_N_EFF)
+            assert chk.status == "failed", \
+                f"{p.id} coord {i}: a per-coordinate re-draw would pass: {chk.detail}"
+            assert chk.sigma > 20, \
+                f"{p.id} coord {i}: caught, but only at {chk.sigma:.1f} sigma"
+
+
 def test_a_dropped_or_negated_vector_shift_would_be_caught():
     """Why `mean_by_coord` exists.
 
@@ -469,11 +488,21 @@ def test_every_probe_has_at_least_one_checkable_oracle():
 
 
 def test_replicated_wraps_all_carry_a_covariance_oracle():
-    """§06 makes `iid` a product measure, so every k > 1 row must assert
-    independence. A k > 1 row without it is the IIDSUPER blind spot re-opened."""
+    """§06 makes `iid` a product measure, so every k > 1 row must pin the
+    cross-coordinate covariance. A k > 1 row without one is the IIDSUPER blind
+    spot re-opened.
+
+    The oracle is 0 whenever the coordinates share no stochastic parameter.
+    `iid` makes them independent GIVEN such a parameter, so a row that shares
+    one pins the parameter's variance instead, and it must name the parameter in
+    `latent` so a reader sees why the oracle is not 0.
+    """
     for p in space.enumerate_probes():
         if p.k > 1:
-            assert p.cov == 0.0, f"{p.id} has k={p.k} but no cov-0 oracle"
+            assert p.cov is not None, f"{p.id} has k={p.k} but no cov oracle"
+            if p.cov != 0.0:
+                assert p.latent is not None, \
+                    f"{p.id} pins cov={p.cov} but names no shared parameter"
 
 
 # The margin the gate's stability rests on. `diff` compares each check's

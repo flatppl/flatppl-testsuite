@@ -567,6 +567,51 @@ TARGETED: tuple[Probe, ...] = (
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
           latent_cov=1.0, latent_cov_var=3.0,
           weighted_variate=True, weight_log_var=1.0),
+    # ---------------------------------- an iid AT a weighted parameter measure
+    # The row above's shape under `iid`, which is a DIFFERENT engine path: this
+    # spelling resolves to a sample leaf and batches in one worker round-trip,
+    # so neither the composite fallback's fold nor the plain draw's propagation
+    # covers it. Both leaf branches rebuilt the output unweighted and every
+    # coordinate reported the proposal's mean, 0 where the oracle is 1.
+    #
+    # Same conjugate tilt: tm = normalize(weighted(fn(exp(_)), Normal(0, 1)))
+    # is exactly Normal(1, 1), and all THREE coordinates are Normal(theta, 1) at
+    # the SAME theta, so the joint is Gaussian with
+    #   E[theta] = 1, Var[theta] = 1
+    #   E[y_i] = 1, Var[y_i] = 2, fourth central moment 3 * 2^2 = 12
+    #   cov(y_i, y_j) = Var[theta] = 1   (i != j)
+    #   cov(theta, y_i) = Var[theta] = 1
+    #
+    # THE CROSS-COORDINATE COVARIANCE IS THIS ROW'S OWN WITNESS, and it is why
+    # the row exists as an `iid` and not a second scalar draw. §06 `iid` is "the
+    # product measure M^(otimes N)", whose coordinates are independent GIVEN the
+    # shared parameter, so they share theta's whole variance: cov = 1. A fix that
+    # re-drew theta per position would leave every mean and variance right and
+    # read cov = 0 instead.
+    #
+    # ONCE ONLY, NOT ONCE PER COORDINATE. theta is pinned per atom and tiled
+    # across the atom's 3 inner draws, so its weight is ONE event for the atom.
+    # Folding it as the k-block product would raise the tilt e^x to e^(3x),
+    # which is exactly Normal(3, 1), so the means would read 3. The teeth test
+    # rejects 2 * mean = 2 already, and 3 is further out.
+    #
+    # WEIGHTED MOMENTS, and the weight is the same single lognormal(0, 1) factor
+    # as the scalar row's -- one shared event, not three -- so `weight_log_var`
+    # is 1 here too. A row whose weight really were cubed would carry 9.
+    Probe("normal.iid3_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "y ~ iid(Normal(mu = theta, sigma = 1.0), 3)\n",
+          "y", 3, None,
+          1.0, 2.0, 12.0, 1.0, 0.0, None,
+          "normal", "iid3_at_weighted_parameter",
+          note="iid over a resolved leaf whose parameter is an "
+               "importance-weighted ensemble: §06's bind integrates each "
+               "coordinate against the parameter measure, and the shared "
+               "parameter draw enters an atom's weight exactly once",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
     # ------------------------------------------------- a LATENT mixing weight
     # §06 "Normalization and mass", the `normalize` entry's own recommended
     # mixture spelling: "To build a normalized mixture distribution, use
