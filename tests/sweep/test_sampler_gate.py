@@ -476,7 +476,14 @@ def test_a_changed_refusal_reason_diffs_even_when_the_marker_is_unchanged():
 
 
 def test_every_probe_has_at_least_one_checkable_oracle():
-    """A row that checks nothing is a row that proves nothing."""
+    """A row that checks nothing is a row that proves nothing.
+
+    A `refusal_only_reason` row is the one exception, and it is not an escape
+    hatch: its oracle is the frozen `REFUSES` outcome plus the verbatim error
+    `table.diff` compares, which is the only honest oracle for a shape the spec
+    makes ill-typed. Inventing a moment for such a shape would pin a number no
+    correct engine produces.
+    """
     for p in space.enumerate_probes():
         checkable = (p.mean is not None or p.mean_by_coord is not None
                      or p.var is not None
@@ -484,7 +491,27 @@ def test_every_probe_has_at_least_one_checkable_oracle():
                      or p.logtotalmass is not None
                      or p.latent_mean is not None
                      or p.latent_cov is not None)
-        assert checkable, f"{p.id} carries no oracle of any kind"
+        assert checkable or p.refusal_only_reason, (
+            f"{p.id} carries no oracle of any kind")
+
+
+def test_a_refusal_only_row_actually_refuses():
+    """`refusal_only_reason` says the shape has no correct draw, so the table
+    must record it REFUSING. A row that declares the exemption and then DRAWS is
+    either mis-declared or a live over-refusal that healed, and either way it is
+    now a row with no oracle at all."""
+    _meta, table_rows = table.load()
+    if not table_rows:
+        pytest.skip("no committed sampler table — run `pixi run sampler-sweep-regen`")
+    for p in space.enumerate_probes():
+        if not p.refusal_only_reason:
+            continue
+        row = table_rows.get(p.id)
+        assert row is not None, f"{p.id} is not in the committed table"
+        assert row.outcome == table.Outcome.REFUSES.value, (
+            f"{p.id} declares refusal_only_reason but the table records "
+            f"{row.outcome} — it now checks nothing")
+        assert row.error, f"{p.id} refuses with no message to freeze"
 
 
 def test_replicated_wraps_all_carry_a_covariance_oracle():

@@ -73,6 +73,11 @@ REFUSAL_PATTERNS: tuple[tuple[str, str], ...] = (
      "the construct does not exist in this engine at all (e.g. ksuperpose)"),
     ("not a measure expression we can sample",
      "an inline combinator the sampler walker does not handle"),
+    ("step boundary",
+     "a kchain / jointchain step whose declared input cannot take the `cat` "
+     "§06 dependent composition feeds it — a static refusal from "
+     "`_inferKernelChain`'s boundary walk, and the shape that sampled NaN "
+     "for every atom before that walk saw the declared type"),
 )
 
 

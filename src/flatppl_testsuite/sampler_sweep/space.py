@@ -188,6 +188,17 @@ class Probe:
     skipped check's detail, so a reader of the table sees WHY a row checks
     nothing there rather than assuming an oversight."""
 
+    refusal_only_reason: str | None = None
+    """Why this row carries no moment oracle AT ALL: the shape has no correct
+    draw, so its oracle IS the frozen `REFUSES` outcome and the verbatim error
+    `table.diff` compares. Such a row still proves something a moment row
+    cannot — that the engine declines rather than returning numbers — and it is
+    the only honest shape for a model the spec makes ill-typed, where any moment
+    would be invented. Set it ONLY when a draw would be wrong by definition,
+    never to excuse an unwritten oracle: a shape that could draw belongs in a
+    moment row (see `normal.iid_kchain3`, which pins a refusal AND carries the
+    moments the shape would have if the guard were lifted)."""
+
 
 # ---------------------------------------------------------------------------
 # Base-agnostic wraps. Each is (slug, k, template, binding, moment transform).
@@ -874,6 +885,151 @@ TARGETED: tuple[Probe, ...] = (
           "normal", "normalize_superpose_component_mass",
           note="a TRUNCATED superposition component must enter at w*Z_t, not w: "
                "dropping its mass mixes at 0.3 : 0.7 and reads mean 7.0"),
+    # ------------------- a 3-STEP marginal kchain at a weighted prior measure
+    # The chain's own RETAINED HISTORY feed, which no existing row reaches. A
+    # 2-step marginal kchain rewires its body's hole to the base ref directly
+    # (the row above); at three steps the body is the FINAL kernel alone and
+    # §06 dependent composition feeds it the `cat` of every variate to its left
+    # (`kchain(M1, K2, K3)` is `a ~ M1; b ~ K2(a); c ~ K3([a, b])`), so the
+    # sampler reconstructs the retained 2-joint history and binds its columns
+    # as `s0`, `s1`. That is a second measure to carry weights from — the
+    # history joint, whose own `logWeights` already fold its components' —
+    # alongside the boundary parents, and it counts ONCE as a whole.
+    #
+    # BOTH SPELLINGS OF THIS SHAPE SAMPLED NaN for every atom until the chain
+    # boundary was type-checked against what the step DECLARES: a `functionof`
+    # boundary publishes its input as `any`, which unifies with the fed vector,
+    # so a step declaring a real took the 2-cat and went NaN with no
+    # diagnostic. The scalar-declared spelling is now a located error naming
+    # `markovchain`; this row is the cat-consuming spelling, which is what §06
+    # describes and what the path must sample.
+    #
+    # THE ORACLE, closed form and exact, cross-checked against an independent
+    # 8e6-draw Monte Carlo. tm is exactly Normal(1, 1), so with
+    # s0 = theta + e0, s1 = s0 + e1 and y_p = sum([s0, s1]) + eps_p,
+    #   y_p = 2*theta + 2*e0 + e1 + eps_p
+    #   E[y] = 2, Var[y] = 4 + 4 + 1 + 1 = 10, E[(y - 2)^4] = 3 * 100 = 300
+    #   cov(y_0, y_1) = Var(2*theta + 2*e0 + e1) = 4 + 4 + 1 = 9
+    #   cov(theta, y_0) = 2 * Var[theta] = 2
+    # The CROSS-COORDINATE covariance is the discriminator: the two positions
+    # are drawn at ONE history, so a per-position re-draw of it reads 0 there
+    # while both marginals stay correct. Dropping the prior's weights reads
+    # theta ~ Normal(0, 1) and E[y] = 0.
+    # The band: with a = theta - 1 and b = y_0 - 2 = 2a + r for
+    # r ~ Normal(0, 6) independent of a, E[a^2 b^2] = 4*E[a^4] + E[a^2]E[r^2]
+    # = 12 + 6 = 18, so n*Var(cov_hat) = 18 - 4 = 14.
+    Probe("normal.kchain_3step_history_at_weighted_prior",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "base2 = Normal(mu = theta, sigma = 1.0)\n"
+          "mu1 = elementof(reals)\n"
+          "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
+          "v2 = elementof(cartpow(reals, 2))\n"
+          "K2 = functionof(iid(Normal(mu = sum(v2), sigma = 1.0), 2), v2 = v2)\n"
+          "y = kchain(base2, K1, K2)\n",
+          "y", 2, None,
+          2.0, 10.0, 300.0, 9.0, 0.0, None,
+          "normal", "kchain_3step_history_at_weighted_prior",
+          note="a 3-step marginal kchain over an importance-weighted prior: "
+               "the sampler reconstructs the retained history and binds its "
+               "columns, so the prior's weights must reach the body's output "
+               "exactly once and the two positions must share one history",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=2.0, latent_cov_var=14.0,
+          weighted_variate=True, weight_log_var=1.0),
+    # ------------- a positional-JOINT base marginal kchain at a weighted prior
+    # The whole-variate boundary bind, which no existing row reaches. §06
+    # `joint` makes the positional form's variate "the `cat` of the component
+    # variates" -- "all scalars (yielding a vector)" -- so the base materialises
+    # to a tuple with no top-level ensemble, and `clm.feedInputs` binds it
+    # through `measureToParamValue` (one atom-major Value) rather than through
+    # the record-field or scalar-ensemble branches every other chain row takes.
+    #
+    # This shape also sampled NaN for every atom until the boundary was checked
+    # against the declared type: a one-component positional joint feeds a
+    # LENGTH-1 vector, and a step declaring a real silently took it. That
+    # spelling is now a located error naming the keyword form and `relabel`;
+    # this row is the vector-consuming spelling.
+    #
+    # THE ORACLE, closed form and exact, cross-checked against the same 8e6
+    # Monte Carlo. With s0 = theta + e0 and y_p = sum([s0]) + eps_p,
+    #   y_p = theta + e0 + eps_p
+    #   E[y] = 1, Var[y] = 3, E[(y - 1)^4] = 3 * 9 = 27
+    #   cov(y_0, y_1) = Var(theta + e0) = 2
+    #   cov(theta, y_0) = Var[theta] = 1
+    # The band: with a = theta - 1 and b = y_0 - 1 = a + r for r ~ Normal(0, 2),
+    # E[a^2 b^2] = E[a^4] + E[a^2]E[r^2] = 3 + 2 = 5, so n*Var(cov_hat) = 4.
+    Probe("normal.kchain_joint_base_at_weighted_prior",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "base2 = Normal(mu = theta, sigma = 1.0)\n"
+          "v1 = elementof(cartpow(reals, 1))\n"
+          "Kv = functionof(iid(Normal(mu = sum(v1), sigma = 1.0), 2), v1 = v1)\n"
+          "jp = joint(base2)\n"
+          "y = kchain(jp, Kv)\n",
+          "y", 2, None,
+          1.0, 3.0, 27.0, 2.0, 0.0, None,
+          "normal", "kchain_joint_base_at_weighted_prior",
+          note="a marginal kchain whose base is a positional joint: the "
+               "boundary binds the whole cat'd variate through "
+               "measureToParamValue, and the prior's weights must survive that "
+               "bind exactly once",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=4.0,
+          weighted_variate=True, weight_log_var=1.0),
+    # ----------- the two spellings that SAMPLED NaN, now refused at the boundary
+    # These are the ill-typed halves of the two rows above, and they are the
+    # rows with teeth for the boundary check: against the pre-fix engine both
+    # are MALFORMED / nonfinite-draws — every atom NaN, silently, with the model
+    # type-checking clean — and both now REFUSE with a located §06 message.
+    #
+    # Neither has a moment oracle, because neither has a correct draw. §06
+    # dependent composition feeds step `i+1` the `cat` of every variate to its
+    # left and §06 `joint` makes a positional joint's variate that same `cat`,
+    # so a step declaring a real is being handed a vector. The refusal names the
+    # construct that means what each model was reaching for: `markovchain` for
+    # the previous state alone, the keyword form or `relabel` for named joint
+    # components.
+    Probe("normal.kchain_3step_scalar_step_refuses",
+          "base = Normal(mu = 0.0, sigma = 1.0)\n"
+          "mu1 = elementof(reals)\n"
+          "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
+          "mu2 = elementof(reals)\n"
+          "K2 = functionof(Normal(mu = mu2, sigma = 1.0), mu2 = mu2)\n"
+          "y = kchain(base, K1, K2)\n",
+          "y", 1, None,
+          None, None, None, None, None, None,
+          "normal", "kchain_3step_scalar_step_refuses",
+          note="a 3-step marginal kchain whose final step declares a real: §06 "
+               "feeds it the cat of both left variates, so there is no correct "
+               "draw. Sampled NaN for every atom until the boundary was checked "
+               "against the declared type",
+          refusal_only_reason="§06 feeds step 2 the cat of both left variates "
+                              "and the step declares a real, so no draw is "
+                              "correct and any moment here would be invented; "
+                              "the frozen REFUSES outcome and message ARE the "
+                              "oracle, and the pre-fix engine gives MALFORMED / "
+                              "nonfinite-draws instead"),
+    Probe("normal.kchain_joint_base_scalar_step_refuses",
+          "base = Normal(mu = 0.0, sigma = 1.0)\n"
+          "mu1 = elementof(reals)\n"
+          "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
+          "jp = joint(base)\n"
+          "y = kchain(jp, K1)\n",
+          "y", 1, None,
+          None, None, None, None, None, None,
+          "normal", "kchain_joint_base_scalar_step_refuses",
+          note="a positional-joint base feeds a LENGTH-1 vector (§06 joint: "
+               "all scalars yield a vector), which a step declaring a real "
+               "cannot take. Sampled NaN for every atom until the boundary was "
+               "checked against the declared type",
+          refusal_only_reason="the base's variate is a length-1 vector (§06 "
+                              "joint: all scalars yield a vector) and the step "
+                              "declares a real, so no draw is correct and any "
+                              "moment here would be invented; the frozen "
+                              "REFUSES outcome and message ARE the oracle, and "
+                              "the pre-fix engine gives MALFORMED / "
+                              "nonfinite-draws instead"),
 )
 
 

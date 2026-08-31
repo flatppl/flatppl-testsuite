@@ -1,16 +1,16 @@
 {
  "metadata": {
-  "generated_at": "2026-08-31T14:14:06+00:00",
-  "engine_commit": "546dc85fa88eb9ae2e53e9b2c32f555863f1eaa3",
-  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
+  "generated_at": "2026-08-31T14:06:03+00:00",
+  "engine_commit": "14042f6d6584eca9a65bedf4cf656e654b1e05e3",
+  "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 87,
+  "probe_count": 91,
   "outcome_counts": {
-   "DRAWS": 86,
-   "REFUSES": 1
+   "DRAWS": 88,
+   "REFUSES": 3
   },
   "failing_rows": []
  },
@@ -6754,6 +6754,236 @@
     }
    ],
    "note": "a TRUNCATED superposition component must enter at w*Z_t, not w: dropping its mass mixes at 0.3 : 0.7 and reads mean 7.0"
+  },
+  {
+   "probe_id": "normal.kchain_3step_history_at_weighted_prior",
+   "family": "normal",
+   "wrap": "kchain_3step_history_at_weighted_prior",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 2,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "2.003177 vs 2.000000 (|d|=0.00318, band 0.0581 = 5 SE, 0.27 sigma)",
+     "got": 2.0031772551152867,
+     "want": 2.0,
+     "band": 0.058059547084276575,
+     "sigma": 0.2736203841441186,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "10.085932 vs 10.000000 (|d|=0.0859, band 0.26 = 5 SE, 1.65 sigma)",
+     "got": 10.085932091252829,
+     "want": 10.0,
+     "band": 0.25965018804658424,
+     "sigma": 1.6547665899901403,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "2.000325 vs 2.000000 (|d|=0.000325, band 0.0581 = 5 SE, 0.03 sigma)",
+     "got": 2.0003252408105197,
+     "want": 2.0,
+     "band": 0.058059547084276575,
+     "sigma": 0.028009244547460142,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "10.110951 vs 10.000000 (|d|=0.111, band 0.26 = 5 SE, 2.14 sigma)",
+     "got": 10.1109514388559,
+     "want": 10.0,
+     "band": 0.25965018804658424,
+     "sigma": 2.1365561043998405,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+9.096433 vs +9.000000 (|d|=0.0964, band 0.184 = 5 SE, 2.63 sigma)",
+     "got": 9.096432650944969,
+     "want": 9.0,
+     "band": 0.18360040870410196,
+     "sigma": 2.626155672136438,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "1.992991 vs 2.000000 (|d|=0.00701, band 0.0687 = 5 SE, 0.51 sigma)",
+     "got": 1.9929907583822617,
+     "want": 2.0,
+     "band": 0.06869698254424177,
+     "sigma": 0.5101564405120894,
+     "fallback": false
+    }
+   ],
+   "note": "a 3-step marginal kchain over an importance-weighted prior: the sampler reconstructs the retained history and binds its columns, so the prior's weights must reach the body's output exactly once and the two positions must share one history"
+  },
+  {
+   "probe_id": "normal.kchain_joint_base_at_weighted_prior",
+   "family": "normal",
+   "wrap": "kchain_joint_base_at_weighted_prior",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 2,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.996202 vs 1.000000 (|d|=0.0038, band 0.0318 = 5 SE, 0.60 sigma)",
+     "got": 0.996201552996627,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 0.5972302609179607,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.006267 vs 3.000000 (|d|=0.00627, band 0.0779 = 5 SE, 0.40 sigma)",
+     "got": 3.006266877609379,
+     "want": 3.0,
+     "band": 0.07789505641397526,
+     "sigma": 0.40226414216029127,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.993350 vs 1.000000 (|d|=0.00665, band 0.0318 = 5 SE, 1.05 sigma)",
+     "got": 0.9933495386918963,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 1.0456527993510532,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "3.014381 vs 3.000000 (|d|=0.0144, band 0.0779 = 5 SE, 0.92 sigma)",
+     "got": 3.014380502053795,
+     "want": 3.0,
+     "band": 0.07789505641397526,
+     "sigma": 0.923068979972843,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+2.008315 vs +2.000000 (|d|=0.00831, band 0.0551 = 5 SE, 0.75 sigma)",
+     "got": 2.0083145757217573,
+     "want": 2.0,
+     "band": 0.05508012261123059,
+     "sigma": 0.7547709888414452,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.992772 vs 1.000000 (|d|=0.00723, band 0.0367 = 5 SE, 0.98 sigma)",
+     "got": 0.9927724332797735,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 0.9841436044778575,
+     "fallback": false
+    }
+   ],
+   "note": "a marginal kchain whose base is a positional joint: the boundary binds the whole cat'd variate through measureToParamValue, and the prior's weights must survive that bind exactly once"
+  },
+  {
+   "probe_id": "normal.kchain_3step_scalar_step_refuses",
+   "family": "normal",
+   "wrap": "kchain_3step_scalar_step_refuses",
+   "outcome": "REFUSES",
+   "n": 200000,
+   "k": 1,
+   "marker": "step-boundary",
+   "error": "static diagnostic: kchain-marginal step boundary 1 \u2192 2: cannot unify previous step's result type array of real (length 2) with next step's input \"mu2\" of type real (from step 1 (`K1`) to step 2 (`K2`)) \u2014 the chain feeds step 2 the `cat` of every variate to its left (spec \u00a706 dependent composition: `c ~ K3([a, b])`). A step that means the PREVIOUS state alone is `markovchain(kernel, init, n)`",
+   "checks": [],
+   "note": "a 3-step marginal kchain whose final step declares a real: \u00a706 feeds it the cat of both left variates, so there is no correct draw. Sampled NaN for every atom until the boundary was checked against the declared type"
+  },
+  {
+   "probe_id": "normal.kchain_joint_base_scalar_step_refuses",
+   "family": "normal",
+   "wrap": "kchain_joint_base_scalar_step_refuses",
+   "outcome": "REFUSES",
+   "n": 200000,
+   "k": 1,
+   "marker": "step-boundary",
+   "error": "static diagnostic: kchain-marginal step boundary 0 \u2192 1: cannot unify previous step's result type array of real (length 1) with next step's input \"mu1\" of type real (from step 0 (`jp`) to step 1 (`K1`)) \u2014 a positional `joint`'s variate is the `cat` of its components (spec \u00a706 `joint`), and \u00a706 dependent composition binds that whole value to a lone kernel input. Name the components (`joint(name1 = M1, ...)` or `relabel`) to splat them by field name, or give the step an input of the fed shape",
+   "checks": [],
+   "note": "a positional-joint base feeds a LENGTH-1 vector (\u00a706 joint: all scalars yield a vector), which a step declaring a real cannot take. Sampled NaN for every atom until the boundary was checked against the declared type"
   }
  ]
 }
