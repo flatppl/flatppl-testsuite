@@ -162,6 +162,54 @@ def test_the_theta_rows_do_not_fire_on_the_prior_itself():
         assert chk.status == "passed", f"{p.id}: {chk.detail}"
 
 
+# The mixing-weight row's teeth (flatppl-js #233). `matSuperpose` SIR-resampled a
+# parent whose per-atom weights were non-uniform to equal weights carrying the
+# POOLED total mass, so §06 normalize's own mixture spelling mixed every atom at
+# E[p] instead of p_i and the latent came out INDEPENDENT of the variate. The
+# failing hypothesis is therefore cov = 0, recorded as `latent_cov_null`.
+#
+# BOTH marginals stay correct under that defect -- E[p] is the prior and E[y] is
+# linear in p -- so this is also the one row where `check_latent_mean` proves
+# nothing, which is why the covariance check exists.
+
+
+def test_a_pooled_mixing_proportion_would_be_caught_on_the_covariance():
+    rows = [p for p in space.enumerate_probes() if p.latent_cov_null is not None]
+    assert rows, "no latent mixing-weight rows in the space"
+    for p in rows:
+        chk = C.check_latent_cov(p.latent_cov_null, p.latent_cov,
+                                 p.latent_cov_var, _PESSIMISTIC_N_EFF)
+        assert chk.status == "failed", \
+            f"{p.id}: a decoupled mixing proportion would pass: {chk.detail}"
+        assert chk.sigma > 20, \
+            f"{p.id}: caught, but only at {chk.sigma:.1f} sigma: {chk.detail}"
+
+
+def test_the_mixing_row_does_not_fire_on_the_closed_form_covariance():
+    """The other half: the band must accept the value §06 requires."""
+    for p in space.enumerate_probes():
+        if p.latent_cov_null is None:
+            continue
+        chk = C.check_latent_cov(p.latent_cov, p.latent_cov,
+                                 p.latent_cov_var, _PESSIMISTIC_N_EFF)
+        assert chk.status == "passed", f"{p.id}: {chk.detail}"
+
+
+def test_the_mixing_rows_marginals_prove_nothing_on_their_own():
+    """The trap, asserted. A latent mixing weight leaves the latent's own
+    marginal exactly on its prior, so `check_latent_mean` PASSES at the defect.
+    A future reader must not read that pass as coverage of this shape."""
+    for p in space.enumerate_probes():
+        if p.latent_cov_null is None:
+            continue
+        chk = C.check_latent_mean(p.latent_mean, p.latent_mean, p.latent_var,
+                                  _PESSIMISTIC_N_EFF)
+        assert chk.status == "passed", \
+            f"{p.id}: the latent marginal is the prior under the defect too"
+        assert p.latent_tilt is None, \
+            f"{p.id}: the mass is constant here, so there is no Z-tilt to record"
+
+
 def test_a_dropped_iid_importance_weight_would_be_caught():
     """The teeth of the `weighted_variate` row (flatppl-js #232).
 
@@ -400,7 +448,8 @@ def test_every_probe_has_at_least_one_checkable_oracle():
                      or p.var is not None
                      or p.cov is not None or p.ks is not None
                      or p.logtotalmass is not None
-                     or p.latent_mean is not None)
+                     or p.latent_mean is not None
+                     or p.latent_cov is not None)
         assert checkable, f"{p.id} carries no oracle of any kind"
 
 

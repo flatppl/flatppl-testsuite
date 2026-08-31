@@ -245,6 +245,40 @@ def check_latent_mean(emp: float | None, want: float | None, var: float | None,
                     "{sigma} sigma)")
 
 
+def check_latent_cov(emp: float | None, want: float | None,
+                     cov_var: float | None, n_eff: float | None) -> Check:
+    """The WEIGHTED covariance of a latent with the variate's coordinate 0.
+
+    The discriminating moment for a latent that reaches the variate only through
+    a mixture's component choice. §06 `normalize`'s recommended mixture spelling
+    `normalize(superpose(weighted(w1, M1), weighted(w2, M2)))` mixes atom i at
+    its own w(theta_i), and a lift that pools the proportion leaves BOTH
+    marginals correct -- the latent's is its prior, the variate's is linear in it
+    -- so `check_mean` and `check_latent_mean` are both blind to it. The failing
+    hypothesis is cov = 0 (a decoupled proportion makes the two independent),
+    recorded as `space.Probe.latent_cov_null` and rejected by this band in
+    `tests/sweep/test_sampler_gate.py`.
+
+    The band is `SIGMA * sqrt(cov_var / n_eff)`, with `cov_var` the closed-form
+    `n * Var(cov_hat)` = `E[a^2 b^2] - cov^2` over the two centred variables. As
+    with `check_latent_mean`, the ESS is the only part of the band the run
+    supplies; everything else is an oracle.
+    """
+    name = "latent_cov"
+    if want is None:
+        return Check(name, "skipped", "row names no latent covariance")
+    if emp is None:
+        return Check(name, "skipped", "driver reported no latent covariance")
+    if cov_var is None or cov_var <= 0.0:
+        return Check(name, "skipped", "no closed-form estimator variance to band with")
+    if not n_eff or n_eff <= 0:
+        return Check(name, "skipped", "no effective sample size reported")
+    se = math.sqrt(cov_var / n_eff)
+    return _verdict(name, emp, want, SIGMA * se, se,
+                    "{got:.6f} vs {want:.6f} (|d|={delta:.3g}, band {band:.3g} = 5 SE, "
+                    "{sigma} sigma)")
+
+
 def check_totalmass(emp: float | None, want: float | None) -> Check:
     """The engine's reported `logTotalmass` against the closed form.
 

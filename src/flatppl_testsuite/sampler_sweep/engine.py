@@ -165,6 +165,10 @@ class Draws:
     """Effective sample size of the same weights, `1 / sum(w_i^2)`. The band on
     `latent_mean` is `sqrt(prior variance / n_eff)`: the variance is the
     closed-form oracle, the ESS is the only part the run supplies."""
+    latent_cov: float | None = None
+    """Self-normalised WEIGHTED covariance of the `latent` binding with the
+    variate's coordinate 0, under the same weights. The only moment that sees a
+    mixing weight decoupled from the variate -- both marginals stay correct."""
     moment_denom: float | None = None
     """What `sum`/`sumsq`/`cross` must be divided by: `n` for a raw sum, `1` for
     an already-normalised WEIGHTED one (a `weighted_variate` probe). None means
@@ -230,6 +234,7 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
             ks_sample=tuple(r.get("ksSample") or ()),
             log_totalmass=r.get("logTotalmass"),
             latent_mean=r.get("latentMean"), latent_n_eff=r.get("latentNEff"),
+            latent_cov=r.get("latentCov"),
             moment_denom=r.get("momentDenom"), variate_n_eff=r.get("variateNEff"),
             error=r.get("error", ""), ms=r.get("ms", 0),
         )

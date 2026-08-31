@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-08-28T09:23:27+00:00",
-  "engine_commit": "04fe0d395693d788ea1a2d95c452f148bab66173",
-  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
+  "generated_at": "2026-08-31T08:59:41+00:00",
+  "engine_commit": "330cdeca272ae164ac46b904c0d8792ac301702f",
+  "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 78,
+  "probe_count": 79,
   "outcome_counts": {
-   "DRAWS": 77,
+   "DRAWS": 78,
    "REFUSES": 1
   },
   "failing_rows": []
@@ -5455,6 +5455,16 @@
      "band": 0.012909944487368295,
      "sigma": 0.2366895848592552,
      "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "skipped",
+     "detail": "row names no latent covariance",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
     }
    ],
    "note": "a scalar theta-dependent mass factor over a probability leaf; the theta-marginal must be the prior, not the Z-tilted 31/9"
@@ -5518,6 +5528,16 @@
      "band": 0.012909944487368295,
      "sigma": 0.2366895848592552,
      "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "skipped",
+     "detail": "row names no latent covariance",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
     }
    ],
    "note": "the same mass factor in log space; the tilted hypothesis is 4 e^5 / (e^5 - e), a full nat above the prior"
@@ -5580,6 +5600,16 @@
      "want": 2.0,
      "band": 0.015211514157165906,
      "sigma": 0.7897870930034626,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "skipped",
+     "detail": "row names no latent covariance",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
      "fallback": false
     }
    ],
@@ -5697,6 +5727,79 @@
     }
    ],
    "note": "iid over a normalize whose weights ARE the law: every coordinate is Normal(1, 1) by conjugacy, and the weights must fold as a product over the k coordinates"
+  },
+  {
+   "probe_id": "normal.normalize_superpose_latent_mixing",
+   "family": "normal",
+   "wrap": "normalize_superpose_latent_mixing",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "skipped",
+     "detail": "the variate's mean is 50/7 whether or not the per-atom proportion survives (it is linear in p) and its variance pins no defect; cov(p, y) is the discriminating moment and it is checked",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "skipped",
+     "detail": "the variate's mean is 50/7 whether or not the per-atom proportion survives (it is linear in p) and its variance pins no defect; cov(p, y) is the discriminating moment and it is checked",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.285791 vs 0.285714 (|d|=7.68e-05, band 0.00179 = 5 SE, 0.21 sigma)",
+     "got": 0.2857910661285674,
+     "want": 0.2857142857142857,
+     "band": 0.0017857142857157018,
+     "sigma": 0.21498515998864146,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "-0.253190 vs -0.255102 (|d|=0.00191, band 0.00855 = 5 SE, 1.12 sigma)",
+     "got": -0.2531897121693356,
+     "want": -0.25510204081632654,
+     "band": 0.008552578884823216,
+     "sigma": 1.117983635546702,
+     "fallback": false
+    }
+   ],
+   "note": "\u00a706 normalize's own mixture spelling with a LATENT mixing weight: atom i must mix at p_i, and only cov(p, y) can see it"
   }
  ]
 }

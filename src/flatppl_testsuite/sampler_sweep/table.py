@@ -170,6 +170,8 @@ def evaluate(probe: space.Probe, draws: engine.Draws) -> Row:
     if probe.latent is not None:
         results.append(C.check_latent_mean(draws.latent_mean, probe.latent_mean,
                                            probe.latent_var, draws.latent_n_eff))
+        results.append(C.check_latent_cov(draws.latent_cov, probe.latent_cov,
+                                          probe.latent_cov_var, draws.latent_n_eff))
 
     row.checks = [
         {"name": c.name, "status": c.status, "detail": c.detail,

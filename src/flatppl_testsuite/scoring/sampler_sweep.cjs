@@ -268,6 +268,24 @@ async function drawRow(row, ctx, p, ksSub, t0) {
     }
     row.latentMean = et;
     row.latentNEff = nEff;
+
+    // COV(latent, variate coordinate 0), under the same weights. A mixing
+    // weight reaches the variate only through the mixture's component choice,
+    // and a lift that pools the proportion leaves BOTH marginals correct -- the
+    // latent's is its prior and the variate's is linear in it -- so neither mean
+    // can see the decoupling. The joint moment is the only one that can.
+    let ey = 0;
+    let ety = 0;
+    for (let i = 0; i < n; i++) {
+      const y = flat[i * k];
+      ey += w[i] * y;
+      ety += w[i] * ts[i] * y;
+    }
+    const cv = ety - et * ey;
+    if (!Number.isFinite(cv)) {
+      throw new Error('latent covariance is not finite for ' + p.latent);
+    }
+    row.latentCov = cv;
   }
 
   row.ms = Date.now() - t0;

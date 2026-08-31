@@ -155,6 +155,19 @@ class Probe:
     Checked by nothing at run time -- it is the number the gate's teeth test
     asserts the band REJECTS, so a green row cannot mean 'landed somewhere
     plausible'."""
+    latent_cov: float | None = None
+    """Closed-form cov(latent, variate coordinate 0), checked WEIGHTED (see
+    `checks.check_latent_cov`). The discriminating moment for a mixing weight
+    that reaches the variate only through the mixture's component choice: both
+    marginals stay correct when the two decouple, so neither mean can see it."""
+    latent_cov_var: float | None = None
+    """`n * Var(cov_hat)` for that estimator, closed form: `E[a^2 b^2] - cov^2`
+    with `a`, `b` the two centred variables. It bands the check."""
+    latent_cov_null: float | None = None
+    """What a lift that decouples the latent from the variate gives instead --
+    0, since the mixture then draws at the pooled proportion. Checked by nothing
+    at run time; it is the number the gate's teeth test asserts the band
+    rejects."""
 
     weighted_variate: bool = False
     """Take the variate's own moments under the measure's ATOM WEIGHTS, banded by
@@ -350,6 +363,11 @@ _LOGNORMAL_MU4 = 2485.651403873756
 # (b-a)^2/12. Both priors below span 4, so both variances are 16/12.
 _UNIFORM_SPAN4_VAR = 1.3333333333333333
 
+# Beta(2, 5) prior moments for the mixing-weight row: mean a/(a+b) = 2/7,
+# variance ab/((a+b)^2 (a+b+1)) = 5/196.
+_BETA25_MEAN = 2.0 / 7.0
+_BETA25_VAR = 5.0 / 196.0
+
 TARGETED: tuple[Probe, ...] = (
     # The DOTTED spelling, and it has to be. §07 "Elementary functions": "All
     # accept scalar arguments and return scalar results", so a bare `exp` over a
@@ -499,6 +517,62 @@ TARGETED: tuple[Probe, ...] = (
                "is Normal(1, 1) by conjugacy, and the weights must fold as a "
                "product over the k coordinates",
           n_draws=600_000, weighted_variate=True),
+    # ------------------------------------------------- a LATENT mixing weight
+    # §06 "Normalization and mass", the `normalize` entry's own recommended
+    # mixture spelling: "To build a normalized mixture distribution, use
+    # `normalize(superpose(weighted(w1, M1), weighted(w2, M2)))`". With a LATENT
+    # in those weights the mixing PROPORTION is what moves per atom, and §06
+    # `superpose` makes the mass "nu(A) = M1(A) + M2(A) + ..." -- here
+    # p + (1 - p) = 1, so the mass is CONSTANT and the proportion is the only
+    # thing at stake.
+    #
+    # WHY NO EXISTING CHECK REACHED IT. Atom i must mix at p_i, giving
+    # E[y | p] = 10(1 - p). Both marginals are then correct whether or not the
+    # per-atom proportion survives: E[p] is the Beta(2, 5) prior 2/7, and E[y] is
+    # LINEAR in p, so it is 10*E[1 - p] = 50/7 at E[p] just as it is atom by
+    # atom. flatppl-js pooled the proportion into E[p] and both means stayed
+    # clean; `latent_mean` read 0.285793 against 2/7 and the variate mean 7.147
+    # against 50/7. Only the JOINT moment separates the two, which is what
+    # `latent_cov` adds.
+    #
+    # THE ORACLE, closed form and exact:
+    #   cov(p, y) = cov(p, 10(1 - p)) = -10*Var(p) = -25/98 = -0.2551020408
+    # for Beta(2, 5)'s variance 5/196. The failing hypothesis has its own closed
+    # form -- 0, since a decoupled proportion leaves p independent of y -- and it
+    # is `latent_cov_null`, which the gate asserts the band rejects. Measured
+    # -0.003046 pre-fix, 0.98 sigma from zero at 60k.
+    #
+    # THE BAND is derived, not fitted. For iid pairs
+    #   n*Var(cov_hat) = E[a^2 b^2] - cov^2  with a = p - E[p], b = y - E[y],
+    # and conditioning on p gives E[b^2 | p] = 2549/49 - (300/7)(1 - p), so
+    #   E[a^2 b^2] = (2549/49)*Var(p) - (300/7)*(Var(p)(1 - E[p]) - mu3(p))
+    #              = 6245/9604,
+    # hence n*Var(cov_hat) = 1405/2401 = 0.5851728446480633 exactly, with
+    # mu3(Beta(2,5)) = 5/2058. Cross-checked against 400 replicate ensembles of
+    # the closed-form generative model at 60k: sd 0.0031301 against the formula's
+    # 0.0031230, agreeing to 0.2%.
+    #
+    # The variate's own moments are NOT pinned. y's mean is 50/7 either side, so
+    # it discriminates nothing here, and its variance is the mixture's -- a
+    # number the row would freeze without any defect to catch.
+    Probe("normal.normalize_superpose_latent_mixing",
+          "p ~ Beta(alpha = 2.0, beta = 5.0)\n"
+          "q = 1.0 - p\n"
+          "m = normalize(superpose(weighted(p, Normal(mu = 0.0, sigma = 1.0)), "
+          "weighted(q, Normal(mu = 10.0, sigma = 1.0))))\n"
+          "y ~ m\n",
+          "y", 1, None,
+          None, None, None, None, 0.0, None,
+          "normal", "normalize_superpose_latent_mixing",
+          note="§06 normalize's own mixture spelling with a LATENT mixing "
+               "weight: atom i must mix at p_i, and only cov(p, y) can see it",
+          latent="p", latent_mean=_BETA25_MEAN, latent_var=_BETA25_VAR,
+          latent_cov=-10.0 * _BETA25_VAR,
+          latent_cov_var=1405.0 / 2401.0, latent_cov_null=0.0,
+          variate_skip_reason="the variate's mean is 50/7 whether or not the "
+                              "per-atom proportion survives (it is linear in p) "
+                              "and its variance pins no defect; cov(p, y) is the "
+                              "discriminating moment and it is checked"),
 )
 
 
