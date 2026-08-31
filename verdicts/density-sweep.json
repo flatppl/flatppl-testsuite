@@ -3,10 +3,10 @@
     "generated_at": "2026-08-31T13:07:46.866259+00:00",
     "determinizer_commit": "7d7c963d8190a206fb918e9f4e3010774a2072cd",
     "engine_commit": "bf1e54a8cf61459128115f7ec7cd1fa2780d6323",
-    "probe_count": 858,
+    "probe_count": 859,
     "outcome_counts": {
       "LOWERS": 688,
-      "REFUSES": 170,
+      "REFUSES": 171,
       "MALFORMED": 0
     },
     "ci_slice": {
@@ -6640,6 +6640,17 @@
       "value": -1.737085713764618,
       "marker": null,
       "spec_justified": null,
+      "oracle_unvalidated": false,
+      "known_defect": false,
+      "known_defect_reason": null
+    },
+    {
+      "probe_id": "normalize.weighted_leaf_function.direct.single.noconsumer",
+      "outcome": "REFUSES",
+      "oracle": -1.0439385332046727,
+      "value": null,
+      "marker": "normalize:refuse-normalize-node-nodeid-normalize-unnormalized",
+      "spec_justified": false,
       "oracle_unvalidated": false,
       "known_defect": false,
       "known_defect_reason": null

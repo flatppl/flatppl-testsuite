@@ -799,6 +799,51 @@ LITERAL_PROBES: tuple[LiteralProbe, ...] = (
              "in the DETERMINISER, not the engine",
         refusal_spec_justified=False,
     ),
+    # ------------------------------- a weighted probability leaf's normalizer
+    # The generated families carry no `weighted` wrap over a probability leaf
+    # with a FUNCTION weight, so this construct reaches the table only by hand.
+    # It is §06 `weighted`'s own reading -- "produces the measure ν(A) = ∫_A f(x)
+    # dM(x)" -- composed with §06 `normalize`, and its Z is an integral against
+    # the base rather than an algebraic factor.
+    #
+    # ORACLE. The Gaussian exponential tilt is closed-form: e^x φ(x) =
+    # e^{1/2} φ(x − 1), so Z = ∫ e^x dΦ = e^{1/2} exactly and the normalized
+    # measure is Normal(1, 1). §06 `normalize` shifts by −log Z, giving
+    #     log φ(0.5) + 0.5 − 0.5 = −1.043938533204672742
+    # (mpmath, 40 dps, from the closed-form normal density; log Z = 0.5 is the
+    # Gaussian moment-generating function at 1, derived and not measured).
+    #
+    # THE DEFECT THIS PINS. flatppl-js had no deterministic arm for this shape.
+    # It fell through to `mat-density.resolveNormalizeMasses`'s materialise
+    # fallback, which bakes −log Ẑ from the inner measure's tracked
+    # `logTotalmass` — for a `weighted` parent, log((1/N) Σᵢ w(xᵢ)) over the
+    # N = `sampleCount` atoms of the base's own ensemble. So the divisor moved
+    # with the session seed and the sample count: the implied log Ẑ ran 1.099 at
+    # N = 1 to 0.494 at N = 100000 against the exact 0.5, and no
+    # `marginalizationCount` changed it.
+    #
+    # THIS ROW READS `REFUSES` TODAY, AND IT IS THE DETERMINISER THAT REFUSES,
+    # for the same reason the superposition row above does:
+    #     determinize: refuse normalize: normalize of an unnormalized measure
+    #     needs a closed-form mass rule; `totalmass` is not FlatPDL
+    # So a green verdict here does NOT pin the engine fix; it pins the same
+    # determiniser gap, and the row flips to LOWERS with a value check the moment
+    # that gap closes. The engine-side check lives in flatppl-js's
+    # `weighted-leaf-quad-z.test.ts`, which scores this source at
+    # −1.0439385332046156 and holds it fixed across four seeds and every sample
+    # count.
+    LiteralProbe(
+        id="normalize.weighted_leaf_function.direct.single.noconsumer",
+        source="m = normalize(weighted(fn(exp(_)), "
+               "Normal(mu = 0.0, sigma = 1.0)))\n"
+               "lp = logdensityof(m, 0.5)\n",
+        binding="lp",
+        oracle=-1.043938533204672742,
+        note="a function weight over a probability leaf: Z = ∫ e^x dΦ = e^{1/2}. "
+             "The seeded ensemble divisor scored -1.6433810714 at N = 1. REFUSES "
+             "today in the DETERMINISER, not the engine",
+        refusal_spec_justified=False,
+    ),
 )
 
 
