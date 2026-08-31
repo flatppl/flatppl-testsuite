@@ -176,6 +176,11 @@ class Probe:
     Q))` draws at Q's positions and carries f/Z in the weights -- where an
     unweighted moment measures Q and not the measure. A KS test cannot follow the
     weights, so such a row carries `ks=None`."""
+    weight_log_var: float | None = None
+    """Closed-form variance of the atom weight's LOG on a `weighted_variate` row,
+    from the weight's own distribution. The gate's teeth test bands with
+    `n_draws / 4 * exp(-weight_log_var)`, so each such row derives its own
+    pessimistic effective count instead of borrowing another row's."""
 
     variate_skip_reason: str | None = None
     """Why this row's variate carries no mean/variance oracle, when the reason is
@@ -516,7 +521,52 @@ TARGETED: tuple[Probe, ...] = (
           note="iid over a normalize whose weights ARE the law: every coordinate "
                "is Normal(1, 1) by conjugacy, and the weights must fold as a "
                "product over the k coordinates",
-          n_draws=600_000, weighted_variate=True),
+          n_draws=600_000, weighted_variate=True, weight_log_var=3.0),
+    # ------------------------------------- a draw AT a weighted parameter measure
+    # The weight-drop witness one operator over (flatppl-js, the matSample fix).
+    # §06 "The measure monad" defines bind as
+    #   (nu >>= kappa)(B) = int kappa(x)(B) dnu(x)
+    # and §06 `kchain`/`jointchain` give `theta ~ M; y ~ K(theta)` as exactly that
+    # bind ("equivalence with stochastic nodes"), so the integral is against the
+    # PARAMETER measure and not against the proposal its atoms were drawn from.
+    #
+    # tm = normalize(weighted(fn(exp(_)), Normal(0, 1))) is exactly Normal(1, 1)
+    # -- e^x times the standard normal density is e^(1/2) times Normal(1, 1)'s, a
+    # conjugate tilt -- so (theta, y) is jointly Gaussian:
+    #   E[theta] = 1, Var[theta] = 1
+    #   E[y] = 1, Var[y] = 1 + 1 = 2, fourth central moment 3 * 2^2 = 12
+    #   cov(theta, y) = Var[theta] = 1
+    # `matSample` dropped theta's weights, so y came back UNWEIGHTED and its own
+    # ensemble reported Normal(0, 1)'s mean: 0 where the oracle is 1, a full sigma
+    # out and silent. A DOUBLE count of the same stream is the other failure this
+    # row must exclude, and it reports 2 -- the same distance from the oracle, so
+    # the mean's band rejects both.
+    #
+    # WEIGHTED MOMENTS: the atoms sit at Normal(0, 1)'s positions and the whole
+    # tilt rides in the atom weight, so an unweighted moment measures the
+    # proposal. The weight is one lognormal(0, 1) factor, so its log has variance
+    # 1 and the ensemble's ESS/n is about e^(-1) = 37% -- no extra draws needed.
+    #
+    # cov(theta, y) IS pinned but is NOT this row's teeth, and a reader must not
+    # take it for them: with the weights dropped the atoms are Normal(0, 1) and
+    # y = theta + noise, so an unweighted covariance is 1 as well. It is frozen
+    # because it catches a DIFFERENT defect -- a draw paired with the wrong
+    # parameter atom, which leaves both marginals right and the covariance at 0.
+    # The MEANS are what separate the weight drop, which is why `latent_tilt`
+    # records the untilted 0.
+    Probe("normal.draw_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "y ~ Normal(mu = theta, sigma = 1.0)\n",
+          "y", 1, None,
+          1.0, 2.0, 12.0, None, 0.0, None,
+          "normal", "draw_at_weighted_parameter",
+          note="a draw conditioned on an importance-weighted parameter ensemble: "
+               "§06's bind integrates the kernel against the parameter measure, "
+               "so theta's weights must reach y's atoms exactly once",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
     # ------------------------------------------------- a LATENT mixing weight
     # §06 "Normalization and mass", the `normalize` entry's own recommended
     # mixture spelling: "To build a normalized mixture distribution, use

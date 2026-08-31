@@ -210,31 +210,46 @@ def test_the_mixing_rows_marginals_prove_nothing_on_their_own():
             f"{p.id}: the mass is constant here, so there is no Z-tilt to record"
 
 
-def test_a_dropped_iid_importance_weight_would_be_caught():
-    """The teeth of the `weighted_variate` row (flatppl-js #232).
+def test_a_dropped_importance_weight_would_be_caught_on_every_weighted_row():
+    """The teeth of every `weighted_variate` row.
 
-    `iid`'s composite fallback dropped the inner measure's per-position weights,
-    which leaves every coordinate at the UNNORMALIZED base's mean. Under
-    `normalize(weighted(fn(exp(_)), Normal(0, 1)))` the measure is Normal(1, 1)
-    by conjugacy, so the defect reports 0 where the oracle is 1. Banded at a
-    pessimistic quarter of the effective count, so the teeth do not rest on the
-    ESS the run happens to report.
+    Both rows carry the SAME failing hypothesis, because both represent their law
+    by reweighting `Normal(0, 1)` positions through the conjugate tilt e^x: drop
+    the weights and the reported mean is the unnormalized base's 0 where the
+    oracle is 1.
 
-    A MIS-FOLD is the other failure this row must catch: reading one position's
-    weight instead of the block's product leaves coordinate 0 right and the rest
-    at the base's mean, which is why every coordinate is checked and not a pooled
-    mean.
+    `iid`'s composite fallback dropped the inner measure's per-position weights
+    (flatppl-js #232). A MIS-FOLD is the other failure that row must catch:
+    reading one position's weight instead of the block's product leaves
+    coordinate 0 right and the rest at the base's mean, which is why every
+    coordinate is checked and not a pooled mean.
+
+    `matSample` dropped a PARAMETER measure's weights, which leaves the drawn
+    variate's ensemble at the same 0. There the other failure is a DOUBLE count
+    of the one stream, which reports 2 -- equally far from the oracle, so this
+    band rejects it too and the test asserts that explicitly.
+
+    Each row bands at a pessimistic quarter of ITS OWN effective count, derived
+    from `weight_log_var` (the closed-form variance of the atom weight's log), so
+    the teeth do not rest on the ESS a run happens to report and no row borrows
+    another's weight distribution.
     """
     rows = [p for p in space.enumerate_probes() if p.weighted_variate]
     assert rows, "no weighted-variate rows in the space"
     for p in rows:
-        n_eff = p.n_draws / 4 * math.exp(-3.0)   # the row's own ESS/n, quartered
-        for i in range(p.k):
-            chk = C.check_mean(i, 0.0, p.mean, p.var, n_eff)
-            assert chk.status == "failed", \
-                f"{p.id} coord {i}: the unnormalized base's mean would pass: {chk.detail}"
-            assert chk.sigma > 20, \
-                f"{p.id} coord {i}: caught, but only at {chk.sigma:.1f} sigma"
+        assert p.weight_log_var is not None, \
+            f"{p.id}: a weighted_variate row must record its weight's log variance"
+        n_eff = p.n_draws / 4 * math.exp(-p.weight_log_var)
+        # 0 is the dropped-weight reading; 2 * p.mean is the doubled-stream one,
+        # the same distance the other way.
+        for wrong, why in ((0.0, "the unnormalized base's mean"),
+                           (2.0 * p.mean, "a doubled weight stream")):
+            for i in range(p.k):
+                chk = C.check_mean(i, wrong, p.mean, p.var, n_eff)
+                assert chk.status == "failed", \
+                    f"{p.id} coord {i}: {why} would pass: {chk.detail}"
+                assert chk.sigma > 20, \
+                    f"{p.id} coord {i}: {why} caught, but only at {chk.sigma:.1f} sigma"
 
 
 def test_a_dropped_or_negated_vector_shift_would_be_caught():
