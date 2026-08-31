@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "generated_at": "2026-08-31T12:48:37.832166+00:00",
+    "generated_at": "2026-08-31T12:48:38.932630+00:00",
     "determinizer_commit": "7d7c963d8190a206fb918e9f4e3010774a2072cd",
-    "engine_commit": "d6f243377ac09e75c83f08cdff17f1457f55f6ee",
-    "probe_count": 857,
+    "engine_commit": "429311420e5d4bacb56f1b1942ed8bcc5195a914",
+    "probe_count": 858,
     "outcome_counts": {
       "LOWERS": 688,
-      "REFUSES": 169,
+      "REFUSES": 170,
       "MALFORMED": 0
     },
     "ci_slice": {
@@ -9446,6 +9446,17 @@
       "marker": "record:refuse-record-node-nodeid-record-fewer",
       "spec_justified": true,
       "oracle_unvalidated": true,
+      "known_defect": false,
+      "known_defect_reason": null
+    },
+    {
+      "probe_id": "superpose.component_mass_truncate.direct.single.noconsumer",
+      "outcome": "REFUSES",
+      "oracle": -2.147877551448541,
+      "value": null,
+      "marker": "normalize:refuse-normalize-node-nodeid-normalize-unnormalized",
+      "spec_justified": false,
+      "oracle_unvalidated": false,
       "known_defect": false,
       "known_defect_reason": null
     }

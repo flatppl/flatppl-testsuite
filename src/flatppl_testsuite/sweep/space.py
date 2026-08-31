@@ -748,6 +748,57 @@ LITERAL_PROBES: tuple[LiteralProbe, ...] = (
              "maps as analytically scoreable, so a refusal is a capability gap",
         refusal_spec_justified=False,
     ),
+    # ------------------------------------------ a superposition component's mass
+    # `oracle.py` raises `OracleUnsupported` on `superpose`, so the generated
+    # families carry NO superposition row at all and this construct reaches the
+    # table only by hand. It is load-bearing: a mixture is §06 `normalize`'s own
+    # recommended spelling, "To build a normalized mixture distribution, use
+    # `normalize(superpose(weighted(w1, M1), weighted(w2, M2)))`".
+    #
+    # ORACLE. §06 `superpose` is "ν(A) = M₁(A) + M₂(A) + …", so the mass is
+    # Σᵢ wᵢ·totalmass(Mᵢ), and §06 `truncate` "restricts the support of measure M
+    # to the set S: ν(A) = M(A ∩ S). Does not normalize automatically", so the
+    # truncated component keeps Z_t = 2 Phi(1) - 1 = 0.6826894921370859. Then
+    #     Z = 0.3 Z_t + 0.7 = 0.9048068476411258
+    # and §06 `normalize` shifts the density by -log Z:
+    #     log[(0.3 phi(0.5) + 0.7 phi(0.5 - 10)) / Z] = -2.147877551448541081
+    # (mpmath, 50 dps, from the closed-form normal density; the second component
+    # contributes at 1e-20 and is kept rather than dropped).
+    #
+    # THE DEFECT THIS PINS. flatppl-js's matSuperpose read only each component's
+    # per-atom weights, which carry the weighting events introduced along that
+    # component's own chain; matTruncate keeps uniform weights and records the
+    # accept rate on `logTotalmass` alone. Z_t never reached the mixture, so
+    # `normalize` divided by 0.3 + 0.7 = 1 and every point scored exactly
+    # log Z = -0.1000337860820677 low — the same offset at y = 0.5 and y = 10.0,
+    # which is what identified it as a missing divisor rather than a mis-scored
+    # component.
+    #
+    # THIS ROW READS `REFUSES` TODAY, AND IT IS THE DETERMINISER THAT REFUSES:
+    #     determinize: refuse normalize (node NodeId(16)): normalize of an
+    #     unnormalized measure needs a closed-form mass rule; `totalmass` is not
+    #     FlatPDL
+    # The same table drives `flatppl determinize` before the JS engine, so the
+    # engine's own density number never reaches it — flatppl-js scores this
+    # source at -2.1478775514485413 directly, and that check lives in
+    # flatppl-js's `normalize-pooled-divisor.test.ts`. So a green verdict here
+    # does NOT pin the engine fix; it pins the determiniser gap, and the row
+    # flips to LOWERS with a value check the moment that gap closes. With
+    # `weighted(w, <leaf>)` components the determiniser lowers instead, and
+    # rightly emits no divisor at all, since Sigma w = 1 there.
+    LiteralProbe(
+        id="superpose.component_mass_truncate.direct.single.noconsumer",
+        source="m = normalize(superpose(weighted(0.3, truncate("
+               "Normal(mu = 0.0, sigma = 1.0), interval(-1.0, 1.0))), "
+               "weighted(0.7, Normal(mu = 10.0, sigma = 1.0))))\n"
+               "lp = logdensityof(m, 0.5)\n",
+        binding="lp",
+        oracle=-2.147877551448541081,
+        note="a truncated superposition component enters at w*Z_t; the mass-"
+             "ignored divisor of 1 scores -2.2479113375 instead. REFUSES today "
+             "in the DETERMINISER, not the engine",
+        refusal_spec_justified=False,
+    ),
 )
 
 

@@ -373,6 +373,11 @@ _UNIFORM_SPAN4_VAR = 1.3333333333333333
 _BETA25_MEAN = 2.0 / 7.0
 _BETA25_VAR = 5.0 / 196.0
 
+# The mass-aware mixing proportion on Normal(10, 1) in the component-mass row:
+# 0.7 / (0.3 * (2 Phi(1) - 1) + 0.7). Spelled as the complement's source so the
+# KS reference's two weights sum to 1 exactly.
+_SUPER_P1 = 0.7736457806712373
+
 TARGETED: tuple[Probe, ...] = (
     # The DOTTED spelling, and it has to be. §07 "Elementary functions": "All
     # accept scalar arguments and return scalar results", so a bare `exp` over a
@@ -824,91 +829,51 @@ TARGETED: tuple[Probe, ...] = (
                               "per-atom proportion survives (it is linear in p) "
                               "and its variance pins no defect; cov(p, y) is the "
                               "discriminating moment and it is checked"),
-    # -------------------------------- a SELECT gather at a weighted parameter
-    # The same conjugate tilt as the draw row above, now under a discrete-
-    # selector mixture. §07 sec:functions makes `ifelse(cond, a, b)` return "`a`
-    # if `cond` is true, `b` otherwise", so `c ~ Bernoulli(p); y ~ ifelse(c, a,
-    # b)` is §06 "The measure monad"'s bind over the selector measure, and every
-    # branch integrates against the parameter measure it was drawn at.
+    # ------------------------------- a COMPONENT'S OWN MASS in a superposition
+    # §06 `superpose` is "ν(A) = M₁(A) + M₂(A) + …", so the superposition's mass
+    # is Σᵢ wᵢ·totalmass(Mᵢ) and a component enters at wᵢ·Zᵢ. §06 `truncate`
+    # "restricts the support of measure M to the set S: ν(A) = M(A ∩ S). Does not
+    # normalize automatically", so the truncated component below keeps
+    #   Z_t = 2 Phi(1) - 1 = 0.6826894921370859.
+    # matSuperpose read only each component's per-atom weights, which carry the
+    # weighting events introduced along that component's own chain; matTruncate
+    # keeps uniform weights and records the accept rate on `logTotalmass` alone,
+    # so Z_t never reached the mixture and the superposition counted Σᵢ wᵢ = 1.
     #
-    # WHY NO EXISTING ROW REACHED IT. `matSelect` is its own executor: it draws
-    # every branch's full batch and the per-atom selector, then GATHERS. The
-    # draw, iid and broadcast rows above are evidence for none of it -- the
-    # gather closed with `logWeights: null` and reduced both the selector and
-    # every branch to `.samples` on the way in, so a weighted branch's or a
-    # weighted selector's law was dropped at the pick. The `superpose` rows do
-    # not cover it either: `superpose` resolves to `matSuperpose`, which
-    # concatenates and resamples rather than gathering.
+    # CONSTANT weights, so every oracle is closed form with no quadrature over a
+    # prior. Z = 0.3·Z_t + 0.7 = 0.9048068476411258, and the mixing proportions
+    # are 0.3·Z_t/Z = 0.2263542193287627 on the truncated component and 0.7/Z =
+    # 0.7736457806712373 on Normal(10, 1). The truncated slice is symmetric, so
+    # its mean is 0 and
+    #   mean   = 10 * 0.7 / Z                 = 7.736457806712373
+    #   var    = 18.351341846308454
+    #   fourth = 880.9968317699546
+    # (mpmath, 50 dps: the mixture's raw moments folded from the truncated
+    # normal's own integrals and Normal(10, 1)'s, then centred).
     #
-    # THE ORACLE, closed form and exact. tm = normalize(weighted(fn(exp(_)),
-    # Normal(0, 1))) is exactly Normal(1, 1), branch 0 is the TRUE branch
-    # (matSelect's `sel ? 0 : 1` gather), so
-    #   y = theta + 10*Bernoulli(0.5) + Normal(0, 1)
-    #   E[y] = 1 + 5 = 6
-    #   Var[y] = Var[theta] + 25 + 1 = 27
-    #   E[(y - 6)^4] = 12 + 6*2*25 + 625 = 937
-    #   cov(theta, y) = Var[theta] = 1
-    # Dropping the weights reads theta ~ Normal(0, 1) and E[y] = 5 -- a whole
-    # unit out and silent, with `logWeights` absent and n_eff reporting a
-    # confident n where theta's own was 0.37n.
+    # THE DEFECT'S OWN NUMBERS, which the bands must reject. Dropping Z_t mixes
+    # at 0.3 : 0.7 and gives mean 7.0 — 0.736 out, against a band from
+    # sqrt(var / n). The variance moves too (17.4 against 18.35), so mean and
+    # variance both discriminate, and the KS reference below carries the
+    # proportions explicitly rather than only their first moment.
     #
-    # THE BAND for the covariance, closed form: with a = theta - 1 and
-    # b = y - 6 = a + z + D for z ~ Normal(0, 1) and D = 10*(Bernoulli(0.5) -
-    # 0.5), E[a^2 b^2] = E[a^4] + E[a^2]E[z^2] + E[a^2]E[D^2] = 3 + 1 + 25 = 29,
-    # so n*Var(cov_hat) = 29 - 1 = 28.
-    Probe("normal.select_at_weighted_parameter",
-          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
-          "theta ~ tm\n"
-          "c ~ Bernoulli(p = 0.5)\n"
-          "a = Normal(mu = theta, sigma = 1.0)\n"
-          "b = Normal(mu = theta + 10.0, sigma = 1.0)\n"
-          "y ~ ifelse(c, a, b)\n",
+    # NO LATENT. This row is deliberately the constant-weight spelling: the
+    # `normalize_superpose_latent_mixing` row above already carries a latent
+    # mixing weight, and mixing a latent in here would put the pooled-divisor
+    # residue on the atom weights and blur what this row pins.
+    Probe("normal.normalize_superpose_component_mass",
+          "m = normalize(superpose(weighted(0.3, truncate("
+          "Normal(mu = 0.0, sigma = 1.0), interval(-1.0, 1.0))), "
+          "weighted(0.7, Normal(mu = 10.0, sigma = 1.0))))\n"
+          "y ~ m\n",
           "y", 1, None,
-          6.0, 27.0, 937.0, None, 0.0, None,
-          "normal", "select_at_weighted_parameter",
-          note="a discrete-selector mixture whose branches are drawn at an "
-               "importance-weighted parameter: §06's bind integrates each "
-               "branch against the parameter measure, so theta's weights must "
-               "survive the gather exactly once",
-          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=28.0,
-          weighted_variate=True, weight_log_var=1.0),
-    # ------------------------ a marginal KCHAIN over a weighted prior measure
-    # The same conjugate tilt fed as a chain BASE. §06 `kchain`'s "Equivalence
-    # with stochastic nodes" reads `y = kchain(M, K)` as `theta ~ M; y ~
-    # K(theta)`, the same bind, so the kernel integrates against the prior
-    # MEASURE and not against the proposal its atoms were drawn from.
-    #
-    # WHY NO EXISTING ROW REACHED IT. A chain does not resolve its prior the way
-    # a draw does. `clm.feedInputs` binds the prior into the body's ref overlay
-    # as per-atom POSITION columns, and `collectRefArrays` consults that overlay
-    # BEFORE `getMeasure`, so the body's own draws never see the prior measure
-    # and the parameter-weight fold the draw row pins had nothing to fold --
-    # `feedInputs` carried no weight channel at all. The draw, iid, broadcast and
-    # select rows all resolve their parameters through `getMeasure`.
-    #
-    # THE ORACLE, closed form and exact. tm is exactly Normal(1, 1) and the
-    # kernel adds one Normal(0, 1), so
-    #   E[y] = 1, Var[y] = 2, E[(y - 1)^4] = 3 * 2^2 = 12
-    #   cov(theta, y) = Var[theta] = 1
-    # Dropping the weights reads Normal(0, 1)'s mean, 0 where the oracle is 1.
-    # The band for the covariance: with a = theta - 1 and b = y - 1 = a + z,
-    # E[a^2 b^2] = E[a^4] + E[a^2]E[z^2] = 3 + 1 = 4, so n*Var(cov_hat) = 3.
-    Probe("normal.kchain_over_weighted_prior",
-          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
-          "theta ~ tm\n"
-          "mu1 = elementof(reals)\n"
-          "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
-          "y = kchain(tm, K1)\n",
-          "y", 1, None,
-          1.0, 2.0, 12.0, None, 0.0, None,
-          "normal", "kchain_over_weighted_prior",
-          note="a marginal kchain over an importance-weighted prior: the "
-               "boundary feed reduces the prior to positions, so the weights "
-               "must be carried onto the body's output exactly once",
-          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          7.736457806712373, 18.351341846308454, 880.9968317699546, None, 0.0,
+          ("mix", (1.0 - _SUPER_P1, _SUPER_P1),
+           [("truncnorm", (-1.0, 1.0), {"loc": 0.0, "scale": 1.0}),
+            ("norm", (10.0, 1.0), {})]),
+          "normal", "normalize_superpose_component_mass",
+          note="a TRUNCATED superposition component must enter at w*Z_t, not w: "
+               "dropping its mass mixes at 0.3 : 0.7 and reads mean 7.0"),
 )
 
 
