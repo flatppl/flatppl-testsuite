@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-08-31T11:45:55+00:00",
+  "generated_at": "2026-08-31T12:23:38+00:00",
   "engine_commit": "e93509caac8e805c55a8355bef2523c3020c5ecc",
-  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
+  "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 86,
+  "probe_count": 88,
   "outcome_counts": {
-   "DRAWS": 85,
+   "DRAWS": 87,
    "REFUSES": 1
   },
   "failing_rows": []
@@ -6701,6 +6701,152 @@
     }
    ],
    "note": "\u00a706 normalize's own mixture spelling with a LATENT mixing weight: atom i must mix at p_i, and only cov(p, y) can see it"
+  },
+  {
+   "probe_id": "normal.select_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "select_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "6.009496 vs 6.000000 (|d|=0.0095, band 0.0954 = 5 SE, 0.50 sigma)",
+     "got": 6.009495594853055,
+     "want": 6.0,
+     "band": 0.09540157084977471,
+     "sigma": 0.49766449170986005,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "27.152688 vs 27.000000 (|d|=0.153, band 0.265 = 5 SE, 2.88 sigma)",
+     "got": 27.152688370135955,
+     "want": 27.0,
+     "band": 0.2647922751115138,
+     "sigma": 2.883172669437816,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "1.033374 vs 1.000000 (|d|=0.0334, band 0.0972 = 5 SE, 1.72 sigma)",
+     "got": 1.0333736212974038,
+     "want": 1.0,
+     "band": 0.09715220440817449,
+     "sigma": 1.7175946495865488,
+     "fallback": false
+    }
+   ],
+   "note": "a discrete-selector mixture whose branches are drawn at an importance-weighted parameter: \u00a706's bind integrates each branch against the parameter measure, so theta's weights must survive the gather exactly once"
+  },
+  {
+   "probe_id": "normal.kchain_over_weighted_prior",
+   "family": "normal",
+   "wrap": "kchain_over_weighted_prior",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.994679 vs 1.000000 (|d|=0.00532, band 0.026 = 5 SE, 1.02 sigma)",
+     "got": 0.9946793214679116,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.0245859192549103,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.010671 vs 2.000000 (|d|=0.0107, band 0.0519 = 5 SE, 1.03 sigma)",
+     "got": 2.010671370794354,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.0274757429060324,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.997105 vs 1.000000 (|d|=0.0029, band 0.0318 = 5 SE, 0.46 sigma)",
+     "got": 0.9971045700071236,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 0.455248792093118,
+     "fallback": false
+    }
+   ],
+   "note": "a marginal kchain over an importance-weighted prior: the boundary feed reduces the prior to positions, so the weights must be carried onto the body's output exactly once"
   }
  ]
 }

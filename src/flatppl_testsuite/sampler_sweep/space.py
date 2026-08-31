@@ -824,6 +824,91 @@ TARGETED: tuple[Probe, ...] = (
                               "per-atom proportion survives (it is linear in p) "
                               "and its variance pins no defect; cov(p, y) is the "
                               "discriminating moment and it is checked"),
+    # -------------------------------- a SELECT gather at a weighted parameter
+    # The same conjugate tilt as the draw row above, now under a discrete-
+    # selector mixture. §07 sec:functions makes `ifelse(cond, a, b)` return "`a`
+    # if `cond` is true, `b` otherwise", so `c ~ Bernoulli(p); y ~ ifelse(c, a,
+    # b)` is §06 "The measure monad"'s bind over the selector measure, and every
+    # branch integrates against the parameter measure it was drawn at.
+    #
+    # WHY NO EXISTING ROW REACHED IT. `matSelect` is its own executor: it draws
+    # every branch's full batch and the per-atom selector, then GATHERS. The
+    # draw, iid and broadcast rows above are evidence for none of it -- the
+    # gather closed with `logWeights: null` and reduced both the selector and
+    # every branch to `.samples` on the way in, so a weighted branch's or a
+    # weighted selector's law was dropped at the pick. The `superpose` rows do
+    # not cover it either: `superpose` resolves to `matSuperpose`, which
+    # concatenates and resamples rather than gathering.
+    #
+    # THE ORACLE, closed form and exact. tm = normalize(weighted(fn(exp(_)),
+    # Normal(0, 1))) is exactly Normal(1, 1), branch 0 is the TRUE branch
+    # (matSelect's `sel ? 0 : 1` gather), so
+    #   y = theta + 10*Bernoulli(0.5) + Normal(0, 1)
+    #   E[y] = 1 + 5 = 6
+    #   Var[y] = Var[theta] + 25 + 1 = 27
+    #   E[(y - 6)^4] = 12 + 6*2*25 + 625 = 937
+    #   cov(theta, y) = Var[theta] = 1
+    # Dropping the weights reads theta ~ Normal(0, 1) and E[y] = 5 -- a whole
+    # unit out and silent, with `logWeights` absent and n_eff reporting a
+    # confident n where theta's own was 0.37n.
+    #
+    # THE BAND for the covariance, closed form: with a = theta - 1 and
+    # b = y - 6 = a + z + D for z ~ Normal(0, 1) and D = 10*(Bernoulli(0.5) -
+    # 0.5), E[a^2 b^2] = E[a^4] + E[a^2]E[z^2] + E[a^2]E[D^2] = 3 + 1 + 25 = 29,
+    # so n*Var(cov_hat) = 29 - 1 = 28.
+    Probe("normal.select_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "c ~ Bernoulli(p = 0.5)\n"
+          "a = Normal(mu = theta, sigma = 1.0)\n"
+          "b = Normal(mu = theta + 10.0, sigma = 1.0)\n"
+          "y ~ ifelse(c, a, b)\n",
+          "y", 1, None,
+          6.0, 27.0, 937.0, None, 0.0, None,
+          "normal", "select_at_weighted_parameter",
+          note="a discrete-selector mixture whose branches are drawn at an "
+               "importance-weighted parameter: §06's bind integrates each "
+               "branch against the parameter measure, so theta's weights must "
+               "survive the gather exactly once",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=28.0,
+          weighted_variate=True, weight_log_var=1.0),
+    # ------------------------ a marginal KCHAIN over a weighted prior measure
+    # The same conjugate tilt fed as a chain BASE. §06 `kchain`'s "Equivalence
+    # with stochastic nodes" reads `y = kchain(M, K)` as `theta ~ M; y ~
+    # K(theta)`, the same bind, so the kernel integrates against the prior
+    # MEASURE and not against the proposal its atoms were drawn from.
+    #
+    # WHY NO EXISTING ROW REACHED IT. A chain does not resolve its prior the way
+    # a draw does. `clm.feedInputs` binds the prior into the body's ref overlay
+    # as per-atom POSITION columns, and `collectRefArrays` consults that overlay
+    # BEFORE `getMeasure`, so the body's own draws never see the prior measure
+    # and the parameter-weight fold the draw row pins had nothing to fold --
+    # `feedInputs` carried no weight channel at all. The draw, iid, broadcast and
+    # select rows all resolve their parameters through `getMeasure`.
+    #
+    # THE ORACLE, closed form and exact. tm is exactly Normal(1, 1) and the
+    # kernel adds one Normal(0, 1), so
+    #   E[y] = 1, Var[y] = 2, E[(y - 1)^4] = 3 * 2^2 = 12
+    #   cov(theta, y) = Var[theta] = 1
+    # Dropping the weights reads Normal(0, 1)'s mean, 0 where the oracle is 1.
+    # The band for the covariance: with a = theta - 1 and b = y - 1 = a + z,
+    # E[a^2 b^2] = E[a^4] + E[a^2]E[z^2] = 3 + 1 = 4, so n*Var(cov_hat) = 3.
+    Probe("normal.kchain_over_weighted_prior",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "mu1 = elementof(reals)\n"
+          "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
+          "y = kchain(tm, K1)\n",
+          "y", 1, None,
+          1.0, 2.0, 12.0, None, 0.0, None,
+          "normal", "kchain_over_weighted_prior",
+          note="a marginal kchain over an importance-weighted prior: the "
+               "boundary feed reduces the prior to positions, so the weights "
+               "must be carried onto the body's output exactly once",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
 )
 
 
