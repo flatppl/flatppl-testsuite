@@ -612,6 +612,162 @@ TARGETED: tuple[Probe, ...] = (
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
           latent_cov=1.0, latent_cov_var=3.0,
           weighted_variate=True, weight_log_var=1.0),
+    # ------------------------------- a BROADCAST at a weighted parameter measure
+    # The same conjugate tilt again, now under `broadcast`, and once per EXECUTOR
+    # in mat-broadcast.ts. Every one of them rebuilt its output with
+    # `arrayMeasure(out, axes, null)` and dropped a weighted parameter's law:
+    # both cells of the general path read the proposal's mean, -0.002 / 1.001
+    # where the oracle is 1.
+    #
+    # WHY ONE ROW PER EXECUTOR AND NOT ONE ROW. `broadcast` is not one code path.
+    # The kernel's body picks the executor -- a builtin distribution head, an
+    # `iid` body, a generative body, a `joint` body, a nested `broadcast` -- and
+    # each assembles its own output. The `iid` row above is evidence for none of
+    # them. Each row below names its executor.
+    #
+    # EVERY CELL SHARES ONE PARAMETER DRAW, so the closed forms are the scalar
+    # row's per coordinate and the cross-coordinate covariance is Var[theta] = 1:
+    # the positions are independent GIVEN theta and carry its whole variance.
+    # That covariance is each row's own witness, and it rejects BOTH neighbouring
+    # defects. A parameter re-drawn per position reads 0. A cell axis that
+    # collapsed to one draw repeated reads Var[y] = 2.
+    #
+    # ONCE ONLY, NOT ONCE PER POSITION. Each executor pins its parameters per
+    # atom and tiles the atom's value across that atom's positions, so theta's
+    # weight is ONE event: `weight_log_var` is 1.0 on every row, the scalar row's
+    # value, not 2 or 4. Folding it as the position product would give the tilt
+    # e^(P x), exactly Normal(P, 1), so the means would read P -- past the 2 the
+    # teeth already reject.
+    #
+    # THE CELLS CARRY EQUAL PARAMETERS on purpose. `mean`, `var` and `cov` are
+    # each one number across the coordinates, and the teeth test derives its
+    # failing hypotheses from `mean`, so a row with per-cell means would need a
+    # per-cell teeth derivation this dataclass has no field for. The cell axis is
+    # still pinned, by the covariance: an axis that collapsed moves it to 2.
+    #
+    # NO JOINTCHAIN ROW. `jointchain(Normal(mu = _m_, sigma = 1.0), step)` gives
+    # x_1 = x_0 + e, so Var is 2 for the first step and 3 for the second, and the
+    # covariance is Var[x_0] = 2 within a cell against Var[theta] = 1 across
+    # cells. Neither is one number, and `Probe` carries no per-coordinate
+    # variance or covariance oracle. That executor's weight propagation is
+    # covered by the engine's own test
+    # (packages/engine/test/broadcast-parameter-weights.test.ts), which reads
+    # each pair separately; a row here needs the dataclass extended first.
+    #
+    # 1. The GENERAL PER-CELL PATH: a builtin distribution head, one worker
+    #    `sampleN` per cell. `.+` over a length-2 collection supplies the cell
+    #    axis, and an atom-dependent parameter makes the closed-form fast-path
+    #    registry decline, so this is the general path and not a Normal handler.
+    Probe("normal.broadcast_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "cells = [0.0, 0.0]\n"
+          "y ~ broadcast(Normal, mu = theta .+ cells, sigma = 1.0)\n",
+          "y", 2, None,
+          1.0, 2.0, 12.0, 1.0, 0.0, None,
+          "normal", "broadcast_at_weighted_parameter",
+          note="broadcast over a builtin distribution head whose parameter is "
+               "an importance-weighted ensemble: §04 makes the result the "
+               "independent product measure of the kernel applications, and "
+               "each one integrates against the parameter measure",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
+    # 2. The IID-BODIED COMPOSITE, which folds (atom, cell, inner) into one
+    #    batch: 2 cells x 2 inner draws = 4 positions, all four at one theta. The
+    #    inner axis is no more a re-draw of theta than the cell axis is, so the
+    #    covariance oracle is 1 for every pair, not just the cross-cell ones.
+    Probe("normal.broadcast_iid_body_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "cells = [0.0, 0.0]\n"
+          "krow = m -> iid(Normal(mu = m, sigma = 1.0), 2)\n"
+          "y ~ krow.(theta .+ cells)\n",
+          "y", 4, None,
+          1.0, 2.0, 12.0, 1.0, 0.0, None,
+          "normal", "broadcast_iid_body_at_weighted_parameter",
+          note="an iid-bodied composite broadcast at a weighted parameter: the "
+               "cell and inner axes fold into one batch and every position of "
+               "an atom shares its single parameter draw",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
+    # 3. The GENERATIVE-BODIED COMPOSITE: the body closes over an INTERNAL DRAW,
+    #    sampled fresh per (atom, cell) and carrying no weight of its own.
+    #      y_j = theta + u_j,  u = 2 * Uniform(0, 1)
+    #    E[u] = 1 and u - 1 is Uniform(-1, 1), so with a = theta - 1:
+    #      E[y_j] = 2
+    #      Var[y_j] = Var[theta] + 1/3 = 4/3
+    #      E[(y_j - 2)^4] = E[a^4] + 6 E[a^2] E[w^2] + E[w^4]
+    #                     = 3 + 6/3 + 1/5 = 5.2
+    #      cov(y_i, y_j) = Var[theta] = 1   (the draws are independent)
+    #      cov(theta, y_j) = Var[theta] = 1
+    #      n Var(cov_hat) = E[a^2 (a + w)^2] - 1 = (3 + 1/3) - 1 = 7/3
+    #    That the internal draw is FRESH per position is what makes the cross-
+    #    position covariance 1 rather than 4/3.
+    Probe("normal.broadcast_generative_body_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "cells = [0.0, 0.0]\n"
+          "xs = theta .+ cells\n"
+          "x = elementof(reals)\n"
+          "dz = 2.0 * draw(Uniform(interval(0.0, 1.0)))\n"
+          "gy = x + dz\n"
+          "gen = kernelof(gy, x = x)\n"
+          "y ~ gen.(xs)\n",
+          "y", 2, None,
+          2.0, 1.3333333333333333, 5.2, 1.0, 0.0, None,
+          "normal", "broadcast_generative_body_at_weighted_parameter",
+          note="a generative-bodied composite broadcast at a weighted "
+               "parameter: the internal draw is fresh per position and "
+               "unweighted, so the atom's weight is the parameter's alone",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=2.3333333333333335,
+          weighted_variate=True, weight_log_var=1.0),
+    # 4. The JOINT-BODIED COMPOSITE: per cell the kernel draws a 2-component
+    #    joint variate, both components Normal(theta, 1). The components are the
+    #    variate's STRUCTURE, not a second weighting event, so cov(a_j, b_j) is
+    #    Var[theta] = 1 like every other pair. 2 cells x 2 components = 4.
+    Probe("normal.broadcast_joint_body_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "cells = [0.0, 0.0]\n"
+          "obs = functionof(joint(a = Normal(mu = am, sigma = 1.0), "
+          "b = Normal(mu = am, sigma = 1.0)), am = am)\n"
+          "y = broadcast(obs, am = theta .+ cells)\n",
+          "y", 4, None,
+          1.0, 2.0, 12.0, 1.0, 0.0, None,
+          "normal", "broadcast_joint_body_at_weighted_parameter",
+          note="a joint-bodied composite broadcast at a weighted parameter: "
+               "the components are the variate's structure, so the shared "
+               "parameter draw still enters the atom's weight once",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
+    # 5. The NESTED-BROADCAST COMPOSITE, whose outer kernel body is itself a
+    #    `broadcast`: 2 outer x 2 inner = 4 positions folded in one batch. theta
+    #    arrives as a closed-over per-atom ref inside the INNER mu, which is the
+    #    route that leaves both axis-ladder sizes statically resolvable.
+    Probe("normal.broadcast_nested_body_at_weighted_parameter",
+          "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
+          "theta ~ tm\n"
+          "inner = [0.0, 0.0]\n"
+          "sigmas = [1.0, 1.0]\n"
+          "ok = functionof(Normal(mu = _mu_, sigma = _sigma_), "
+          "mu = _mu_, sigma = _sigma_)\n"
+          "shifted = inner .+ theta\n"
+          "pk = functionof(broadcast(ok, mu = shifted, sigma = _sigma_g_), "
+          "sigma_g = _sigma_g_)\n"
+          "y = broadcast(pk, sigma_g = sigmas)\n",
+          "y", 4, None,
+          1.0, 2.0, 12.0, 1.0, 0.0, None,
+          "normal", "broadcast_nested_body_at_weighted_parameter",
+          note="a nested-broadcast composite at a weighted parameter: the "
+               "outer and inner cell axes fold into one batch and every "
+               "position of an atom shares its single parameter draw",
+          latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
+          latent_cov=1.0, latent_cov_var=3.0,
+          weighted_variate=True, weight_log_var=1.0),
     # ------------------------------------------------- a LATENT mixing weight
     # §06 "Normalization and mass", the `normalize` entry's own recommended
     # mixture spelling: "To build a normalized mixture distribution, use

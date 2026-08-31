@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-08-31T10:45:46+00:00",
-  "engine_commit": "b954aa2c9f7af9712427be8671634dc5d6daa8f0",
-  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
+  "generated_at": "2026-08-31T11:34:16+00:00",
+  "engine_commit": "18ea75494d847365b654a5b07e034c99ea87d8ff",
+  "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 81,
+  "probe_count": 86,
   "outcome_counts": {
-   "DRAWS": 80,
+   "DRAWS": 85,
    "REFUSES": 1
   },
   "failing_rows": []
@@ -5933,6 +5933,701 @@
     }
    ],
    "note": "iid over a resolved leaf whose parameter is an importance-weighted ensemble: \u00a706's bind integrates each coordinate against the parameter measure, and the shared parameter draw enters an atom's weight exactly once"
+  },
+  {
+   "probe_id": "normal.broadcast_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "broadcast_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 2,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.990989 vs 1.000000 (|d|=0.00901, band 0.026 = 5 SE, 1.74 sigma)",
+     "got": 0.9909893164067131,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.7351583029992488,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.003230 vs 2.000000 (|d|=0.00323, band 0.0519 = 5 SE, 0.31 sigma)",
+     "got": 2.0032301163405233,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 0.31100654738826544,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.991344 vs 1.000000 (|d|=0.00866, band 0.026 = 5 SE, 1.67 sigma)",
+     "got": 0.9913443908237131,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.6667827667303714,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.971629 vs 2.000000 (|d|=0.0284, band 0.0519 = 5 SE, 2.73 sigma)",
+     "got": 1.9716290760987936,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 2.7316486957556494,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.975793 vs +1.000000 (|d|=0.0242, band 0.0367 = 5 SE, 3.30 sigma)",
+     "got": 0.9757931996402284,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 3.296125609227852,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.992477 vs 1.000000 (|d|=0.00752, band 0.0318 = 5 SE, 1.18 sigma)",
+     "got": 0.9924768148904531,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 1.182871263418713,
+     "fallback": false
+    }
+   ],
+   "note": "broadcast over a builtin distribution head whose parameter is an importance-weighted ensemble: \u00a704 makes the result the independent product measure of the kernel applications, and each one integrates against the parameter measure"
+  },
+  {
+   "probe_id": "normal.broadcast_iid_body_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "broadcast_iid_body_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.993387 vs 1.000000 (|d|=0.00661, band 0.026 = 5 SE, 1.27 sigma)",
+     "got": 0.9933868705288097,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.2734690317273778,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.982508 vs 2.000000 (|d|=0.0175, band 0.0519 = 5 SE, 1.68 sigma)",
+     "got": 1.9825083191749546,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.6841583051258147,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.991858 vs 1.000000 (|d|=0.00814, band 0.026 = 5 SE, 1.57 sigma)",
+     "got": 0.9918576017365457,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.5679553950474068,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.982414 vs 2.000000 (|d|=0.0176, band 0.0519 = 5 SE, 1.69 sigma)",
+     "got": 1.9824137062423604,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.693267958897498,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.991378 vs +1.000000 (|d|=0.00862, band 0.0367 = 5 SE, 1.17 sigma)",
+     "got": 0.9913780342202055,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 1.174012334810482,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.994289 vs 1.000000 (|d|=0.00571, band 0.026 = 5 SE, 1.10 sigma)",
+     "got": 0.9942890889469079,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.0997317383162204,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "1.990807 vs 2.000000 (|d|=0.00919, band 0.0519 = 5 SE, 0.89 sigma)",
+     "got": 1.9908065771737449,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 0.8851739041111074,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.988151 vs +1.000000 (|d|=0.0118, band 0.0367 = 5 SE, 1.61 sigma)",
+     "got": 0.9881512120045891,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 1.6133934666925076,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.986334 vs 1.000000 (|d|=0.0137, band 0.026 = 5 SE, 2.63 sigma)",
+     "got": 0.9863342488782346,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 2.6315696561932755,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "1.981997 vs 2.000000 (|d|=0.018, band 0.0519 = 5 SE, 1.73 sigma)",
+     "got": 1.9819967251466695,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.7334163118438157,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "+0.981407 vs +1.000000 (|d|=0.0186, band 0.0367 = 5 SE, 2.53 sigma)",
+     "got": 0.9814065744735495,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 2.5317788856908847,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.986995 vs 1.000000 (|d|=0.013, band 0.0318 = 5 SE, 2.04 sigma)",
+     "got": 0.986994798752494,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 2.044809293756521,
+     "fallback": false
+    }
+   ],
+   "note": "an iid-bodied composite broadcast at a weighted parameter: the cell and inner axes fold into one batch and every position of an atom shares its single parameter draw"
+  },
+  {
+   "probe_id": "normal.broadcast_generative_body_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "broadcast_generative_body_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 2,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.990969 vs 2.000000 (|d|=0.00903, band 0.0212 = 5 SE, 2.13 sigma)",
+     "got": 1.9909688560121948,
+     "want": 2.0,
+     "band": 0.021200349077727713,
+     "sigma": 2.129951717939641,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.314707 vs 1.333333 (|d|=0.0186, band 0.034 = 5 SE, 2.74 sigma)",
+     "got": 1.31470673622652,
+     "want": 1.3333333333333333,
+     "band": 0.033964697200842865,
+     "sigma": 2.742052578397655,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "1.990372 vs 2.000000 (|d|=0.00963, band 0.0212 = 5 SE, 2.27 sigma)",
+     "got": 1.9903720869757016,
+     "want": 2.0,
+     "band": 0.021200349077727713,
+     "sigma": 2.270696814707915,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.316688 vs 1.333333 (|d|=0.0166, band 0.034 = 5 SE, 2.45 sigma)",
+     "got": 1.3166875339454949,
+     "want": 1.3333333333333333,
+     "band": 0.033964697200842865,
+     "sigma": 2.4504560263568766,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.982445 vs +1.000000 (|d|=0.0176, band 0.0245 = 5 SE, 3.59 sigma)",
+     "got": 0.982444902116125,
+     "want": 1.0,
+     "band": 0.02448005449388026,
+     "sigma": 3.5855920762479454,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.984524 vs 1.000000 (|d|=0.0155, band 0.028 = 5 SE, 2.76 sigma)",
+     "got": 0.9845244749721527,
+     "want": 1.0,
+     "band": 0.028045425683712544,
+     "sigma": 2.7590105428199614,
+     "fallback": false
+    }
+   ],
+   "note": "a generative-bodied composite broadcast at a weighted parameter: the internal draw is fresh per position and unweighted, so the atom's weight is the parameter's alone"
+  },
+  {
+   "probe_id": "normal.broadcast_joint_body_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "broadcast_joint_body_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.001242 vs 1.000000 (|d|=0.00124, band 0.026 = 5 SE, 0.24 sigma)",
+     "got": 1.001242170295434,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 0.23920073094864894,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "2.003826 vs 2.000000 (|d|=0.00383, band 0.0519 = 5 SE, 0.37 sigma)",
+     "got": 2.003825871873442,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 0.3683679089763888,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.988269 vs 1.000000 (|d|=0.0117, band 0.026 = 5 SE, 2.26 sigma)",
+     "got": 0.9882693667273471,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 2.2589302478279505,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.988767 vs 2.000000 (|d|=0.0112, band 0.0519 = 5 SE, 1.08 sigma)",
+     "got": 1.9887674361226537,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.0815093146910246,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+1.001892 vs +1.000000 (|d|=0.00189, band 0.0367 = 5 SE, 0.26 sigma)",
+     "got": 1.0018917345741616,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 0.2575885570617633,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.994974 vs 1.000000 (|d|=0.00503, band 0.026 = 5 SE, 0.97 sigma)",
+     "got": 0.9949737881363194,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 0.9678814218264332,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "1.998798 vs 2.000000 (|d|=0.0012, band 0.0519 = 5 SE, 0.12 sigma)",
+     "got": 1.9987981049674524,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 0.11572252668001205,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+1.004063 vs +1.000000 (|d|=0.00406, band 0.0367 = 5 SE, 0.55 sigma)",
+     "got": 1.0040628332706927,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 0.5532168064560942,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.991293 vs 1.000000 (|d|=0.00871, band 0.026 = 5 SE, 1.68 sigma)",
+     "got": 0.9912926924541765,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.676738155156141,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "1.985806 vs 2.000000 (|d|=0.0142, band 0.0519 = 5 SE, 1.37 sigma)",
+     "got": 1.9858058846274975,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.3666575286627458,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "+0.994652 vs +1.000000 (|d|=0.00535, band 0.0367 = 5 SE, 0.73 sigma)",
+     "got": 0.9946520690716858,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 0.728202481418921,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.996533 vs 1.000000 (|d|=0.00347, band 0.0318 = 5 SE, 0.55 sigma)",
+     "got": 0.9965325815173735,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 0.5451826083796718,
+     "fallback": false
+    }
+   ],
+   "note": "a joint-bodied composite broadcast at a weighted parameter: the components are the variate's structure, so the shared parameter draw still enters the atom's weight once"
+  },
+  {
+   "probe_id": "normal.broadcast_nested_body_at_weighted_parameter",
+   "family": "normal",
+   "wrap": "broadcast_nested_body_at_weighted_parameter",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 4,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.991664 vs 1.000000 (|d|=0.00834, band 0.026 = 5 SE, 1.61 sigma)",
+     "got": 0.9916642838183667,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.6051820035920383,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.981418 vs 2.000000 (|d|=0.0186, band 0.0519 = 5 SE, 1.79 sigma)",
+     "got": 1.9814180712795129,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.7891310670987581,
+     "fallback": false
+    },
+    {
+     "name": "mean[1]",
+     "status": "passed",
+     "detail": "0.995338 vs 1.000000 (|d|=0.00466, band 0.026 = 5 SE, 0.90 sigma)",
+     "got": 0.9953384322415724,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 0.8976630815286166,
+     "fallback": false
+    },
+    {
+     "name": "var[1]",
+     "status": "passed",
+     "detail": "1.986758 vs 2.000000 (|d|=0.0132, band 0.0519 = 5 SE, 1.27 sigma)",
+     "got": 1.9867582209514438,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 1.2749633601440373,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,1]",
+     "status": "passed",
+     "detail": "+0.986561 vs +1.000000 (|d|=0.0134, band 0.0367 = 5 SE, 1.83 sigma)",
+     "got": 0.9865605381339919,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 1.8299880104934405,
+     "fallback": false
+    },
+    {
+     "name": "mean[2]",
+     "status": "passed",
+     "detail": "0.994213 vs 1.000000 (|d|=0.00579, band 0.026 = 5 SE, 1.11 sigma)",
+     "got": 0.9942128098009915,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.114420567638919,
+     "fallback": false
+    },
+    {
+     "name": "var[2]",
+     "status": "passed",
+     "detail": "1.995152 vs 2.000000 (|d|=0.00485, band 0.0519 = 5 SE, 0.47 sigma)",
+     "got": 1.9951520002698493,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 0.46678184277695595,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,2]",
+     "status": "passed",
+     "detail": "+0.984894 vs +1.000000 (|d|=0.0151, band 0.0367 = 5 SE, 2.06 sigma)",
+     "got": 0.9848942961421413,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 2.0568723082479186,
+     "fallback": false
+    },
+    {
+     "name": "mean[3]",
+     "status": "passed",
+     "detail": "0.992127 vs 1.000000 (|d|=0.00787, band 0.026 = 5 SE, 1.52 sigma)",
+     "got": 0.9921269869114522,
+     "want": 1.0,
+     "band": 0.025965018804658423,
+     "sigma": 1.5160807599983928,
+     "fallback": false
+    },
+    {
+     "name": "var[3]",
+     "status": "passed",
+     "detail": "1.977289 vs 2.000000 (|d|=0.0227, band 0.0519 = 5 SE, 2.19 sigma)",
+     "got": 1.9772893428194391,
+     "want": 2.0,
+     "band": 0.051930037609316845,
+     "sigma": 2.1866590345475037,
+     "fallback": false
+    },
+    {
+     "name": "cov[0,3]",
+     "status": "passed",
+     "detail": "+0.976257 vs +1.000000 (|d|=0.0237, band 0.0367 = 5 SE, 3.23 sigma)",
+     "got": 0.976256509167661,
+     "want": 1.0,
+     "band": 0.03672008174082039,
+     "sigma": 3.233038940371444,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "latent_mean",
+     "status": "passed",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "got": 0.9916429349389977,
+     "want": 1.0,
+     "band": 0.018360040870410196,
+     "sigma": 2.2758841115846598,
+     "fallback": false
+    },
+    {
+     "name": "latent_cov",
+     "status": "passed",
+     "detail": "0.984748 vs 1.000000 (|d|=0.0153, band 0.0318 = 5 SE, 2.40 sigma)",
+     "got": 0.9847475962146165,
+     "want": 1.0,
+     "band": 0.031800523616591574,
+     "sigma": 2.39813720825429,
+     "fallback": false
+    }
+   ],
+   "note": "a nested-broadcast composite at a weighted parameter: the outer and inner cell axes fold into one batch and every position of an atom shares its single parameter draw"
   },
   {
    "probe_id": "normal.normalize_superpose_latent_mixing",
