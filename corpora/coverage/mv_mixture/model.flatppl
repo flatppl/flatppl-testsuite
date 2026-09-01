@@ -1,0 +1,28 @@
+%%%
+# A mixture of two bivariate normals
+
+Spec §06 `ksuperpose` passes the parameter family with ONE FAMILY AXIS PER
+COLLECTION ARGUMENT: "an argument's family axes are its leading axes in
+excess of the rank (number of axes) of the parameter it feeds, and any
+count other than one is a static error", and within the family the
+same-number-of-axes requirement is suspended. So a `MvNormal` family takes
+an N x d `mu` beside an N x d x d `cov`, and the mixture's variate is the
+component variate — a vector of d.
+
+This is the first suite row whose mixture components are MULTIVARIATE. The
+two clusters carry distinct full covariances, so neither the `mu` axis nor
+the `cov` axis can be dropped without moving the number.
+%%%
+flatppl_compat = "0.1"
+
+mus = rowstack([[-2.0, 1.0], [3.0, -1.0]])
+cA = rowstack([[1.0, 0.3], [0.3, 1.0]])
+cB = rowstack([[0.5, 0.0], [0.0, 2.0]])
+covs = [cA, cB]
+
+w = [0.3, 0.7]
+
+% Sum w = 1 already, so normalize only settles the static mass class.
+mix = normalize(ksuperpose(MvNormal, w)(mu = mus, cov = covs))
+
+y = elementof(cartpow(reals, 2))

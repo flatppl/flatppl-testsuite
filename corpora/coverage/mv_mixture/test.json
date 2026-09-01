@@ -1,0 +1,33 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "lp",
+  "measure": "mix",
+  "status": "refuses",
+  "inputs": [
+    "y"
+  ],
+  "points": [
+    { "y": [0.0, 0.0] },
+    { "y": [-2.0, 1.0] },
+    { "y": [3.0, -1.0] },
+    { "y": [0.5, 0.5] },
+    { "y": [6.0, -4.0] }
+  ],
+  "expected": [
+    -6.394856014845793,
+    -2.994694530988289,
+    -2.1945520083496635,
+    -6.854677586052239,
+    -13.44455201034808
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18 multivariate_normal mixture (see test.py)",
+  "allow_skip": true
+}

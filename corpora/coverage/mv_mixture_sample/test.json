@@ -1,0 +1,64 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "density_model": "model_density.flatppl",
+  "density_binding": "m",
+  "status": "refuses",
+  "oracle": "closed-form mixture moments (independent oracle; see test.py)",
+  "n_samples": 4000,
+  "seed_base": 0,
+  "bindings": [
+    "y1",
+    "y2"
+  ],
+  "checks": [
+    {
+      "id": "mean_y1",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "y1",
+      "expected": 1.5,
+      "atol": 0.192029
+    },
+    {
+      "id": "mean_y2",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "y2",
+      "expected": -0.4,
+      "atol": 0.125996
+    },
+    {
+      "id": "var_y1",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "y1",
+      "expected": 5.9,
+      "atol": 0.512058
+    },
+    {
+      "id": "var_y2",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "y2",
+      "expected": 2.54,
+      "atol": 0.25792
+    },
+    {
+      "id": "cov_y1_y2",
+      "kind": "sample_stats",
+      "stat": "cov",
+      "fields": [
+        "y1",
+        "y2"
+      ],
+      "expected": -2.01,
+      "atol": 0.256891,
+      "note": "THE PER-COORDINATE-SELECTION CATCH: both coordinates of one draw must come from the SAME component. Choosing per coordinate instead decorrelates them, which measured cov near -1.25 with both variances near 5.5 (flatppl-js, before the per-atom selection landed) against this closed-form -2.01."
+    }
+  ],
+  "allow_skip": true
+}

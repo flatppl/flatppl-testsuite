@@ -1,0 +1,13 @@
+mus = rowstack([[-2.0, 1.0], [3.0, -1.0]])
+cA = rowstack([[1.0, 0.3], [0.3, 1.0]])
+cB = rowstack([[0.5, 0.0], [0.0, 2.0]])
+covs = [cA, cB]
+w = [0.3, 0.7]
+
+mix = normalize(ksuperpose(MvNormal, w)(mu = mus, cov = covs))
+
+y = draw(mix)
+y1 = y[1]
+y2 = y[2]
+
+m = lawof(record(y1 = y1, y2 = y2))

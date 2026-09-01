@@ -1,0 +1,3 @@
+lp = logdensityof(mix, y)
+inputs = (y)
+outputs = (lp)

@@ -25,7 +25,7 @@ _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
 # corpus -> number of test directories it must contain.
 EXPECTED_COUNTS = {
     "bayesian_inference": 5,
-    "coverage": 12,
+    "coverage": 14,
     "examples": 15,
     "fragment": 21,
     "hs3": 8,
@@ -34,7 +34,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 18,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 123
+EXPECTED_TOTAL = 125
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -57,7 +57,7 @@ EXPECTED_ENGINES = {
 }
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 138
+EXPECTED_CASES = 140
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

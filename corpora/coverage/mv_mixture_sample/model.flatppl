@@ -1,0 +1,31 @@
+%%%
+# Sampling a mixture of two bivariate normals
+
+The sample-path companion to `mv_mixture`. §06 `ksuperpose`: "Because the
+weights do not depend on the variate, the mixture is sampleable whenever
+`kernel` is" — so the multivariate mixture draws, and its moments are the
+closed-form mixture moments (see test.py).
+
+The draw is a 2-vector; its coordinates are destructured so the harness's
+`sample_stats` checks read scalar fields. The per-coordinate variances and
+their covariance are the checks that catch a component chosen per COORDINATE
+rather than per draw: that defect puts both means at the pooled value and
+both variances near 5.5.
+%%%
+flatppl_compat = "0.1"
+
+s = rnginit([42, 0, 0, 0])
+
+mus = rowstack([[-2.0, 1.0], [3.0, -1.0]])
+cA = rowstack([[1.0, 0.3], [0.3, 1.0]])
+cB = rowstack([[0.5, 0.0], [0.0, 2.0]])
+covs = [cA, cB]
+w = [0.3, 0.7]
+
+mix = normalize(ksuperpose(MvNormal, w)(mu = mus, cov = covs))
+
+y = draw(mix)
+y1 = y[1]
+y2 = y[2]
+
+draws = rand(s, lawof(record(y1 = y1, y2 = y2)))

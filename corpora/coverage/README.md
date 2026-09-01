@@ -31,6 +31,8 @@ Two kinds of dir live here:
 | `out_of_window` | `filter` -> derived `iid` size 0 (empty product) | determiniser refuses (no dynamic iid size) |
 | `paired_assay` | table variate: `iid` over a record law, table observation | determiniser refuses (no record-measure unroll) |
 | `censored_lifetimes` | `truncate` with a LATENT bound, exact `-inf` gate point | lowers, matches closed form incl. -inf |
+| `mv_mixture` | §06 `ksuperpose` family axes by parameter rank: a MULTIVARIATE mixture (N x d `mu`, N x d x d `cov`) | determiniser refuses (no per-component slice extraction) |
+| `mv_mixture_sample` | the same mixture's sample path, per-draw component selection | determiniser refuses (ksuperpose sampling unimplemented) |
 
 Engine gaps found while authoring that could NOT be expressed as rows
 here (no green shape and no refusal to pin) are recorded in
