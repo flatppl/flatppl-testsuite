@@ -29,7 +29,7 @@ Two kinds of dir live here:
 | `beam_bunch` | unbinned `PoissonProcess`, latent-weighted `superpose` intensity | determiniser refuses (no PoissonProcess type rule) |
 | `b_mass_peak` | `particle-physics` standard-module members in a fit | determiniser refuses (cross-module ref) |
 | `out_of_window` | `filter` -> derived `iid` size 0 (empty product) | determiniser refuses (no dynamic iid size) |
-| `paired_assay` | table variate: `iid` over a record law, table observation | determiniser refuses (no record-measure unroll) |
+| `paired_assay` | table variate: `iid` over a record law, table observation | lowers, matches scipy (record-measure unroll landed 2026-09-01) |
 | `censored_lifetimes` | `truncate` with a LATENT bound, exact `-inf` gate point | lowers, matches closed form incl. -inf |
 | `mv_mixture` | §06 `ksuperpose` family axes by parameter rank: a MULTIVARIATE mixture (N x d `mu`, N x d x d `cov`) | determiniser refuses (no per-component slice extraction) |
 | `mv_mixture_sample` | the same mixture's sample path, per-draw component selection | determiniser refuses (ksuperpose sampling unimplemented) |

@@ -5,7 +5,7 @@
   ],
   "model": "model.flatppl",
   "binding": "posterior",
-  "status": "refuses",
+  "status": "lowers",
   "points": [
     {
       "mu_a": 0.3,
@@ -29,6 +29,5 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "scipy 1.18 (row- and field-wise Normal factorization)",
-  "allow_skip": true
+  "oracle": "scipy 1.18 (row- and field-wise Normal factorization)"
 }

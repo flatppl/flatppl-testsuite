@@ -10,10 +10,26 @@ ruling). The posterior log-density is the prior term alone:
 
 STATUS: the rust determiniser REFUSES the model at the `iid` node —
 "iid size is not a statically-resolved 1-D count ...; only a 1-D
-static size is unrolled" (verified live 2026-09-01). So §06's own
+static size is unrolled" (re-verified live 2026-09-01 against the
+record-measure-unroll branch, which does NOT reach this). So §06's own
 region-restricted idiom (filter -> lengthof -> iid) does not lower at
 ANY data-derived size, empty or not. `allow_skip: true`; the frozen
 values are real oracle values and take over when dynamic sizes lower.
+
+TWO determiniser blockers, not one, and neither is the unroll:
+
+1. `lengthof(filter(...))` stays `%dynamic`. `consteval.rs`'s
+   `length_observer` reads the inferred TYPE of `obs_w`, and `filter`'s
+   type rule gives a dynamic length (correct in general — a filter's
+   output length is data-dependent). Resolving it needs the const-eval
+   table to FOLD `filter` over fixed data, which needs reals, interval
+   sets, and evaluating a predicate body at a bound placeholder — the
+   deferred `flatppl-interpreter` value core, not a shape widening.
+2. Even at a LITERAL size the model refuses one node later:
+   "normalize(truncate): closed-form Z is only implemented for an
+   `interval(lo, hi)` truncation set; a named/other set is not yet
+   supported" — `window` here is a named binding, and the arm wants an
+   inline `interval(...)`.
 """
 from scipy import stats
 

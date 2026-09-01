@@ -7,13 +7,16 @@ record law; the components share no stochastic node given mu_a, mu_b):
        + sum_i Normal(b_i | mu_b, 2).logpdf
        + Normal(mu_a | 0, 5).logpdf + Normal(mu_b | 0, 5).logpdf
 
-STATUS: the rust determiniser REFUSES the model at the `iid` node even
-with a LITERAL size 6 — "iid size is not a statically-resolved 1-D
-count (dynamic, multi-axis, or unresolved domain)" — i.e. the
-record-valued inner measure (table variate) has no unroll arm
-(verified live 2026-09-01; a scalar `iid(Normal, 3)` lowers in the
-same setup, so the size is not the operative part of the message).
-`allow_skip: true`; the frozen values take over when tables lower.
+STATUS: scored live since 2026-09-01. The determiniser gained the
+record-measure unroll (the table row count comes from the iid node's
+own `%table` domain, and each row is read out of its columns), and the
+same change stopped the keyword-`joint` record-law rewrite from
+marginalizing a latent that the enclosing `kernelof` declares as an
+INPUT — §06 `likelihoodof` makes `densityof(likelihoodof(K, obs),
+theta)` the CONDITIONAL `pdf(K(theta), obs)`. Before that the obs were
+scored against the prior predictive, Normal(0, sqrt(26)) /
+Normal(0, sqrt(29)), which is -36.27 at the first point rather than
+-22.89.
 """
 import numpy as np
 from scipy import stats
