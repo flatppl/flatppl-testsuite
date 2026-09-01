@@ -5,7 +5,7 @@
   ],
   "model": "model.flatppl",
   "binding": "posterior",
-  "status": "refuses",
+  "status": "lowers",
   "points": [
     {
       "D": 2.0
@@ -26,6 +26,5 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "scipy 1.18 (product of step conditionals + gamma prior)",
-  "allow_skip": true
+  "oracle": "scipy 1.18 (product of step conditionals + gamma prior)"
 }

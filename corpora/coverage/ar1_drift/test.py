@@ -10,12 +10,12 @@ and S = sum d_k^2 = 83.15890438672801:
     log prior = log 2 + Cauchy(0, 1).logpdf(s)      (half-Cauchy via
                 normalize(truncate(Cauchy(0, 1), interval(0, inf))))
 
-STATUS: the rust determiniser REFUSES `markovchain` density lowering
-("deferred to a later task", verified live at setup-resolved main,
-2026-09-01), so this dir carries `allow_skip: true` and the unified
-harness records DETERMINIZE_SKIP. The frozen `expected` values below are
-real oracle values: the moment the lowering lands, the skip disappears
-and the numeric compare takes over.
+STATUS: LIVE. The rust determiniser unrolls the `markovchain` trajectory
+into its step conditionals, so all four points are numerically checked at
+1e-9. This dir was authored as a refusal pin (`allow_skip: true`, the
+determiniser answering "density lowering for `markovchain` is not
+implemented (deferred to a later task)"); the lowering landed and the
+frozen values below took over unchanged.
 """
 import numpy as np
 from scipy import stats

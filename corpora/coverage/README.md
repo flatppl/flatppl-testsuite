@@ -20,8 +20,8 @@ Two kinds of dir live here:
 | Dir | Axis | Status at authoring (2026-09-01) |
 |---|---|---|
 | `spectral_lines` | `ksuperpose` mixture + Dirichlet-simplex latent posterior | lowers, matches scipy |
-| `ar1_drift` | `markovchain` trajectory density | determiniser refuses ("deferred to a later task") |
-| `kscan_walk` | `kscan` with exogenous step sizes | determiniser refuses (same deferral) |
+| `ar1_drift` | `markovchain` trajectory density | authored as a refusal pin; now lowers, matches closed form |
+| `kscan_walk` | `kscan` with exogenous step sizes | authored as a refusal pin; now lowers, matches scipy |
 | `sensor_calibration` | `aggregate` (einsum) linear predictor in a likelihood | lowers, matches scipy |
 | `dose_surface` | §06 `weighted` arity rule, both spellings over one measure | lowers, matches closed form |
 | `allele_freq` | Dirichlet prior + iid `Categorical` likelihood | lowers, matches scipy |

@@ -5,7 +5,7 @@
   ],
   "model": "model.flatppl",
   "binding": "posterior",
-  "status": "refuses",
+  "status": "lowers",
   "points": [
     {
       "sigma_step": 0.6
@@ -30,6 +30,5 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "closed form (product of step conditionals) + scipy half-Cauchy",
-  "allow_skip": true
+  "oracle": "closed form (product of step conditionals) + scipy half-Cauchy"
 }
