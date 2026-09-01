@@ -6,13 +6,11 @@ Extended unbinned Poisson-process log-likelihood over the window R:
     lambda(x) = s * truncnorm.pdf(x; 5, 0.8 on R) + b * 0.1
     Lambda(R) = s + b  (both shapes have unit mass on R)
 
-STATUS: the rust determiniser REFUSES this model — `PoissonProcess`
-has no type rule ("its calls are left %deferred") and the `normalize`
-node then has no determinization rule (verified live 2026-09-01). The
-flatppl-js materialise route supports superpose intensities in
-mat-poisson, so this pin is determiniser-side. `allow_skip: true`; the
-frozen values are real oracle values and take over when the lowering
-lands.
+STATUS: live. `PoissonProcess` gained its infer type rule and its
+determiniser extended-likelihood lowering on 2026-09-01 (flatppl-rust
+`poissonprocess-density`), so the frozen values are checked rather than
+skipped. Both engines agree with this oracle: det-js to 7e-15 absolute,
+StableHLO under Enzyme-JAX to 5e-6 (f32).
 """
 import numpy as np
 from scipy import stats
