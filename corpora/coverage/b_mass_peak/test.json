@@ -5,7 +5,7 @@
   ],
   "model": "model.flatppl",
   "binding": "posterior",
-  "status": "refuses",
+  "status": "lowers",
   "points": [
     {
       "f": 0.4
@@ -30,6 +30,5 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "scipy 1.18 (crystalball + argus mixture, beta prior)",
-  "allow_skip": true
+  "oracle": "scipy 1.18 (crystalball + argus mixture, beta prior)"
 }

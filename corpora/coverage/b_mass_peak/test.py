@@ -5,21 +5,24 @@ Mixture log-likelihood plus the Beta prior:
     lp(f) = Beta(f | 2, 2).logpdf
           + sum_i log(f * pdf_CB(m_i) + (1 - f) * pdf_Argus(m_i))
 
-Parameter mapping to §09 (verified against a direct transcription of
-the §09 formulas, agreement ~4e-9 relative from quad tolerance):
+Parameter mapping to §09, re-verified 2026-09-01 against a direct
+transcription of the §09 formulas with CLOSED-FORM normalizers (not
+`quad`): all four points agree to 0–4e-16 relative. The earlier ~4e-9
+residual was `quad`'s own tolerance on the Crystal Ball normalizer.
 
 * `CrystalBall(m0, sigma, alpha, n)` = scipy `crystalball(beta = alpha,
   m = n, loc = m0, scale = sigma)` (left power-law tail).
 * `Argus(resonance, slope, power = 0.5)` = scipy `argus(chi, scale =
   resonance)` with slope = -chi^2 / 2, so chi = sqrt(40) here.
 
-STATUS: the rust determiniser REFUSES any standard-module member on
-this path ("cross-module ref could not be resolved against the module
-bundle", verified live 2026-09-01) — the same class the examples corpus
-records for `load_module`. flatppl-js registers all eight §09
-particle-physics distributions density-only, so the pin is
-determiniser-side. `allow_skip: true`; the frozen values are real
-oracle values and take over when module bundles lower.
+STATUS: live, on a two-repo change. flatppl-rust "determinizer: lower a
+standard-module distribution member as a constructor" makes the
+determiniser emit a §09 member as a bare-tag constructor; before it,
+every §09 member refused with "cross-module ref could not be resolved
+against the module bundle". flatppl-js "engine: accept a standard-module
+member as a FlatPDL kernel tag" then lets that tag lower and stops the
+analyzer reporting it as an undefined variable — the densities were
+always REGISTRY-resident, so only the name was ever rejected.
 """
 import numpy as np
 from scipy import stats
