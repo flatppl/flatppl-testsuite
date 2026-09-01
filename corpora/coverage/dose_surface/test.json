@@ -1,0 +1,14 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "lp",
+  "expected": -2.278868566376729,
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "closed form: 2 * log(0.5 * 0.8^2)"
+}

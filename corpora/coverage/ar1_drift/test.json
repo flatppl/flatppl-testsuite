@@ -1,0 +1,35 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "refuses",
+  "points": [
+    {
+      "sigma_step": 0.6
+    },
+    {
+      "sigma_step": 0.8
+    },
+    {
+      "sigma_step": 1.0
+    },
+    {
+      "sigma_step": 1.5
+    }
+  ],
+  "expected": [
+    -165.23109485257928,
+    -149.40957082611237,
+    -152.99680606377413,
+    -179.03843118955555
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "closed form (product of step conditionals) + scipy half-Cauchy",
+  "allow_skip": true
+}

@@ -1,0 +1,36 @@
+%%%
+# Three emission lines, shared width, latent intensities
+
+Emission-line spectroscopy: three lines at known wavelengths share one
+instrumental width `sigma`; the relative intensities `w` are a latent
+simplex vector. The observable is a `ksuperpose` mixture of the three
+`Normal` lines, so this fixture scores §06's `ksuperpose` density rule
+(logsumexp over `log w_i + logdensityof(Normal(centers_i, sigma), y)`)
+with the weight vector coming from a `Dirichlet` prior. Σw = 1 by
+construction, so the mixture is already a probability measure and no
+`normalize` is needed.
+%%%
+flatppl_compat = "0.1"
+
+centers = [412.1, 415.7, 421.3]
+
+% Generated at w = (0.5, 0.3, 0.2), sigma = 0.9 (numpy seed 41213).
+y_obs = [
+    416.9659, 412.0515, 421.551, 411.9125, 410.2642, 412.8685,
+    410.7146, 421.7806, 420.9414, 411.5065, 420.6732, 420.4982,
+    413.3433, 411.403, 412.5639, 411.3898, 412.7373, 421.1254,
+    416.742, 421.9416, 412.5557, 415.002, 412.2671, 422.4918
+]
+N = lengthof(y_obs)
+
+w ~ Dirichlet(alpha = [2.0, 2.0, 2.0])
+sigma ~ Gamma(shape = 3.0, rate = 4.0)
+
+% Σw = 1 exactly, so normalize only settles the static mass class for draw.
+line = normalize(ksuperpose(Normal, w)(mu = centers, sigma = sigma))
+y ~ iid(line, N)
+
+prior = lawof(record(w = w, sigma = sigma))
+forward_kernel = kernelof(record(y = y), w = w, sigma = sigma)
+L = likelihoodof(forward_kernel, record(y = y_obs))
+posterior = bayesupdate(L, prior)

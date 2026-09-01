@@ -1,0 +1,31 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "refuses",
+  "points": [
+    {
+      "mu": 0.5
+    },
+    {
+      "mu": 0.0
+    },
+    {
+      "mu": -1.2
+    }
+  ],
+  "expected": [
+    -1.643335713764618,
+    -1.612085713764618,
+    -1.7920857137646178
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "closed form: prior term alone (empty product likelihood = 0)",
+  "allow_skip": true
+}

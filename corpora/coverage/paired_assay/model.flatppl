@@ -1,0 +1,28 @@
+%%%
+# Paired assay readouts observed as a table
+
+Six assay runs each yield a paired raw/corrected readout; a run is one
+record-valued draw from a keyword `joint`, so the dataset is a 6-row
+table (§06 `iid`: a record-valued `M` under a scalar size gives an
+N-row table, mirroring `cartpow` on a record set). The fixture is the
+first suite row that OBSERVES a table (§03 tables as data carriers for
+unbinned multivariate samples).
+%%%
+flatppl_compat = "0.1"
+
+tab_obs = table(
+    a = [0.61, -0.32, 1.4, 0.05, -0.88, 0.97],
+    b = [1.1, 2.53, -0.4, 0.75, 1.9, -0.21]
+)
+
+
+mu_a ~ Normal(mu = 0.0, sigma = 5.0)
+mu_b ~ Normal(mu = 0.0, sigma = 5.0)
+
+run = joint(a = Normal(mu = mu_a, sigma = 1.0), b = Normal(mu = mu_b, sigma = 2.0))
+tab ~ iid(run, 6)
+
+prior = lawof(record(mu_a = mu_a, mu_b = mu_b))
+forward_kernel = kernelof(record(tab = tab), mu_a = mu_a, mu_b = mu_b)
+L = likelihoodof(forward_kernel, record(tab = tab_obs))
+posterior = bayesupdate(L, prior)

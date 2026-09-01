@@ -1,0 +1,63 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "lowers",
+  "points": [
+    {
+      "w": [
+        0.4,
+        0.3,
+        0.3
+      ],
+      "sigma": 0.9
+    },
+    {
+      "w": [
+        0.5,
+        0.3,
+        0.2
+      ],
+      "sigma": 0.85
+    },
+    {
+      "w": [
+        0.2,
+        0.2,
+        0.6
+      ],
+      "sigma": 1.2
+    },
+    {
+      "w": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "sigma": 0.6
+    },
+    {
+      "w": [
+        0.34,
+        0.33,
+        0.33
+      ],
+      "sigma": 1.0
+    }
+  ],
+  "expected": [
+    -53.44998056415662,
+    -53.76279039897639,
+    -61.258812510245114,
+    -59.55962145943399,
+    -55.19550049384655
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18 (dirichlet + gamma + ksuperpose logsumexp)"
+}

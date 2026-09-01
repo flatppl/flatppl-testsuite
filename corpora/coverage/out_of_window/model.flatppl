@@ -1,0 +1,24 @@
+%%%
+# Region-restricted likelihood whose analysis window is empty
+
+§06's region-restricted idiom — `filter` the data to a validity window,
+`normalize(truncate(...))` the model to it, `iid` over the derived
+count — on a dataset where EVERY event misses the window. The derived
+size resolves to 0, so the likelihood is the empty product measure
+whose log-density is exactly 0 (§06 `iid`; the zero-size-arrays
+ruling), and the posterior log-density is the prior term alone.
+%%%
+flatppl_compat = "0.1"
+
+obs_values = [8.2, 9.4, 12.1]
+window = interval(-3.0, 3.0)
+
+obs_w = filter(fn(_ in window), obs_values)
+n = lengthof(obs_w)
+
+mu = elementof(reals)
+model_w = normalize(truncate(Normal(mu = mu, sigma = 1.0), window))
+L = likelihoodof(functionof(iid(model_w, n)), obs_w)
+
+prior = joint(mu = Normal(mu = 0.0, sigma = 2.0))
+posterior = bayesupdate(L, prior)

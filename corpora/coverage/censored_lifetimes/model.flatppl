@@ -1,0 +1,23 @@
+%%%
+# Device lifetimes below a latent detection ceiling
+
+Six device lifetimes observed only below a latent detection ceiling
+`tau`; the Exponential failure rate is fit jointly with `tau`. The
+truncation set `interval(0, tau)` depends on a LATENT — every other
+truncate in the suite has constant bounds. The `truncate` is left
+un-normalized on purpose: its density is the support indicator times
+the base density (§06 `truncate`), so no mass term enters and the
+oracle is exact, with a hard -inf at any theta whose `tau` lies below
+the largest observation (max t = 2.4).
+%%%
+flatppl_compat = "0.1"
+
+t_obs = [0.3, 1.1, 0.7, 2.4, 0.2, 1.8]
+
+rate = elementof(posreals)
+tau = elementof(posreals)
+m = truncate(Exponential(rate = rate), interval(0.0, tau))
+L = likelihoodof(functionof(iid(m, 6)), t_obs)
+
+prior = joint(rate = Gamma(shape = 2.0, rate = 1.0), tau = Gamma(shape = 4.0, rate = 1.0))
+posterior = bayesupdate(L, prior)

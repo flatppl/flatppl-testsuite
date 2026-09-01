@@ -1,0 +1,22 @@
+%%%
+# Allele-class frequencies: Dirichlet prior, categorical genotypes
+
+Three allele classes with a `Dirichlet` prior on their frequencies `p`;
+thirty genotyped individuals are iid `Categorical(p)` draws. The model
+is conjugate, so the posterior log-density is closed form. The fixture
+scores a SIMPLEX latent inside a `bayesupdate` — the density sweep
+scores the bare Dirichlet law only — with the latent vector indexed by
+a discrete iid likelihood.
+%%%
+flatppl_compat = "0.1"
+
+% Class labels 1 to 3 with class counts 14, 8, 8.
+counts_data = [1, 3, 2, 1, 1, 3, 2, 2, 1, 3, 3, 1, 2, 1, 3, 1, 1, 2, 3, 1, 2, 1, 1, 3, 2, 1, 3, 1, 2, 1]
+
+p ~ Dirichlet(alpha = [2.0, 3.0, 4.0])
+y ~ iid(Categorical(p = p), lengthof(counts_data))
+
+prior = lawof(record(p = p))
+forward_kernel = kernelof(record(y = y), p = p)
+L = likelihoodof(forward_kernel, record(y = counts_data))
+posterior = bayesupdate(L, prior)

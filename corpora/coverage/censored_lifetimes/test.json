@@ -1,0 +1,38 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "lowers",
+  "points": [
+    {
+      "rate": 1.0,
+      "tau": 3.0
+    },
+    {
+      "rate": 0.5,
+      "tau": 4.0
+    },
+    {
+      "rate": 2.0,
+      "tau": 5.0
+    },
+    {
+      "rate": 1.0,
+      "tau": 2.0
+    }
+  ],
+  "expected": [
+    -8.995922603223725,
+    -10.234906649788002,
+    -12.111415468006136,
+    "-inf"
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18 (indicator x Exponential, Gamma priors)"
+}

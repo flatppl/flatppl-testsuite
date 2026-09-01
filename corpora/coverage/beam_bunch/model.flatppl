@@ -1,0 +1,37 @@
+%%%
+# Extended unbinned fit: a Gaussian bunch over a flat background
+
+Event positions in a detector window from a Gaussian signal peak over a
+flat background; the signal and background yields `s` and `b` are both
+latent. The intensity is §06 `superpose`'s own idiom — a latent-weighted
+superposition feeding `PoissonProcess` — and the extended log-likelihood
+is closed form:
+
+    sum_i log lambda(x_i) - Lambda(R),   Lambda(R) = s + b
+
+since both component shapes are normalized to unit mass on the window.
+%%%
+flatppl_compat = "0.1"
+
+window = interval(0.0, 10.0)
+
+% 25 events, numpy seed 90210: 16 from the truncated peak, 9 uniform.
+events_obs = [
+    1.4558, 2.7229, 3.44, 3.5532, 3.815, 4.1881, 4.5518, 4.6498,
+    4.7677, 4.8254, 4.8584, 4.9804, 5.0494, 5.2282, 5.4442, 5.5463,
+    5.8047, 5.8668, 5.9805, 6.1686, 6.2184, 6.6791, 7.2659, 7.4487,
+    9.375
+]
+
+s ~ Gamma(shape = 5.0, rate = 0.5)
+b ~ Gamma(shape = 8.0, rate = 0.5)
+
+sig_shape = normalize(truncate(Normal(mu = 5.0, sigma = 0.8), window))
+bkg_shape = weighted(0.1, Lebesgue(support = window))
+intensity = superpose(weighted(s, sig_shape), weighted(b, bkg_shape))
+events ~ PoissonProcess(intensity = intensity)
+
+prior = lawof(record(s = s, b = b))
+forward_kernel = kernelof(record(events = events), s = s, b = b)
+L = likelihoodof(forward_kernel, record(events = events_obs))
+posterior = bayesupdate(L, prior)

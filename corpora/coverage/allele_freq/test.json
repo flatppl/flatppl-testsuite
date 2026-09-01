@@ -1,0 +1,50 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "lowers",
+  "points": [
+    {
+      "p": [
+        0.4,
+        0.3,
+        0.3
+      ]
+    },
+    {
+      "p": [
+        0.45,
+        0.25,
+        0.3
+      ]
+    },
+    {
+      "p": [
+        0.2,
+        0.3,
+        0.5
+      ]
+    },
+    {
+      "p": [
+        0.55,
+        0.25,
+        0.2
+      ]
+    }
+  ],
+  "expected": [
+    -30.90809361599973,
+    -30.964563649093527,
+    -35.686219462973014,
+    -32.414619406351065
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18 (dirichlet.logpdf + categorical counts)"
+}

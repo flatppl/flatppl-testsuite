@@ -1,0 +1,36 @@
+%%%
+# B-meson mass peak: CrystalBall signal on an Argus background
+
+The B-physics textbook fit: a `CrystalBall` signal peak on an `Argus`
+background in a reconstructed-mass spectrum, mixture fraction `f`
+latent. Both distributions come from the `particle-physics` standard
+module (§09) — the first suite row through a standard-module member,
+which is what checks the catalogue name+version invariant end to end.
+Σ of the mixture weights is 1, so `normalize` is the identity on the
+mass.
+%%%
+flatppl_compat = "0.1"
+
+hep = standard_module("particle-physics", "0.1")
+
+% 30 events, numpy seed 5279: 12 CrystalBall + 18 Argus draws.
+m_obs = [
+    4.70412, 4.71995, 4.80547, 4.84687, 4.91867, 5.01576, 5.04388,
+    5.06559, 5.06809, 5.14104, 5.1471, 5.15618, 5.15856, 5.20357,
+    5.21367, 5.22326, 5.26491, 5.26499, 5.27234, 5.27584, 5.27706,
+    5.27769, 5.27792, 5.27928, 5.27954, 5.28146, 5.28253, 5.28356,
+    5.28574, 5.28812
+]
+N = lengthof(m_obs)
+
+f ~ Beta(alpha = 2.0, beta = 2.0)
+
+sig = hep.CrystalBall(m0 = 5.279, sigma = 0.003, alpha = 1.5, n = 3.0)
+bkg = hep.Argus(resonance = 5.29, slope = -20.0, power = 0.5)
+mix = normalize(superpose(weighted(f, sig), weighted(1.0 - f, bkg)))
+m ~ iid(mix, N)
+
+prior = lawof(record(f = f))
+forward_kernel = kernelof(record(m = m), f = f)
+L = likelihoodof(forward_kernel, record(m = m_obs))
+posterior = bayesupdate(L, prior)

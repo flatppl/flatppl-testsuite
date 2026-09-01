@@ -1,0 +1,27 @@
+%%%
+# One quantity, two instruments, combined likelihoods
+
+One physical quantity `mu` measured by two instruments with different
+response: instrument A reads `mu` directly with unit noise, instrument
+B reads `2 mu` with half the noise. Each observation builds its own
+likelihood and `joint_likelihood` combines them (§06 "Combining
+likelihoods"). The fixture scores three things no suite row reaches:
+`joint_likelihood` itself, a kernel parameter reached through a DERIVED
+expression, and a free-`elementof` boundary in a scored `bayesupdate`
+where the prior is not the law of a like-named draw.
+%%%
+flatppl_compat = "0.1"
+
+obs_a = 1.5
+obs_b = 3.2
+
+mu = elementof(reals)
+model_a = functionof(Normal(mu = mu, sigma = 1.0))
+model_b = functionof(Normal(mu = 2.0 * mu, sigma = 0.5))
+
+L_a = likelihoodof(model_a, obs_a)
+L_b = likelihoodof(model_b, obs_b)
+L = joint_likelihood(L_a, L_b)
+
+prior = joint(mu = Normal(mu = 0.0, sigma = 2.0))
+posterior = bayesupdate(L, prior)

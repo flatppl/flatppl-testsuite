@@ -1,0 +1,34 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "refuses",
+  "points": [
+    {
+      "mu_a": 0.3,
+      "mu_b": 1.0
+    },
+    {
+      "mu_a": 0.0,
+      "mu_b": 0.0
+    },
+    {
+      "mu_a": -0.5,
+      "mu_b": 2.0
+    }
+  ],
+  "expected": [
+    -22.89278587309329,
+    -23.81748587309329,
+    -25.73248587309329
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09
+  },
+  "oracle": "scipy 1.18 (row- and field-wise Normal factorization)",
+  "allow_skip": true
+}
