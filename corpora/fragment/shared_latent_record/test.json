@@ -27,8 +27,6 @@
       "value_atol_f32": 0.001,
       "value_rtol_f32": 0.0001
     },
-    "status": "refuses",
-    "allow_skip": true,
-    "refusal": "determinize: refuse Ref(Ref { ns: SelfMod, name: Symbol(5) }) (node NodeId(27)): field is not a draw, a reference to a draw, or a bijection of a draw"
+    "status": "lowers"
   }
 }

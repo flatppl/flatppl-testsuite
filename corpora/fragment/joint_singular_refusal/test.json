@@ -30,6 +30,6 @@
     },
     "status": "refuses",
     "allow_skip": true,
-    "refusal": "determinize: refuse record (node NodeId(29)): record law has fewer distinct draws than fields, so its joint is carried by a lower-dimensional set and has no density (two fields resolve to the same draw)"
+    "refusal": "determinize: refuse record: record law has fewer distinct draws than fields, so its joint is carried by a lower-dimensional set and has no density (two fields resolve to the same draw)"
   }
 }
