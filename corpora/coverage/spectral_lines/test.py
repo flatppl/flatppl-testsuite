@@ -12,6 +12,10 @@ Dirichlet term uses scipy's chart-measure formula, which the settled
 alone is same-source (engine and oracle both transcribe §08) — the
 mixture and Gamma terms are the independently checkable part.
 `normalize` in the model contributes nothing: Σw = 1 exactly.
+
+The point keys are `query.flatppl`'s ABI input names, not the model's
+draw names: the dir scores under Mode ABI, so one query, one point set
+and one frozen vector serve both det-js and stablehlo.
 """
 import numpy as np
 from scipy import stats
@@ -32,8 +36,8 @@ Y_OBS = np.array([
 
 
 def oracle(point: dict) -> float:
-    w = np.asarray(point["w"], dtype=float)
-    sigma = float(point["sigma"])
+    w = np.asarray(point["w_v"], dtype=float)
+    sigma = float(point["sigma_v"])
     lp = stats.dirichlet.logpdf(w, ALPHA)
     lp += stats.gamma.logpdf(sigma, a=GAMMA_SHAPE, scale=1.0 / GAMMA_RATE)
     comp = np.log(w)[None, :] + stats.norm.logpdf(

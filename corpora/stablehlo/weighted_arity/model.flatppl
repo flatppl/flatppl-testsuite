@@ -1,0 +1,45 @@
+%%%
+# Two-input dose-response surface: the two weight arities of §06
+
+An unnormalized response surface over the unit square, proportional to
+`dose * time^2`. The base is `iid(Uniform(interval(0, 1)), 2)` — the
+unit square as a probability measure with density 1, so the weighted
+density is the weight itself and the oracle is exact.
+
+The point of the fixture is §06 `weighted`'s arity rule, scored in both
+spellings over one measure:
+
+* `w2 = (x, y) -> ...` — the k-parameter form: a weight of exactly k
+  scalar parameters receives one component per parameter;
+* `w1 = v -> v[1] * v[2]^2` — the one-parameter form, which receives
+  the variate whole.
+
+The scored binding is `lp = lp1 + lp2`; the two spellings denote one
+measure, so a change in either alone moves the sum.
+
+The model has NO free parameters, so `func.func @logdensity` takes no
+arguments and the one authored point is the empty record. This is the
+StableHLO twin of `corpora/coverage/dose_surface`, which cannot list
+`stablehlo` on its own test.json: the stablehlo runner requires a
+`points` list, and a `points` list plus a `query.flatppl` puts the
+det-js runner into Mode ABI, whose declared `inputs` may not be empty.
+
+On the StableHLO path this fixture is what pins the batched `Uniform`
+density: `iid(Uniform(S), 2)` lowers through
+`builtin_logdensityof.(Uniform, broadcast(record, support = [S]), v)`,
+and the §08 support mask is what gives that per-element densities to
+sum rather than one scalar.
+%%%
+flatppl_compat = "0.1"
+
+square = iid(Uniform(interval(0.0, 1.0)), 2)
+
+w2 = (x, y) -> x * y^2
+m2 = weighted(w2, square)
+lp2 = logdensityof(m2, [0.5, 0.8])
+
+w1 = v -> v[1] * v[2]^2
+m1 = weighted(w1, square)
+lp1 = logdensityof(m1, [0.5, 0.8])
+
+lp = lp1 + lp2

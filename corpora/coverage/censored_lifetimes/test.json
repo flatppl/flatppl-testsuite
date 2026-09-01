@@ -1,11 +1,16 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "model.flatppl",
   "binding": "posterior",
   "status": "lowers",
+  "inputs": [
+    "rate",
+    "tau"
+  ],
   "points": [
     {
       "rate": 1.0,
@@ -32,7 +37,9 @@
   ],
   "tolerance": {
     "atol": 1e-09,
-    "rtol": 1e-09
+    "rtol": 1e-09,
+    "value_atol_f32": 0.0001,
+    "value_rtol_f32": 1e-05
   },
   "oracle": "scipy 1.18 (indicator x Exponential, Gamma priors)"
 }

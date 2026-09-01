@@ -1,0 +1,2 @@
+% The model is fixed-phase throughout, so there is no `inputs` binding to write and `func.func @logdensity` takes no arguments.
+outputs = (lp)

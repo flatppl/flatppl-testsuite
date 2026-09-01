@@ -1,0 +1,4 @@
+% Mode ABI: one query, both engines. `rate` and `tau` are already the model's free `elementof(posreals)` boundaries.
+lp = logdensityof(posterior, record(rate = rate, tau = tau))
+inputs = (rate, tau)
+outputs = (lp)

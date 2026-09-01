@@ -1,35 +1,39 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "model.flatppl",
   "binding": "posterior",
   "status": "lowers",
+  "inputs": [
+    "beta_v"
+  ],
   "points": [
     {
-      "beta": [
+      "beta_v": [
         1.2,
         -0.7,
         0.4
       ]
     },
     {
-      "beta": [
+      "beta_v": [
         0.0,
         0.0,
         0.0
       ]
     },
     {
-      "beta": [
+      "beta_v": [
         1.0,
         -1.0,
         1.0
       ]
     },
     {
-      "beta": [
+      "beta_v": [
         2.0,
         0.5,
         -0.3
@@ -44,7 +48,9 @@
   ],
   "tolerance": {
     "atol": 1e-09,
-    "rtol": 1e-09
+    "rtol": 1e-09,
+    "value_atol_f32": 0.0001,
+    "value_rtol_f32": 1e-05
   },
   "oracle": "scipy 1.18 (X @ beta closed form; aggregate = matrix product per \u00a704)"
 }

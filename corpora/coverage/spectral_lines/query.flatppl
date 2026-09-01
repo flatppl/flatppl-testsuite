@@ -1,0 +1,6 @@
+% Mode ABI: one query, both engines. `w`/`sigma` are model draws, so the scored free parameters take the `_v` suffix.
+w_v = elementof(stdsimplex(3))
+sigma_v = elementof(posreals)
+lp = logdensityof(posterior, record(w = w_v, sigma = sigma_v))
+inputs = (w_v, sigma_v)
+outputs = (lp)

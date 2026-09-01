@@ -30,11 +30,11 @@ EXPECTED_COUNTS = {
     "fragment": 21,
     "hs3": 8,
     "sample": 1,
-    "stablehlo": 25,
+    "stablehlo": 26,
     "stablehlo-gradient": 18,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 125
+EXPECTED_TOTAL = 126
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -55,9 +55,24 @@ EXPECTED_ENGINES = {
     "stablehlo-gradient": {"stablehlo"},
     "stablehlo-sample": {"stablehlo"},
 }
+# Per-DIR exceptions to the corpus default above, keyed by the dir's path under
+# `corpora/`. The coverage corpus is deliberately mixed: a coverage model that
+# also lowers to StableHLO carries a `query.flatppl`, which puts BOTH engines on
+# the one ABI query, one point set and one frozen oracle (Mode ABI, see
+# `unified/runners/logdensity_detjs.py`). The rest of the corpus stays det-js
+# only, so the corpus-wide pin cannot express it. An override is as deliberate an
+# edit as the corpus default, and a dir that drops an engine still fails here.
+ENGINE_OVERRIDES = {
+    "coverage/allele_freq": {"det-js", "stablehlo"},
+    "coverage/censored_lifetimes": {"det-js", "stablehlo"},
+    "coverage/sensor_calibration": {"det-js", "stablehlo"},
+    "coverage/spectral_lines": {"det-js", "stablehlo"},
+    "coverage/two_instruments": {"det-js", "stablehlo"},
+}
+
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 140
+EXPECTED_CASES = 146
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
@@ -145,14 +160,24 @@ def test_every_dir_declares_the_expected_engines():
     wrong = {}
     for rel, engines in _engines_by_dir().items():
         corpus = rel.split("/")[0]
-        want = EXPECTED_ENGINES.get(corpus)
+        want = ENGINE_OVERRIDES.get(rel, EXPECTED_ENGINES.get(corpus))
         if want is None:
             wrong[rel] = f"corpus {corpus!r} not in EXPECTED_ENGINES"
         elif set(engines) != want:
             wrong[rel] = f"declares {sorted(engines)}, expected {sorted(want)}"
     assert not wrong, (
-        "engine coverage changed. If intentional, update EXPECTED_ENGINES "
-        f"(and EXPECTED_CASES):\n" + "\n".join(f"  {k}: {v}" for k, v in sorted(wrong.items()))
+        "engine coverage changed. If intentional, update EXPECTED_ENGINES, "
+        f"ENGINE_OVERRIDES (and EXPECTED_CASES):\n"
+        + "\n".join(f"  {k}: {v}" for k, v in sorted(wrong.items()))
+    )
+
+
+def test_every_engine_override_names_a_live_dir():
+    """A stale override silently stops guarding the dir it names."""
+    live = set(_engines_by_dir())
+    assert not sorted(set(ENGINE_OVERRIDES) - live), (
+        f"ENGINE_OVERRIDES names dir(s) with no test.json: "
+        f"{sorted(set(ENGINE_OVERRIDES) - live)}"
     )
 
 

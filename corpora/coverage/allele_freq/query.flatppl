@@ -1,0 +1,5 @@
+% Mode ABI: one query, both engines. `p` is a model draw, so the scored free parameter is `p_v`.
+p_v = elementof(stdsimplex(3))
+lp = logdensityof(posterior, record(p = p_v))
+inputs = (p_v)
+outputs = (lp)

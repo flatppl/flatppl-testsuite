@@ -1,0 +1,5 @@
+% Mode ABI: one query, both engines. `beta` is a model draw, so the scored free parameter is `beta_v`.
+beta_v = elementof(cartpow(reals, 3))
+lp = logdensityof(posterior, record(beta = beta_v))
+inputs = (beta_v)
+outputs = (lp)

@@ -5,6 +5,10 @@ matrix-vector product X @ beta (§04 multi-axis aggregation: the `.j`
 axis is absent from the output axes and is summed). The posterior
 log-density at beta is the iid-Normal prior plus the broadcast Normal
 likelihood at the predicted means, noise sigma 0.5.
+
+The point keys are `query.flatppl`'s ABI input names, not the model's
+draw names: the dir scores under Mode ABI, so one query, one point set
+and one frozen vector serve both det-js and stablehlo.
 """
 import numpy as np
 from scipy import stats
@@ -26,7 +30,7 @@ Y_OBS = np.array([0.515, -1.0269, -1.0278, -0.796, 0.4253, 1.2745, 2.2125, 2.927
 
 
 def oracle(point: dict) -> float:
-    beta = np.asarray(point["beta"], dtype=float)
+    beta = np.asarray(point["beta_v"], dtype=float)
     lik = stats.norm.logpdf(Y_OBS, X @ beta, 0.5).sum()
     prior = stats.norm.logpdf(beta, 0.0, 1.0).sum()
     return float(lik + prior)
