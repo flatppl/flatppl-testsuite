@@ -1,0 +1,4 @@
+% The model scores a POSITIONAL pair, so the ABI argument is one 2-vector.
+t_v = elementof(cartpow(reals, 2))
+inputs = (t_v)
+outputs = logdensityof(j, t_v)

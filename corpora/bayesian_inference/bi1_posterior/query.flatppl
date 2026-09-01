@@ -1,0 +1,4 @@
+# This model declares its own theta1/theta2 as elementof params, so the ABI
+# reuses those bindings rather than shadowing them.
+inputs = (theta1, theta2)
+outputs = logdensityof(posterior, record(theta1 = theta1, theta2 = theta2))

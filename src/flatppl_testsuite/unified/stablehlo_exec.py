@@ -75,14 +75,25 @@ def emit(model_path: Path, mode: str) -> str:
     return re.sub(r"@(logdensity|sample)\b", "@main", text)
 
 
-def emit_concat(dir: Path, mode: str, query_name: str = "query.flatppl") -> str:
-    """Emit ``model.flatppl`` + ``query_name`` concatenated into one module.
+def emit_concat(
+    dir: Path,
+    mode: str,
+    query_name: str = "query.flatppl",
+    model_name: str = "model.flatppl",
+) -> str:
+    """Emit ``model_name`` + ``query_name`` concatenated into one module.
+
+    ``model_name`` is a parameter because the fragment and bayesian_inference
+    corpora name the model after the test id (`superpose.flatppl`), not
+    `model.flatppl` — so a StableHLO row can be added to those dirs against
+    the file the det-js case already scores, with no second copy of the model
+    to drift.
 
     The combined temporary module is written INSIDE ``dir`` because the CLI
     resolves relative `load_data("x.csv", ...)` sources against the model
     file's own location — a temp file in the system temp dir would break
     every load_data fixture at emit time."""
-    model = (dir / "model.flatppl").read_text()
+    model = (dir / model_name).read_text()
     query = (dir / query_name).read_text()
     src_text = model.rstrip() + "\n" + query.lstrip()
     with tempfile.NamedTemporaryFile(
@@ -96,12 +107,12 @@ def emit_concat(dir: Path, mode: str, query_name: str = "query.flatppl") -> str:
         tmp.unlink(missing_ok=True)
 
 
-def load_data_bindings(dir: Path) -> dict[str, Path]:
+def load_data_bindings(dir: Path, model_name: str = "model.flatppl") -> dict[str, Path]:
     """``name -> source path`` for the `load_data` bindings of a fixture
     (textual scan; corpus fixtures use literal relative sources). The emitter
     never opens the source (§13: shape from the declared valueset) — the
     harness loads it and feeds it as the runtime argument."""
-    src = "".join((dir / f).read_text() for f in ("model.flatppl", "query.flatppl"))
+    src = "".join((dir / f).read_text() for f in (model_name, "query.flatppl"))
     return {m[1]: dir / m[2]
             for m in re.finditer(r'^\s*(\w+)\s*=\s*load_data\(\s*"([^"]+)"', src, re.M)}
 

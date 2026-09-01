@@ -45,12 +45,12 @@ EXPECTED_TOTAL = 126
 # its StableHLO gate was retired -- so the engine list is pinned too, not just
 # the roster.
 EXPECTED_ENGINES = {
-    "bayesian_inference": {"det-js"},
+    "bayesian_inference": {"det-js", "stablehlo"},
     "coverage": {"det-js"},
     "examples": {"det-js", "stablehlo"},
-    "fragment": {"det-js"},
+    "fragment": {"det-js", "stablehlo"},
     "hs3": {"det-js"},
-    "sample": {"det-js"},
+    "sample": {"det-js", "stablehlo"},
     "stablehlo": {"stablehlo"},
     "stablehlo-gradient": {"stablehlo"},
     "stablehlo-sample": {"stablehlo"},
@@ -72,7 +72,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 146
+EXPECTED_CASES = 173
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

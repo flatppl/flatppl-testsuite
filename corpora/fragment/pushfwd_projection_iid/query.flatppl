@@ -1,0 +1,4 @@
+t_a = elementof(reals)
+t_c = elementof(reals)
+inputs = (t_a, t_c)
+outputs = logdensityof(pushfwd(fn(get(_, ["a", "c"])), m), record(a = t_a, c = t_c))

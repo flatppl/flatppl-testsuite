@@ -1,0 +1,3 @@
+t_x = elementof(posreals)
+inputs = (t_x)
+outputs = logdensityof(m, t_x)

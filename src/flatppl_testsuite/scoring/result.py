@@ -8,6 +8,7 @@ CONVERT_SKIP = "CONVERT_SKIP"
 UNSCOREABLE = "UNSCOREABLE"
 NUMERIC_MISMATCH = "NUMERIC_MISMATCH"
 DETERMINIZE_SKIP = "DETERMINIZE_SKIP"
+EMIT_REFUSED = "EMIT_REFUSED"
 
 
 @dataclass
@@ -15,5 +16,5 @@ class CheckResult:
     test_id: str
     check_id: str
     status: str          # passed | failed | skipped
-    tag: str = ""        # CONVERT_SKIP | UNSCOREABLE | NUMERIC_MISMATCH | DETERMINIZE_SKIP | ""
+    tag: str = ""        # CONVERT_SKIP | UNSCOREABLE | NUMERIC_MISMATCH | DETERMINIZE_SKIP | EMIT_REFUSED | ""
     message: str = ""

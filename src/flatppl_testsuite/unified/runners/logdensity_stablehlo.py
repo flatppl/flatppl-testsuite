@@ -21,7 +21,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from flatppl_testsuite.scoring.compare import compare_scalar
-from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSCOREABLE
+from flatppl_testsuite.scoring.result import (
+    CheckResult, EMIT_REFUSED, NUMERIC_MISMATCH, UNSCOREABLE,
+)
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from flatppl_testsuite.unified.detjs_exec import parse_expected
 from flatppl_testsuite.unified.loader import TestSpec
@@ -30,9 +32,14 @@ from flatppl_testsuite.unified.loader import TestSpec
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     tid = dir.name
     body = spec.body
+    model_name = body.get("model", "model.flatppl")
     inputs: list[str] = body["inputs"]
     points: list[dict] = body["points"]
-    expected: list[float] = body["expected"]
+    expected = body["expected"]
+    # A dir shared with a det-js Mode A case freezes ONE scalar for its single
+    # point rather than a list, so both paths are gated on the same value.
+    if not isinstance(expected, list):
+        expected = [expected]
     tol = body.get("tolerance", {})
     atol = tol.get("value_atol_f32", 1e-4)
     rtol = tol.get("value_rtol_f32", 0.0)
@@ -43,11 +50,15 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                             "(run regen)")]
 
     try:
-        src = ex.emit_concat(dir, "logdensity")
+        src = ex.emit_concat(dir, "logdensity", model_name=model_name)
     except ex.EmitRefused as e:
-        return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, f"emit refused: {e}")]
+        # A refusal is a SKIP, matching `logdensity_detjs`'s DeterminizeRefused
+        # handling: the construct is outside what the determiniser/emitter
+        # legalizes, which a dir declares with `"allow_skip": true`. Strict by
+        # default -- a dir that has not declared it still fails the run.
+        return [CheckResult(tid, "logdensity", "skipped", EMIT_REFUSED, str(e))]
 
-    ld_sources = ex.load_data_bindings(dir)
+    ld_sources = ex.load_data_bindings(dir, model_name=model_name)
 
     results: list[CheckResult] = []
     for i, (pt, want) in enumerate(zip(points, expected)):

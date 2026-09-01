@@ -1,0 +1,8 @@
+# ABI form of the `density_consistency` check the det-js sample runner scores
+# live against test.py::logdensity -- the same joint log-density query, at one
+# frozen point, so the StableHLO path is gated on the same closed-form oracle.
+t_mu = elementof(reals)
+t_y1 = elementof(reals)
+t_y2 = elementof(reals)
+inputs = (t_mu, t_y1, t_y2)
+outputs = logdensityof(m, record(mu = t_mu, y1 = t_y1, y2 = t_y2))

@@ -29,6 +29,7 @@ and that combined view is not visible to either file alone.
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -53,6 +54,19 @@ def _abi_dirs() -> list[Path]:
     return sorted(p.parent for p in _CORPORA.rglob("query.flatppl"))
 
 
+def _model_path(dir: Path) -> Path:
+    """The file the query is concatenated onto. The fragment and
+    bayesian_inference corpora name the model after the test id, and their
+    StableHLO row names it in the engine block, so the name is read off
+    `test.json` rather than assumed to be `model.flatppl`."""
+    body = json.loads((dir / "test.json").read_text())
+    for source in (body.get("stablehlo") or {}, body):
+        name = source.get("model")
+        if name:
+            return dir / name
+    return dir / "model.flatppl"
+
+
 def _declared_inputs(query_src: str) -> list[str]:
     m = _INPUTS.search(query_src)
     if m is None:
@@ -68,7 +82,7 @@ _IDS = [str(d.relative_to(_CORPORA)) for d in _abi_dirs()]
 
 @pytest.mark.parametrize("dir", _abi_dirs(), ids=_IDS)
 def test_inputs_lists_every_parameterized_param(dir: Path):
-    model = (dir / "model.flatppl").read_text()
+    model = _model_path(dir).read_text()
     query = (dir / "query.flatppl").read_text()
 
     params = set(_ELEMENTOF.findall(model)) | set(_ELEMENTOF.findall(query))

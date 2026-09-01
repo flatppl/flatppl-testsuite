@@ -1,0 +1,4 @@
+t_y1 = elementof(reals)
+t_y2 = elementof(reals)
+inputs = (t_y1, t_y2)
+outputs = logdensityof(lawof(record(y1 = y1, y2 = y2)), record(y1 = t_y1, y2 = t_y2))

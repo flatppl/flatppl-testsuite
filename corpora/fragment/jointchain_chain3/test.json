@@ -1,7 +1,8 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "jointchain_chain3.flatppl",
   "binding": "lp",
@@ -10,5 +11,23 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "scipy 1.18"
+  "oracle": "scipy 1.18",
+  "stablehlo": {
+    "inputs": [
+      "t_a",
+      "t_b",
+      "t_c"
+    ],
+    "points": [
+      {
+        "t_a": 0.3,
+        "t_b": 0.7,
+        "t_c": 1.1
+      }
+    ],
+    "tolerance": {
+      "value_atol_f32": 1e-05,
+      "value_rtol_f32": 1e-06
+    }
+  }
 }

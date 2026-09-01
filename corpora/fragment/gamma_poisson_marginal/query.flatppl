@@ -1,0 +1,5 @@
+# The observation is a Poisson count, so the ABI argument is an integer tensor
+# (the model scores the same point as the literal `record(y = 4)`).
+t_y = elementof(nonnegintegers)
+inputs = (t_y)
+outputs = logdensityof(pp, record(y = t_y))

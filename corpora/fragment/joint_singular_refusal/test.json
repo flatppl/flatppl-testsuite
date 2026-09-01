@@ -1,7 +1,8 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "joint_singular_refusal.flatppl",
   "binding": "lp",
@@ -11,5 +12,24 @@
     "rtol": 1e-09
   },
   "oracle": "none -- refusal fixture, see test.py",
-  "allow_skip": true
+  "allow_skip": true,
+  "stablehlo": {
+    "inputs": [
+      "t_a",
+      "t_b"
+    ],
+    "points": [
+      {
+        "t_a": 0.5,
+        "t_b": 0.7
+      }
+    ],
+    "tolerance": {
+      "value_atol_f32": 0.001,
+      "value_rtol_f32": 0.0001
+    },
+    "status": "refuses",
+    "allow_skip": true,
+    "refusal": "determinize: refuse record (node NodeId(29)): record law has fewer distinct draws than fields, so its joint is carried by a lower-dimensional set and has no density (two fields resolve to the same draw)"
+  }
 }

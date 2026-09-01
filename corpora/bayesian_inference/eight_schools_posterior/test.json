@@ -1,7 +1,8 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "eight_schools_posterior.flatppl",
   "binding": "lp",
@@ -10,5 +11,35 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "scipy 1.18"
+  "oracle": "scipy 1.18",
+  "stablehlo": {
+    "inputs": [
+      "t_mu",
+      "t_tau",
+      "t_theta"
+    ],
+    "points": [
+      {
+        "t_mu": 0.0,
+        "t_tau": 1.0,
+        "t_theta": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "tolerance": {
+      "value_atol_f32": 0.001,
+      "value_rtol_f32": 0.0001
+    },
+    "status": "refuses",
+    "allow_skip": true,
+    "refusal": "determinize: refuse Ref(Ref { ns: SelfMod, name: Symbol(8) }) (node NodeId(41)): field is not a draw, a reference to a draw, or a bijection of a draw"
+  }
 }

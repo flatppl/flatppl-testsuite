@@ -21,11 +21,27 @@ One directory per posterior (5 in total), each a unified test dir:
 | Path | What |
 |------|------|
 | `<test_id>/<test_id>.flatppl` | One self-contained model, ending in `lp = logdensityof(...)`. |
-| `<test_id>/test.json` | `test_type: "logdensity"`, `engines: ["det-js"]`, the frozen `expected` scalar for `lp`, tolerances. |
+| `<test_id>/query.flatppl` | The SAME query as an `inputs`/`outputs` ABI, for the StableHLO path. |
+| `<test_id>/test.json` | `test_type: "logdensity"`, `engines: ["det-js", "stablehlo"]`, the frozen `expected` scalar for `lp`, tolerances. |
 | `<test_id>/test.py` | INDEPENDENT scipy oracle: `oracle()` reproduces `expected` in closed form. |
 
 `tests/test_unified.py` discovers every directory here automatically; there is no
 per-corpus gate script or manifest anymore.
+
+## StableHLO path
+
+All 5 dirs currently PIN a refusal: the `"stablehlo"` block sets `"status":
+"refuses"`, `"allow_skip": true`, and the verbatim exit-3 message, so the row
+starts comparing numbers against the same frozen `expected` the moment the
+lowering lands. `allow_skip` sits inside the block, so the det-js case stays
+strict about its own skips.
+
+The refusal is specific to the CONCATENATED module. Each model determinizes on
+its own, and `model + query` determinizes once the model's literal-point `lp`
+line is dropped — the same posterior scored twice, once at literal fields and
+once at ABI-symbolic ones, is what trips it. `corpora/examples/` carries the
+same three models WITHOUT the `lp` line and its StableHLO rows are green, which
+is the isolating comparison. See `flatppl-dev/TODO-flatppl-rust.md`.
 
 ## Oracle
 

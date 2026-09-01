@@ -1,0 +1,3 @@
+t_y = elementof(reals)
+inputs = (t_y)
+outputs = logdensityof(pp, record(y = t_y))

@@ -1,0 +1,5 @@
+# ABI form of the model's own `lp = logdensityof(broadcast(...), [1, 4, 2])`:
+# the observation vector becomes the compiled function's one argument.
+t_y = elementof(cartpow(reals, 3))
+inputs = (t_y)
+outputs = logdensityof(broadcast(Poisson, [2.0, 3.5, 1.0]), t_y)

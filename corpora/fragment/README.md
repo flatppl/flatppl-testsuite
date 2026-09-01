@@ -16,11 +16,36 @@ One directory per fragment (21 in total), each a unified test dir:
 | Path | What |
 |------|------|
 | `<test_id>/<test_id>.flatppl` | One self-contained model, ending in `lp = logdensityof(...)`. |
-| `<test_id>/test.json` | `test_type: "logdensity"`, `engines: ["det-js"]`, the frozen `expected` scalar for `lp`, tolerances. |
+| `<test_id>/query.flatppl` | The SAME query as an `inputs`/`outputs` ABI, for the StableHLO path. |
+| `<test_id>/test.json` | `test_type: "logdensity"`, `engines: ["det-js", "stablehlo"]`, the frozen `expected` scalar for `lp`, tolerances. |
 | `<test_id>/test.py` | INDEPENDENT oracle: `oracle()` reproduces `expected` in closed form (scipy / Julia Distributions.jl). |
 
 `tests/test_unified.py` discovers every directory here automatically; there is no
 per-corpus gate script or manifest anymore.
+
+## Both paths, one query, one frozen value
+
+Every dir runs its query on the det-js path AND the StableHLO path. The model
+file is unchanged: det-js still scores its own `lp` binding (Mode A), while
+`query.flatppl` restates the same query with the point as an `inputs`/`outputs`
+ABI argument, which is what `flatppl stablehlo` needs. The `"stablehlo"` block
+in `test.json` carries only that ABI shape (`inputs`, `points`, an f32
+`tolerance`) — `expected` deliberately stays at the top level, so ONE frozen
+oracle value gates both paths and `regen` keeps owning it.
+
+4 dirs pin a StableHLO REFUSAL instead (`"stablehlo": {"status": "refuses",
+"allow_skip": true, "refusal": "<verbatim exit-3 message>"}`):
+`joint_singular_refusal`, `shared_latent_joint`,
+`shared_latent_joint_positional`, `shared_latent_record`. `allow_skip` sits
+INSIDE the block, so the det-js case in the same dir stays strict about its own
+skips. The frozen `expected` is a real oracle value, so the row starts
+comparing numbers the moment the lowering lands.
+
+Three of those four refuse only in the CONCATENATED module: the model alone
+determinizes, and `model + query` alone determinizes once the model's own
+literal-point `lp` line is dropped. Scoring one record law twice — once at
+literal fields, once at ABI-symbolic ones — is what trips the refusal. See
+`flatppl-dev/TODO-flatppl-rust.md`.
 
 ## Oracle
 

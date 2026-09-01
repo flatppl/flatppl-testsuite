@@ -19,7 +19,8 @@ One directory per sample-path model (one so far: `hier_normal`), a unified test 
 |------|------|
 | `<test_id>/<test_id>.flatppl` | The sample-path model, ending in `rand(rng, lawof(record(...)))`. |
 | `<test_id>/<test_id>_density.flatppl` | A companion model with the IDENTICAL joint law, no `rand(...)` wrapper — used only by the sampling<->density secondary check (see below), named by `test.json`'s `density_model`. |
-| `<test_id>/test.json` | `test_type: "sample"`, `engines: ["det-js"]`, per-check frozen closed-form moments + Monte-Carlo tolerances (`checks[i].expected`/`atol`), or a top-level `stat` recipe (the stablehlo-sample shape) — see `unified/regen.py`'s docstring for which shape applies. |
+| `<test_id>/query.flatppl` | The density query as an `inputs`/`outputs` ABI, for the StableHLO row (see below). |
+| `<test_id>/test.json` | `test_type: "sample"`, `engines: ["det-js", "stablehlo"]`, per-check frozen closed-form moments + Monte-Carlo tolerances (`checks[i].expected`/`atol`), or a top-level `stat` recipe (the stablehlo-sample shape) — see `unified/regen.py`'s docstring for which shape applies. |
 | `<test_id>/test.py` | INDEPENDENT closed-form oracle: `stat()` returns structural moments (mean/var/cov) + the Monte-Carlo tolerance formulas; may also expose a per-point joint log-density for the density-consistency check. |
 
 `tests/test_unified.py` discovers every directory here automatically; there is no
@@ -66,6 +67,23 @@ identical joint law but no `rand(...)` wrapper. (Appending a second
 `lawof(...)` query onto the sample-path model after `rand()` has already
 consumed the stochastic-phase graph is refused by the determinizer —
 confirmed empirically — hence the separate companion model.)
+
+## StableHLO path
+
+The StableHLO row scores that SAME density query, at one frozen point, via a
+`"stablehlo"` engine block that overrides `test_type` to `"logdensity"` and
+`model` to the companion density file, plus `query.flatppl`'s
+`inputs`/`outputs` ABI. It is the one block in the corpus that carries its own
+`expected`, because a `sample` dir has no top-level scalar to share; the value
+comes from this dir's `test.py::logdensity` and
+`tests/core/test_engine_override_rows.py` re-derives it, since `regen` does not
+refreeze a block.
+
+The sample path itself is NOT scored on StableHLO: the emitter needs at least
+one `inputs` argument (`inputs = ()` is a parse error) and this model has no
+free parameter, and the `(sample, stablehlo)` runner's check kinds
+(`distribution`, `key_reproducibility`, `key_advance`, `fanout_distribution`)
+do not include the `sample_stats`/`cov` checks this dir exists for.
 
 ## Oracle
 

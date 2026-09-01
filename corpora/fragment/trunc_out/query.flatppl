@@ -1,0 +1,5 @@
+# The model's point sits OUTSIDE the truncation interval, so the frozen value
+# is exactly -inf on both paths.
+t_x = elementof(reals)
+inputs = (t_x)
+outputs = logdensityof(m, t_x)

@@ -1,0 +1,4 @@
+t_theta1 = elementof(reals)
+t_theta2 = elementof(posreals)
+inputs = (t_theta1, t_theta2)
+outputs = logdensityof(posterior, record(theta1 = t_theta1, theta2 = t_theta2))

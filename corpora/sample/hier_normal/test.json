@@ -1,7 +1,8 @@
 {
   "test_type": "sample",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "hier_normal.flatppl",
   "density_model": "hier_normal_density.flatppl",
@@ -83,5 +84,29 @@
       "rtol": 1e-06,
       "note": "For the first n_points swept realizations, the closed-form joint log-density at that exact (mu, y1, y2) must match logdensityof(lawof(record(mu=mu, y1=y1, y2=y2)), <point>) scored via the det-js path against density_model -- the sampling<->density agreement check."
     }
-  ]
+  ],
+  "stablehlo": {
+    "test_type": "logdensity",
+    "model": "hier_normal_density.flatppl",
+    "inputs": [
+      "t_mu",
+      "t_y1",
+      "t_y2"
+    ],
+    "points": [
+      {
+        "t_mu": 0.4,
+        "t_y1": -0.3,
+        "t_y2": 1.2
+      }
+    ],
+    "expected": [
+      -5.625200692608064
+    ],
+    "oracle": "closed-form (test.py::logdensity; see test_stablehlo_row_matches_oracle)",
+    "tolerance": {
+      "value_atol_f32": 1e-05,
+      "value_rtol_f32": 1e-06
+    }
+  }
 }

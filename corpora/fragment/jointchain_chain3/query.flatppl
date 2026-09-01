@@ -1,0 +1,5 @@
+t_a = elementof(reals)
+t_b = elementof(reals)
+t_c = elementof(reals)
+inputs = (t_a, t_b, t_c)
+outputs = logdensityof(j, record(a = t_a, b = t_b, c = t_c))

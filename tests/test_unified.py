@@ -23,7 +23,7 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.unified.harness import run_test_dir
-from flatppl_testsuite.unified.loader import discover_test_dirs, load_test
+from flatppl_testsuite.unified.loader import discover_test_dirs, load_test, merged_body
 
 _CORPORA = Path(__file__).resolve().parents[1] / "corpora"
 _DIRS = discover_test_dirs(_CORPORA)
@@ -129,7 +129,12 @@ def assert_results_acceptable(results, allow_skip: bool) -> None:
 def test_unified_dir(test_dir, engine):
     _gate_engine(engine)
     results = run_test_dir(test_dir, engines=[engine])
-    allow_skip = bool(load_test(test_dir).body.get("allow_skip", False))
+    # Per ENGINE, not per dir: a dir whose model the StableHLO path refuses but
+    # the det-js path scores declares `allow_skip` inside its `"stablehlo"`
+    # block, so the det-js case stays strict about its own skips.
+    allow_skip = bool(
+        merged_body(load_test(test_dir).body, engine).get("allow_skip", False)
+    )
     assert_results_acceptable(results, allow_skip=allow_skip)
 
 

@@ -18,6 +18,33 @@ class TestSpec:
     body: dict  # the whole parsed test.json
 
 
+def merged_body(body: dict, engine: str) -> dict:
+    """`body` with its per-engine override block for `engine` applied on top.
+
+    A test dir describes ONE model, but the two paths can need different
+    scoring shapes for the same query. `corpora/fragment/superpose` is the
+    case: det-js scores the model's own `lp = logdensityof(m, 0.5)` binding
+    directly (Mode A, no `points`), while the StableHLO emitter refuses a
+    module with no `inputs`/`outputs` ABI and therefore needs the same point
+    as an ABI argument. A `"stablehlo": { "inputs": …, "points": … }` block
+    supplies exactly that, and the det-js case keeps the body it always had --
+    so adding a StableHLO row to an existing dir cannot move the det-js
+    verdict.
+
+    Shallow merge, on purpose: `tolerance` is replaced whole, since the f32
+    band the StableHLO path needs has nothing to do with the 1e-9 band the
+    det-js path holds to, and a deep merge would leave the det-js `atol` in
+    place where it means nothing.
+
+    `expected` deliberately stays at the top level in the dirs that use this:
+    ONE frozen oracle value gates both paths, which is the whole point of
+    scoring the same query on both."""
+    override = body.get(engine)
+    if not isinstance(override, dict):
+        return body
+    return {**body, **override}
+
+
 def load_test(dir: Path) -> TestSpec:
     raw = json.loads((Path(dir) / "test.json").read_text())
     tt = raw.get("test_type")
@@ -28,6 +55,13 @@ def load_test(dir: Path) -> TestSpec:
     engines = raw.get("engines")
     if not isinstance(engines, list) or not engines:
         raise ValueError(f"{dir}: test.json 'engines' must be a non-empty list")
+    for engine in engines:
+        override_tt = merged_body(raw, engine).get("test_type")
+        if override_tt not in KNOWN_TEST_TYPES:
+            raise ValueError(
+                f"{dir}: engine {engine!r} override sets unknown test_type "
+                f"{override_tt!r} (known: {sorted(KNOWN_TEST_TYPES)})"
+            )
     return TestSpec(dir=Path(dir), test_type=tt, engines=list(engines), body=raw)
 
 
