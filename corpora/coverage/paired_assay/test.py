@@ -17,6 +17,10 @@ theta)` the CONDITIONAL `pdf(K(theta), obs)`. Before that the obs were
 scored against the prior predictive, Normal(0, sqrt(26)) /
 Normal(0, sqrt(29)), which is -36.27 at the first point rather than
 -22.89.
+
+The point keys are `query.flatppl`'s ABI input names, not the model's
+draw names: the dir scores under Mode ABI, so one query, one point set
+and one frozen vector serve both det-js and stablehlo.
 """
 import numpy as np
 from scipy import stats
@@ -26,7 +30,7 @@ B = np.array([1.1, 2.53, -0.4, 0.75, 1.9, -0.21])
 
 
 def oracle(point: dict) -> float:
-    mu_a, mu_b = float(point["mu_a"]), float(point["mu_b"])
+    mu_a, mu_b = float(point["mu_a_v"]), float(point["mu_b_v"])
     lik = stats.norm.logpdf(A, mu_a, 1.0).sum() + stats.norm.logpdf(B, mu_b, 2.0).sum()
     prior = stats.norm.logpdf(mu_a, 0.0, 5.0) + stats.norm.logpdf(mu_b, 0.0, 5.0)
     return float(lik + prior)

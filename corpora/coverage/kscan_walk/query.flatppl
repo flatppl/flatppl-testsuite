@@ -1,0 +1,4 @@
+% Mode ABI: one query, both engines. `D` is already the model's free parameter, so it is the ABI input directly.
+lp = logdensityof(posterior, record(D = D))
+inputs = (D)
+outputs = (lp)

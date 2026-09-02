@@ -11,6 +11,10 @@ determiniser extended-likelihood lowering on 2026-09-01 (flatppl-rust
 `poissonprocess-density`), so the frozen values are checked rather than
 skipped. Both engines agree with this oracle: det-js to 7e-15 absolute,
 StableHLO under Enzyme-JAX to 5e-6 (f32).
+
+The point keys are `query.flatppl`'s ABI input names, not the model's
+draw names: the dir scores under Mode ABI, so one query, one point set
+and one frozen vector serve both det-js and stablehlo.
 """
 import numpy as np
 from scipy import stats
@@ -25,7 +29,7 @@ _A, _B = (0.0 - 5.0) / 0.8, (10.0 - 5.0) / 0.8
 
 
 def oracle(point: dict) -> float:
-    s, b = float(point["s"]), float(point["b"])
+    s, b = float(point["s_v"]), float(point["b_v"])
     lam = s * stats.truncnorm.pdf(EVENTS, _A, _B, loc=5.0, scale=0.8) + b * 0.1
     lik = np.log(lam).sum() - (s + b)
     prior = stats.gamma.logpdf(s, a=5.0, scale=2.0) + stats.gamma.logpdf(b, a=8.0, scale=2.0)

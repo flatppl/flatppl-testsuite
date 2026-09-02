@@ -64,11 +64,29 @@ EXPECTED_ENGINES = {
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
     "coverage/allele_freq": {"det-js", "stablehlo"},
+    "coverage/ar1_drift": {"det-js", "stablehlo"},
+    "coverage/beam_bunch": {"det-js", "stablehlo"},
+    "coverage/b_mass_peak": {"det-js", "stablehlo"},
     "coverage/censored_lifetimes": {"det-js", "stablehlo"},
+    "coverage/kscan_walk": {"det-js", "stablehlo"},
+    "coverage/paired_assay": {"det-js", "stablehlo"},
     "coverage/sensor_calibration": {"det-js", "stablehlo"},
     "coverage/spectral_lines": {"det-js", "stablehlo"},
     "coverage/stdmod_interp_poly6": {"det-js", "stablehlo"},
     "coverage/two_instruments": {"det-js", "stablehlo"},
+    # The three coverage dirs with NO StableHLO row, and why. `dose_surface`
+    # has a StableHLO twin instead (`corpora/stablehlo/weighted_arity`),
+    # because the stablehlo runner requires a `points` list and a `points`
+    # list plus a `query.flatppl` puts det-js into Mode ABI, whose declared
+    # `inputs` may not be empty. `mv_mixture` refuses in the emitter,
+    # `mv_mixture_sample` is a `sample` dir whose det-js row already skips.
+    #   mv_mixture: "stablehlo: expected 2 argument(s), got 3" (ops.rs
+    #   `lower_get`, a multi-selector `get` the multivariate ksuperpose
+    #   lowering emits).
+    #   out_of_window: "determinize: refuse iid in `L`: iid size is not a
+    #   statically-resolved 1-D count (dynamic, multi-axis, or unresolved
+    #   domain); only a 1-D static size is unrolled" -- `lengthof(filter(..))`
+    #   stays dynamic, so the model never reaches the emitter.
     # The hs3 corpus is det-js only because its oracle is the external frozen
     # ROOT vector, which is a 2DeltaNLL difference no StableHLO row can score
     # directly. `histfactory` is the exception: an independent closed-form
@@ -81,7 +99,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 177
+EXPECTED_CASES = 182
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

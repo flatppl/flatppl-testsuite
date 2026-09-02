@@ -18,6 +18,13 @@ N x d `mu` beside an N x d x d `cov` has no form there.
 The flatppl-js engine reaches the same slice rule independently, in
 `flatppl-js/packages/engine/ksuperpose-expand.ts`. That agreement is not
 evidence: the values below are scipy's.
+
+NO StableHLO row: `crates/stablehlo` still refuses the slice form the
+determiniser now emits. Re-probed live 2026-09-02 at rust `b08eb79` with
+this dir's own `query.flatppl` — `flatppl stablehlo` exits 3 with
+"stablehlo: expected 2 argument(s), got 3", from `ops.rs`'s `lower_get`,
+which has no multi-selector `get` arm for `get(mus, i, all)`. The
+determiniser refusal is gone; the emitter gap is not.
 """
 import numpy as np
 from scipy.special import logsumexp

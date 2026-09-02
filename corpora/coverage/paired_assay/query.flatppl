@@ -1,0 +1,6 @@
+% Mode ABI: one query, both engines. `mu_a`/`mu_b` are model draws, so the scored free parameters take the `_v` suffix.
+mu_a_v = elementof(reals)
+mu_b_v = elementof(reals)
+lp = logdensityof(posterior, record(mu_a = mu_a_v, mu_b = mu_b_v))
+inputs = (mu_a_v, mu_b_v)
+outputs = (lp)

@@ -16,6 +16,10 @@ into its step conditionals, so all four points are numerically checked at
 determiniser answering "density lowering for `markovchain` is not
 implemented (deferred to a later task)"); the lowering landed and the
 frozen values below took over unchanged.
+
+The point keys are `query.flatppl`'s ABI input names, not the model's
+draw names: the dir scores under Mode ABI, so one query, one point set
+and one frozen vector serve both det-js and stablehlo.
 """
 import numpy as np
 from scipy import stats
@@ -51,7 +55,7 @@ _S = float((_INC ** 2).sum())
 
 
 def oracle(point: dict) -> float:
-    s = float(point["sigma_step"])
+    s = float(point["sigma_step_v"])
     lik = -N / 2 * np.log(2 * np.pi) - N * np.log(s) - _S / (2 * s * s)
     prior = np.log(2.0) + stats.cauchy.logpdf(s)
     return float(lik + prior)

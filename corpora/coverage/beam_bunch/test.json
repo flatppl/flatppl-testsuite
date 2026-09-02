@@ -1,26 +1,32 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "model.flatppl",
   "binding": "posterior",
+  "status": "lowers",
+  "inputs": [
+    "s_v",
+    "b_v"
+  ],
   "points": [
     {
-      "s": 15.0,
-      "b": 10.0
+      "s_v": 15.0,
+      "b_v": 10.0
     },
     {
-      "s": 10.0,
-      "b": 15.0
+      "s_v": 10.0,
+      "b_v": 15.0
     },
     {
-      "s": 20.0,
-      "b": 5.0
+      "s_v": 20.0,
+      "b_v": 5.0
     },
     {
-      "s": 12.5,
-      "b": 12.5
+      "s_v": 12.5,
+      "b_v": 12.5
     }
   ],
   "expected": [
@@ -31,7 +37,9 @@
   ],
   "tolerance": {
     "atol": 1e-09,
-    "rtol": 1e-09
+    "rtol": 1e-09,
+    "value_atol_f32": 1e-05,
+    "value_rtol_f32": 1e-06
   },
   "oracle": "scipy 1.18 (extended unbinned Poisson-process closed form)"
 }

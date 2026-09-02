@@ -23,6 +23,10 @@ against the module bundle". flatppl-js "engine: accept a standard-module
 member as a FlatPDL kernel tag" then lets that tag lower and stops the
 analyzer reporting it as an undefined variable — the densities were
 always REGISTRY-resident, so only the name was ever rejected.
+
+The point keys are `query.flatppl`'s ABI input names, not the model's
+draw names: the dir scores under Mode ABI, so one query, one point set
+and one frozen vector serve both det-js and stablehlo.
 """
 import numpy as np
 from scipy import stats
@@ -39,7 +43,7 @@ _CHI = np.sqrt(40.0)
 
 
 def oracle(point: dict) -> float:
-    f = float(point["f"])
+    f = float(point["f_v"])
     ps = crystalball.pdf(M_OBS, 1.5, 3.0, loc=5.279, scale=0.003)
     pb = argus.pdf(M_OBS, _CHI, scale=5.29)
     lik = np.log(f * ps + (1.0 - f) * pb).sum()

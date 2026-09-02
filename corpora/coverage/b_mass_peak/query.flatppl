@@ -1,0 +1,5 @@
+% Mode ABI: one query, both engines. `f` is a model draw, so the scored free parameter takes the `_v` suffix.
+f_v = elementof(unitinterval)
+lp = logdensityof(posterior, record(f = f_v))
+inputs = (f_v)
+outputs = (lp)

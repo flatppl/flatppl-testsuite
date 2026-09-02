@@ -1,23 +1,28 @@
 {
   "test_type": "logdensity",
   "engines": [
-    "det-js"
+    "det-js",
+    "stablehlo"
   ],
   "model": "model.flatppl",
   "binding": "posterior",
   "status": "lowers",
+  "inputs": [
+    "mu_a_v",
+    "mu_b_v"
+  ],
   "points": [
     {
-      "mu_a": 0.3,
-      "mu_b": 1.0
+      "mu_a_v": 0.3,
+      "mu_b_v": 1.0
     },
     {
-      "mu_a": 0.0,
-      "mu_b": 0.0
+      "mu_a_v": 0.0,
+      "mu_b_v": 0.0
     },
     {
-      "mu_a": -0.5,
-      "mu_b": 2.0
+      "mu_a_v": -0.5,
+      "mu_b_v": 2.0
     }
   ],
   "expected": [
@@ -27,7 +32,9 @@
   ],
   "tolerance": {
     "atol": 1e-09,
-    "rtol": 1e-09
+    "rtol": 1e-09,
+    "value_atol_f32": 5e-06,
+    "value_rtol_f32": 1e-07
   },
   "oracle": "scipy 1.18 (row- and field-wise Normal factorization)"
 }

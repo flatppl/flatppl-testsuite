@@ -30,6 +30,15 @@ TWO determiniser blockers, not one, and neither is the unroll:
    `interval(lo, hi)` truncation set; a named/other set is not yet
    supported" — `window` here is a named binding, and the arm wants an
    inline `interval(...)`.
+
+NO StableHLO row, for the same reason. Re-probed live 2026-09-02 with a
+`--features hs3,stablehlo` binary at rust `b08eb79` and an ABI query:
+`flatppl stablehlo` exits 3 with the SAME determiniser refusal, so the
+model never reaches the emitter and a stablehlo row would only add a
+second skip. Nothing to work around: `crates/stablehlo` has no `filter`
+either, and folding the size makes the whole data path vanish (N = 0 ->
+the literal 0.0), which is also the only route by which this model could
+ever execute on StableHLO.
 """
 from scipy import stats
 

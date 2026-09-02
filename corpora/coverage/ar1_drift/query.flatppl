@@ -1,0 +1,5 @@
+% Mode ABI: one query, both engines. `sigma_step` is a model draw, so the scored free parameter takes the `_v` suffix.
+sigma_step_v = elementof(posreals)
+lp = logdensityof(posterior, record(sigma_step = sigma_step_v))
+inputs = (sigma_step_v)
+outputs = (lp)
