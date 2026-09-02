@@ -171,18 +171,34 @@ def value(src: str, arg_values: list) -> float:
     return float(jax.jit(f)(*args))
 
 
-def gradient(src: str, arg_values: list, argnums: list[int]) -> list:
-    """``jax.grad`` of ``@main`` w.r.t. the arguments in ``argnums`` — the HMC
-    path. Returns one entry per requested argnum (a float for a scalar arg, a
-    list for a vector arg), matching the finite-difference oracle's shape."""
-    jax, jnp, hlo_call = _jax()
-    args = [_to_arg(jnp, v) for v in arg_values]
-    argnums_t = tuple(argnums)
+@lru_cache(maxsize=64)
+def _jitted_gradient(src: str, argnums: tuple):
+    """The `jax.jit`-compiled gradient callable for ``src``, cached by source
+    text and argnums — the same lever `_jitted_sample` below pulls, for the same
+    reason.
+
+    A gradient case scores one module at MANY points, so without this cache each
+    point defines + traces + Enzyme-differentiates + XLA-compiles a fresh
+    closure. Adjoint compilation is the expensive half: on
+    `stablehlo-gradient/dissimilar_mixture` one compile dominates the whole
+    case, so paying it per point multiplied the dir's runtime by its point
+    count."""
+    jax, _, hlo_call = _jax()
 
     def f(*a):
         return hlo_call(*a, source=src)[0].sum()
 
-    g = jax.jit(jax.grad(f, argnums=argnums_t))(*args)
+    return jax.jit(jax.grad(f, argnums=argnums))
+
+
+def gradient(src: str, arg_values: list, argnums: list[int]) -> list:
+    """``jax.grad`` of ``@main`` w.r.t. the arguments in ``argnums`` — the HMC
+    path. Returns one entry per requested argnum (a float for a scalar arg, a
+    list for a vector arg), matching the finite-difference oracle's shape."""
+    _, jnp, _ = _jax()
+    args = [_to_arg(jnp, v) for v in arg_values]
+
+    g = _jitted_gradient(src, tuple(argnums))(*args)
     out = []
     for gi in g:
         arr = np.asarray(gi)
