@@ -1,0 +1,12 @@
+# The variate domain is `reals`, not `nonnegreals`: §09 gives ContinuedPoisson
+# the domain `reals` with the support `nonnegreals`, and the point grid scores
+# below zero on purpose to reach the off-support branch.
+#
+# ContinuedPoisson is a `%finite` measure, so `lawof` refuses it (§04: an
+# unnormalized measure is not its own law). The density is reached the way
+# HistFactory's converter output reaches it, through `functionof` +
+# `likelihoodof`.
+hep = standard_module("particle-physics", "0.1")
+x = elementof(reals)
+aux = functionof(hep.ContinuedPoisson(rate = 4.5))
+aux_lik = likelihoodof(aux, x)

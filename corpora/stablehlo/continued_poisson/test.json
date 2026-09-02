@@ -1,0 +1,46 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "likelihoodof(functionof(hepphys.ContinuedPoisson(rate = 4.5)), x)",
+  "inputs": [
+    "x"
+  ],
+  "points": [
+    {
+      "x": 0.0
+    },
+    {
+      "x": 1.0
+    },
+    {
+      "x": 3.0
+    },
+    {
+      "x": 3.7
+    },
+    {
+      "x": 12.5
+    },
+    {
+      "x": -0.5
+    },
+    {
+      "x": -1.5
+    }
+  ],
+  "expected": [
+    -4.5,
+    -2.995922603223726,
+    -1.779527278899233,
+    -1.6713187782433527,
+    -6.959108696541275,
+    "-inf",
+    "-inf"
+  ],
+  "tolerance": {
+    "value_atol_f32": 0.0001
+  },
+  "oracle": "scipy 1.18 gammaln closed form (test.py); \u00a709's density is not normalized, so there is no normalizer to check"
+}

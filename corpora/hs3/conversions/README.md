@@ -43,6 +43,22 @@ pixi run test                 # tests/core/ + the unified harness, incl. every c
 pixi run unified               # the unified harness alone
 ```
 
+**HistFactory carries a second, ABSOLUTE check.** The ROOT vector above is a 2ΔNLL difference and
+so blind to a constant shift in every hs3 density. `histfactory/test.py` holds an independent
+closed-form oracle — a two-bin Poisson product, three unit-Gaussian constraints, and §09's
+`ContinuedPoisson` staterror term, with `interp_poly6_exp` obtained by solving §09's 6×6 C² system
+— and it reproduces the frozen ROOT vector to 8e-13, so everything but the offset is anchored by
+ROOT and the offset by closed-form maths. It is the only `corpora/hs3/` dir with a local `test.py`.
+
+That oracle also freezes the dir's `"stablehlo"` row: the same five points, scored absolutely
+through the StableHLO emitter and the IREE executor via `query.flatppl`. Its `value_atol_f32` is
+**5e-4, absolute, with `value_rtol_f32` at 0.0** — about 2e-4 is observed. The band is absolute
+rather than relative because the error is a fixed cancellation loss: $\log\Gamma(401) \approx 1990$
+and $\log\Gamma(101) \approx 364$ cancel against the Poisson terms down to a result of order ten, so
+the same ~2e-4 shows up at every point whatever its magnitude. That is f32 arithmetic, not a
+lowering error. `histfactory.flatppl` itself is unchanged; the ABI query lives in `query.flatppl`
+because `stablehlo_exec.emit_concat` hard-codes that filename.
+
 The frozen vectors are **generated from ROOT**, not the sibling engine. To regenerate after a
 converter change (requires ROOT ≥ 6.30):
 

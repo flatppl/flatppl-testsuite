@@ -1,0 +1,3 @@
+lp = logdensityof(aux_lik, record(x = x))
+inputs = (x)
+outputs = (lp)

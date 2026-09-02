@@ -157,9 +157,9 @@
       -19.447233346356427
     ],
     "tolerance": {
-      "value_atol_f32": 0.0001,
-      "value_rtol_f32": 3e-05
+      "value_atol_f32": 0.0005,
+      "value_rtol_f32": 0.0
     },
-    "oracle": "closed-form Poisson-product + ContinuedPoisson, scipy 1.18 (tests/core/test_hs3_absolute_density.py::_histfactory_oracle); ABSOLUTE per-point log-densities at the SAME grid as the twice_delta_nll_points check above, whose frozen ROOT vector this oracle reproduces to 8e-13"
+    "oracle": "closed-form Poisson-product + ContinuedPoisson, scipy 1.18 (test.py::oracle); ABSOLUTE per-point log-densities at the SAME grid as the twice_delta_nll_points check above, whose frozen ROOT vector this oracle reproduces to 8e-13. The f32 band is ABSOLUTE (~2e-4 observed, 5e-4 pinned) and value_rtol_f32 is 0.0: the error is a fixed cancellation loss, not proportional to the result -- lgamma(401) ~ 1990 and lgamma(101) ~ 364 cancel against the Poisson terms down to a result of order ten, so the same ~2e-4 appears at every point regardless of its magnitude."
   }
 }
