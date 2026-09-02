@@ -6,19 +6,18 @@ BIVARIATE normals, scored at five observation points.
 which is §06 `ksuperpose`'s own density rule. Sum w = 1 here, so the
 `normalize` divisor is 1 and the last term vanishes.
 
-STATUS: the rust determiniser REFUSES the model — "ksuperpose over a
-MULTIVARIATE parameter family is not lowered (the per-component slice
-extraction is not built): a family argument with an axis beyond the family
-axis has no `broadcast(record, ...)` form" (observed live 2026-09-01). §04
-*Collection arguments* makes a plain broadcast require the same number of
-axes from every collection argument and strips every axis to reach its
-cell, so an N x d `mu` beside an N x d x d `cov` has no form there.
-`allow_skip: true`; the frozen values take over when the lowering lands.
+STATUS: scored. The rust determiniser lowers the multivariate family to a
+per-component slice form — get(mus, i, all) for the flat N x d `mu`, and
+get(covs, i) for the nested N-vector of matrices — then the §06 mixture
+assembly, one `builtin_logdensityof` per component under one `logsumexp`
+(2026-09-02). It refused before that: a plain `broadcast(record, ...)`
+requires the same number of axes from every collection argument (§04
+*Collection arguments*) and strips every axis to reach its cell, so an
+N x d `mu` beside an N x d x d `cov` has no form there.
 
-The flatppl-js engine scores this same mixture correctly today (its
-`ksuperpose` expansion indexes only the family axis), verified against
-these values in
-`flatppl-js/packages/engine/test/ksuperpose-multivariate.test.ts`.
+The flatppl-js engine reaches the same slice rule independently, in
+`flatppl-js/packages/engine/ksuperpose-expand.ts`. That agreement is not
+evidence: the values below are scipy's.
 """
 import numpy as np
 from scipy.special import logsumexp

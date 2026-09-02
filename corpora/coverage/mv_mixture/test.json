@@ -6,7 +6,7 @@
   "model": "model.flatppl",
   "binding": "lp",
   "measure": "mix",
-  "status": "refuses",
+  "status": "lowers",
   "inputs": [
     "y"
   ],
@@ -28,6 +28,5 @@
     "atol": 1e-09,
     "rtol": 1e-09
   },
-  "oracle": "scipy 1.18 multivariate_normal mixture (see test.py)",
-  "allow_skip": true
+  "oracle": "scipy 1.18 multivariate_normal mixture (see test.py)"
 }
