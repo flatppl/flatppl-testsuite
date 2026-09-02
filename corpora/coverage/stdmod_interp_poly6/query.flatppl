@@ -1,0 +1,4 @@
+% Mode ABI: one query, both engines. `alpha` is already the model's free `elementof(reals)` boundary, so the query only names the ABI.
+lp = logdensityof(likelihood, record(alpha = alpha))
+inputs = (alpha)
+outputs = (lp)

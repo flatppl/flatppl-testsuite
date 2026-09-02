@@ -1,0 +1,52 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "likelihood",
+  "status": "lowers",
+  "inputs": [
+    "alpha"
+  ],
+  "points": [
+    {
+      "alpha": 0.0
+    },
+    {
+      "alpha": 0.5
+    },
+    {
+      "alpha": -0.3
+    },
+    {
+      "alpha": 1.0
+    },
+    {
+      "alpha": -1.0
+    },
+    {
+      "alpha": 1.8
+    },
+    {
+      "alpha": -2.5
+    }
+  ],
+  "expected": [
+    -2.6675960226263955,
+    -2.800347769264013,
+    -2.7197537016979716,
+    -3.503756801023373,
+    -3.8412568010233725,
+    -15.994433247733724,
+    -72.80428264776488
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09,
+    "value_atol_f32": 0.0001,
+    "value_rtol_f32": 1e-05
+  },
+  "oracle": "scipy 1.18 + a 6x6 solve of \u00a709's C^2 conditions, confirmed against ROOT 6.40.02 (FlexibleInterpVar / PiecewiseInterpolation, interpCode 4) to 4.4e-16 over this alpha grid"
+}

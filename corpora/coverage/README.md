@@ -33,6 +33,18 @@ Two kinds of dir live here:
 | `censored_lifetimes` | `truncate` with a LATENT bound, exact `-inf` gate point | lowers, matches closed form incl. -inf |
 | `mv_mixture` | §06 `ksuperpose` family axes by parameter rank: a MULTIVARIATE mixture (N x d `mu`, N x d x d `cov`) | determiniser refuses (no per-component slice extraction) |
 | `mv_mixture_sample` | the same mixture's sample path, per-draw component selection | determiniser refuses (ksuperpose sampling unimplemented) |
+| `stdmod_interp_poly6` | §09 standard-module FUNCTION members, one per lowered module: `particle-physics` (both degree-6 HistFactory interpolators, both extrapolation branches), `polynomials` (`legendre`), `distances` (`euclidean`) | lowers, matches a 6x6 solve of §09's C² conditions cross-checked against ROOT, plus `scipy.special` and the norm written out |
+
+`stdmod_interp_poly6` is the FUNCTION-member counterpart to `b_mass_peak`'s
+DISTRIBUTION members, and it is the only row anywhere that scores the
+determiniser's §09 function lowering. Note that a LOWERED member needs no JS
+catalogue entry: the lowering leaves base ops only, so the `distances` member
+scores on det-js even though `flatppl-js/packages/engine/standard-modules.ts`
+registers no `distances` module. `corpora/hs3/conversions/histfactory`
+uses the same two members, but that corpus runs through the `convert` runner,
+which scores via the `FLATPPL_ENGINE`-selected engine and defaults to pure
+`js` — so it never determinizes under `pixi run test`. See
+`tests/core/test_hs3_absolute_density.py` for the one check that does.
 
 Engine gaps found while authoring that could NOT be expressed as rows
 here (no green shape and no refusal to pin) are recorded in
