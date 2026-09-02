@@ -22,6 +22,32 @@ library `src/flatppl_testsuite/suites/hs3_import.py` (`score_scan`/`score_points
 `tests/test_unified.py` discovers every directory here automatically; there is no
 per-corpus gate script, manifest, or comparison-table script anymore.
 
+## Refusal pins
+
+Until 2026-09-02 the runner scored through the environment-selected engine,
+which defaults to pure JS, so these rows never ran `determinize` at all and the
+`det-js` label was false for the whole corpus. It now names the det-js path the
+way its sibling runners do (`tests/core/test_detjs_runners_are_det_js.py` guards
+that). Three fixtures turned out not to lower, and each is pinned with
+`status: "refuses"`, `allow_skip: true`, and the verbatim exit-3 message:
+`rf103_interprfuncs`, `rf203_ranges`, `rf207_comptools`. The frozen `expected`
+vectors stay REAL ROOT values, so each row starts comparing numbers the moment
+the lowering lands. `allow_skip` is per-dir, so it also covers the dir's
+`static_integrity` and `structure_import` checks; both pass today, and a
+regression in either would show up as a skip rather than a failure.
+
+The pinned message is the SHALLOWER of two stacked determiniser gaps. It fires
+on `__M__ = <pdf>`, the measure ALIAS binding that `formats/hs3/importer.assemble`
+emits on its prenormalized branch; the refusal is not construct-specific, since
+`M = g1` for a bare `Normal` refuses identically. Inline the name into `iid(...)`
+and the alias gap gives way to the real blocker, `normalize of an unnormalized
+measure needs a closed-form mass rule; totalmass is not FlatPDL`, on the
+converter's generic-pdf shape
+`normalize(truncate(weighted(x -> polynomial(...), Lebesgue(reals)), interval(...)))`.
+A polynomial's mass over an interval is closed form, so that is a capability
+gap, not a conformant refusal. Fixing the alias gap alone moves the message
+without turning any row green.
+
 ## Run
 
 ```sh

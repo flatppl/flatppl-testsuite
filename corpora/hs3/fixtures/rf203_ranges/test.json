@@ -5,6 +5,9 @@
   ],
   "backend": "roofit 6.41.01",
   "fixture_kind": "fixture",
+  "status": "refuses",
+  "allow_skip": true,
+  "refusal": "determinize: refuse `model` in `__M__` (<tmp>.flatppl:2026:9): primitive measure must be a built-in constructor call with well-formed positional or keyword arguments",
   "hs3": "hs3.json",
   "checks": [
     {
