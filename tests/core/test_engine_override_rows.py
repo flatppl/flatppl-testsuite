@@ -60,7 +60,10 @@ def test_a_block_expected_still_matches_the_dirs_own_oracle(dir, engine, block):
     mod = load_test_module(dir)
     got = [float(mod.logdensity(*[pt[name] for name in block["inputs"]]))
            for pt in block["points"]]
-    assert got == pytest.approx(block["expected"], abs=0, rel=1e-15), (
+    # 1e-12, not float identity: an oracle that goes through a linear solve or
+    # lgamma differs by ~1e-14 relative between libm/BLAS builds (CI vs a
+    # laptop), while a real drift of the frozen values is >= 1e-6.
+    assert got == pytest.approx(block["expected"], abs=0, rel=1e-12), (
         f"{dir.name}: the {engine!r} block's frozen `expected` no longer matches "
         "test.py's oracle -- regen does not refreeze a block, so update it by hand"
     )
