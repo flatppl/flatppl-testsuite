@@ -41,10 +41,10 @@ determiniser's §09 function lowering. Note that a LOWERED member needs no JS
 catalogue entry: the lowering leaves base ops only, so the `distances` member
 scores on det-js even though `flatppl-js/packages/engine/standard-modules.ts`
 registers no `distances` module. `corpora/hs3/conversions/histfactory`
-uses the same two members, but that corpus runs through the `convert` runner,
-which scores via the `FLATPPL_ENGINE`-selected engine and defaults to pure
-`js` — so it never determinizes under `pixi run test`. See
-`tests/core/test_hs3_absolute_density.py` for the one check that does.
+uses the same two members through the `convert` runner, which determinizes
+too since 2026-09-02 (before that it scored via the environment-selected
+engine, defaulting to pure `js`, so it never determinized at all).
+`tests/core/test_hs3_absolute_density.py` scores the same members absolutely.
 
 Engine gaps found while authoring that could NOT be expressed as rows
 here (no green shape and no refusal to pin) are recorded in

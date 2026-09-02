@@ -61,8 +61,10 @@ freezes the oracle's value into `test.json`.
 `src/flatppl_testsuite/unified/runners/`, wired into `unified/harness.py`'s dispatch.
 
 **A new FlatPPL engine** subclasses `FlatpplEngine` in `scoring/engine.py` and calls
-`register_engine(...)`. Select it with `FLATPPL_ENGINE` (default `js`); the unified
-harness and the 2DeltaNLL math are all engine-agnostic.
+`register_engine(...)`. `FLATPPL_ENGINE` (default `js`) selects one for a caller that
+asks the registry; no unified runner does, because a runner must score with the engine
+its label names (`tests/core/test_detjs_runners_are_det_js.py`). The 2DeltaNLL math is
+engine-agnostic: `scoring/flatppl_engine.py` takes the scorer as an argument.
 
 ## Dependencies
 

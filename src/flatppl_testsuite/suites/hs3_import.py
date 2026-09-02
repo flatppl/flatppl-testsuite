@@ -42,18 +42,21 @@ def _names_in_source(src: str) -> set[str]:
     return names
 
 
-def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
+def score_scan(hs3_doc: dict, hs3_path: Path, check: dict,
+               *, log_density) -> list[float]:
     """Score the 2DeltaNLL vector for a `twice_delta_nll_scan` check.
 
     Convert the fixture, then either score the converter's emitted likelihood
     binding (fixtures WITH a `likelihoods` block) or build the check-time iid
     likelihood (generic-family dists are already range-normalized, so they are
     iid'd directly; raw dists are range-normalized). Propagates
-    `SkipUnimplemented` and `DeterminizeRefused` (the latter only surfaces
-    under the `det-js` engine, when the model can't be legalized to FlatPDL);
-    raises `RuntimeError` (stage-prefixed) on convert/assemble/score failure.
-    Single scoring path shared by the suite runner and the comparison-table
-    script.
+    `SkipUnimplemented` and `DeterminizeRefused` (the latter when the model
+    can't be legalized to FlatPDL); raises `RuntimeError` (stage-prefixed) on
+    convert/assemble/score failure. Single scoring path shared by the suite
+    runner and the comparison-table script.
+
+    `log_density` is the caller's scorer, required so the environment cannot
+    pick one (see `scoring/flatppl_engine`).
     """
     from ..formats.hs3.importer import (
         convert, SkipUnimplemented, data_columns, assemble)
@@ -97,7 +100,8 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
         model_path = Path(tf.name)
     try:
         return twice_delta_nll(
-            model_path, binding, check["scan_parameter"], check["scan_points"], reference)
+            model_path, binding, check["scan_parameter"], check["scan_points"],
+            reference, log_density=log_density)
     except DeterminizeRefused:
         raise
     except Exception as e:
@@ -106,7 +110,7 @@ def score_scan(hs3_doc: dict, hs3_path: Path, check: dict) -> list[float]:
         model_path.unlink(missing_ok=True)
 
 
-def score_points(model_file: Path, check: dict) -> list[float]:
+def score_points(model_file: Path, check: dict, *, log_density) -> list[float]:
     """Score a `twice_delta_nll_points` check against the committed FlatPPL model.
 
     The conversions corpus (HS3 paper examples) ships a worked `<model>.flatppl`;
@@ -114,14 +118,18 @@ def score_points(model_file: Path, check: dict) -> list[float]:
     theta points and returns the 2DeltaNLL vector (offset-invariant, so it lines
     up with the frozen ROOT vector regardless of normalization conventions).
     Single scoring path shared by the suite runner and the comparison-table
-    script. Propagates `DeterminizeRefused` (only under the `det-js` engine);
-    raises `RuntimeError` (stage-prefixed) on other failure.
+    script. Propagates `DeterminizeRefused`; raises `RuntimeError`
+    (stage-prefixed) on other failure.
+
+    `log_density` is the caller's scorer, required so the environment cannot
+    pick one (see `scoring/flatppl_engine`).
     """
     from ..scoring.engine import DeterminizeRefused
     from ..scoring.flatppl_engine import twice_delta_nll_points
     try:
         return twice_delta_nll_points(
-            model_file, check["binding"], check["reference_point"], check["points"])
+            model_file, check["binding"], check["reference_point"],
+            check["points"], log_density=log_density)
     except DeterminizeRefused:
         raise
     except Exception as e:

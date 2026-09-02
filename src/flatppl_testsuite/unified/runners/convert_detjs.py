@@ -18,6 +18,14 @@ structure-checking helpers from `suites/hs3_import.py` rather than
 reimplementing them, so there is exactly one scoring path for the frozen ROOT
 vectors, shared with `corpora/hs3/run_comparisons.py` and the legacy gate.
 
+Scoring goes through `detjs_exec`, named here, the way every other det-js
+runner names it. It used to go through `scoring.engine.get_engine()`, which
+reads `FLATPPL_ENGINE` and defaults to `"js"` -- so under a plain `pixi run
+test` this whole det-js-labelled corpus scored in pure JS and never ran
+`determinize` at all (provable: point `FLATPPL_BIN` at a wrapper that fails on
+`determinize` and all 8 rows still passed). `tests/core/test_detjs_runners_are_det_js.py`
+guards the property.
+
 Skip semantics (legacy tags, preserved distinctly):
 * a conversion failure (an HS3 construct the converter doesn't legalize yet)
   is `CONVERT_SKIP`;
@@ -37,6 +45,7 @@ from flatppl_testsuite.scoring.result import (
 )
 from flatppl_testsuite.formats.hs3.importer import convert, SkipUnimplemented
 from flatppl_testsuite.suites.hs3_import import _names_in_source, score_points, score_scan
+from flatppl_testsuite.unified import detjs_exec as ex
 from flatppl_testsuite.unified.loader import TestSpec
 
 
@@ -127,7 +136,8 @@ def _run_fixture(tid: str, dir: Path, body: dict) -> list[CheckResult]:
 
         if kind == "twice_delta_nll_scan":
             try:
-                actual_vec = score_scan(hs3_doc, hs3_path, check)
+                actual_vec = score_scan(hs3_doc, hs3_path, check,
+                                        log_density=ex.log_density_at)
             except SkipUnimplemented as e:
                 results.append(CheckResult(
                     tid, check_id, "skipped", CONVERT_SKIP, e.hs3_type,
@@ -166,7 +176,8 @@ def _run_conversion(tid: str, dir: Path, body: dict) -> list[CheckResult]:
             raise ValueError(f"unknown check kind {check['kind']!r}")
 
         try:
-            actual_vec = score_points(model_file, check)
+            actual_vec = score_points(model_file, check,
+                                      log_density=ex.log_density_at)
         except DeterminizeRefused as e:
             results.append(CheckResult(tid, check_id, "skipped", DETERMINIZE_SKIP, str(e)))
             continue

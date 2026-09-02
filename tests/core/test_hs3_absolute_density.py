@@ -28,10 +28,11 @@ per-point values that `regen` never refreezes -- see the comment above it.
 
 `histfactory` matters for a second reason. It is the only corpus model that uses
 a §09 standard-module FUNCTION member (`interp_poly6_exp`, three times), and
-`score_binding` determinizes unconditionally, unlike the `convert` runner that
-scores the rest of this corpus through the `FLATPPL_ENGINE`-selected engine
-(default `js`). So this is the only place histfactory's determinised path, and
-therefore the §09 function lowering it needs, is scored at all.
+`score_binding` determinizes it against a closed-form oracle. The `convert`
+runner that drives the dir's own row determinizes too since 2026-09-02, but it
+compares against the frozen ROOT 2DeltaNLL vector, which is offset-invariant.
+So this is still the only place the §09 function lowering is checked in an
+ABSOLUTE density.
 """
 from __future__ import annotations
 
@@ -227,9 +228,9 @@ def test_histfactory_conversion_absolute_logdensity_matches_the_oracle():
     already, so this scores that binding directly -- an ABSOLUTE density.
 
     `score_binding` determinizes, so this also fails if the §09 function
-    lowering for `interp_poly6_exp` regresses. That is not covered anywhere else:
-    the dir's own unified row goes through the `convert` runner, which scores via
-    the `FLATPPL_ENGINE`-selected engine and defaults to pure `js`.
+    lowering for `interp_poly6_exp` regresses. The dir's own unified row
+    determinizes as well, but against an offset-invariant 2DeltaNLL vector, so
+    this is the only ABSOLUTE check on that lowering.
     """
     got = ex.score_binding(_HISTFACTORY / "histfactory.flatppl", "log_likelihood")
     want = _histfactory_oracle(_HF_NOMINAL)
