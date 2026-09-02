@@ -69,11 +69,19 @@ ENGINE_OVERRIDES = {
     "coverage/spectral_lines": {"det-js", "stablehlo"},
     "coverage/stdmod_interp_poly6": {"det-js", "stablehlo"},
     "coverage/two_instruments": {"det-js", "stablehlo"},
+    # The hs3 corpus is det-js only because its oracle is the external frozen
+    # ROOT vector, which is a 2DeltaNLL difference no StableHLO row can score
+    # directly. `histfactory` is the exception: an independent closed-form
+    # Poisson-product oracle (`test_hs3_absolute_density.py`) reproduces that
+    # ROOT vector, so it can also freeze ABSOLUTE per-point densities for a
+    # StableHLO row on the same grid. Its `"stablehlo"` override block switches
+    # the test_type from `convert` to `logdensity` and points at `query.flatppl`.
+    "hs3/conversions/histfactory": {"det-js", "stablehlo"},
 }
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 175
+EXPECTED_CASES = 176
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

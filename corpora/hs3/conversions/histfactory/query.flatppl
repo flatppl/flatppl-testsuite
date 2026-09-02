@@ -1,0 +1,8 @@
+# Mode ABI: the SAME query the model's own `log_likelihood` binding scores, with
+# the nominal point's record fields opened up as ABI inputs so the frozen point
+# grid can drive it. Every name is already a free `elementof` boundary in the
+# model, so the query only names the ABI. The record's field order is the
+# model's own, unchanged.
+lp = logdensityof(likelihood, record(syst1 = syst1, mu = mu, syst2 = syst2, mcstat = mcstat, syst3 = syst3))
+inputs = (mu, syst1, syst2, syst3, mcstat)
+outputs = (lp)
