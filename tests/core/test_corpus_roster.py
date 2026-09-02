@@ -31,10 +31,10 @@ EXPECTED_COUNTS = {
     "hs3": 8,
     "sample": 1,
     "stablehlo": 27,
-    "stablehlo-gradient": 18,
+    "stablehlo-gradient": 20,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 128
+EXPECTED_TOTAL = 130
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -99,7 +99,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 182
+EXPECTED_CASES = 184
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
@@ -213,4 +213,34 @@ def test_total_collected_case_count():
     cases = sum(len(v) for v in _engines_by_dir().values())
     assert cases == EXPECTED_CASES, (
         f"expected {EXPECTED_CASES} (dir, engine) cases, found {cases}"
+    )
+
+# Two stablehlo-gradient dirs score the DERIVATIVE of a model whose VALUE is
+# already scored under `examples/`. The harness reads `model.flatppl` from the
+# test dir itself (`unified/stablehlo_exec.emit_concat`), so the model has to be
+# duplicated rather than referenced -- and a duplicate drifts silently. Pin that
+# the pairs stay byte-identical, in both directions: editing either copy fails
+# here until both are updated.
+GRADIENT_MODEL_TWINS = {
+    "stablehlo-gradient/signal_background_counting":
+        "examples/ex_signal_background_counting",
+    "stablehlo-gradient/zero_inflated_binomial":
+        "examples/ex_zero_inflated_binomial",
+}
+
+
+def test_gradient_cases_share_their_examples_model_verbatim():
+    drifted = []
+    for grad_dir, example_dir in GRADIENT_MODEL_TWINS.items():
+        for name in ("model.flatppl", "query.flatppl"):
+            a = _CORPORA / grad_dir / name
+            b = _CORPORA / example_dir / name
+            if not a.exists() or not b.exists():
+                drifted.append(f"{grad_dir}/{name}: missing a copy")
+            elif a.read_bytes() != b.read_bytes():
+                drifted.append(f"{grad_dir}/{name} != {example_dir}/{name}")
+    assert not drifted, (
+        "a gradient case's model/query copy drifted from the examples dir it was "
+        "taken from. Update BOTH copies (the frozen vectors in the gradient dir "
+        "need a `regen` too):\n" + "\n".join(f"  {d}" for d in drifted)
     )
