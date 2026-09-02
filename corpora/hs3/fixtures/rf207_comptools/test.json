@@ -7,7 +7,8 @@
   "fixture_kind": "fixture",
   "status": "refuses",
   "allow_skip": true,
-  "refusal": "determinize: refuse `model` in `__M__` (<tmp>.flatppl:2061:9): primitive measure must be a built-in constructor call with well-formed positional or keyword arguments",
+  "refusal": "determinize: refuse normalize: normalize of an unnormalized measure needs a closed-form mass rule; `totalmass` is not FlatPDL",
+  "refusal_note": "`bkg1` is a chebychev_dist: the weight is `1 + a0*chebyshev(1, u) + a1*chebyshev(2, u)` over an affine `u`. That IS a polynomial in the observable, so its mass over the interval is closed form, but it is spelled with §09 `polynomials` members rather than §07 `polynomial(c, x)`, which the determiniser's polynomial mass rule reads. A Chebyshev arm is the follow-on.",
   "hs3": "hs3.json",
   "checks": [
     {

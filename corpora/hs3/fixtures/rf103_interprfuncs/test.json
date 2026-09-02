@@ -7,7 +7,8 @@
   "fixture_kind": "fixture",
   "status": "refuses",
   "allow_skip": true,
-  "refusal": "determinize: refuse `genpdf` in `__M__` (<tmp>.flatppl:4033:9): primitive measure must be a built-in constructor call with well-formed positional or keyword arguments",
+  "refusal": "determinize: refuse normalize in `genpdf` (<tmp>.flatppl:9:10): normalize of an unnormalized measure needs a closed-form mass rule; `totalmass` is not FlatPDL",
+  "refusal_note": "The generic_dist weight is `1 + 0.1*abs(x) + sin(sqrt(abs(x*alpha + 0.1)))`. Its integral over the observable's domain has no closed form, so no closed-form mass rule can normalize it; this row needs numeric quadrature in the engine, not a new determiniser identity.",
   "hs3": "hs3.json",
   "checks": [
     {
