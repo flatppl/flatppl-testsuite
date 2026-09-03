@@ -46,13 +46,16 @@ def test_det_js_scores_gaussian(tmp_path):
 
 
 def test_det_js_refuses_continuous_kchain(tmp_path):
+    # theta must be non-empty: an empty record renders as `record()`, which spec
+    # §04 forbids ("Nullary calls (`f()`) are not allowed"), so inference refused
+    # at exit 1 before the kchain refusal under test could fire at exit 3.
     model = tmp_path / "k.flatppl"
     model.write_text(
         "mu = draw(Normal(mu = 0.0, sigma = 1.0))\n"
         "pp = kchain(lawof(record(mu = mu)), x -> Normal(mu = get(x, \"mu\"), sigma = 1.0))\n"
     )
     with pytest.raises(DeterminizeRefused):
-        get_engine("det-js").log_density(model, "pp", {})
+        get_engine("det-js").log_density(model, "pp", {"mu": 0.0})
 
 
 # det-js ≈ js cross-check (Phase 4b.3): a secondary internal check that the
