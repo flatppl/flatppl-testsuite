@@ -1,0 +1,7 @@
+t_p = elementof(interval(0.0, 1.0))
+t_mu = elementof(reals)
+t_sigma = elementof(posreals)
+t_shape = elementof(posreals)
+t_rate = elementof(posreals)
+inputs = (t_p, t_mu, t_sigma, t_shape, t_rate)
+outputs = logdensityof(posterior, record(p = t_p, mu = t_mu, sigma = t_sigma, shape = t_shape, rate = t_rate))
