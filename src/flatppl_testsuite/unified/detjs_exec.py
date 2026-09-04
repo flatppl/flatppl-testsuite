@@ -32,6 +32,43 @@ def log_density_at(model: Path, binding: str, theta: dict) -> float:
     return _ENGINE.log_density(model, binding, theta)
 
 
+def log_density_points(model: Path, binding: str, points: list[dict]) -> list["PointScore"]:
+    """`logdensityof(binding, theta)` at each theta, batched into one Node run.
+
+    Same theta-splice lowering as `log_density_at` -- theta is substituted into
+    the source before `determinize`, so each point needs its own determinize --
+    but the Node half runs once for the whole batch instead of once per point,
+    which is where the ~0.3 s engine load lives. Used by the pyhf corpus, whose
+    check compares an ABSOLUTE log-density at several points in one model.
+
+    A point whose determinize refuses raises `DeterminizeRefused` for the whole
+    batch, matching `log_density_at`: a refusal is a property of the model, not
+    of one theta.
+    """
+    from flatppl_testsuite.scoring.engine import render_record
+
+    src = model.read_text()
+    sources: list[str] = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for i, theta in enumerate(points):
+            in_path = Path(tmp) / f"p{i}.flatppl"
+            out_path = Path(tmp) / f"p{i}.flatpdl.flatppl"
+            in_path.write_text(
+                src + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n"
+            )
+            det = subprocess.run(
+                [str(CONFIG.flatppl_bin), "determinize", str(in_path), "-o", str(out_path)],
+                capture_output=True, text=True,
+            )
+            if det.returncode == 3:
+                raise DeterminizeRefused(det.stderr.strip())
+            if det.returncode != 0:
+                raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
+            sources.append(out_path.read_text())
+
+    return _score_flatpdl_batch(sources, "__score__")
+
+
 def parse_expected(v):
     """Frozen expected value -> float. `±inf`/`nan` cannot round-trip through
     JSON, so they are stored as the STRINGS "inf"/"-inf"/"nan" (e.g.

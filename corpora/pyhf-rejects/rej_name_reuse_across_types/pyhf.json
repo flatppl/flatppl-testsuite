@@ -1,0 +1,59 @@
+{
+ "channels": [
+  {
+   "name": "c",
+   "samples": [
+    {
+     "name": "a",
+     "data": [
+      50.0,
+      60.0
+     ],
+     "modifiers": [
+      {
+       "name": "t",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "b",
+     "data": [
+      10.0,
+      20.0
+     ],
+     "modifiers": [
+      {
+       "name": "t",
+       "type": "normsys",
+       "data": {
+        "lo": 0.9,
+        "hi": 1.1
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "c",
+   "data": [
+    60.0,
+    80.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "t",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

@@ -1,0 +1,30 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf_reject",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "generator": "corpora/pyhf-rejects/gen_expected.py",
+    "quantity": "the converter's exit code and refusal message, beside pyhf's own verdict"
+  },
+  "pyhf_error": null,
+  "pyhf_agrees": false,
+  "mismatch_reason": "A pyhf BUG, refused permanently. pyhf builds a model for a per-bin name shared across channels of unequal bin counts, then reads past the end of its own 2-component paramset and takes the third channel-B component from the preceding parameter, so it returns a number that is not the document's.",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "fc3fa9420e5bb2d4889befb68a896a97208c3b519009f6eed68d4649c79ef419"
+    },
+    {
+      "id": "convert_outcome",
+      "kind": "convert_outcome",
+      "expect_exit": 1,
+      "stderr_contains": "unsupported HS3 construct: `shapefactor` modifier `k` has 2 bins in channel `ca` and 3 in channel `cb`; a per-bin parameter has one component per bin, so the two counts must agree"
+    }
+  ]
+}

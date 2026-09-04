@@ -1,0 +1,92 @@
+{
+ "channels": [
+  {
+   "name": "ch1",
+   "samples": [
+    {
+     "name": "bkg",
+     "data": [
+      50.0,
+      60.0,
+      40.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      },
+      {
+       "name": "a1",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         45.0,
+         58.0,
+         39.0
+        ],
+        "hi_data": [
+         55.0,
+         63.0,
+         42.0
+        ]
+       }
+      },
+      {
+       "name": "a2",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         48.0,
+         54.0,
+         38.0
+        ],
+        "hi_data": [
+         52.0,
+         66.0,
+         41.0
+        ]
+       }
+      },
+      {
+       "name": "a3",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         49.0,
+         59.0,
+         35.0
+        ],
+        "hi_data": [
+         51.0,
+         61.0,
+         45.0
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "ch1",
+   "data": [
+    52.0,
+    58.0,
+    43.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

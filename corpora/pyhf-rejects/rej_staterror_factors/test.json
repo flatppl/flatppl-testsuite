@@ -1,0 +1,29 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf_reject",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "generator": "corpora/pyhf-rejects/gen_expected.py",
+    "quantity": "the converter's exit code and refusal message, beside pyhf's own verdict"
+  },
+  "pyhf_error": "InvalidModel: Incorrect number of values (2) for factors were configured by you, expected 9.",
+  "pyhf_agrees": true,
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "48a02feffd547852558a79ec8c6a881165516bb55190c51035956ab3e2bf1eec"
+    },
+    {
+      "id": "convert_outcome",
+      "kind": "convert_outcome",
+      "expect_exit": 1,
+      "stderr_contains": "unsupported HS3 construct: measurement `m` sets `factors` on parameter `st`, but a `staterror` modifier's parameter does not use `factors`"
+    }
+  ]
+}

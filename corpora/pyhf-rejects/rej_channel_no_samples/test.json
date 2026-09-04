@@ -1,0 +1,29 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf_reject",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "generator": "corpora/pyhf-rejects/gen_expected.py",
+    "quantity": "the converter's exit code and refusal message, beside pyhf's own verdict"
+  },
+  "pyhf_error": "InvalidSpecification: [] should be non-empty. Path: channels[0].samples Instance: [] Schema: workspace.json",
+  "pyhf_agrees": true,
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "3567bbd41e9bbbdba2dbc4ce89640dd7106f21b79087d09110bf39524208eeda"
+    },
+    {
+      "id": "convert_outcome",
+      "kind": "convert_outcome",
+      "expect_exit": 1,
+      "stderr_contains": "unsupported HS3 construct: channel `c` has no samples, so it has no expected counts"
+    }
+  ]
+}

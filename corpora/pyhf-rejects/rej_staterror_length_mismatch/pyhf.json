@@ -1,0 +1,49 @@
+{
+ "channels": [
+  {
+   "name": "c",
+   "samples": [
+    {
+     "name": "b",
+     "data": [
+      50.0,
+      60.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      },
+      {
+       "name": "st",
+       "type": "staterror",
+       "data": [
+        5.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "c",
+   "data": [
+    52.0,
+    58.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

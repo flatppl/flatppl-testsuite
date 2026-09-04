@@ -1,0 +1,105 @@
+{
+ "channels": [
+  {
+   "name": "signal",
+   "samples": [
+    {
+     "name": "signal",
+     "data": [
+      10.0,
+      35.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg1",
+     "data": [
+      100.0,
+      100.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_normsys",
+       "type": "normsys",
+       "data": {
+        "lo": 0.9,
+        "hi": 1.1
+       }
+      }
+     ]
+    },
+    {
+     "name": "bkg2",
+     "data": [
+      50.0,
+      100.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_normsys",
+       "type": "normsys",
+       "data": {
+        "lo": 0.5,
+        "hi": 1.5
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "control",
+   "samples": [
+    {
+     "name": "background",
+     "data": [
+      100.0,
+      100.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_normsys",
+       "type": "normsys",
+       "data": {
+        "lo": 0.9,
+        "hi": 1.1
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "signal",
+   "data": [
+    160.0,
+    235.0
+   ]
+  },
+  {
+   "name": "control",
+   "data": [
+    100.0,
+    100.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

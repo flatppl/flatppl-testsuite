@@ -1,0 +1,82 @@
+{
+ "channels": [
+  {
+   "name": "signal",
+   "samples": [
+    {
+     "name": "signal",
+     "data": [
+      20.0,
+      20.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg1",
+     "data": [
+      100.0,
+      70.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_shapefactor",
+       "type": "shapefactor",
+       "data": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "control",
+   "samples": [
+    {
+     "name": "background",
+     "data": [
+      100.0,
+      100.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_shapefactor",
+       "type": "shapefactor",
+       "data": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "signal",
+   "data": [
+    120.0,
+    90.0
+   ]
+  },
+  {
+   "name": "control",
+   "data": [
+    100.0,
+    100.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

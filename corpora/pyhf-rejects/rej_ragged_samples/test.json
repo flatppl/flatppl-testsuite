@@ -1,0 +1,29 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf_reject",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "generator": "corpora/pyhf-rejects/gen_expected.py",
+    "quantity": "the converter's exit code and refusal message, beside pyhf's own verdict"
+  },
+  "pyhf_error": "InvalidModel: expected 2 size sample data but got 1",
+  "pyhf_agrees": true,
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "74823cf3840ca89cf1ed49d4e69dc13f9b36f5d2694d43735dfbd22bb4a3781d"
+    },
+    {
+      "id": "convert_outcome",
+      "kind": "convert_outcome",
+      "expect_exit": 1,
+      "stderr_contains": "unsupported HS3 construct: channel `c`: sample `b` has 1 bins but expected 2"
+    }
+  ]
+}

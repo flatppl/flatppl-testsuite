@@ -96,6 +96,33 @@ root = ">=6.30"
 [feature.pyhs3.pypi-dependencies]
 pyhs3 = "*"
 
+# The pyhf oracle for `corpora/pyhf/`. pyhf is the ONLY reference number for a
+# pyhf workspace: the rust converter is the artifact under test and neither
+# engine can stand in for it. Pinned to 0.7.6, the version the import audit
+# measured, so a regenerated vector is comparable to the frozen one; `numpy`
+# pins the 64-bit numpy backend the audit used.
+#
+# Isolated from the default env on purpose. `pixi run test` scores these
+# fixtures with det-js and never imports pyhf, so CI needs no pyhf env — this
+# feature exists only to regenerate the frozen vectors:
+#   FLATPPL_BIN=/path/to/flatppl pixi run -e pyhf gen-pyhf
+[feature.pyhf.dependencies]
+python = ">=3.11"
+numpy = ">=1.26,<2.1"
+scipy = ">=1.11"
+
+[feature.pyhf.pypi-dependencies]
+pyhf = "==0.7.6"
+
+[feature.pyhf.tasks]
+# Freeze each `corpora/pyhf/<fixture>/test.json`'s absolute logpdf vector from
+# pyhf. Needs FLATPPL_BIN: the record shape per parameter is read off the
+# converter's own emitted `elementof` declaration, not guessed.
+gen-pyhf = { cmd = "python corpora/pyhf/gen_expected.py" }
+# Freeze each `corpora/pyhf-rejects/<doc>/test.json`'s converter exit code and
+# refusal message, beside pyhf's own measured verdict on the same document.
+gen-pyhf-rejects = { cmd = "python corpora/pyhf-rejects/gen_expected.py" }
+
 # ---------------------------------------------------------------------------
 # StableHLO numeric-execution gate. Executes emitted StableHLO with Enzyme-JAX
 # (`enzyme_ad.jax.hlo_call`) so the emitted density modules are checked as
@@ -147,4 +174,7 @@ unified = "python -m pytest tests/test_unified.py -q -m stablehlo_only"
 [environments]
 root = ["root"]
 pyhs3 = ["pyhs3"]
+# no-default-feature: the oracle must not be able to reach the runner's own
+# scoring path, so a frozen number cannot come from the engine under test.
+pyhf = { features = ["pyhf"], no-default-feature = true }
 stablehlo = { features = ["stablehlo"], no-default-feature = true }

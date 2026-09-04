@@ -1,0 +1,88 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "61abeeae45f4af8a9619d4e34cbcc9ab06ccfb58f18d65babab4ea2cb8878a82"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "h": 0.0,
+          "mu": 1.0,
+          "st": [
+            1.0
+          ]
+        },
+        {
+          "h": 1.790910257831142,
+          "mu": 0.9626601055083277,
+          "st": [
+            1.4943252313346027
+          ]
+        },
+        {
+          "h": 0.6266098250516661,
+          "mu": 1.635887316326482,
+          "st": [
+            1.664423160592359
+          ]
+        },
+        {
+          "h": 0.3430092616813807,
+          "mu": 1.2089695361968813,
+          "st": [
+            0.236561974876479
+          ]
+        },
+        {
+          "h": -0.04303585627676354,
+          "mu": 2.9091274394143474,
+          "st": [
+            2.803293706114563
+          ]
+        },
+        {
+          "h": 1.4395114423844302,
+          "mu": 1.785196004140888,
+          "st": [
+            0.6300689173245001
+          ]
+        }
+      ],
+      "expected": [
+        -1.9919660399948995,
+        -47.04515061750348,
+        -75.24235459227404,
+        -101.42741135286548,
+        -500.29042686478,
+        -22.274382223479197
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

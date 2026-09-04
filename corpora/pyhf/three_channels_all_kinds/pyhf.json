@@ -1,0 +1,159 @@
+{
+ "channels": [
+  {
+   "name": "ca",
+   "samples": [
+    {
+     "name": "sig",
+     "data": [
+      20.0,
+      10.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg",
+     "data": [
+      50.0,
+      60.0
+     ],
+     "modifiers": [
+      {
+       "name": "t",
+       "type": "normsys",
+       "data": {
+        "lo": 0.9,
+        "hi": 1.1
+       }
+      },
+      {
+       "name": "st_a",
+       "type": "staterror",
+       "data": [
+        5.0,
+        6.0
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cb",
+   "samples": [
+    {
+     "name": "sig",
+     "data": [
+      8.0,
+      4.0,
+      2.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg",
+     "data": [
+      30.0,
+      20.0,
+      10.0
+     ],
+     "modifiers": [
+      {
+       "name": "h",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         28.0,
+         18.0,
+         9.0
+        ],
+        "hi_data": [
+         33.0,
+         23.0,
+         12.0
+        ]
+       }
+      },
+      {
+       "name": "g_b",
+       "type": "shapesys",
+       "data": [
+        3.0,
+        2.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cc",
+   "samples": [
+    {
+     "name": "bkg",
+     "data": [
+      15.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      },
+      {
+       "name": "k",
+       "type": "shapefactor",
+       "data": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "ca",
+   "data": [
+    72.0,
+    68.0
+   ]
+  },
+  {
+   "name": "cb",
+   "data": [
+    40.0,
+    25.0,
+    11.0
+   ]
+  },
+  {
+   "name": "cc",
+   "data": [
+    16.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

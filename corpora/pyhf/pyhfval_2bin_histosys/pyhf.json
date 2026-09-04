@@ -1,0 +1,65 @@
+{
+ "channels": [
+  {
+   "name": "singlechannel",
+   "samples": [
+    {
+     "name": "signal",
+     "data": [
+      30.0,
+      95.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "background",
+     "data": [
+      100.0,
+      150.0
+     ],
+     "modifiers": [
+      {
+       "name": "bkg_norm",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         98,
+         100
+        ],
+        "hi_data": [
+         102,
+         190
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "singlechannel",
+   "data": [
+    130.0,
+    245.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

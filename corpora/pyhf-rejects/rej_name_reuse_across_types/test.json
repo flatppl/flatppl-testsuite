@@ -1,0 +1,29 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf_reject",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "generator": "corpora/pyhf-rejects/gen_expected.py",
+    "quantity": "the converter's exit code and refusal message, beside pyhf's own verdict"
+  },
+  "pyhf_error": "InvalidNameReuse: Multiple values for 'paramset_type' (['constrained_by_normal', 'unconstrained']) were found for t. Use unique modifier names when constructing the pdf.",
+  "pyhf_agrees": true,
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "1add71160936cbf8ebaefe54117d6f86ef4fb32f88c333626fc8094d3171dd4d"
+    },
+    {
+      "id": "convert_outcome",
+      "kind": "convert_outcome",
+      "expect_exit": 1,
+      "stderr_contains": "unsupported HS3 construct: modifier name `t` is used by a `normfactor` modifier in channel `c` and a `normsys` modifier in channel `c`; the two cannot share one nuisance parameter, so give them distinct names"
+    }
+  ]
+}

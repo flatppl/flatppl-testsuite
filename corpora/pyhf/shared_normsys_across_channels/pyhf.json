@@ -1,0 +1,84 @@
+{
+ "channels": [
+  {
+   "name": "ca",
+   "samples": [
+    {
+     "name": "bkg",
+     "data": [
+      50.0,
+      60.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      },
+      {
+       "name": "t",
+       "type": "normsys",
+       "data": {
+        "lo": 0.9,
+        "hi": 1.1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cb",
+   "samples": [
+    {
+     "name": "bkg",
+     "data": [
+      30.0,
+      20.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      },
+      {
+       "name": "t",
+       "type": "normsys",
+       "data": {
+        "lo": 0.85,
+        "hi": 1.2
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "ca",
+   "data": [
+    52.0,
+    58.0
+   ]
+  },
+  {
+   "name": "cb",
+   "data": [
+    31.0,
+    19.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

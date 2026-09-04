@@ -1,0 +1,100 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "092039b4db06597f86ddefa0785ac740103c160520fbf5e1fa573597e9e08dc1"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "mu": 1.0,
+          "f": [
+            1.0
+          ],
+          "g": [
+            1.0
+          ]
+        },
+        {
+          "mu": 3.0036371804817996,
+          "f": [
+            0.9626601055083277
+          ],
+          "g": [
+            1.4943252313346027
+          ]
+        },
+        {
+          "mu": 2.188626877536166,
+          "f": [
+            1.635887316326482
+          ],
+          "g": [
+            1.664423160592359
+          ]
+        },
+        {
+          "mu": 1.9901064831769664,
+          "f": [
+            1.2089695361968813
+          ],
+          "g": [
+            0.236561974876479
+          ]
+        },
+        {
+          "mu": 1.7198749006062655,
+          "f": [
+            2.9091274394143474
+          ],
+          "g": [
+            2.803293706114563
+          ]
+        },
+        {
+          "mu": 2.7576580096691012,
+          "f": [
+            1.785196004140888
+          ],
+          "g": [
+            0.6300689173245001
+          ]
+        }
+      ],
+      "expected": [
+        -6.412700200463661,
+        -31.036302139418268,
+        -70.54432258345597,
+        -120.29339799807576,
+        -374.6128770823004,
+        -24.54627126887752
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

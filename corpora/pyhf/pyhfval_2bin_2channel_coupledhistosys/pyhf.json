@@ -1,0 +1,123 @@
+{
+ "channels": [
+  {
+   "name": "signal",
+   "samples": [
+    {
+     "name": "signal",
+     "data": [
+      30.0,
+      35.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg1",
+     "data": [
+      100.0,
+      100.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_histosys",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         90.0,
+         90.0
+        ],
+        "hi_data": [
+         110.0,
+         110.0
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "name": "bkg2",
+     "data": [
+      50.0,
+      120.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_histosys",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         45.0,
+         45.0
+        ],
+        "hi_data": [
+         55.0,
+         55.0
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "control",
+   "samples": [
+    {
+     "name": "background",
+     "data": [
+      105.0,
+      100.0
+     ],
+     "modifiers": [
+      {
+       "name": "coupled_histosys",
+       "type": "histosys",
+       "data": {
+        "lo_data": [
+         95.0,
+         90.0
+        ],
+        "hi_data": [
+         110.0,
+         115.0
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "signal",
+   "data": [
+    180.0,
+    255.0
+   ]
+  },
+  {
+   "name": "control",
+   "data": [
+    105.0,
+    100.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

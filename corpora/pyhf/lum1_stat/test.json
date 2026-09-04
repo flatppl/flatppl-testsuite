@@ -1,0 +1,88 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "416396d91bcc59b6b9ac811046b1c421770584af1ffc26f11466a8358285b9ac"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "lumi": 1.0,
+          "mu": 1.0,
+          "st": [
+            1.0
+          ]
+        },
+        {
+          "lumi": 1.3581820515662284,
+          "mu": 0.9626601055083277,
+          "st": [
+            1.4943252313346027
+          ]
+        },
+        {
+          "lumi": 1.1253219650103332,
+          "mu": 1.635887316326482,
+          "st": [
+            1.664423160592359
+          ]
+        },
+        {
+          "lumi": 1.0686018523362761,
+          "mu": 1.2089695361968813,
+          "st": [
+            0.236561974876479
+          ]
+        },
+        {
+          "lumi": 0.9913928287446473,
+          "mu": 2.9091274394143474,
+          "st": [
+            2.803293706114563
+          ]
+        },
+        {
+          "lumi": 1.287902288476886,
+          "mu": 1.785196004140888,
+          "st": [
+            0.6300689173245001
+          ]
+        }
+      ],
+      "expected": [
+        0.5337626043133561,
+        -59.17916838881066,
+        -76.5852867380699,
+        -97.54442324117342,
+        -497.2141415548745,
+        -25.050537618487553
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

@@ -29,12 +29,14 @@ EXPECTED_COUNTS = {
     "examples": 15,
     "fragment": 21,
     "hs3": 8,
+    "pyhf": 167,
+    "pyhf-rejects": 31,
     "sample": 1,
     "stablehlo": 27,
     "stablehlo-gradient": 21,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 131
+EXPECTED_TOTAL = 329
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -50,6 +52,8 @@ EXPECTED_ENGINES = {
     "examples": {"det-js", "stablehlo"},
     "fragment": {"det-js", "stablehlo"},
     "hs3": {"det-js"},
+    "pyhf": {"det-js"},
+    "pyhf-rejects": {"det-js"},
     "sample": {"det-js", "stablehlo"},
     "stablehlo": {"stablehlo"},
     "stablehlo-gradient": {"stablehlo"},
@@ -99,7 +103,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 185
+EXPECTED_CASES = 383
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
@@ -113,6 +117,85 @@ EXPECTED_HS3 = {
     "conversions/gaussian", "conversions/histfactory", "conversions/product",
     "fixtures/rf101_basics", "fixtures/rf103_interprfuncs", "fixtures/rf203_ranges",
     "fixtures/rf207_comptools", "fixtures/rf304_uncorrprod",
+}
+# The pyhf corpus is the whole audit matrix, so its roster is pinned by GROUP
+# rather than by 167 literal names: the groups are what a reviewer can check,
+# and losing a group is the failure that matters. `sw<bins>_<kinds>` is the
+# combinatorial sweep over per-sample modifier subsets at 1, 2 and 3 bins;
+# `lum<bins>_<kind>` pairs lumi with one other kind; `m_<kind>` is one kind
+# alone; `pyhfval_*` are pyhf's own `tests/test_validation.py` workspaces. The
+# four `two_<kind>` two-channel fixtures stay in the named set below, because
+# a `two_` prefix would also swallow `two_channels`, `two_histosys` and the two
+# multi-measurement fixtures, which are distinct surface items.
+# See `corpora/pyhf/README.md`.
+EXPECTED_PYHF_GROUPS = {
+    "sw1_": 36, "sw2_": 36, "sw3_": 36,
+    "lum1_": 4, "lum2_": 4,
+    "m_": 7,
+    "pyhfval_": 10,
+}
+# The named fixtures outside those prefixes: the surface items and defect
+# classes the audit called out one by one.
+EXPECTED_PYHF_NAMED = {
+    "all_kinds_one_sample", "fixed_normsys", "histosys_shapesys",
+    "lumi_multi_channel", "lumi_with_normsys", "many_bins", "multichan_old",
+    "normfactor_shared_across_channels_diff_bins", "normsys_auxdata_override",
+    "normsys_histosys_share_a_name", "one_bin", "poi_bounds_inits",
+    "shapefactor_shared_across_channels", "shapesys_factors_override",
+    "shapesys_zero_nominal_bin", "shapesys_zero_unc_bin",
+    "shared_histosys_across_samples", "shared_normfactor_across_channels",
+    "shared_normsys_across_channels", "staterror_plus_shapesys",
+    "staterror_sigmas_override", "staterror_two_samples",
+    "staterror_zero_err_bin", "staterror_zero_nominal_bin",
+    "three_channels_all_kinds", "three_histosys",
+    "two_channels", "two_histosys",
+    "two_hist", "two_norm", "two_shap", "two_stat",
+    "two_measurements_conflicting_auxdata", "two_measurements_diff_poi",
+}
+# The rejection corpus, pinned by name: 31 documents, one per pyhf
+# validation-failure class plus the six the converter and pyhf disagree about.
+# A dropped document silently removes a whole failure class from the gate.
+EXPECTED_PYHF_REJECTS = {
+    "rej_bad_param_name",
+    "rej_channel_no_samples",
+    "rej_duplicate_channel_name",
+    "rej_duplicate_sample_name",
+    "rej_empty_channels",
+    "rej_empty_sample_data",
+    "rej_histosys_length_mismatch",
+    "rej_histosys_sigmas_override",
+    "rej_lumi_without_config",
+    "rej_lumi_wrong_modifier_name",
+    "rej_measurement_missing_poi",
+    "rej_modifier_extra_key",
+    "rej_modifier_missing_type",
+    "rej_name_reuse_across_types",
+    "rej_negative_nominal",
+    "rej_no_measurements",
+    "rej_no_observation_for_channel",
+    "rej_normsys_sigmas_override",
+    "rej_obs_length_mismatch",
+    "rej_ragged_samples",
+    "rej_reserved_param_name",
+    "rej_sample_missing_data",
+    "rej_shapesys_length_mismatch",
+    "rej_shapesys_shared_across_channels",
+    "rej_staterror_factors",
+    "rej_staterror_length_mismatch",
+    "rej_staterror_siglen",
+    "rej_undeclared_poi",
+    "rej_unknown_modifier_type",
+    "shapefactor_shared_diff_bins",
+    "staterror_shared_across_channels"
+}
+# The documents where the converter and pyhf DISAGREE, and must keep
+# disagreeing. Each carries a `mismatch_reason` in its test.json and a row in
+# `corpora/pyhf-rejects/README.md`. A new name appearing here is a real finding
+# and needs a reason before the pin moves.
+EXPECTED_PYHF_MISMATCHES = {
+    "rej_bad_param_name", "rej_measurement_missing_poi", "rej_no_measurements",
+    "rej_modifier_extra_key", "shapefactor_shared_diff_bins",
+    "staterror_shared_across_channels",
 }
 # Examples deliberately NOT given a test dir (recorded when the legacy
 # manifest.json that listed them was deleted).
@@ -152,6 +235,84 @@ def test_examples_roster_by_name():
 
 def test_hs3_roster_by_name():
     assert _dirs_by_corpus().get("hs3", set()) == EXPECTED_HS3
+
+
+def test_pyhf_roster_by_group():
+    dirs = _dirs_by_corpus().get("pyhf", set())
+    counts = {p: sum(1 for d in dirs if d.startswith(p))
+              for p in EXPECTED_PYHF_GROUPS}
+    assert counts == EXPECTED_PYHF_GROUPS, (
+        f"pyhf sweep group sizes changed:\n  expected: {EXPECTED_PYHF_GROUPS}\n"
+        f"  actual:   {counts}"
+    )
+    named = {d for d in dirs
+             if not any(d.startswith(p) for p in EXPECTED_PYHF_GROUPS)}
+    assert named == EXPECTED_PYHF_NAMED, (
+        f"pyhf named fixtures changed:\n  gained: {sorted(named - EXPECTED_PYHF_NAMED)}\n"
+        f"  lost:   {sorted(EXPECTED_PYHF_NAMED - named)}"
+    )
+
+
+def test_pyhf_rejects_roster_by_name():
+    assert _dirs_by_corpus().get("pyhf-rejects", set()) == EXPECTED_PYHF_REJECTS
+
+
+def test_the_pyhf_mismatch_set_is_exactly_the_reasoned_one():
+    """A document where the converter and pyhf disagree needs a recorded reason.
+
+    Both directions matter. A NEW mismatch is a finding that must be understood
+    before it is pinned; a mismatch that quietly RESOLVES means the converter
+    changed behaviour on a document whose divergence was deliberate.
+    """
+    actual, unreasoned = set(), []
+    for dir in sorted((_CORPORA / "pyhf-rejects").iterdir()):
+        if not (dir / "test.json").exists():
+            continue
+        body = json.loads((dir / "test.json").read_text())
+        if body.get("pyhf_agrees") is False:
+            actual.add(dir.name)
+            if not body.get("mismatch_reason"):
+                unreasoned.append(dir.name)
+    assert actual == EXPECTED_PYHF_MISMATCHES, (
+        f"gained: {sorted(actual - EXPECTED_PYHF_MISMATCHES)}, "
+        f"resolved: {sorted(EXPECTED_PYHF_MISMATCHES - actual)}"
+    )
+    assert not unreasoned, f"mismatch with no `mismatch_reason`: {unreasoned}"
+
+
+def test_every_pyhf_dir_freezes_an_absolute_logpdf_vector():
+    """The point of the corpus is an ABSOLUTE comparison with `rtol = 0`.
+
+    A row silently switching to a Delta, or gaining an `rtol`, would keep the
+    dir count and the engine list intact while dropping the property that makes
+    a normalization defect visible -- which is precisely how the staterror
+    defect survived every gate the suite had.
+    """
+    wrong = {}
+    for dir in sorted((_CORPORA / "pyhf").iterdir()):
+        if not (dir / "test.json").exists():
+            continue
+        body = json.loads((dir / "test.json").read_text())
+        checks = {c["kind"]: c for c in body["checks"]}
+        if body.get("fixture_kind") != "pyhf":
+            wrong[dir.name] = f"fixture_kind is {body.get('fixture_kind')!r}"
+        elif "logpdf_points" not in checks:
+            wrong[dir.name] = f"has no logpdf_points check (have: {sorted(checks)})"
+        elif "static_integrity" not in checks:
+            wrong[dir.name] = "has no static_integrity check"
+        else:
+            chk = checks["logpdf_points"]
+            tol = chk["tolerance"]
+            if tol.get("rtol") != 0:
+                wrong[dir.name] = f"rtol is {tol.get('rtol')!r}, must be 0"
+            elif len(chk["points"]) != len(chk["expected"]):
+                wrong[dir.name] = (
+                    f"{len(chk['points'])} points but {len(chk['expected'])} "
+                    "expected values"
+                )
+            elif body.get("oracle", {}).get("tool") != "pyhf":
+                wrong[dir.name] = f"oracle is {body.get('oracle', {}).get('tool')!r}"
+    assert not wrong, "\n".join(f"  {k}: {v}" for k, v in sorted(wrong.items()))
 
 
 def test_excluded_examples_have_no_test_dir():

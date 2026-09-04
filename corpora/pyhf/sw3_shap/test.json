@@ -1,0 +1,95 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "775f83cb59b981ceb6fe3a1f83087d150220e901d482a22cecb8b2cd27ba52a9"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "c_likelihood",
+      "binding_note": "`likelihood = c_likelihood` is a bare alias, which `flatppl determinize` refuses to score through (expected likelihoodof). Scoring c_likelihood directly -- the same measure, since the alias carries no arithmetic.",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "mu": 1.0,
+          "f": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "mu": 3.0036371804817996,
+          "f": [
+            0.9626601055083277,
+            1.4943252312772977,
+            2.188626877536166
+          ]
+        },
+        {
+          "mu": 1.635887316326482,
+          "f": [
+            1.664423160539914,
+            1.9901064831769664,
+            1.2089695361968813
+          ]
+        },
+        {
+          "mu": 0.23656197478323793,
+          "f": [
+            1.7198749006062655,
+            2.9091274394143474,
+            2.8032937060946566
+          ]
+        },
+        {
+          "mu": 2.7576580096691012,
+          "f": [
+            1.785196004140888,
+            0.630068917242502,
+            1.6420349471768279
+          ]
+        },
+        {
+          "mu": 2.3618191793990966,
+          "f": [
+            0.968868039227067,
+            3.4964275244906426,
+            2.005515780362092
+          ]
+        }
+      ],
+      "expected": [
+        -9.142266275192185,
+        -62.9659299120741,
+        -40.41631912793292,
+        -99.85170032907749,
+        -43.64700568769035,
+        -117.32700365329825
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

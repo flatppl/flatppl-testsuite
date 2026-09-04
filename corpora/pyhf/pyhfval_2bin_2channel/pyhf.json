@@ -1,0 +1,88 @@
+{
+ "channels": [
+  {
+   "name": "signal",
+   "samples": [
+    {
+     "name": "signal",
+     "data": [
+      10.0,
+      35.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "background",
+     "data": [
+      100.0,
+      150.0
+     ],
+     "modifiers": [
+      {
+       "name": "uncorr_bkguncrt_signal",
+       "type": "shapesys",
+       "data": [
+        10.0,
+        10.0
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "control",
+   "samples": [
+    {
+     "name": "background",
+     "data": [
+      200.0,
+      350.0
+     ],
+     "modifiers": [
+      {
+       "name": "uncorr_bkguncrt_control",
+       "type": "shapesys",
+       "data": [
+        5.0,
+        10.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "signal",
+   "data": [
+    110.0,
+    185.0
+   ]
+  },
+  {
+   "name": "control",
+   "data": [
+    200.0,
+    350.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

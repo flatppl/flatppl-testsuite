@@ -1,0 +1,88 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "e4c2434e4af67d26f62083a5547546302d3beeb311a465024373d4db667dcf1b"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "mu": 1.0,
+          "f": [
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "mu": 3.0036371804817996,
+          "f": [
+            0.9626601055083277,
+            1.4943252312772977
+          ]
+        },
+        {
+          "mu": 2.188626877536166,
+          "f": [
+            1.635887316326482,
+            1.664423160539914
+          ]
+        },
+        {
+          "mu": 1.9901064831769664,
+          "f": [
+            1.2089695361968813,
+            0.23656197478323793
+          ]
+        },
+        {
+          "mu": 1.7198749006062655,
+          "f": [
+            2.9091274394143474,
+            2.8032937060946566
+          ]
+        },
+        {
+          "mu": 2.7576580096691012,
+          "f": [
+            1.785196004140888,
+            0.630068917242502
+          ]
+        }
+      ],
+      "expected": [
+        -11.670898728987211,
+        -41.52955366837254,
+        -54.26643726597807,
+        -35.390824168457826,
+        -159.7920251206753,
+        -41.61564652911537
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

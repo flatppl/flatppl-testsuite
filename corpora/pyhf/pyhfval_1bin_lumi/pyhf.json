@@ -1,0 +1,85 @@
+{
+ "channels": [
+  {
+   "name": "channel1",
+   "samples": [
+    {
+     "name": "signal",
+     "data": [
+      20.0
+     ],
+     "modifiers": [
+      {
+       "data": null,
+       "name": "mu",
+       "type": "normfactor"
+      }
+     ]
+    },
+    {
+     "name": "background1",
+     "data": [
+      100.0
+     ],
+     "modifiers": [
+      {
+       "data": null,
+       "name": "lumi",
+       "type": "lumi"
+      }
+     ]
+    },
+    {
+     "name": "background2",
+     "data": [
+      0.0
+     ],
+     "modifiers": [
+      {
+       "data": null,
+       "name": "lumi",
+       "type": "lumi"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "channel1",
+   "data": [
+    120.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": [
+     {
+      "name": "lumi",
+      "auxdata": [
+       1.0
+      ],
+      "sigmas": [
+       0.1
+      ],
+      "inits": [
+       1.0
+      ],
+      "bounds": [
+       [
+        0.5,
+        1.5
+       ]
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

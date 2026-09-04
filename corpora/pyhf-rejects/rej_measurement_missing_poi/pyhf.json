@@ -1,0 +1,39 @@
+{
+ "channels": [
+  {
+   "name": "c",
+   "samples": [
+    {
+     "name": "b",
+     "data": [
+      50.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "c",
+   "data": [
+    50.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

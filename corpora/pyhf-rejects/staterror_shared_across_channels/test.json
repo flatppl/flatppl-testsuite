@@ -1,0 +1,30 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf_reject",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "generator": "corpora/pyhf-rejects/gen_expected.py",
+    "quantity": "the converter's exit code and refusal message, beside pyhf's own verdict"
+  },
+  "pyhf_error": null,
+  "pyhf_agrees": false,
+  "mismatch_reason": "pyhf accepts a staterror name shared across channels and gives it ONE paramset spanning every channel's bins, each channel masking its own slice. The converter refused rather than emit the correlated shape it used to. TRIPWIRE: the follow-up rust branch implements the spanning lowering, and when it lands this row FAILS on the exit code -- that is the signal to move the document into `corpora/pyhf/` as a scoring fixture. pyhf's numbers for it are in flatppl-dev/audit-fix-pyhf.md.",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "9a3474f42044a9d4c6dc1af77175fb385e9d7f4841072ead00dd9d880f883b1d"
+    },
+    {
+      "id": "convert_outcome",
+      "kind": "convert_outcome",
+      "expect_exit": 1,
+      "stderr_contains": "unsupported HS3 construct: `staterror` modifier `st` appears in channels `ca` and `cb`; pyhf gives such a name one parameter spanning every channel's bins (4 here) with each channel using its own slice, which this importer does not emit. Give each channel's modifier its own name, as pyhf's own workspaces do (`st_ca`, `st_cb`)"
+    }
+  ]
+}
