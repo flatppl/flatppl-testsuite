@@ -1,0 +1,70 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "e58c29df1412fee609473d33483a5e9d87542f57da382c29decf6943c32f6057"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "t": 0.0,
+          "mu": 1.0
+        },
+        {
+          "t": 1.790910257831142,
+          "mu": 0.9626601055083277
+        },
+        {
+          "t": -0.3652496696038604,
+          "mu": 2.188626877536166
+        },
+        {
+          "t": -0.16301811953359724,
+          "mu": 1.664423160539914
+        },
+        {
+          "t": 0.3430092616813807,
+          "mu": 1.2089695361968813
+        },
+        {
+          "t": -2.1620543217382315,
+          "mu": 1.7198749006062655
+        }
+      ],
+      "expected": [
+        -7.140925556771171,
+        -10.706418726852778,
+        -37.893882496694985,
+        -18.94213613384442,
+        -9.626080249515368,
+        -12.336085350393526
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

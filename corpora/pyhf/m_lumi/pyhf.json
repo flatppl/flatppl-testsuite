@@ -1,0 +1,80 @@
+{
+ "channels": [
+  {
+   "name": "c",
+   "samples": [
+    {
+     "name": "sig",
+     "data": [
+      20.0,
+      10.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      },
+      {
+       "name": "lumi",
+       "type": "lumi",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg",
+     "data": [
+      50.0,
+      60.0
+     ],
+     "modifiers": [
+      {
+       "name": "lumi",
+       "type": "lumi",
+       "data": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "c",
+   "data": [
+    72.0,
+    68.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": [
+     {
+      "name": "lumi",
+      "auxdata": [
+       1.0
+      ],
+      "bounds": [
+       [
+        0.5,
+        1.5
+       ]
+      ],
+      "inits": [
+       1.0
+      ],
+      "sigmas": [
+       0.1
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

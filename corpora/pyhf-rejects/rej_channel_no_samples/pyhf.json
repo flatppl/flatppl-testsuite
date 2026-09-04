@@ -1,0 +1,26 @@
+{
+ "channels": [
+  {
+   "name": "c",
+   "samples": []
+  }
+ ],
+ "observations": [
+  {
+   "name": "c",
+   "data": [
+    50.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

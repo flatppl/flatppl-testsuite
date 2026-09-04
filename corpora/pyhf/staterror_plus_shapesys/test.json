@@ -1,0 +1,112 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "0017ede74ea1a181bf064b3b0ec249964ca5bd05fab04b68137a9a448afd53dc"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "mu": 1.0,
+          "g": [
+            1.0,
+            1.0
+          ],
+          "st": [
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "mu": 3.0036371804817996,
+          "g": [
+            0.962660105580823,
+            1.4943252313346027
+          ],
+          "st": [
+            2.188626877573634,
+            1.6358873163797423
+          ]
+        },
+        {
+          "mu": 1.664423160539914,
+          "g": [
+            1.9901064832201063,
+            1.2089695362623394
+          ],
+          "st": [
+            0.236561974876479,
+            1.7198749006571263
+          ]
+        },
+        {
+          "mu": 2.9091274394143474,
+          "g": [
+            2.803293706114563,
+            2.757658009690311
+          ],
+          "st": [
+            1.7851960041898824,
+            0.6300689173245001
+          ]
+        },
+        {
+          "mu": 1.6420349471768279,
+          "g": [
+            2.361819179431616,
+            0.9688680392993851
+          ],
+          "st": [
+            3.496427524490745,
+            2.005515780404792
+          ]
+        },
+        {
+          "mu": 2.7397289079793787,
+          "g": [
+            3.1394312732679963,
+            1.6085065418331872
+          ],
+          "st": [
+            2.0706102704094675,
+            0.7957555010202716
+          ]
+        }
+      ],
+      "expected": [
+        -10.738284024642631,
+        -216.00942108631116,
+        -146.07380912796316,
+        -617.5762410788343,
+        -713.3996022753506,
+        -474.14589643919817
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

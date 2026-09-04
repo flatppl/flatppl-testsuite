@@ -1,0 +1,3 @@
+{"channels":[{"name":"c","samples":[{"name":"sig","data":[20.0,10.0],"modifiers":[{"name":"mu","type":"normfactor","data":null}]},{"name":"bkg","data":[50.0,60.0],"modifiers":[{"name":"st","type":"staterror","data":[5.0,6.0]}]}]}],
+ "observations":[{"name":"c","data":[72.0,68.0]}],
+ "measurements":[{"name":"m","config":{"poi":"mu","parameters":[{"name":"st","factors":[1.0,1.0]}]}}],"version":"1.0.0"}

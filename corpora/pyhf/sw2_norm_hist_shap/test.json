@@ -1,0 +1,100 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "9aa2dc756404b7b1ced608b173383ca07eb2dc0c852f7afb9d2eb9044c5415f7"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "h": 0.0,
+          "mu": 1.0,
+          "t": 0.0,
+          "f": [
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "h": 1.790910257831142,
+          "mu": 0.9626601055083277,
+          "t": -0.3652496696038604,
+          "f": [
+            2.188626877536166,
+            1.635887316326482
+          ]
+        },
+        {
+          "h": -0.12225262780012291,
+          "mu": 1.9901064831769664,
+          "t": -0.7729006625758839,
+          "f": [
+            0.23656197478323793,
+            1.7198749006062655
+          ]
+        },
+        {
+          "h": 1.6558963420204964,
+          "mu": 2.8032937060946566,
+          "t": 1.4395114423844302,
+          "f": [
+            1.785196004140888,
+            0.630068917242502
+          ]
+        },
+        {
+          "h": -0.15423578974738894,
+          "mu": 2.3618191793990966,
+          "t": -1.1159028011041898,
+          "f": [
+            3.4964275244906426,
+            2.005515780362092
+          ]
+        },
+        {
+          "h": 1.4138984399705412,
+          "mu": 3.1394312732576943,
+          "t": -0.20213351174407923,
+          "f": [
+            2.0706102703686278,
+            0.7957555009430075
+          ]
+        }
+      ],
+      "expected": [
+        -7.856828929639829,
+        -50.468679186430414,
+        -29.716750192461426,
+        -49.6618145462712,
+        -81.00882878301215,
+        -45.748957071919925
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

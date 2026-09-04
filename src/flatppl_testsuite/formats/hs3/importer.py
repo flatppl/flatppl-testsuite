@@ -62,16 +62,42 @@ def classify_unimplemented(stderr: str) -> SkipUnimplemented | None:
     return None
 
 
-def convert(hs3_json: Path) -> str:
-    """Run `flatppl convert --from hs3` and return the emitted FlatPPL source.
+def convert_raw(source: Path, source_format: str = "hs3") -> tuple[int, str]:
+    """Run the converter and return its `(exit code, stderr)` unclassified.
 
-    Raises SkipUnimplemented when the converter reports an out-of-scope
-    construct, so the runner can mark the fixture SKIP with the named type.
+    `convert` turns a nonzero exit into `SkipUnimplemented` or `RuntimeError`,
+    which is right for a fixture that is meant to convert. A REFUSAL fixture is
+    the opposite case: the refusal is the result under test, so the runner needs
+    the raw exit code and the verbatim message.
     """
+    if source_format not in ("hs3", "pyhf"):
+        raise ValueError(f"unknown source_format {source_format!r}")
     with tempfile.TemporaryDirectory() as d:
         out = Path(d) / "m.flatppl"
         proc = subprocess.run(
-            [str(CONFIG.flatppl_bin), "convert", "--from", "hs3",
+            [str(CONFIG.flatppl_bin), "convert", "--from", source_format,
+             str(source), str(out)],
+            capture_output=True, text=True)
+        return proc.returncode, proc.stderr
+
+
+def convert(hs3_json: Path, source_format: str = "hs3") -> str:
+    """Run `flatppl convert --from <source_format>` and return the FlatPPL source.
+
+    Raises SkipUnimplemented when the converter reports an out-of-scope
+    construct, so the runner can mark the fixture SKIP with the named type.
+
+    `source_format` selects the reader: `"hs3"` for a native HS3 document,
+    `"pyhf"` for a pyhf workspace. The two readers share this one CLI path and
+    one error classification, so a pyhf fixture's convert failure is tagged the
+    same way an HS3 fixture's is.
+    """
+    if source_format not in ("hs3", "pyhf"):
+        raise ValueError(f"unknown source_format {source_format!r}")
+    with tempfile.TemporaryDirectory() as d:
+        out = Path(d) / "m.flatppl"
+        proc = subprocess.run(
+            [str(CONFIG.flatppl_bin), "convert", "--from", source_format,
              str(hs3_json), str(out)],
             capture_output=True, text=True)
         if proc.returncode != 0:

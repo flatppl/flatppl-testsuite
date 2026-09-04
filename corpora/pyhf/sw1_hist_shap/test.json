@@ -1,0 +1,88 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "1cbc4299463221e0d85169856c6b60f0d355101c4b4bcca0a5a1a509e1627d62"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "h": 0.0,
+          "mu": 1.0,
+          "f": [
+            1.0
+          ]
+        },
+        {
+          "h": 1.790910257831142,
+          "mu": 0.9626601055083277,
+          "f": [
+            1.4943252312772977
+          ]
+        },
+        {
+          "h": 0.6266098250516661,
+          "mu": 1.635887316326482,
+          "f": [
+            1.664423160539914
+          ]
+        },
+        {
+          "h": 0.3430092616813807,
+          "mu": 1.2089695361968813,
+          "f": [
+            0.23656197478323793
+          ]
+        },
+        {
+          "h": -0.04303585627676354,
+          "mu": 2.9091274394143474,
+          "f": [
+            2.8032937060946566
+          ]
+        },
+        {
+          "h": 1.4395114423844302,
+          "mu": 1.785196004140888,
+          "f": [
+            0.630068917242502
+          ]
+        }
+      ],
+      "expected": [
+        -3.8864382235502632,
+        -15.001090253267993,
+        -15.823196728564092,
+        -22.37221434842799,
+        -50.536539254308614,
+        -5.162048028398385
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}

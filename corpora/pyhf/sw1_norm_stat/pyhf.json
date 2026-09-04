@@ -1,0 +1,63 @@
+{
+ "channels": [
+  {
+   "name": "c",
+   "samples": [
+    {
+     "name": "sig",
+     "data": [
+      10.0
+     ],
+     "modifiers": [
+      {
+       "name": "mu",
+       "type": "normfactor",
+       "data": null
+      }
+     ]
+    },
+    {
+     "name": "bkg",
+     "data": [
+      50.0
+     ],
+     "modifiers": [
+      {
+       "name": "t",
+       "type": "normsys",
+       "data": {
+        "lo": 0.92,
+        "hi": 1.13
+       }
+      },
+      {
+       "name": "st",
+       "type": "staterror",
+       "data": [
+        3.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "c",
+   "data": [
+    60.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "mu",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

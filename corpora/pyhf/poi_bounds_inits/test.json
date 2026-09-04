@@ -1,0 +1,65 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": 137,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  },
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "573bb1ccecc9763b73537595da7db17ccd0ad9bba42cde8e856a365eb952a4a3"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "c_likelihood",
+      "binding_note": "`likelihood = c_likelihood` is a bare alias, which `flatppl determinize` refuses to score through (expected likelihoodof). Scoring c_likelihood directly -- the same measure, since the alias carries no arithmetic.",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "mu": 2.0
+        },
+        {
+          "mu": 3.8618192320480276
+        },
+        {
+          "mu": 1.2377058499392783
+        },
+        {
+          "mu": 1.9212752973565257
+        },
+        {
+          "mu": 2.8139488425464996
+        },
+        {
+          "mu": 2.1032836924197627
+        }
+      ],
+      "expected": [
+        -8.970723959361692,
+        -25.668658282361804,
+        -6.274820489263902,
+        -8.552200448039315,
+        -14.829832535448304,
+        -9.563082285132225
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ]
+}
