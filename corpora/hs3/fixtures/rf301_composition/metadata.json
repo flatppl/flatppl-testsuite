@@ -1,0 +1,10 @@
+{
+  "description": "Gaussian whose mean is a polynomial function of another observable.",
+  "modified_from_source": false,
+  "notes": [],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf301_composition.py",
+  "test_id": "rf301_composition",
+  "title": "RooFit rf301 composition"
+}

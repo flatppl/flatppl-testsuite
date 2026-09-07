@@ -117,8 +117,15 @@ _GOLDEN = _golden_cases()
 
 
 def test_the_golden_roster_is_complete():
-    """All 8 hs3 dirs must be covered; a silently-shrinking list defeats this."""
-    assert len(_GOLDEN) == 8, f"expected 8 golden cases, found {[c[0] for c in _GOLDEN]}"
+    """All 12 hs3 dirs must be covered; a silently-shrinking list defeats this.
+
+    9 fixtures + 3 conversions. The four rf30x conditional fixtures joined in
+    the same change that vendored them: their `model.flatppl` is compared
+    against live converter output here, which is the ONE place a fixture dir's
+    golden is asserted -- the `fixture` arm of the runner reads only
+    `hs3.json`, so nothing else would notice a stale golden.
+    """
+    assert len(_GOLDEN) == 12, f"expected 12 golden cases, found {[c[0] for c in _GOLDEN]}"
 
 
 @pytest.mark.parametrize("name,hs3,gold", _GOLDEN, ids=[c[0] for c in _GOLDEN])

@@ -1,0 +1,10 @@
+{
+  "description": "Conditional product model with y-dependent Gaussian mean.",
+  "modified_from_source": false,
+  "notes": [],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf305_condcorrprod.py",
+  "test_id": "rf305_condcorrprod",
+  "title": "RooFit rf305 conditional correlated product"
+}

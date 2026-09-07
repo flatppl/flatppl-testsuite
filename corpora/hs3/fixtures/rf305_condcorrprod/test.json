@@ -1,0 +1,79 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "backend": "roofit 6.41.01",
+  "fixture_kind": "fixture",
+  "status": "refuses",
+  "allow_skip": true,
+  "refusal": "determinize: refuse normalize in `__L1__` (<tmp>.flatppl): normalize(truncate): closed-form Z via builtin_touniform is only defined for a univariate continuous base (touniform is the CDF only there, \u00a707); a discrete or multivariate base needs a different closed-form Z (e.g. a CMF / finite-support sum), which is not yet implemented",
+  "refusal_note": "Refused one level further out, on the `normalize(truncate(...))` the HARNESS adds when `formats/hs3/importer.assemble` range-normalizes the pdf. The closed-form Z goes through `builtin_touniform`, which is the CDF only for a univariate continuous base (spec \u00a707); this pdf's base is multivariate. THIS is the multivariate-normalize gap. The frozen ROOT vector is a REAL value and starts comparing when a multivariate Z lands. Distinct from the `totalmass` gap on the other three. SCORING CAVEAT for whoever lights this row: these are 2-D CONDITIONAL models and the converter emits a joint-normalized density over the observable RECORD, but `importer.assemble`'s 1-D path observes `data_columns(...)[0]`, a single column. In this fixture that column is `y`, and the Gaussian's variate is `x` with `y` the conditioning observable, so the 1-D path would score the wrong axis. Do not read a green row as agreement until `assemble` handles the multivariate observable record; the frozen ROOT vector cannot vouch for the column choice.",
+  "hs3": "hs3.json",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "a4fd9f8480c2d9fb0aafc49fae58d8536baeda45f48d607fc7c411f1dbe4b5c8"
+    },
+    {
+      "id": "structure_import",
+      "kind": "structure_import",
+      "target": {
+        "data": [
+          "modelData"
+        ],
+        "functions": [
+          "fy"
+        ],
+        "pdfs": [
+          "gaussx",
+          "gaussy",
+          "model"
+        ]
+      }
+    },
+    {
+      "comparison": {
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|",
+        "type": "pointwise_comp"
+      },
+      "expected": [
+        8237.581509928723,
+        2119.478985411184,
+        0.0,
+        1880.4583296499113,
+        7760.914327222485
+      ],
+      "id": "twice_delta_nll_scan",
+      "kind": "twice_delta_nll_scan",
+      "reference_point": {
+        "a0": -0.5,
+        "a1": -0.5,
+        "sigma": 0.5,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "scan_parameter": "a0",
+      "scan_points": [
+        -1.5,
+        -1.0,
+        -0.5,
+        0.0,
+        0.5
+      ],
+      "target": {
+        "data": "modelData",
+        "pdf": "model"
+      },
+      "tolerance": {
+        "atol": 1e-07,
+        "rtol": 1e-08
+      }
+    }
+  ],
+  "upstream_axis_order": [
+    "y",
+    "x"
+  ]
+}

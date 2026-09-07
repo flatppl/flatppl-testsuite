@@ -28,7 +28,7 @@ EXPECTED_COUNTS = {
     "coverage": 15,
     "examples": 15,
     "fragment": 21,
-    "hs3": 8,
+    "hs3": 12,
     "pyhf": 171,
     "pyhf-rejects": 30,
     "sample": 1,
@@ -36,7 +36,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 21,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 332
+EXPECTED_TOTAL = 336
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -103,7 +103,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 386
+EXPECTED_CASES = 390
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
@@ -117,6 +117,13 @@ EXPECTED_HS3 = {
     "conversions/gaussian", "conversions/histfactory", "conversions/product",
     "fixtures/rf101_basics", "fixtures/rf103_interprfuncs", "fixtures/rf203_ranges",
     "fixtures/rf207_comptools", "fixtures/rf304_uncorrprod",
+    # The four rf30x conditional/composition fixtures. Their scan rows are
+    # dark behind two determiniser gaps (see corpora/hs3/README.md), so the
+    # convert and structure halves are what they gate today -- which is
+    # exactly why the roster has to pin them: an `allow_skip` dir that lost
+    # its test.json would take those two checks with it silently.
+    "fixtures/rf301_composition", "fixtures/rf302_utilfuncs",
+    "fixtures/rf303_conditional", "fixtures/rf305_condcorrprod",
 }
 # The pyhf corpus is the whole audit matrix, so its roster is pinned by GROUP
 # rather than by 167 literal names: the groups are what a reviewer can check,

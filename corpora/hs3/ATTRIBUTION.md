@@ -39,6 +39,37 @@ Only the fixtures the harness currently converts **and** scores end to end:
   accepted; which side is exactly correct is not adjudicated here. See the `note` field
   in `expected.json`. Harness-local, not upstream.
 
+The four rf30x conditional/composition fixtures came in later, from a DIFFERENT
+upstream commit, so the single `Commit:` line above does not cover them:
+
+- Source commit: `12dfed749229604bcebbe241d04cd7deca7f74bb` (branch `master`).
+- `rf301_composition` — Gaussian whose mean is a polynomial function of another
+  observable. `hs3.json` and `metadata.json` verbatim; `expected.json` is
+  upstream's, with a `canonical_sha256` added to its `static_integrity` check
+  (upstream carries that check with no hash, so it would verify nothing).
+- `rf302_utilfuncs` — the same shape through four utility functions.
+- `rf303_conditional` — explicit conditional dist with its own `d` dataset.
+- `rf305_condcorrprod` — conditional dist inside a correlated product.
+
+Two provenance points, both deliberate.
+
+**The upstream working tree was dirty when these were copied.** Every fixture in
+that checkout had a reformatted `hs3.json` and `expected.json` relative to
+`master`. The reformat is cosmetic: for all four, the CANONICAL form
+(`json.dumps(sort_keys=True, separators=(",", ":"))`) is byte-identical to
+upstream `12dfed7`, so the frozen `canonical_sha256` reproduces from a clean
+checkout at that commit and no value depends on the local edit. That is checked,
+not assumed.
+
+**Their model changed between the two commits.** Against the `9d04e321` pin
+above, all four `hs3.json` files differ semantically: the dataset's two axes are
+SWAPPED (`[x, y]` became `[y, x]` in three of them), `nbins` was added and the
+per-axis `value` dropped. `expected.json` did NOT change. So the frozen ROOT
+vector predates an axis reordering, which is why each dir records its
+`upstream_axis_order` and why the `refusal_note` warns that the harness's 1-D
+scoring path would observe the wrong column. Nothing scores today, so nothing is
+wrong today.
+
 To run against the full upstream suite instead of this vendored subset, set
 `HS3SUITE` to an HS3TestSuite checkout.
 

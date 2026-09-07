@@ -1,0 +1,10 @@
+{
+  "description": "Conditional Gaussian model with generated data and external prototype data.",
+  "modified_from_source": false,
+  "notes": [],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf303_conditional.py",
+  "test_id": "rf303_conditional",
+  "title": "RooFit rf303 conditional model"
+}

@@ -1,0 +1,83 @@
+{
+  "test_type": "convert",
+  "engines": [
+    "det-js"
+  ],
+  "backend": "roofit 6.41.01",
+  "fixture_kind": "fixture",
+  "status": "refuses",
+  "allow_skip": true,
+  "refusal": "determinize: refuse normalize: normalize of an unnormalized measure needs a closed-form mass rule; `totalmass` is not FlatPDL",
+  "refusal_note": "Refused on the CONVERTER's own emitted `normalize`. The HS3 conditional dist lowers to `normalize(logweighted(<lambda over the observable record>, Lebesgue(...)))`, and the determiniser has no closed-form mass rule for an unnormalized measure -- `totalmass` is not in FlatPDL. The frozen ROOT vector is a REAL value, so this row starts comparing numbers the moment that rule lands. Distinct from the rf305 gap below. SCORING CAVEAT for whoever lights this row: these are 2-D CONDITIONAL models and the converter emits a joint-normalized density over the observable RECORD, but `importer.assemble`'s 1-D path observes `data_columns(...)[0]`, a single column. In this fixture that column is `y`, and the Gaussian's variate is `x` with `y` the conditioning observable, so the 1-D path would score the wrong axis. Do not read a green row as agreement until `assemble` handles the multivariate observable record; the frozen ROOT vector cannot vouch for the column choice.",
+  "hs3": "hs3.json",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "a0028361564d8c8bcd0bc0b8d86305a8f92ba2e2e61ec6f636bd07aee91921e2"
+    },
+    {
+      "id": "structure_import",
+      "kind": "structure_import",
+      "target": {
+        "data": [
+          "model_2Data"
+        ],
+        "functions": [
+          "fy_1",
+          "fy_2",
+          "fy_3",
+          "fy_4"
+        ],
+        "pdfs": [
+          "model_1",
+          "model_2",
+          "model_3",
+          "model_4"
+        ]
+      }
+    },
+    {
+      "comparison": {
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|",
+        "type": "pointwise_comp"
+      },
+      "expected": [
+        7842.016067552846,
+        1970.7453662613825,
+        0.0,
+        2002.5076091129667,
+        8001.928347905585
+      ],
+      "id": "twice_delta_nll_scan",
+      "kind": "twice_delta_nll_scan",
+      "reference_point": {
+        "a0": -1.5,
+        "a1": -0.5,
+        "sigma": 0.5,
+        "x": 0.0,
+        "y": 0.0
+      },
+      "scan_parameter": "a0",
+      "scan_points": [
+        -2.5,
+        -2.0,
+        -1.5,
+        -1.0,
+        -0.5
+      ],
+      "target": {
+        "data": "model_2Data",
+        "pdf": "model_2"
+      },
+      "tolerance": {
+        "atol": 1e-07,
+        "rtol": 1e-08
+      }
+    }
+  ],
+  "upstream_axis_order": [
+    "y",
+    "x"
+  ]
+}

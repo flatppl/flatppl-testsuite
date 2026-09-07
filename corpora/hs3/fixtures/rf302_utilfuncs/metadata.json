@@ -1,0 +1,12 @@
+{
+  "description": "Gaussian models using formula, polynomial, addition, and product functions.",
+  "modified_from_source": true,
+  "notes": [
+    "The original tutorial has no data; this fixture samples a representative model."
+  ],
+  "reference_backend": "roofit 6.41.01",
+  "schema_version": 1,
+  "source": "ROOT RooFit tutorial rf302_utilfuncs.py",
+  "test_id": "rf302_utilfuncs",
+  "title": "RooFit rf302 utility functions"
+}

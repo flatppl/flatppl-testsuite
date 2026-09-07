@@ -14,7 +14,7 @@ library `src/flatppl_testsuite/suites/hs3_import.py` (`score_scan`/`score_points
 
 | Path | What |
 |------|------|
-| `fixtures/<id>/` | One vendored HS3 model: `hs3.json` (input), `metadata.json` (provenance), `model.flatppl` (golden conversion), `test.json` (`fixture_kind: "fixture"`; `static_integrity`/`structure_import`/`twice_delta_nll_scan` checks, the last carrying the frozen ROOT `expected` vector). |
+| `fixtures/<id>/` | One vendored HS3 model: `hs3.json` (input), `metadata.json` (provenance), `model.flatppl` (golden conversion, asserted against live converter output by `tests/core/test_hs3_assemble.py` — the runner's `fixture` arm reads only `hs3.json`, so that test is the ONLY thing that catches a stale golden), `test.json` (`fixture_kind: "fixture"`; `static_integrity`/`structure_import`/`twice_delta_nll_scan` checks, the last carrying the frozen ROOT `expected` vector). |
 | `conversions/<model>/` | Three HS3-paper Appendix A models (`gaussian`, `product`, `histfactory`): `<model>.hs3.json`, `<model>.flatppl`, `<model>_root.py`, `test.json` (`fixture_kind: "conversion"`; one `twice_delta_nll_points` check with the frozen ROOT `expected` vector). See `conversions/README.md`. |
 | `conversions/gen_expected.py` | Regenerates every `conversions/<model>/test.json`'s frozen ROOT vector from the live ROOT/RooFit oracle (needs the `root` pixi env — `unified/regen.py` deliberately does not reproduce this offline). |
 | `ATTRIBUTION.md` | Source, commit, license, and the deliberate `rf103` deviation. **Read this before editing any fixture.** |
@@ -47,6 +47,45 @@ converter's generic-pdf shape
 A polynomial's mass over an interval is closed form, so that is a capability
 gap, not a conformant refusal. Fixing the alias gap alone moves the message
 without turning any row green.
+
+### The four rf30x conditional/composition fixtures
+
+`rf301_composition`, `rf302_utilfuncs`, `rf303_conditional` and
+`rf305_condcorrprod` are pinned the same way, and they arrived already
+refusing. They needed the converter to APPLY a function named by a
+distribution field: before that landed, all four converted at exit 0 and
+emitted `model = Normal(mu = fy, sigma = sigma)`, passing the lambda itself as
+a parameter, which the engine rejected outright with `record field 'mu': a
+function may not appear inside a record (spec §04)`. That was a hard failure,
+which `allow_skip` does NOT tolerate, so the four could not be vendored until
+the converter applied the function.
+
+They now refuse, and on TWO DIFFERENT gaps. Closing one will not light all
+four:
+
+| Fixtures | Refused on | The gap |
+|---|---|---|
+| rf301, rf302, rf303 | the CONVERTER's own emitted `normalize` | `normalize of an unnormalized measure needs a closed-form mass rule; totalmass is not FlatPDL`, on the conditional lowering `normalize(logweighted(<lambda over the observable record>, Lebesgue(...)))` |
+| rf305 | the `normalize(truncate(...))` the HARNESS adds in `assemble` | the closed-form Z goes through `builtin_touniform`, the CDF only for a univariate continuous base (§07); this pdf's base is multivariate |
+
+The rf301/302/303 gap is the same `totalmass` blocker the paragraph above
+names, reached by a different route. rf305's is the multivariate-normalize
+gap and is its own item.
+
+Each dir's frozen `expected` stays a REAL ROOT vector, so all four start
+comparing numbers as their gap closes. Meanwhile `static_integrity` and
+`structure_import` both pass on all four and are what they gate.
+
+**Do not read a green scan row here as agreement without checking the column.**
+These are 2-D conditional models. The converter emits a joint-normalized density
+over the observable RECORD, but `importer.assemble`'s 1-D path observes
+`data_columns(...)[0]`, one column. Upstream reordered these datasets' axes after
+the ROOT vector was frozen, so that column is now `y` in rf301, rf302 and rf305
+while the Gaussian's variate is `x` and `y` is the conditioning observable. Each
+dir records its `upstream_axis_order` and repeats the caveat in its
+`refusal_note`. Whoever closes the gap needs `assemble` to handle the
+multivariate observable record; the frozen vector cannot vouch for which axis was
+scored. See `ATTRIBUTION.md` for the commit-level detail.
 
 ## Run
 
