@@ -1,11 +1,11 @@
 # pyhf rejection corpus
 
-31 pyhf documents with no log-density to freeze, so what each row holds is the
+30 pyhf documents with no log-density to freeze, so what each row holds is the
 converter's **outcome**: its exit code and, for a refusal, a substring of its
 message. The refusal half of `corpora/pyhf/`, from the same import audit
 (`flatppl-dev/audit-fix-pyhf.md`).
 
-One document per pyhf validation-failure class, plus the six where the
+One document per pyhf validation-failure class, plus the five where the
 converter and pyhf disagree. A `logpdf_points` row cannot cover this: a
 document that exits 1 has nothing to score, and the property under test is that
 the converter refuses it *for the same reason pyhf does*.
@@ -43,7 +43,7 @@ document it rejects and manufacture a mismatch that is not one.
 
 ## Outcomes
 
-23 both refuse, 2 both accept and agree, 6 disagree.
+23 both refuse, 2 both accept and agree, 5 disagree.
 
 | Document | pyhf | converter | agree | The defect the converter names |
 |---|---|---|:--:|---|
@@ -77,18 +77,17 @@ document it rejects and manufacture a mismatch that is not one.
 | `rej_undeclared_poi` | refuses | exit 1 | yes | POI `mu` that no modifier declares |
 | `rej_unknown_modifier_type` | refuses | exit 1 | yes | unsupported histfactory modifier: nosuchmod |
 | `shapefactor_shared_diff_bins` | accepts | exit 1 | **no** | per-bin name shared across channels of unequal bin counts |
-| `staterror_shared_across_channels` | accepts | exit 1 | **no** | a `staterror` name spanning channels |
 
 Two documents deliberately share a message. `rej_lumi_wrong_modifier_name` uses
 a lumi modifier under a non-constant name; pyhf's schema requires the literal
 name `lumi`, and the converter reaches the same conclusion by the route it
 takes, so it reports the missing config entry.
 
-## The six mismatches
+## The five mismatches
 
 Each carries a `mismatch_reason` in its `test.json` and is pinned as a
 mismatch, not treated as a defect. `tests/core/test_corpus_roster.py` asserts
-the mismatch set is exactly these six and that each has a reason, in both
+the mismatch set is exactly these five and that each has a reason, in both
 directions: a new mismatch is a finding that needs understanding before it is
 pinned, and a mismatch that quietly *resolves* means the converter changed
 behaviour on a document whose divergence was deliberate.
@@ -114,24 +113,30 @@ the native HS3 path, which legitimately carries `parameter`, `constraint`,
   model, then reads past the end of its own two-component paramset and takes
   the third channel-B component from the preceding parameter, so it returns a
   number that is not the document's.
-- `staterror_shared_across_channels` is a **tripwire**. pyhf accepts a
-  staterror name shared across channels and gives it one paramset spanning
-  every channel's bins, each channel masking its own slice. The converter
-  refuses rather than emit the correlated shape it used to. A follow-up rust
-  branch implements the spanning lowering, and when it lands **this row fails
-  on the exit code** — that is the signal to move the document into
-  `corpora/pyhf/` as a scoring fixture. pyhf's numbers for it are already in
-  `flatppl-dev/audit-fix-pyhf.md`: -5.269013574690845 at init and
-  -32.9547729941094 at `[1.1, 0.9, 1.2, 0.8]`.
+## The tripwire fired
+
+`staterror_shared_across_channels` used to sit here, refused, with a note
+saying the row would fail on its exit code once the spanning lowering landed
+and that the failure was the signal to promote it. That is what happened. Rust
+`main` `106a7d2` emits the spanning form pyhf builds — one parameter over the
+union of the channels' bins, each channel slicing its own part — and `3e64224`
+sizes an `auxdata` override by the spanning component count. The document is
+now a scoring fixture in `corpora/pyhf/`, alongside three more the same branch
+made scoreable: `staterror_span_three`, `staterror_span_uneq` and
+`staterror_span_aux`.
+
+Worth keeping in mind for the next refusal pinned here: a refusal row is a
+placeholder for a capability, and the right outcome for one is to stop
+existing.
 
 ## The gate bites
 
 Run against a `flatppl` built from rust `main` at `0b5fc1c`, the immediate
-parent of the first pyhf import fix, **11 of the 31 rows fail**: six documents
+parent of the first pyhf import fix, **10 of the 30 rows fail**: six documents
 the converter then accepted (`rej_duplicate_channel_name`,
 `rej_duplicate_sample_name`, `rej_histosys_sigmas_override`,
 `rej_normsys_sigmas_override`, `rej_staterror_factors`, `rej_staterror_siglen`)
-plus the two cross-channel shapes it had not yet refused, and three whose
+plus `shapefactor_shared_diff_bins`, which it had not yet refused, and three whose
 message did not name the right defect:
 
 - `rej_channel_no_samples` and `rej_empty_channels` refused for an unrelated

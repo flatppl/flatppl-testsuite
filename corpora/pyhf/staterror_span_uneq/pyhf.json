@@ -1,0 +1,77 @@
+{
+ "channels": [
+  {
+   "name": "c1",
+   "samples": [
+    {
+     "name": "s",
+     "data": [
+      10.0,
+      20.0
+     ],
+     "modifiers": [
+      {
+       "name": "mcstat",
+       "type": "staterror",
+       "data": [
+        5.0,
+        6.0
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "c2",
+   "samples": [
+    {
+     "name": "s",
+     "data": [
+      30.0,
+      40.0,
+      50.0
+     ],
+     "modifiers": [
+      {
+       "name": "mcstat",
+       "type": "staterror",
+       "data": [
+        1.0,
+        2.0,
+        3.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "observations": [
+  {
+   "name": "c1",
+   "data": [
+    10.0,
+    20.0
+   ]
+  },
+  {
+   "name": "c2",
+   "data": [
+    30.0,
+    40.0,
+    50.0
+   ]
+  }
+ ],
+ "measurements": [
+  {
+   "name": "m",
+   "config": {
+    "poi": "",
+    "parameters": []
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

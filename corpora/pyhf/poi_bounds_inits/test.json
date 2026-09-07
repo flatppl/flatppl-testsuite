@@ -22,8 +22,7 @@
     {
       "id": "logpdf_points",
       "kind": "logpdf_points",
-      "binding": "c_likelihood",
-      "binding_note": "`likelihood = c_likelihood` is a bare alias, which `flatppl determinize` refuses to score through (expected likelihoodof). Scoring c_likelihood directly -- the same measure, since the alias carries no arithmetic.",
+      "binding": "likelihood",
       "comparison": {
         "type": "pointwise_comp",
         "rule": "|evaluated - expected| <= atol + rtol * |expected|"

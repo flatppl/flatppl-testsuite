@@ -29,14 +29,14 @@ EXPECTED_COUNTS = {
     "examples": 15,
     "fragment": 21,
     "hs3": 8,
-    "pyhf": 167,
-    "pyhf-rejects": 31,
+    "pyhf": 171,
+    "pyhf-rejects": 30,
     "sample": 1,
     "stablehlo": 27,
     "stablehlo-gradient": 21,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 329
+EXPECTED_TOTAL = 332
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -103,7 +103,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 383
+EXPECTED_CASES = 386
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
@@ -145,7 +145,9 @@ EXPECTED_PYHF_NAMED = {
     "shapesys_zero_nominal_bin", "shapesys_zero_unc_bin",
     "shared_histosys_across_samples", "shared_normfactor_across_channels",
     "shared_normsys_across_channels", "staterror_plus_shapesys",
-    "staterror_sigmas_override", "staterror_two_samples",
+    "staterror_shared_across_channels", "staterror_sigmas_override",
+    "staterror_span_aux", "staterror_span_three", "staterror_span_uneq",
+    "staterror_two_samples",
     "staterror_zero_err_bin", "staterror_zero_nominal_bin",
     "three_channels_all_kinds", "three_histosys",
     "two_channels", "two_histosys",
@@ -186,7 +188,6 @@ EXPECTED_PYHF_REJECTS = {
     "rej_undeclared_poi",
     "rej_unknown_modifier_type",
     "shapefactor_shared_diff_bins",
-    "staterror_shared_across_channels"
 }
 # The documents where the converter and pyhf DISAGREE, and must keep
 # disagreeing. Each carries a `mismatch_reason` in its test.json and a row in
@@ -195,7 +196,6 @@ EXPECTED_PYHF_REJECTS = {
 EXPECTED_PYHF_MISMATCHES = {
     "rej_bad_param_name", "rej_measurement_missing_poi", "rej_no_measurements",
     "rej_modifier_extra_key", "shapefactor_shared_diff_bins",
-    "staterror_shared_across_channels",
 }
 # Examples deliberately NOT given a test dir (recorded when the legacy
 # manifest.json that listed them was deleted).

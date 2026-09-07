@@ -72,36 +72,21 @@ _ELEMENTOF = re.compile(
     re.M,
 )
 
-# `likelihood = <rhs>` -- the converter's top-level likelihood binding.
+# `likelihood = <rhs>` -- the converter's top-level likelihood binding, which
+# is what every fixture scores. A workspace with no constrained parameter makes
+# the converter emit it as a bare alias (`likelihood = <channel>_likelihood`);
+# `flatppl determinize` used to refuse to score through such an alias, and nine
+# fixtures worked around it by freezing the aliased name instead. Rust
+# `637a3e9` follows the alias, so the workaround is gone and every fixture
+# scores the binding the converter actually names.
 _TOP = re.compile(r"^\s*likelihood\s*=\s*(.+?)\s*$", re.M)
-# A bare identifier RHS, i.e. an alias rather than a likelihood-forming call.
-_BARE_NAME = re.compile(r"^[A-Za-z_]\w*$")
 
 
-def score_binding_name(src: str) -> tuple[str, str | None]:
-    """The binding to score, and a note if it is not `likelihood` itself.
-
-    A workspace with no constrained parameter has exactly one likelihood term,
-    so the converter emits `likelihood = <channel>_likelihood` -- a bare alias.
-    `flatppl determinize` refuses to score through such an alias ("expected
-    likelihoodof"), which is a determiniser gap and has nothing to do with the
-    conversion: a hand-written `top = lik; logdensityof(top, ...)` is refused
-    the same way. Resolving the alias here keeps those fixtures scoring the
-    same measure against pyhf, instead of letting that gap delete whole
-    modifier kinds from the corpus. The note records the substitution in
-    `test.json`.
-    """
-    m = _TOP.search(src)
-    if m is None:
+def score_binding_name(src: str) -> str:
+    """The binding to score: always the module's own `likelihood`."""
+    if _TOP.search(src) is None:
         raise RuntimeError("emitted module has no top-level `likelihood` binding")
-    rhs = m.group(1)
-    if not _BARE_NAME.match(rhs):
-        return "likelihood", None
-    return rhs, (
-        f"`likelihood = {rhs}` is a bare alias, which `flatppl determinize` "
-        f"refuses to score through (expected likelihoodof). Scoring {rhs} "
-        f"directly -- the same measure, since the alias carries no arithmetic."
-    )
+    return "likelihood"
 
 
 def flatppl_bin() -> str:
@@ -221,7 +206,7 @@ def generate(dir: Path) -> tuple[str, list[float]]:
 
     src = convert_source(dir / "pyhf.json")
     shapes = param_shapes(src)
-    binding, binding_note = score_binding_name(src)
+    binding = score_binding_name(src)
 
     test_path = dir / "test.json"
     body = json.loads(test_path.read_text()) if test_path.exists() else {}
@@ -263,7 +248,6 @@ def generate(dir: Path) -> tuple[str, list[float]]:
         "id": "logpdf_points",
         "kind": "logpdf_points",
         "binding": binding,
-        **({"binding_note": binding_note} if binding_note else {}),
         "comparison": {
             "type": "pointwise_comp",
             "rule": "|evaluated - expected| <= atol + rtol * |expected|",
