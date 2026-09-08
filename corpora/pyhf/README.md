@@ -1,8 +1,8 @@
 # pyhf corpus
 
-171 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
+172 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
 scored against **pyhf's own absolute `Model.logpdf`** at six parameter points
-each. 1026 frozen numbers. The whole matrix of the pyhf import audit
+each. 1032 frozen numbers. The whole matrix of the pyhf import audit
 (`flatppl-dev/audit-fix-pyhf.md`), which found five wrong-number defect classes
 in the converter — every one of which converted at exit 0 and passed every gate
 the suite had, because the suite had no way to hold a pyhf fixture at all.
@@ -37,7 +37,7 @@ environment exists only to regenerate:
 FLATPPL_BIN=/path/to/flatppl pixi run -e pyhf gen-pyhf
 ```
 
-The 171 rows add roughly 100 s to `pixi run test`: 415 s without them against
+The 172 rows add roughly 100 s to `pixi run test`: 415 s without them against
 504 s, 510 s and 561 s with them over three runs on the same machine. The
 spread between those three is machine load, not the corpus.
 
@@ -51,10 +51,10 @@ convert --from pyhf  ->  logdensityof(<binding>, <record>) at each point
 Scoring is the det-js path (`unified/detjs_exec.log_density_points`), batched:
 each point needs its own `determinize`, because theta is spliced into the source
 before lowering, but the whole batch's Node evaluation runs in one process. That
-is what keeps 1026 points inside a couple of minutes: one Node start per
+is what keeps 1032 points inside a couple of minutes: one Node start per
 fixture instead of one per point.
 
-**Tolerance is `atol = 1e-9`, `rtol = 0`.** Measured over all 1026 points, the
+**Tolerance is `atol = 1e-9`, `rtol = 0`.** Measured over all 1032 points, the
 worst absolute difference is **1.819e-12**, on `sw3_norm_norm_shap_shap_stat`
 whose log-density is about -1.9e+3 — a relative difference of 1e-15, one or two
 ulp of a double. The band is ~550x that, so float reassociation between pyhf's
@@ -72,7 +72,7 @@ Six per fixture: `suggested_init()` plus five drawn uniformly inside
 component held at its init. `SEED = 137`, and the draw is one vectorised
 `rng.uniform` per point, so the whole corpus's point sets reproduce from
 scratch. These are the audit's own sets: regenerating from an empty tree
-reproduces all 1026 points and all 1026 values bit for bit.
+reproduces all 1032 points and all 1032 values bit for bit.
 
 A fixture whose `test.json` already carries points reuses them, so an ordinary
 regen is a pure re-measurement whose diff shows only moved values.
@@ -85,7 +85,7 @@ the generator fail loudly instead of skipping.
 
 ## Every fixture scores the binding the converter names
 
-All 171 rows score the module's own `likelihood`. That was briefly not true. A
+All 172 rows score the module's own `likelihood`. That was briefly not true. A
 workspace whose only parameters are unconstrained — a normfactor or a
 shapefactor, which pyhf leaves free — has exactly one likelihood term, so the
 converter emits `likelihood = <channel>_likelihood`, a bare alias, and
@@ -113,7 +113,7 @@ should do.
 | `lum1_*`, `lum2_*` | 8 | lumi paired with each other kind, at 1 and 2 bins |
 | `two_hist`, `two_norm`, `two_shap`, `two_stat` | 4 | each kind in two channels, per-channel names for the per-bin kinds |
 | `pyhfval_*` | 10 | pyhf's own `tests/test_validation.py` workspaces |
-| named | 34 | the surface items and defect classes the audit called out individually (below) |
+| named | 35 | the surface items and defect classes the audit called out individually (below) |
 
 The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 `three_channels_all_kinds`, `all_kinds_one_sample`, `two_histosys`,
@@ -126,8 +126,47 @@ The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 `staterror_sigmas_override`, `shapesys_factors_override`, `fixed_normsys`,
 `poi_bounds_inits`, `shapesys_zero_unc_bin`, `shapesys_zero_nominal_bin`,
 `staterror_zero_err_bin`, `staterror_zero_nominal_bin`, `multichan_old`,
-`two_measurements_diff_poi`, `two_measurements_conflicting_auxdata`, and the
-four spanning-staterror fixtures below.
+`two_measurements_diff_poi`, `two_measurements_conflicting_auxdata`,
+`asimov_fractional_counts`, and the four spanning-staterror fixtures below.
+
+### The fractional observed count
+
+`asimov_fractional_counts` is the corpus's only workspace whose observations are
+not all whole numbers, and the only row that scores
+`hepphys.ContinuedPoisson` as the count likelihood. Its two channels are Asimov
+data at `mu = 1` with every systematic at nominal, so each bin's observation is
+the per-bin total of the sample nominals:
+
+| Channel | Observed | Count likelihood |
+|---|---|---|
+| `ca` | `[70.0, 70.0]` | `Poisson` |
+| `cb` | `[34.0, 22.75]` | `hepphys.ContinuedPoisson` |
+
+The rule the converter applies is **per channel, not per bin** (rust
+`78e0b03`, `validate_observed_counts`): a channel whose counts are all
+nonnegative integers keeps `Poisson`, and a channel holding any finite
+nonnegative non-integer count scores `hepphys.ContinuedPoisson` for every bin.
+`cb` mixes `34.0` with `22.75` inside one channel precisely to pin that, and
+`ca` beside it pins that a fractional channel does not drag its neighbour off
+`Poisson`.
+
+Both distributions carry the same log-density on a whole number
+(§09: `ContinuedPoisson`'s density is `rate^x e^-rate / Gamma(x+1)`, the Poisson
+density with the factorial continued by the gamma function), which is why pyhf
+scores the whole workspace through one `lgamma` form and the two channels still
+agree with it. §08 gives `Poisson` the support `nonnegintegers`, so the
+pre-`78e0b03` lowering is not merely different but unscoreable: the emitted
+source with `Poisson.(cb_expected)` in place of the continued form evaluates to
+`-inf` on this fixture, against a frozen `-17.317288936632934`.
+
+The independent oracle is the closed form summed by hand in Julia
+(`SpecialFunctions.loggamma`), which reaches pyhf and the engine from neither
+side:
+
+| Point | Julia closed form | pyhf 0.7.6 | det-js engine |
+|---|---|---|---|
+| 0 (`mu = 1`) | `-17.31728893663294` | `-17.317288936632934` | `-17.31728893663292` |
+| 1 (`mu = 3.0036…`) | `-52.78522704517505` | `-52.78522704517504` | `-52.78522704517503` |
 
 ### The spanning staterror
 
@@ -193,6 +232,11 @@ At `3e64224` all 171 rows pass, with a worst difference of **1.819e-12** on
 `sw3_norm_norm_shap_shap_stat`. The 83 rows that pass on both binaries pin what
 the fixes had to leave alone.
 
+Both binaries predate `asimov_fractional_counts`, so that row is outside the
+counts above; its own pre-fix evidence is in "The fractional observed count".
+Its worst difference at rust `78e0b03` is **1.421e-14**, inside the corpus's
+1.819e-12 worst case, so the corpus band is unchanged.
+
 ## Attribution
 
 `pyhfval_*` are built from the `spec_*` fixtures of pyhf's
@@ -200,6 +244,7 @@ the fixes had to leave alone.
 `validation/data/*.json` bindata they read, with observations set to the rounded
 nominal total per bin. pyhf is Apache-2.0.
 
-Every other workspace was written for the import audit against
-`pyhf/schemas/1.0.0/defs.json`, the workspace schema pyhf 0.7.6 installs, and
-measured with pyhf 0.7.6 on the numpy backend at 64-bit precision.
+Every other workspace was written against `pyhf/schemas/1.0.0/defs.json`, the
+workspace schema pyhf 0.7.6 installs, and measured with pyhf 0.7.6 on the numpy
+backend at 64-bit precision. All but `asimov_fractional_counts` come from the
+import audit.
