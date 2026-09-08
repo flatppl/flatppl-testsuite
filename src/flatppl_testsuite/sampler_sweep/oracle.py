@@ -106,6 +106,9 @@ class Family:
 
     note: str = ""
 
+    support: tuple[int, int | None] | None = None
+    """Inclusive integer support bounds; None as upper bound means unbounded."""
+
 
 # ---------------------------------------------------------------------------
 # BASE FAMILIES — every entry of flatppl-js's `sampler-registry.ts` REGISTRY
@@ -188,26 +191,26 @@ FAMILIES: tuple[Family, ...] = (
     Family("dirac", "Dirac(value = 3.0)", 3.0, 0.0, False, None, fourth=0.0,
            note="degenerate: variance exactly 0, so the variance band is absolute"),
 
-    # --- discrete: no KS (a continuous cdf does not exist), moments only
+    # --- discrete: exact support and moments; no continuous-null KS test
     Family("bernoulli", "Bernoulli(p = 0.3)", 0.3, 0.3 * 0.7, True,
-           ("bernoulli", (0.3,), {}), fourth=0.0777),
+           ("bernoulli", (0.3,), {}), fourth=0.0777, support=(0, 1)),
     Family("binomial", "Binomial(n = 10, p = 0.3)", 3.0, 10 * 0.3 * 0.7, True,
-           ("binom", (10, 0.3), {}), fourth=12.684),
+           ("binom", (10, 0.3), {}), fourth=12.684, support=(0, 10)),
     Family("geometric", "Geometric(p = 0.3)", 0.7 / 0.3, 0.7 / 0.09, True,
            ("geom", (0.3,), {"loc": -1}), fourth=552.222222222223,
-           note="failures-before-success convention: scipy needs loc = -1"),
+           note="failures-before-success convention: scipy needs loc = -1", support=(0, None)),
     Family("negbinomial", "NegativeBinomial(alpha = 3.0, beta = 2.0)", 1.5, 3.0 * 3.0 / 4.0, True,
            ("nbinom", (3.0, 2.0 / 3.0), {}), fourth=27.5625,
-           note="shape/rate form: scipy p = beta/(beta+1)"),
+           note="shape/rate form: scipy p = beta/(beta+1)", support=(0, None)),
     Family("negbinomial2", "NegativeBinomial2(mu = 4.0, psi = 3.0)", 4.0, 4.0 + 16.0 / 3.0, True,
            ("nbinom", (3.0, 3.0 / 7.0), {}), fourth=444.888888888889,
-           note="scipy n = psi, p = psi/(mu+psi)"),
+           note="scipy n = psi, p = psi/(mu+psi)", support=(0, None)),
     Family("categorical", "Categorical(p = [0.2, 0.3, 0.5])", 2.3, 0.61, True, None,
-           fourth=0.6937, note="1-based support per §08"),
+           fourth=0.6937, note="1-based support per §08", support=(1, 3)),
     Family("categorical0", "Categorical0(p = [0.2, 0.3, 0.5])", 1.3, 0.61, True, None,
-           fourth=0.6937, note="0-based support per §08"),
+           fourth=0.6937, note="0-based support per §08", support=(0, 2)),
     Family("poisson", "Poisson(rate = 4.0)", 4.0, 4.0, True,
-           ("poisson", (4.0,), {}), fourth=4.0 + 3 * 4.0 ** 2),
+           ("poisson", (4.0,), {}), fourth=4.0 + 3 * 4.0 ** 2, support=(0, None)),
 )
 
 # The REGISTRY entries with `densityOnly: true` — no sampler exists, so there is

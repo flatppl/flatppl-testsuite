@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.config import CONFIG
-from flatppl_testsuite.scoring.engine import DeterminizeRefused, get_engine
+from flatppl_testsuite.scoring.engine import DeterminizeRefused, get_engine, sample_sweep
 from flatppl_testsuite.unified.detjs_exec import log_density_points, score_abi_points
 
 def _flatppl_bin_available() -> bool:
@@ -87,6 +87,30 @@ def test_det_js_refuses_continuous_kchain(tmp_path):
     )
     with pytest.raises(DeterminizeRefused):
         get_engine("det-js").log_density(model, "pp", {"mu": 0.0})
+
+
+@pytest.fixture
+def sample_model():
+    return Path(__file__).resolve().parents[2] / "corpora/sample/hier_normal/hier_normal.flatppl"
+
+
+def test_sample_sweep_uses_all_seed_bytes(sample_model):
+    bindings = ["mu", "y1", "y2"]
+    base = sample_sweep(sample_model, 2, bindings, base=0)
+    assert sample_sweep(sample_model, 2, bindings, base=0) == base
+    third_byte = sample_sweep(sample_model, 2, bindings, base=1 << 16)
+    fourth_byte = sample_sweep(sample_model, 2, bindings, base=1 << 24)
+    last_index = sample_sweep(sample_model, 1, bindings, base=(1 << 32)-1)
+    assert base != third_byte
+    assert base != fourth_byte
+    assert third_byte != fourth_byte
+    assert last_index != base[:1]
+
+
+@pytest.mark.parametrize("n,base", [(1.5, 0), (1, 0.5), (1, -1), (1, 1 << 32), (2, (1 << 32)-1)])
+def test_sample_sweep_rejects_unrepresentable_seed_ranges(sample_model, n, base):
+    with pytest.raises(RuntimeError):
+        sample_sweep(sample_model, n, ["mu"], base=base)
 
 
 # det-js ≈ js cross-check (Phase 4b.3): a secondary internal check that the

@@ -155,6 +155,8 @@ class Draws:
     sumsq: tuple[float, ...] = ()
     cross: tuple[float, ...] = ()
     ks_sample: tuple[float, ...] = ()
+    outside_support: int | None = None
+    """Count of values outside the probe's support across all n*k coordinates."""
     log_totalmass: float | None = None
     latent_mean: float | None = None
     """Self-normalised WEIGHTED mean of the probe's `latent` binding, or None
@@ -208,7 +210,7 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
         "probes": [
             {"id": p.id, "source": p.source, "binding": p.binding, "n": p.n_draws,
              "k": p.k, "field": p.field, "latent": p.latent,
-             "weightedVariate": p.weighted_variate}
+             "weightedVariate": p.weighted_variate, "support": p.support}
             for p in probes
         ],
     }
@@ -232,6 +234,7 @@ def run(probes, *, seed: int, ks_subsample: int, engine_dir: Path | None = None)
             sum=tuple(r.get("sum") or ()), sumsq=tuple(r.get("sumsq") or ()),
             cross=tuple(r.get("cross") or ()),
             ks_sample=tuple(r.get("ksSample") or ()),
+            outside_support=r.get("outsideSupport"),
             log_totalmass=r.get("logTotalmass"),
             latent_mean=r.get("latentMean"), latent_n_eff=r.get("latentNEff"),
             latent_cov=r.get("latentCov"),

@@ -29,10 +29,9 @@
 //   <binding,binding,...>    comma-separated deterministic bindings to
 //                            materialise at every seed (e.g. `mu,y1,y2`).
 //   --base <i0>              first seed index (default 0); seeds are
-//                            `i0 .. i0+N-1`, mapped injectively to 4 bytes
-//                            via `[i & 255, (i >> 8) & 255, 0, 0]` — distinct
-//                            for i in [0, 65536), ample for the sweep sizes
-//                            this gate uses.
+//                            `i0 .. i0+N-1`, encoded injectively as four
+//                            little-endian bytes. Every index must be an
+//                            integer in [0, 2^32); the range must not wrap.
 //
 // Prints a JSON array of N objects, one per seed, each keyed by the
 // requested binding names, to stdout:
@@ -62,13 +61,17 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--engine') { engineDir = argv[++i]; }
-    else if (a === '--base') { base = parseInt(argv[++i], 10); }
+    else if (a === '--base') { base = Number(argv[++i]); }
     else if (a.startsWith('--')) { usage('unknown flag ' + a); }
     else { pos.push(a); }
   }
   if (pos.length !== 3) usage('expected <model.flatpdl.flatppl> <N> <bindings>');
-  const n = parseInt(pos[1], 10);
-  if (!Number.isInteger(n) || n <= 0) usage('N must be a positive integer');
+  const n = Number(pos[1]);
+  if (!Number.isSafeInteger(n) || n <= 0) usage('N must be a positive integer');
+  if (!Number.isSafeInteger(base) || base < 0 || base >= 0x100000000) {
+    usage('base must be an integer in [0, 2^32)');
+  }
+  if (n > 0x100000000 - base) usage('seed range exceeds the four-byte domain');
   const bindings = pos[2].split(',').map((s) => s.trim()).filter(Boolean);
   if (!bindings.length) usage('need at least one binding');
   return { model: pos[0], n, bindings, engineDir, base };
@@ -89,7 +92,7 @@ function resolveEngine(explicit) {
 
 // Injective seed -> 4-byte mapping (see the --base doc comment above).
 function seedBytes(i) {
-  return [i & 255, (i >> 8) & 255, 0, 0];
+  return [i & 255, (i >>> 8) & 255, (i >>> 16) & 255, (i >>> 24) & 255];
 }
 
 async function main() {

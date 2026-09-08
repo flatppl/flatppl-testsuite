@@ -1,4 +1,4 @@
-s = rnginit(0)
+s = rnginit([0])
 draws = rand(s, lawof(x))
 inputs = (nu)
 outputs = (draws)

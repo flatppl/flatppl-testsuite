@@ -14,6 +14,7 @@
     "alpha"
   ],
   "draws": 100000,
+  "fanout_shape": [20000, 3],
   "key": [
     0,
     0
