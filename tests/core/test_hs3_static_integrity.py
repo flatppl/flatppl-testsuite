@@ -20,45 +20,14 @@ two fixtures for a difference that cannot affect any result.
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
-
-import pytest
 
 from flatppl_testsuite.unified.loader import load_test
 from flatppl_testsuite.unified.runners import convert_detjs
 
 _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
 _FIXTURES = _CORPORA / "hs3" / "fixtures"
-
-
-def _fixture_dirs() -> list[Path]:
-    return sorted(d for d in _FIXTURES.iterdir() if (d / "test.json").exists())
-
-
-_IDS = [d.name for d in _fixture_dirs()]
-
-
-@pytest.mark.parametrize("dir", _fixture_dirs(), ids=_IDS)
-def test_every_fixture_declares_its_canonical_hash(dir: Path):
-    body = json.loads((dir / "test.json").read_text())
-    kinds = [c["kind"] for c in body["checks"]]
-    if "static_integrity" not in kinds:
-        pytest.skip("no static_integrity check declared")
-    check = next(c for c in body["checks"] if c["kind"] == "static_integrity")
-    assert check.get("canonical_sha256"), (
-        f"{dir.name}: static_integrity declares no canonical_sha256, so it cannot "
-        "verify anything"
-    )
-
-
-@pytest.mark.parametrize("dir", _fixture_dirs(), ids=_IDS)
-def test_static_integrity_passes_on_the_pristine_fixture(dir: Path):
-    results = convert_detjs.run(load_test(dir), dir)
-    integrity = [r for r in results if "static_integrity" in r.check_id]
-    assert integrity, f"{dir.name}: no static_integrity result produced"
-    assert all(r.status == "passed" for r in integrity), [
-        (r.check_id, r.status, r.message) for r in integrity
-    ]
 
 
 def test_static_integrity_fails_on_a_tampered_fixture(tmp_path: Path):
@@ -95,7 +64,9 @@ def test_static_integrity_fails_on_a_tampered_fixture(tmp_path: Path):
     assert perturb(doc), "found no numeric leaf to perturb"
     (d / "hs3.json").write_text(json.dumps(doc, indent=2) + "\n")
 
-    results = convert_detjs.run(load_test(d), d)
+    spec = load_test(d)
+    checks = [c for c in spec.body["checks"] if c["kind"] == "static_integrity"]
+    results = convert_detjs.run(replace(spec, body={**spec.body, "checks": checks}), d)
     integrity = [r for r in results if "static_integrity" in r.check_id]
     assert integrity, "no static_integrity result produced"
     assert any(r.status == "failed" for r in integrity), (

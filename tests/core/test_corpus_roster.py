@@ -25,7 +25,7 @@ _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
 # corpus -> number of test directories it must contain.
 EXPECTED_COUNTS = {
     "bayesian_inference": 5,
-    "coverage": 15,
+    "coverage": 19,
     "examples": 15,
     "fragment": 21,
     "hs3": 12,
@@ -36,7 +36,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 21,
     "stablehlo-sample": 18,
 }
-EXPECTED_TOTAL = 336
+EXPECTED_TOTAL = 340
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -67,17 +67,20 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    "coverage/abi_fixed_inputs": {"det-js", "stablehlo"},
     "coverage/allele_freq": {"det-js", "stablehlo"},
     "coverage/ar1_drift": {"det-js", "stablehlo"},
     "coverage/beam_bunch": {"det-js", "stablehlo"},
     "coverage/b_mass_peak": {"det-js", "stablehlo"},
     "coverage/censored_lifetimes": {"det-js", "stablehlo"},
     "coverage/kscan_walk": {"det-js", "stablehlo"},
+    "coverage/local_module_density": {"det-js", "stablehlo"},
     "coverage/paired_assay": {"det-js", "stablehlo"},
     "coverage/sensor_calibration": {"det-js", "stablehlo"},
     "coverage/spectral_lines": {"det-js", "stablehlo"},
     "coverage/stdmod_interp_poly6": {"det-js", "stablehlo"},
     "coverage/two_instruments": {"det-js", "stablehlo"},
+    "coverage/typed_abi_inputs": {"det-js", "stablehlo"},
     # The three coverage dirs with NO StableHLO row, and why. `dose_surface`
     # has a StableHLO twin instead (`corpora/stablehlo/weighted_arity`),
     # because the stablehlo runner requires a `points` list and a `points`
@@ -103,7 +106,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 390
+EXPECTED_CASES = 397
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

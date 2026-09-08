@@ -21,6 +21,7 @@ engine.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -76,6 +77,24 @@ def test_abi_scoring_matches_the_frozen_oracle(dir: Path):
 
 def test_the_guard_sees_the_corpus():
     assert _DIRS, "no ABI example dirs found -- this test is vacuous"
+
+
+@pytest.mark.skipif(not ex.engine_available(), reason="det-js path unavailable")
+def test_promoted_input_replaces_a_wrapped_default_not_its_documentation(tmp_path: Path):
+    """A long fixed default and a doc example cannot change runtime ABI values."""
+    model = tmp_path / "model.flatppl"
+    query = tmp_path / "query.flatppl"
+    zeros = ", ".join(["0.0"] * 40)
+    model.write_text(
+        'flatppl_compat = "0.1"\n'
+        '%%%\nExample default:\nmu = 0.0\n%%%\n'
+        f'mu = sum([{zeros}])\n'
+        'lp = logdensityof(Normal(mu, 1.0), 1.0)\n'
+    )
+    query.write_text("inputs = mu\noutputs = lp\n")
+    scores = ex.score_abi_points(model, query, ["mu"], [{"mu": 3.0}])
+    assert scores[0].error is None, scores[0].error
+    assert scores[0].value == pytest.approx(-math.log(2 * math.pi) / 2 - 2)
 
 
 @pytest.mark.skipif(not ex.engine_available(), reason="det-js path unavailable")

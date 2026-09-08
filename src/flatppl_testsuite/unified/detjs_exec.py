@@ -22,6 +22,7 @@ from flatppl_testsuite.scoring.engine import (  # noqa: F401  (re-exported)
     DetJsScoreEngine,
     sample_sweep,
     score_binding,
+    temporary_source_dir,
 )
 
 _ENGINE = DetJsScoreEngine()
@@ -51,15 +52,17 @@ def log_density_points(model: Path, binding: str, points: list[dict]) -> list["P
     sources: list[str] = []
     with tempfile.TemporaryDirectory() as tmp:
         for i, theta in enumerate(points):
-            in_path = Path(tmp) / f"p{i}.flatppl"
             out_path = Path(tmp) / f"p{i}.flatpdl.flatppl"
-            in_path.write_text(
-                src + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n"
-            )
-            det = subprocess.run(
-                [str(CONFIG.flatppl_bin), "determinize", str(in_path), "-o", str(out_path)],
-                capture_output=True, text=True,
-            )
+            # Relative module imports resolve against the source file's directory.
+            with tempfile.NamedTemporaryFile(
+                suffix=".flatppl", mode="w", dir=temporary_source_dir(model, src)
+            ) as inp:
+                inp.write(src + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n")
+                inp.flush()
+                det = subprocess.run(
+                    [str(CONFIG.flatppl_bin), "determinize", inp.name, "-o", str(out_path)],
+                    capture_output=True, text=True,
+                )
             if det.returncode == 3:
                 raise DeterminizeRefused(det.stderr.strip())
             if det.returncode != 0:
@@ -95,15 +98,15 @@ def parse_expected(v):
 # present), so there is nothing to seed a runtime value into. Substituting the
 # param's RHS makes the whole module derivable with no engine change.
 
-# `name = elementof(<anything>)` as a top-level binding, captured so only the
-# RHS is replaced (keeps the binding's own doc-comment and indentation).
-def _elementof_rhs(name: str) -> re.Pattern[str]:
+# Canonical full syntax puts top-level binding names at column zero and indents
+# continued expressions. Consume the complete RHS, including wrapped defaults.
+# §13 also promotes external and derived fixed inputs.
+def _input_rhs(name: str) -> re.Pattern[str]:
     return re.compile(
-        r"^(\s*" + re.escape(name) + r"\s*=\s*)elementof\s*\([^\n]*\)",
-        re.M,
+        r"^(" + re.escape(name) + r"[ \t]*=[ \t]*)(.*?)"
+        r"(?=^\w+[ \t]*(?:=|~|:)|\Z)",
+        re.M | re.S,
     )
-
-_INPUTS_BINDING = re.compile(r"^\s*inputs\s*=\s*([^\n]+)$", re.M)
 
 
 def _literal(v) -> str:
@@ -113,7 +116,7 @@ def _literal(v) -> str:
     if isinstance(v, (list, tuple)):
         return "[" + ", ".join(_literal(x) for x in v) + "]"
     if isinstance(v, bool):
-        raise TypeError(f"unexpected bool ABI input value {v!r}")
+        return "true" if v else "false"
     return repr(float(v))
 
 
@@ -126,10 +129,10 @@ def abi_input_names(flatpdl_src: str) -> list[str]:
     whose model already declares its point coordinates as `elementof` reuses
     those bindings directly. Tuple order IS the ABI order (flatppl-design
     "Determinization" -> "Signature: `inputs` and `outputs`")."""
-    m = _INPUTS_BINDING.search(flatpdl_src)
+    m = _input_rhs("inputs").search(flatpdl_src)
     if m is None:
         raise ValueError("module declares no `inputs` binding (not an ABI module)")
-    rhs = m.group(1).strip()
+    rhs = m.group(2).strip()
     if rhs.startswith("("):
         rhs = rhs[1:rhs.rindex(")")] if ")" in rhs else rhs[1:]
     return [t.strip() for t in rhs.split(",") if t.strip()]
@@ -143,9 +146,14 @@ def determinize_abi(model: Path, query: Path) -> str:
     model: the result is reused across every point, unlike the theta-splice path
     which re-determinizes per point."""
     src = model.read_text().rstrip() + "\n" + query.read_text().lstrip()
-    with tempfile.TemporaryDirectory() as tmp:
-        in_path = Path(tmp) / "abi.flatppl"
-        in_path.write_text(src)
+    # §04 resolves relative module/data paths from the containing source file.
+    # Keep the concatenated input beside the model, as emit_concat does.
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".flatppl", prefix=".abi-", dir=temporary_source_dir(model, src)
+    ) as inp, tempfile.TemporaryDirectory() as tmp:
+        inp.write(src)
+        inp.flush()
+        in_path = Path(inp.name)
         out_path = Path(tmp) / "abi.flatpdl.flatppl"
         det = subprocess.run(
             [str(CONFIG.flatppl_bin), "determinize", str(in_path), "-o", str(out_path)],
@@ -155,7 +163,16 @@ def determinize_abi(model: Path, query: Path) -> str:
             raise DeterminizeRefused(det.stderr.strip())
         if det.returncode != 0:
             raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
-        return out_path.read_text()
+        # Canonical block docs can contain examples that look like bindings.
+        # They carry no runtime meaning and must not intercept substitution.
+        lines = []
+        in_doc = False
+        for line in out_path.read_text().splitlines():
+            if line.startswith("%%%"):
+                in_doc = not in_doc
+            elif not in_doc and not line.startswith("%"):
+                lines.append(line)
+        return "\n".join(lines)
 
 
 @dataclass
@@ -194,12 +211,12 @@ def score_abi_points(
         for name, field in zip(names, fields):
             if field not in pt:
                 raise ValueError(f"point {pt} has no value for ABI field {field!r}")
-            pat = _elementof_rhs(name)
-            src, n = pat.subn(lambda m: m.group(1) + _literal(pt[field]), src, count=1)
+            pat = _input_rhs(name)
+            src, n = pat.subn(lambda m: m.group(1) + _literal(pt[field]) + "\n", src, count=1)
             if n != 1:
                 raise ValueError(
                     f"could not bind ABI input {name!r}: no top-level "
-                    f"`{name} = elementof(...)` binding in the determinized module"
+                    f"`{name} = ...` binding in the determinized module"
                 )
         sources.append(src)
 

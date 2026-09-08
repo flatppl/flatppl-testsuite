@@ -13,11 +13,13 @@ from __future__ import annotations
 
 import math
 import shutil
+from pathlib import Path
 
 import pytest
 
 from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.engine import DeterminizeRefused, get_engine
+from flatppl_testsuite.unified.detjs_exec import log_density_points, score_abi_points
 
 def _flatppl_bin_available() -> bool:
     return CONFIG.flatppl_bin.exists() or shutil.which(str(CONFIG.flatppl_bin)) is not None
@@ -43,6 +45,35 @@ def test_det_js_scores_gaussian(tmp_path):
     assert math.isclose(value, oracle, rel_tol=0, abs_tol=1e-9), (
         f"det-js={value!r} oracle={oracle!r} delta={value - oracle!r}"
     )
+
+
+def _record_scores(model, binding, points, scorer):
+    if scorer == "single":
+        return [get_engine("det-js").log_density(model, binding, point) for point in points]
+    scores = log_density_points(model, binding, points)
+    assert all(score.error is None for score in scores)
+    return [score.value for score in scores]
+
+
+@pytest.mark.parametrize("scorer", ["single", "batch"])
+def test_det_js_scores_boolean_record(tmp_path, scorer):
+    model = tmp_path / "boolean.flatppl"
+    model.write_text("a ~ Bernoulli(0.3)\nM = lawof(record(a = a))\n")
+    values = _record_scores(model, "M", [{"a": True}, {"a": False}], scorer)
+    assert values == pytest.approx([math.log(0.3), math.log(0.7)], rel=0, abs=1e-9)
+
+
+@pytest.mark.parametrize("scorer", ["single", "batch"])
+def test_det_js_scores_nested_relative_module(tmp_path, scorer):
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    (sub / "leaf.flatppl").write_text("M = joint(x = Normal(2.0, 3.0))\n")
+    (sub / "helper.flatppl").write_text('leaf = load_module("leaf.flatppl")\nM = leaf.M\n')
+    model = tmp_path / "model.flatppl"
+    model.write_text('helpers = load_module("sub/helper.flatppl")\n')
+    values = _record_scores(model, "helpers.M", [{"x": 3.0}], scorer)
+    oracle = -math.log(3) - 0.5 * math.log(2 * math.pi) - 1 / 18
+    assert values == pytest.approx([oracle], rel=0, abs=1e-9)
 
 
 def test_det_js_refuses_continuous_kchain(tmp_path):
@@ -99,3 +130,24 @@ def test_det_js_matches_js_engine(tmp_path, source, binding, thetas):
             f"theta={theta}: det-js={det_value!r} js={js_value!r} "
             f"delta={det_value - js_value!r}"
         )
+
+
+@pytest.mark.parametrize("scorer", ["single", "batch", "abi"])
+def test_det_js_scores_a_model_in_a_read_only_directory(tmp_path, scorer):
+    directory = tmp_path / "readonly"
+    directory.mkdir()
+    model, query = directory / "model.flatppl", directory / "query.flatppl"
+    model.write_text("m = joint(a = Normal(0.0, 1.0))\n")
+    query.write_text("x = elementof(reals)\nlp = logdensityof(m, record(a=x))\n"
+                     "inputs = x\noutputs = lp\n")
+    directory.chmod(0o555)
+    try:
+        if scorer == "abi":
+            scores = score_abi_points(model, query, ["x"], [{"x": 1.0}])
+            assert all(score.error is None for score in scores)
+            values = [score.value for score in scores]
+        else:
+            values = _record_scores(model, "m", [{"a": 1.0}], scorer)
+    finally:
+        directory.chmod(0o755)
+    assert values == pytest.approx([-0.5 * math.log(2 * math.pi) - 0.5], rel=0, abs=1e-9)

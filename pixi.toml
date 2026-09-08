@@ -169,7 +169,7 @@ regen = "python -m flatppl_testsuite.unified.regen"
 # no `nodejs` dependency of its own, so without the filter it also re-runs
 # every det-js case here against whatever unpinned system Node is on PATH --
 # pure duplicate work already covered, correctly, by `pixi run test`.
-unified = "python -m pytest tests/test_unified.py -q -m stablehlo_only"
+unified = "python -m pytest tests/test_unified.py tests/test_stablehlo_reuse.py tests/test_stablehlo_execution.py -q -m stablehlo_only"
 
 [environments]
 root = ["root"]
