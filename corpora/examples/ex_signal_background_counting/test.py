@@ -8,6 +8,9 @@ two-component mixture ``w*Exponential(scale=lam) + (1-w)*Normal(100, 2)``
 with ``w = nu_B / (nu_B + nu_S)``. The model spells the background as
 ``Exponential(1/lam)`` because FlatPPL's ``Exponential`` is
 rate-parameterised, so the scipy scale is ``lam`` itself.
+
+Combine log densities directly: at lam=1e-8 both component
+PDFs underflow for some events even though their mixture log density is finite.
 """
 import numpy as np
 from scipy.stats import expon, lognorm, norm, poisson, uniform
@@ -48,10 +51,14 @@ def oracle(point: dict) -> float:
 
     nu_B = _EXPOSURE * B
     nu_S = _EXPOSURE * _EFFICIENCY * S
-    w = nu_B / (nu_B + nu_S)
+    log_total = np.log(nu_B + nu_S)
+    log_w = np.log(nu_B) - log_total
+    log_1mw = np.log(nu_S) - log_total
     lp += poisson.logpmf(_COUNTS, nu_B + nu_S).sum()
     for i, events in enumerate(_EVENTS):
         ev = np.asarray(events)
-        dens = w[i] * expon.pdf(ev, scale=lam) + (1 - w[i]) * norm.pdf(ev, 100.0, 2.0)
-        lp += np.log(dens).sum()
+        lp += np.logaddexp(
+            log_w[i] + expon.logpdf(ev, scale=lam),
+            log_1mw[i] + norm.logpdf(ev, 100.0, 2.0),
+        ).sum()
     return float(lp)

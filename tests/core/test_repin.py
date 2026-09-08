@@ -33,6 +33,10 @@ if sys.argv[2] == "flip-a-row":
     row["marker"] = "not-implemented"
 if sys.argv[2] == "change-the-seed":
     d["metadata"]["seed"] = 1
+if sys.argv[2] == "remove-a-row":
+    row = d["rows"].pop()
+    d["metadata"]["probe_count"] -= 1
+    d["metadata"]["outcome_counts"][row["outcome"]] -= 1
 p.write_text(json.dumps(d, indent=1) + "\\n")
 """
 
@@ -105,6 +109,17 @@ def test_a_changed_seed_blocks_even_with_every_row_identical(tmp_path):
     _wire(mod, repo, "change-the-seed", only="sampler")
     assert mod.main() == 1
     assert _head(repo) == "tables"
+
+
+def test_a_removed_density_probe_blocks_and_restores_both_tables(tmp_path):
+    """A full re-pin cannot mistake lost coverage for an intentional CI slice."""
+    mod = _load_repin()
+    repo = _repo(tmp_path)
+    _wire(mod, repo, "remove-a-row", only="density")
+    before = {rel: (repo / rel).read_bytes() for rel in TABLE_PATHS}
+    assert mod.main() == 1, "a re-pin silently accepted a removed density probe"
+    assert _head(repo) == "tables", "a blocked re-pin still committed"
+    assert all((repo / rel).read_bytes() == content for rel, content in before.items())
 
 
 def test_metadata_only_movement_commits_with_the_fixed_message(tmp_path):

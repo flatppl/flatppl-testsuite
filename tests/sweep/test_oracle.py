@@ -271,6 +271,52 @@ def test_normalize_of_a_truncated_discrete_base_includes_the_boundary_atom():
     assert math.log(float(1.0 - d.cdf(2.0))) != pytest.approx(math.log(closed_mass))
 
 
+@pytest.mark.parametrize("lo,hi", [(9.0, 10.0), (-10.0, -9.0),
+                                  (40.0, 41.0), (-41.0, -40.0)])
+def test_normalize_truncated_normal_tails(lo, hi):
+    # Integrate the explicit Gaussian density relative to its interval maximum.
+    # This oracle uses neither CDF subtraction nor underflowing probabilities.
+    peak = min(abs(lo), abs(hi))
+    scaled_mass, _ = integrate.quad(
+        lambda x: math.exp((peak * peak - x * x) / 2), lo, hi,
+        epsabs=1e-13, epsrel=1e-13,
+    )
+    x = (lo + hi) / 2
+    expected = (peak * peak - x * x) / 2 - math.log(scaled_mass)
+    p = Probe(id="t", base=Base("normal", (0.0, 1.0)),
+              wraps=(Wrap("truncate", (lo, hi)), Wrap("normalize", ())),
+              spelling="direct", ordering="single", consumer=False, point=x)
+    assert true_logpdf(p) == pytest.approx(expected, rel=1e-12, abs=1e-11)
+
+
+@pytest.mark.parametrize("lo", [40.0, 40.25])
+def test_normalize_truncated_poisson_tail(lo):
+    # §08's Poisson masses summed over exactly the closed interval's atoms.
+    hi, x = 45, 42
+    logpmf = lambda k: k * math.log(3) - 3 - math.lgamma(k + 1)
+    mass = math.fsum(math.exp(logpmf(k)) for k in range(math.ceil(lo), hi + 1))
+    expected = logpmf(x) - math.log(mass)
+    p = Probe(id="t", base=Base("poisson", (3.0,)),
+              wraps=(Wrap("truncate", (lo, hi)), Wrap("normalize", ())),
+              spelling="direct", ordering="single", consumer=False, point=x)
+    assert true_logpdf(p) == pytest.approx(expected, rel=1e-12, abs=1e-11)
+
+
+@pytest.mark.parametrize("base,bounds,point", [
+    (Base("normal", (0.0, 1.0)), (0.0, 0.0), 0.0),
+    (Base("gamma", (2.0, 1.0)), (-2.0, -1.0), -1.5),
+    (Base("poisson", (3.0,)), (0.25, 0.75), 0.5),
+])
+def test_normalize_zero_mass_withholds_density(base, bounds, point):
+    # §06 makes normalization undefined at zero mass, including an empty
+    # lattice interval even when its real-valued endpoints differ.
+    p = Probe(id="t", base=base,
+              wraps=(Wrap("truncate", bounds), Wrap("normalize", ())),
+              spelling="direct", ordering="single", consumer=False, point=point)
+    with pytest.raises(OracleUnsupported):
+        true_logpdf(p)
+
+
 def test_normalize_of_a_weighted_base_divides_out_the_weight():
     """`totalmass(weighted(w, M)) = w * totalmass(M)`, and `M` is a §08 probability
     measure, so the mass is `w` and `normalize` cancels the weight exactly:

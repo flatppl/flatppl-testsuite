@@ -5,7 +5,8 @@ sibling `stablehlo/<dir>` logdensity test — gradient just also checks the
 derivative of the SAME emitted `@logdensity`), emit StableHLO (`flatppl
 stablehlo --mode logdensity`), and compare `stablehlo_exec.gradient`'s output
 at each authored point to the frozen ANALYTIC `expected_grad` within
-`grad_atol`. `grad_params` (a subset of `inputs`) names which ABI arguments to
+`grad_atol + grad_rtol * abs(expected)`. `grad_rtol` defaults to zero.
+`grad_params` (a subset of `inputs`) names which ABI arguments to
 differentiate w.r.t.; their positions in `inputs` become `argnums`. A
 `grad_param` may itself be vector-valued (e.g. dirichlet's `alpha`) — `got`
 and the frozen value are then both lists, compared elementwise via
@@ -31,6 +32,7 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     points: list[dict] = body["points"]
     expected_grad: list[dict] = body["expected_grad"]
     atol = body.get("tolerance", {}).get("grad_atol", 1e-3)
+    rtol = body.get("tolerance", {}).get("grad_rtol", 0.0)
 
     if len(expected_grad) != len(points):
         return [CheckResult(tid, "gradient", "failed", UNSCOREABLE,
@@ -60,11 +62,13 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
             gv = np.atleast_1d(np.asarray(g, dtype=float))
             wv = np.atleast_1d(np.asarray(w, dtype=float))
             worst = float(np.max(np.abs(gv - wv))) if gv.shape == wv.shape else float("inf")
-            ok = gv.shape == wv.shape and worst < atol
+            ok = (gv.shape == wv.shape and np.isfinite(worst)
+                  and np.all(np.abs(gv - wv) <= atol + rtol * np.abs(wv)))
             results.append(CheckResult(
                 tid, f"gradient[{i}].{param}",
                 "passed" if ok else "failed",
                 "" if ok else NUMERIC_MISMATCH,
-                "" if ok else f"point {pt}: got {g!r}, want {w!r} (worst |Δ|={worst:.3g}, atol {atol})",
+                "" if ok else f"point {pt}: got {g!r}, want {w!r} "
+                              f"(worst |Δ|={worst:.3g}, atol {atol}, rtol {rtol})",
             ))
     return results

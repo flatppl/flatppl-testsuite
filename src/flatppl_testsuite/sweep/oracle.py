@@ -747,18 +747,22 @@ def _log_total_mass(probe: Probe, idx: int) -> float:
     if len(inner) == 1 and inner[0].kind == "truncate":
         lo, hi = _interval(inner[0])
         d = _frozen(probe.base)
-        mass = float(d.cdf(hi) - d.cdf(lo))
         if _is_discrete(probe.base):
-            # §03: "`interval(lo, hi)` denotes the closed interval [lo, hi]", and
-            # the `truncate` gate above is `lo <= x <= hi` to match. scipy's `cdf`
-            # is `P(X <= lo)`, so `cdf(hi) - cdf(lo)` EXCLUDES an atom sitting
-            # exactly at `lo` -- which a discrete base can have and a continuous
-            # one cannot. Poisson(3)'s atom at 0 carries 5% of its mass, so
-            # omitting it puts `normalize(truncate(Poisson(3), interval(0, inf)))`
-            # at mass 0.95021 instead of 1.0: a log-density error of 0.0511
-            # attributed to the determiniser.
-            mass += float(d.pmf(lo))
-        return math.log(mass)
+            # §03's interval is closed. The CDF must exclude only atoms
+            # strictly below lo, including when lo lies between integers.
+            lo = math.ceil(lo) - 1 if math.isfinite(lo) else lo
+        # Use the smaller tail and subtract in log space. Direct CDF
+        # subtraction loses right-tail mass, and direct probabilities
+        # underflow for Normal intervals such as [40, 41].
+        if d.logcdf(lo) < -math.log(2):
+            upper, lower = float(d.logcdf(hi)), float(d.logcdf(lo))
+        else:
+            upper, lower = float(d.logsf(lo)), float(d.logsf(hi))
+        if upper == -math.inf or lower >= upper:
+            raise OracleUnsupported(
+                "normalization requires positive interval mass; "
+                "the interval is empty or its mass cannot be resolved")
+        return upper + math.log(-math.expm1(lower - upper))
     if len(inner) == 1 and inner[0].kind == "weighted":
         # totalmass(weighted(w, M)) = w * totalmass(M), and M here is a bare §08
         # distribution, so the mass is w.

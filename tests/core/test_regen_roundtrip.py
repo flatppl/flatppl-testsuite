@@ -97,3 +97,23 @@ def test_regen_is_value_preserving_for_finite_dirs(tmp_path: Path, dirname: str)
     assert after == pytest.approx(before, rel=1e-14, abs=1e-14), (
         f"{dirname}: regen changed the frozen value {before!r} -> {after!r}"
     )
+
+
+@pytest.mark.parametrize("dirname", [
+    "stablehlo-sample/dirichlet", "sample/hier_normal", "coverage/mv_mixture_sample",
+])
+def test_regen_restores_sampler_oracles(tmp_path: Path, dirname: str):
+    d = _copy_dir(_CORPORA / dirname, tmp_path / "sample")
+    path = d / "test.json"
+    before = json.loads(path.read_text())
+    altered = json.loads(path.read_text())
+    if "stat" in altered:
+        altered["stat"] = {}
+    else:
+        altered["checks"][0]["expected"] = 123456.0
+    path.write_text(json.dumps(altered))
+
+    regen_dir(d)
+
+    after = json.loads(path.read_text())
+    assert after == before

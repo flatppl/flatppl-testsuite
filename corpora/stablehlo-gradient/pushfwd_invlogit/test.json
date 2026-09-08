@@ -25,7 +25,8 @@
     }
   ],
   "tolerance": {
-    "grad_atol": 64.0
+    "grad_atol": 1e-5,
+    "grad_rtol": 3e-7
   },
   "expected_grad": [
     {

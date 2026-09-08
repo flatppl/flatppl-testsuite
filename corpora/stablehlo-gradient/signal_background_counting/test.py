@@ -12,8 +12,9 @@ it is independent of any autodiff implementation. Writing ``e`` for exposure,
 ``b = e*f*S`` (nu_S), ``nu = a + b``, ``w = a/nu``, ``s = sigma_B`` and
 ``mu = log(m_B) - s^2/2``:
 
-* the four uniform priors are constant on their support, so they contribute
-  nothing (every authored point is inside the support);
+* the four uniform priors are constant strictly inside their support, so they
+  contribute nothing. Authored gradient points stay away from their endpoints,
+  where the full log-density has no two-sided derivative;
 * LogNormal prior, per component, with ``z = log B``:
   ``d/dB = -1/B - (z - mu)/(s^2 B)``,
   ``d/dm_B = (1/m_B) * sum_j (z_j - mu)/s^2``,
@@ -40,13 +41,12 @@ Two places need an explicit guard, and both are the point of doing it this way:
   instead of to zero. A density-space oracle returns -inf at ``lam = 1e-8``
   where the module is correctly finite.
 
-Verification, before the ``expected_grad`` vectors were frozen: this oracle
-agrees with ``jax.grad`` at x64 of an independent f64 re-implementation of the
-log-density to 4.3e-15 worst relative error over all nine points, and with f64
-central differences on that formula to 8.8e-08. One coordinate is not
-finite-difference-checkable --- ``lam`` at the ``1e-8`` point, where a centred
-step of any usable size leaves the positive domain --- and is covered by the
-autodiff comparison alone.
+Verification uses an independent log-intensity density that cancels the
+Poisson count's log-rate term against the event-mixture denominators. Central
+differences use scale-aware steps inside the parameter support. All 45 partial
+derivatives at the five replacement interior points agree with this oracle
+to 9.1e-11 in abs(error)/(1+abs(gradient)). The lam=1e-8 point also admits
+positive-domain steps; its lam derivative rounds to zero.
 
 ``grad_atol`` basis: the worst absolute error of Enzyme's f32 gradient against
 these frozen f64 vectors, over all nine points and every component, is 2.59e-05

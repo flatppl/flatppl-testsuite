@@ -42,11 +42,6 @@
     {
       "location": 0.0,
       "scale": 1.0,
-      "xobs": 0.0
-    },
-    {
-      "location": 0.0,
-      "scale": 1.0,
       "xobs": 0.5
     },
     {
@@ -90,10 +85,6 @@
     {
       "location": -1.0,
       "scale": -0.7
-    },
-    {
-      "location": 1.0,
-      "scale": -1.0
     },
     {
       "location": 1.0,
