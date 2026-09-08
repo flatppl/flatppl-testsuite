@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from flatppl_testsuite.scoring.result import CheckResult, UNSCOREABLE
+from flatppl_testsuite.scoring.result import CheckResult, NUMERIC_MISMATCH, UNSCOREABLE
 from flatppl_testsuite.unified import sample_checks as checks
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from flatppl_testsuite.unified.loader import TestSpec
@@ -80,6 +80,16 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
             results.append(CheckResult(tid, "fanout_distribution", "failed", UNSCOREABLE,
                                        f"emit refused: {e}"))
         else:
+            # Collection flattens and trims batches, which can hide a scalar
+            # output. Check one pure call before reusing the same initial key.
+            value, _ = ex.sample_call(fanout_src, key, arg_values)
+            expected_shape = tuple(body["fanout_shape"])
+            if np.shape(value) != expected_shape:
+                results.append(CheckResult(
+                    tid, "fanout_distribution", "failed", NUMERIC_MISMATCH,
+                    f"fanout output shape {np.shape(value)}, expected {expected_shape}",
+                ))
+                return results
             fanout_dim = stat.get("fanout_dim")
             if fanout_dim:
                 xs = ex.samples_fanned_multivariate(fanout_src, n_draws, fanout_dim, arg_values, key)

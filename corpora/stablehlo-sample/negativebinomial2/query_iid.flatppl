@@ -1,4 +1,4 @@
-s = rnginit(0)
+s = rnginit([0])
 xs ~ iid(NegativeBinomial2(mu = mu, psi = psi), 200)
 draws = rand(s, lawof(xs))
 inputs = (mu, psi)

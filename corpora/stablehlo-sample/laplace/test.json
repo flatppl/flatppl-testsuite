@@ -12,6 +12,7 @@
     "scale"
   ],
   "draws": 100000,
+  "fanout_shape": [200],
   "key": [
     0,
     0

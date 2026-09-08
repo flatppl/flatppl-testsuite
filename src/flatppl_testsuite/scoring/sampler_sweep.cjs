@@ -42,7 +42,8 @@
 //                   "latent": <a SECOND binding whose weighted marginal is
 //                              reported, or null>,
 //                   "weightedVariate": <true to accumulate the variate's own
-//                              moments under the measure's atom weights> },
+//                              moments under the measure's atom weights>,
+//                   "support": <[lower, upper-or-null, lattice-step] or null> },
 //                 ... ] }
 //
 // WHY A LATENT, AND WHY ITS MOMENT IS WEIGHTED. A `normalize` whose mass moves
@@ -198,8 +199,16 @@ async function drawRow(row, ctx, p, ksSub, t0) {
   }
 
   let allFinite = true;
+  let outsideSupport = 0;
   for (let i = 0; i < flat.length; i++) {
-    if (!Number.isFinite(flat[i])) { allFinite = false; break; }
+    const x = flat[i];
+    if (!Number.isFinite(x)) { allFinite = false; break; }
+    if (p.support) {
+      const [lower, upper, step] = p.support;
+      if (x < lower || (upper !== null && x > upper) || !Number.isInteger((x - lower) / step)) {
+        outsideSupport++;
+      }
+    }
   }
   if (!allFinite) {
     row.status = 'NONFINITE';
@@ -235,6 +244,7 @@ async function drawRow(row, ctx, p, ksSub, t0) {
   }
 
   row.status = 'DRAWS';
+  if (p.support) row.outsideSupport = outsideSupport;
   row.sum = sum;
   row.sumsq = sumsq;
   row.cross = cross;

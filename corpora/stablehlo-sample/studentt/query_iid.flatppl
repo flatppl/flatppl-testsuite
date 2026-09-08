@@ -1,4 +1,4 @@
-s = rnginit(0)
+s = rnginit([0])
 xs ~ iid(StudentT(nu = nu), 200)
 draws = rand(s, lawof(xs))
 inputs = (nu)

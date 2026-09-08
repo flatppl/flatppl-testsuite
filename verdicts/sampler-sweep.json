@@ -1,8 +1,8 @@
 {
  "metadata": {
-  "generated_at": "2026-09-07T13:05:02+00:00",
+  "generated_at": "2026-09-07T23:18:27+00:00",
   "engine_commit": "cd7da438c1334bb8eb64ded1535f27f6d9ab9bab",
-  "engine_resolved_by": "CONFIG default (sibling of the repo root)",
+  "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
@@ -1010,6 +1010,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -1059,6 +1069,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -1116,6 +1136,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -1165,6 +1195,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -1222,6 +1262,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -1271,6 +1321,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -1328,6 +1388,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -1377,6 +1447,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -1978,7 +2058,7 @@
      "got": 2.2982263251147828e-05,
      "want": 0.0,
      "band": 0.0005590169943749475,
-     "sigma": 0.20555961162544745,
+     "sigma": 0.20555961162544742,
      "fallback": false
     },
     {
@@ -2091,7 +2171,7 @@
      "got": 2.59199122627507e-05,
      "want": 0.0,
      "band": 0.0005590169943749475,
-     "sigma": 0.23183474316136382,
+     "sigma": 0.2318347431613638,
      "fallback": false
     },
     {
@@ -2423,7 +2503,7 @@
      "got": -0.00033508578647944987,
      "want": 0.0,
      "band": 0.00223606797749979,
-     "sigma": 0.7492745968620298,
+     "sigma": 0.7492745968620297,
      "fallback": false
     },
     {
@@ -2505,8 +2585,8 @@
      "detail": "+0.000467 vs +0.000000 (|d|=0.000467, band 0.00839 = 5 SE, 0.28 sigma)",
      "got": 0.0004666991956443489,
      "want": 0.0,
-     "band": 0.00838525491562421,
-     "sigma": 0.27828563373473014,
+     "band": 0.008385254915624212,
+     "sigma": 0.2782856337347301,
      "fallback": false
     },
     {
@@ -2535,8 +2615,8 @@
      "detail": "+0.000417 vs +0.000000 (|d|=0.000417, band 0.00839 = 5 SE, 0.25 sigma)",
      "got": 0.0004174455655046039,
      "want": 0.0,
-     "band": 0.00838525491562421,
-     "sigma": 0.24891644303310284,
+     "band": 0.008385254915624212,
+     "sigma": 0.24891644303310279,
      "fallback": false
     },
     {
@@ -2618,7 +2698,7 @@
      "detail": "+0.001146 vs +0.000000 (|d|=0.00115, band 0.00839 = 5 SE, 0.68 sigma)",
      "got": 0.0011461984519431923,
      "want": 0.0,
-     "band": 0.00838525491562421,
+     "band": 0.008385254915624212,
      "sigma": 0.683460707800001,
      "fallback": false
     },
@@ -2648,8 +2728,8 @@
      "detail": "+0.002661 vs +0.000000 (|d|=0.00266, band 0.00839 = 5 SE, 1.59 sigma)",
      "got": 0.002660919517602167,
      "want": 0.0,
-     "band": 0.00838525491562421,
-     "sigma": 1.5866658464038386,
+     "band": 0.008385254915624212,
+     "sigma": 1.5866658464038383,
      "fallback": false
     },
     {
@@ -2678,8 +2758,8 @@
      "detail": "+0.001830 vs +0.000000 (|d|=0.00183, band 0.00839 = 5 SE, 1.09 sigma)",
      "got": 0.0018298794217663783,
      "want": 0.0,
-     "band": 0.00838525491562421,
-     "sigma": 1.0911292740527014,
+     "band": 0.008385254915624212,
+     "sigma": 1.0911292740527012,
      "fallback": false
     },
     {
@@ -2920,8 +3000,8 @@
      "detail": "+0.005039 vs +0.000000 (|d|=0.00504, band 0.0335 = 5 SE, 0.75 sigma)",
      "got": 0.005039167927055388,
      "want": 0.0,
-     "band": 0.03354101966249684,
-     "sigma": 0.7511948023288366,
+     "band": 0.03354101966249685,
+     "sigma": 0.7511948023288365,
      "fallback": false
     },
     {
@@ -2950,8 +3030,8 @@
      "detail": "-0.010785 vs +0.000000 (|d|=0.0108, band 0.0335 = 5 SE, 1.61 sigma)",
      "got": -0.010784651269698742,
      "want": 0.0,
-     "band": 0.03354101966249684,
-     "sigma": 1.607680890178387,
+     "band": 0.03354101966249685,
+     "sigma": 1.6076808901783868,
      "fallback": false
     },
     {
@@ -3606,6 +3686,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -3749,6 +3839,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -3798,6 +3898,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -3855,6 +3965,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -3904,6 +4024,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -4021,6 +4151,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -4130,6 +4270,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -4277,6 +4427,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -4326,6 +4486,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -4383,6 +4553,16 @@
      "fallback": false
     },
     {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
      "name": "totalmass",
      "status": "passed",
      "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
@@ -4432,6 +4612,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -4545,6 +4735,16 @@
      "got": null,
      "want": null,
      "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
      "sigma": null,
      "fallback": false
     },
@@ -5595,11 +5795,11 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "2.002403 vs 2.000000 (|d|=0.0024, band 0.0152 = 5 SE, 0.79 sigma)",
+     "detail": "2.002403 vs 2.000000 (|d|=0.0024, band 0.0155 = 5 SE, 0.77 sigma)",
      "got": 2.002402771509274,
      "want": 2.0,
-     "band": 0.015211514157165906,
-     "sigma": 0.7897870930034626,
+     "band": 0.015536359932654842,
+     "sigma": 0.7732736367106139,
      "fallback": false
     },
     {
@@ -5628,81 +5828,81 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "1.002928 vs 1.000000 (|d|=0.00293, band 0.0277 = 5 SE, 0.53 sigma)",
+     "detail": "1.002928 vs 1.000000 (|d|=0.00293, band 0.0392 = 5 SE, 0.37 sigma)",
      "got": 1.0029281153961958,
      "want": 1.0,
-     "band": 0.027744370802746547,
-     "sigma": 0.527695404774846,
+     "band": 0.039236465468752285,
+     "sigma": 0.37313699911727366,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "0.993869 vs 1.000000 (|d|=0.00613, band 0.0392 = 5 SE, 0.78 sigma)",
+     "detail": "0.993869 vs 1.000000 (|d|=0.00613, band 0.0734 = 5 SE, 0.42 sigma)",
      "got": 0.99386912015224,
      "want": 1.0,
-     "band": 0.039236465468752285,
-     "sigma": 0.7812732077819996,
+     "band": 0.07340470542602882,
+     "sigma": 0.4176080955694416,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "1.007252 vs 1.000000 (|d|=0.00725, band 0.0277 = 5 SE, 1.31 sigma)",
+     "detail": "1.007252 vs 1.000000 (|d|=0.00725, band 0.0392 = 5 SE, 0.92 sigma)",
      "got": 1.0072520919507395,
      "want": 1.0,
-     "band": 0.027744370802746547,
-     "sigma": 1.3069483540101734,
+     "band": 0.039236465468752285,
+     "sigma": 0.9241520437811901,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.005830 vs 1.000000 (|d|=0.00583, band 0.0392 = 5 SE, 0.74 sigma)",
+     "detail": "1.005830 vs 1.000000 (|d|=0.00583, band 0.0734 = 5 SE, 0.40 sigma)",
      "got": 1.005830304664218,
      "want": 1.0,
-     "band": 0.039236465468752285,
-     "sigma": 0.7429701674914247,
+     "band": 0.07340470542602882,
+     "sigma": 0.3971342593352803,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "-0.002302 vs +0.000000 (|d|=0.0023, band 0.0277 = 5 SE, 0.41 sigma)",
+     "detail": "-0.002302 vs +0.000000 (|d|=0.0023, band 0.0555 = 5 SE, 0.21 sigma)",
      "got": -0.0023021611764939554,
      "want": 0.0,
-     "band": 0.027744370802746547,
-     "sigma": 0.4148879772515968,
+     "band": 0.055488741605493094,
+     "sigma": 0.2074439886257984,
      "fallback": false
     },
     {
      "name": "mean[2]",
      "status": "passed",
-     "detail": "1.001453 vs 1.000000 (|d|=0.00145, band 0.0277 = 5 SE, 0.26 sigma)",
+     "detail": "1.001453 vs 1.000000 (|d|=0.00145, band 0.0392 = 5 SE, 0.19 sigma)",
      "got": 1.001452528341743,
      "want": 1.0,
-     "band": 0.027744370802746547,
-     "sigma": 0.2617699193955479,
+     "band": 0.039236465468752285,
+     "sigma": 0.18509928511524784,
      "fallback": false
     },
     {
      "name": "var[2]",
      "status": "passed",
-     "detail": "1.001518 vs 1.000000 (|d|=0.00152, band 0.0392 = 5 SE, 0.19 sigma)",
+     "detail": "1.001518 vs 1.000000 (|d|=0.00152, band 0.0734 = 5 SE, 0.10 sigma)",
      "got": 1.001517703486208,
      "want": 1.0,
-     "band": 0.039236465468752285,
-     "sigma": 0.19340471524080516,
+     "band": 0.07340470542602882,
+     "sigma": 0.10337916877395277,
      "fallback": false
     },
     {
      "name": "cov[0,2]",
      "status": "passed",
-     "detail": "+0.004263 vs +0.000000 (|d|=0.00426, band 0.0277 = 5 SE, 0.77 sigma)",
+     "detail": "+0.004263 vs +0.000000 (|d|=0.00426, band 0.0555 = 5 SE, 0.38 sigma)",
      "got": 0.004262698436772849,
      "want": 0.0,
-     "band": 0.027744370802746547,
-     "sigma": 0.7682096067485633,
+     "band": 0.055488741605493094,
+     "sigma": 0.38410480337428166,
      "fallback": false
     },
     {
@@ -5741,21 +5941,21 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "0.992215 vs 1.000000 (|d|=0.00778, band 0.026 = 5 SE, 1.50 sigma)",
+     "detail": "0.992215 vs 1.000000 (|d|=0.00778, band 0.0318 = 5 SE, 1.22 sigma)",
      "got": 0.9922150738215714,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.499118147573212,
+     "band": 0.031800523616591574,
+     "sigma": 1.224024841900234,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "1.994585 vs 2.000000 (|d|=0.00541, band 0.0519 = 5 SE, 0.52 sigma)",
+     "detail": "1.994585 vs 2.000000 (|d|=0.00541, band 0.0757 = 5 SE, 0.36 sigma)",
      "got": 1.9945854210830387,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.5213340068898631,
+     "band": 0.07570038779935845,
+     "sigma": 0.3576321782731459,
      "fallback": false
     },
     {
@@ -5781,21 +5981,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.994613 vs 1.000000 (|d|=0.00539, band 0.0318 = 5 SE, 0.85 sigma)",
+     "detail": "0.994613 vs 1.000000 (|d|=0.00539, band 0.0551 = 5 SE, 0.49 sigma)",
      "got": 0.9946131642200656,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 0.84697281165582,
+     "band": 0.05508012261123059,
+     "sigma": 0.4889999808057819,
      "fallback": false
     }
    ],
@@ -5814,81 +6014,81 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "0.988014 vs 1.000000 (|d|=0.012, band 0.026 = 5 SE, 2.31 sigma)",
+     "detail": "0.988014 vs 1.000000 (|d|=0.012, band 0.0318 = 5 SE, 1.88 sigma)",
      "got": 0.988013692966177,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 2.308164520118216,
+     "band": 0.031800523616591574,
+     "sigma": 1.8846084388952091,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "1.993837 vs 2.000000 (|d|=0.00616, band 0.0519 = 5 SE, 0.59 sigma)",
+     "detail": "1.993837 vs 2.000000 (|d|=0.00616, band 0.0757 = 5 SE, 0.41 sigma)",
      "got": 1.993837111274685,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.5933838110882865,
+     "band": 0.07570038779935845,
+     "sigma": 0.40705793619244357,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "0.988317 vs 1.000000 (|d|=0.0117, band 0.026 = 5 SE, 2.25 sigma)",
+     "detail": "0.988317 vs 1.000000 (|d|=0.0117, band 0.0318 = 5 SE, 1.84 sigma)",
      "got": 0.9883173600636451,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 2.2496883257136093,
+     "band": 0.031800523616591574,
+     "sigma": 1.8368628260981825,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.982837 vs 2.000000 (|d|=0.0172, band 0.0519 = 5 SE, 1.65 sigma)",
+     "detail": "1.982837 vs 2.000000 (|d|=0.0172, band 0.0757 = 5 SE, 1.13 sigma)",
      "got": 1.9828368093407356,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.6525301587866692,
+     "band": 0.07570038779935845,
+     "sigma": 1.133626336548957,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+0.989607 vs +1.000000 (|d|=0.0104, band 0.0367 = 5 SE, 1.42 sigma)",
+     "detail": "+0.989607 vs +1.000000 (|d|=0.0104, band 0.0636 = 5 SE, 0.82 sigma)",
      "got": 0.98960725079233,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 1.4151315458697258,
+     "band": 0.06360104723318315,
+     "sigma": 0.8170265789466176,
      "fallback": false
     },
     {
      "name": "mean[2]",
      "status": "passed",
-     "detail": "0.998337 vs 1.000000 (|d|=0.00166, band 0.026 = 5 SE, 0.32 sigma)",
+     "detail": "0.998337 vs 1.000000 (|d|=0.00166, band 0.0318 = 5 SE, 0.26 sigma)",
      "got": 0.998337434483606,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 0.32015488394248814,
+     "band": 0.031800523616591574,
+     "sigma": 0.2614053681063545,
      "fallback": false
     },
     {
      "name": "var[2]",
      "status": "passed",
-     "detail": "2.010768 vs 2.000000 (|d|=0.0108, band 0.0519 = 5 SE, 1.04 sigma)",
+     "detail": "2.010768 vs 2.000000 (|d|=0.0108, band 0.0757 = 5 SE, 0.71 sigma)",
      "got": 2.010767620300925,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.0367429715661312,
+     "band": 0.07570038779935845,
+     "sigma": 0.711199811120127,
      "fallback": false
     },
     {
      "name": "cov[0,2]",
      "status": "passed",
-     "detail": "+1.006581 vs +1.000000 (|d|=0.00658, band 0.0367 = 5 SE, 0.90 sigma)",
+     "detail": "+1.006581 vs +1.000000 (|d|=0.00658, band 0.0636 = 5 SE, 0.52 sigma)",
      "got": 1.0065813519066515,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 0.8961515871757024,
+     "band": 0.06360104723318315,
+     "sigma": 0.5173933600906022,
      "fallback": false
     },
     {
@@ -5914,21 +6114,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.992228 vs 1.000000 (|d|=0.00777, band 0.0318 = 5 SE, 1.22 sigma)",
+     "detail": "0.992228 vs 1.000000 (|d|=0.00777, band 0.0551 = 5 SE, 0.71 sigma)",
      "got": 0.992227624398832,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 1.2220515131884173,
+     "band": 0.05508012261123059,
+     "sigma": 0.7055517701029222,
      "fallback": false
     }
    ],
@@ -5947,51 +6147,51 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "0.990989 vs 1.000000 (|d|=0.00901, band 0.026 = 5 SE, 1.74 sigma)",
+     "detail": "0.990989 vs 1.000000 (|d|=0.00901, band 0.0318 = 5 SE, 1.42 sigma)",
      "got": 0.9909893164067131,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.7351583029992488,
+     "band": 0.031800523616591574,
+     "sigma": 1.416750821767242,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "2.003230 vs 2.000000 (|d|=0.00323, band 0.0519 = 5 SE, 0.31 sigma)",
+     "detail": "2.003230 vs 2.000000 (|d|=0.00323, band 0.0757 = 5 SE, 0.21 sigma)",
      "got": 2.0032301163405233,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.31100654738826544,
+     "band": 0.07570038779935845,
+     "sigma": 0.2133487313885766,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "0.991344 vs 1.000000 (|d|=0.00866, band 0.026 = 5 SE, 1.67 sigma)",
+     "detail": "0.991344 vs 1.000000 (|d|=0.00866, band 0.0318 = 5 SE, 1.36 sigma)",
      "got": 0.9913443908237131,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.6667827667303714,
+     "band": 0.031800523616591574,
+     "sigma": 1.360922430184604,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.971629 vs 2.000000 (|d|=0.0284, band 0.0519 = 5 SE, 2.73 sigma)",
+     "detail": "1.971629 vs 2.000000 (|d|=0.0284, band 0.0757 = 5 SE, 1.87 sigma)",
      "got": 1.9716290760987936,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 2.7316486957556494,
+     "band": 0.07570038779935845,
+     "sigma": 1.8738955457138937,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+0.975793 vs +1.000000 (|d|=0.0242, band 0.0367 = 5 SE, 3.30 sigma)",
+     "detail": "+0.975793 vs +1.000000 (|d|=0.0242, band 0.0636 = 5 SE, 1.90 sigma)",
      "got": 0.9757931996402284,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 3.296125609227852,
+     "band": 0.06360104723318315,
+     "sigma": 1.9030190077705198,
      "fallback": false
     },
     {
@@ -6017,21 +6217,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.992477 vs 1.000000 (|d|=0.00752, band 0.0318 = 5 SE, 1.18 sigma)",
+     "detail": "0.992477 vs 1.000000 (|d|=0.00752, band 0.0551 = 5 SE, 0.68 sigma)",
      "got": 0.9924768148904531,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 1.182871263418713,
+     "band": 0.05508012261123059,
+     "sigma": 0.6829310423514667,
      "fallback": false
     }
    ],
@@ -6050,111 +6250,111 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "0.993387 vs 1.000000 (|d|=0.00661, band 0.026 = 5 SE, 1.27 sigma)",
+     "detail": "0.993387 vs 1.000000 (|d|=0.00661, band 0.0318 = 5 SE, 1.04 sigma)",
      "got": 0.9933868705288097,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.2734690317273778,
+     "band": 0.031800523616591574,
+     "sigma": 1.039783110322746,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "1.982508 vs 2.000000 (|d|=0.0175, band 0.0519 = 5 SE, 1.68 sigma)",
+     "detail": "1.982508 vs 2.000000 (|d|=0.0175, band 0.0757 = 5 SE, 1.16 sigma)",
      "got": 1.9825083191749546,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.6841583051258147,
+     "band": 0.07570038779935845,
+     "sigma": 1.1553230659403317,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "0.991858 vs 1.000000 (|d|=0.00814, band 0.026 = 5 SE, 1.57 sigma)",
+     "detail": "0.991858 vs 1.000000 (|d|=0.00814, band 0.0318 = 5 SE, 1.28 sigma)",
      "got": 0.9918576017365457,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.5679553950474068,
+     "band": 0.031800523616591574,
+     "sigma": 1.2802302191033896,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.982414 vs 2.000000 (|d|=0.0176, band 0.0519 = 5 SE, 1.69 sigma)",
+     "detail": "1.982414 vs 2.000000 (|d|=0.0176, band 0.0757 = 5 SE, 1.16 sigma)",
      "got": 1.9824137062423604,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.693267958897498,
+     "band": 0.07570038779935845,
+     "sigma": 1.1615722368722587,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+0.991378 vs +1.000000 (|d|=0.00862, band 0.0367 = 5 SE, 1.17 sigma)",
+     "detail": "+0.991378 vs +1.000000 (|d|=0.00862, band 0.0636 = 5 SE, 0.68 sigma)",
      "got": 0.9913780342202055,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 1.174012334810482,
+     "band": 0.06360104723318315,
+     "sigma": 0.677816337534773,
      "fallback": false
     },
     {
      "name": "mean[2]",
      "status": "passed",
-     "detail": "0.994289 vs 1.000000 (|d|=0.00571, band 0.026 = 5 SE, 1.10 sigma)",
+     "detail": "0.994289 vs 1.000000 (|d|=0.00571, band 0.0318 = 5 SE, 0.90 sigma)",
      "got": 0.9942890889469079,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.0997317383162204,
+     "band": 0.031800523616591574,
+     "sigma": 0.8979272042728986,
      "fallback": false
     },
     {
      "name": "var[2]",
      "status": "passed",
-     "detail": "1.990807 vs 2.000000 (|d|=0.00919, band 0.0519 = 5 SE, 0.89 sigma)",
+     "detail": "1.990807 vs 2.000000 (|d|=0.00919, band 0.0757 = 5 SE, 0.61 sigma)",
      "got": 1.9908065771737449,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.8851739041111074,
+     "band": 0.07570038779935845,
+     "sigma": 0.6072242886405028,
      "fallback": false
     },
     {
      "name": "cov[0,2]",
      "status": "passed",
-     "detail": "+0.988151 vs +1.000000 (|d|=0.0118, band 0.0367 = 5 SE, 1.61 sigma)",
+     "detail": "+0.988151 vs +1.000000 (|d|=0.0118, band 0.0636 = 5 SE, 0.93 sigma)",
      "got": 0.9881512120045891,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 1.6133934666925076,
+     "band": 0.06360104723318315,
+     "sigma": 0.9314931523037028,
      "fallback": false
     },
     {
      "name": "mean[3]",
      "status": "passed",
-     "detail": "0.986334 vs 1.000000 (|d|=0.0137, band 0.026 = 5 SE, 2.63 sigma)",
+     "detail": "0.986334 vs 1.000000 (|d|=0.0137, band 0.0318 = 5 SE, 2.15 sigma)",
      "got": 0.9863342488782346,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 2.6315696561932755,
+     "band": 0.031800523616591574,
+     "sigma": 2.148667626754961,
      "fallback": false
     },
     {
      "name": "var[3]",
      "status": "passed",
-     "detail": "1.981997 vs 2.000000 (|d|=0.018, band 0.0519 = 5 SE, 1.73 sigma)",
+     "detail": "1.981997 vs 2.000000 (|d|=0.018, band 0.0757 = 5 SE, 1.19 sigma)",
      "got": 1.9819967251466695,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.7334163118438157,
+     "band": 0.07570038779935845,
+     "sigma": 1.1891137797766411,
      "fallback": false
     },
     {
      "name": "cov[0,3]",
      "status": "passed",
-     "detail": "+0.981407 vs +1.000000 (|d|=0.0186, band 0.0367 = 5 SE, 2.53 sigma)",
+     "detail": "+0.981407 vs +1.000000 (|d|=0.0186, band 0.0636 = 5 SE, 1.46 sigma)",
      "got": 0.9814065744735495,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 2.5317788856908847,
+     "band": 0.06360104723318315,
+     "sigma": 1.461723221182243,
      "fallback": false
     },
     {
@@ -6180,21 +6380,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.986995 vs 1.000000 (|d|=0.013, band 0.0318 = 5 SE, 2.04 sigma)",
+     "detail": "0.986995 vs 1.000000 (|d|=0.013, band 0.0551 = 5 SE, 1.18 sigma)",
      "got": 0.986994798752494,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 2.044809293756521,
+     "band": 0.05508012261123059,
+     "sigma": 1.1805711961917762,
      "fallback": false
     }
    ],
@@ -6213,51 +6413,51 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "1.990969 vs 2.000000 (|d|=0.00903, band 0.0212 = 5 SE, 2.13 sigma)",
+     "detail": "1.990969 vs 2.000000 (|d|=0.00903, band 0.028 = 5 SE, 1.61 sigma)",
      "got": 1.9909688560121948,
      "want": 2.0,
-     "band": 0.021200349077727713,
-     "sigma": 2.129951717939641,
+     "band": 0.028045425683712544,
+     "sigma": 1.6100921572123092,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "1.314707 vs 1.333333 (|d|=0.0186, band 0.034 = 5 SE, 2.74 sigma)",
+     "detail": "1.314707 vs 1.333333 (|d|=0.0186, band 0.0573 = 5 SE, 1.62 sigma)",
      "got": 1.31470673622652,
      "want": 1.3333333333333333,
-     "band": 0.033964697200842865,
-     "sigma": 2.742052578397655,
+     "band": 0.05734554002516776,
+     "sigma": 1.6240667625275247,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "1.990372 vs 2.000000 (|d|=0.00963, band 0.0212 = 5 SE, 2.27 sigma)",
+     "detail": "1.990372 vs 2.000000 (|d|=0.00963, band 0.028 = 5 SE, 1.72 sigma)",
      "got": 1.9903720869757016,
      "want": 2.0,
-     "band": 0.021200349077727713,
-     "sigma": 2.270696814707915,
+     "band": 0.028045425683712544,
+     "sigma": 1.7164854498696158,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.316688 vs 1.333333 (|d|=0.0166, band 0.034 = 5 SE, 2.45 sigma)",
+     "detail": "1.316688 vs 1.333333 (|d|=0.0166, band 0.0573 = 5 SE, 1.45 sigma)",
      "got": 1.3166875339454949,
      "want": 1.3333333333333333,
-     "band": 0.033964697200842865,
-     "sigma": 2.4504560263568766,
+     "band": 0.05734554002516776,
+     "sigma": 1.4513595460547495,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+0.982445 vs +1.000000 (|d|=0.0176, band 0.0245 = 5 SE, 3.59 sigma)",
+     "detail": "+0.982445 vs +1.000000 (|d|=0.0176, band 0.0534 = 5 SE, 1.65 sigma)",
      "got": 0.982444902116125,
      "want": 1.0,
-     "band": 0.02448005449388026,
-     "sigma": 3.5855920762479454,
+     "band": 0.053353041835596395,
+     "sigma": 1.645182475065787,
      "fallback": false
     },
     {
@@ -6283,21 +6483,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.984524 vs 1.000000 (|d|=0.0155, band 0.028 = 5 SE, 2.76 sigma)",
+     "detail": "0.984524 vs 1.000000 (|d|=0.0155, band 0.0508 = 5 SE, 1.52 sigma)",
      "got": 0.9845244749721527,
      "want": 1.0,
-     "band": 0.028045425683712544,
-     "sigma": 2.7590105428199614,
+     "band": 0.05083665120610016,
+     "sigma": 1.5220834438038608,
      "fallback": false
     }
    ],
@@ -6316,111 +6516,111 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "1.001242 vs 1.000000 (|d|=0.00124, band 0.026 = 5 SE, 0.24 sigma)",
+     "detail": "1.001242 vs 1.000000 (|d|=0.00124, band 0.0318 = 5 SE, 0.20 sigma)",
      "got": 1.001242170295434,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 0.23920073094864894,
+     "band": 0.031800523616591574,
+     "sigma": 0.19530657897498477,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "2.003826 vs 2.000000 (|d|=0.00383, band 0.0519 = 5 SE, 0.37 sigma)",
+     "detail": "2.003826 vs 2.000000 (|d|=0.00383, band 0.0757 = 5 SE, 0.25 sigma)",
      "got": 2.003825871873442,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.3683679089763888,
+     "band": 0.07570038779935845,
+     "sigma": 0.25269830080542066,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "0.988269 vs 1.000000 (|d|=0.0117, band 0.026 = 5 SE, 2.26 sigma)",
+     "detail": "0.988269 vs 1.000000 (|d|=0.0117, band 0.0318 = 5 SE, 1.84 sigma)",
      "got": 0.9882693667273471,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 2.2589302478279505,
+     "band": 0.031800523616591574,
+     "sigma": 1.8444088239057426,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.988767 vs 2.000000 (|d|=0.0112, band 0.0519 = 5 SE, 1.08 sigma)",
+     "detail": "1.988767 vs 2.000000 (|d|=0.0112, band 0.0757 = 5 SE, 0.74 sigma)",
      "got": 1.9887674361226537,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.0815093146910246,
+     "band": 0.07570038779935845,
+     "sigma": 0.7419092691518203,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+1.001892 vs +1.000000 (|d|=0.00189, band 0.0367 = 5 SE, 0.26 sigma)",
+     "detail": "+1.001892 vs +1.000000 (|d|=0.00189, band 0.0636 = 5 SE, 0.15 sigma)",
      "got": 1.0018917345741616,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 0.2575885570617633,
+     "band": 0.06360104723318315,
+     "sigma": 0.14871882275977635,
      "fallback": false
     },
     {
      "name": "mean[2]",
      "status": "passed",
-     "detail": "0.994974 vs 1.000000 (|d|=0.00503, band 0.026 = 5 SE, 0.97 sigma)",
+     "detail": "0.994974 vs 1.000000 (|d|=0.00503, band 0.0318 = 5 SE, 0.79 sigma)",
      "got": 0.9949737881363194,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 0.9678814218264332,
+     "band": 0.031800523616591574,
+     "sigma": 0.7902718716647489,
      "fallback": false
     },
     {
      "name": "var[2]",
      "status": "passed",
-     "detail": "1.998798 vs 2.000000 (|d|=0.0012, band 0.0519 = 5 SE, 0.12 sigma)",
+     "detail": "1.998798 vs 2.000000 (|d|=0.0012, band 0.0757 = 5 SE, 0.08 sigma)",
      "got": 1.9987981049674524,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.11572252668001205,
+     "band": 0.07570038779935845,
+     "sigma": 0.07938499837895319,
      "fallback": false
     },
     {
      "name": "cov[0,2]",
      "status": "passed",
-     "detail": "+1.004063 vs +1.000000 (|d|=0.00406, band 0.0367 = 5 SE, 0.55 sigma)",
+     "detail": "+1.004063 vs +1.000000 (|d|=0.00406, band 0.0636 = 5 SE, 0.32 sigma)",
      "got": 1.0040628332706927,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 0.5532168064560942,
+     "band": 0.06360104723318315,
+     "sigma": 0.3193998721276511,
      "fallback": false
     },
     {
      "name": "mean[3]",
      "status": "passed",
-     "detail": "0.991293 vs 1.000000 (|d|=0.00871, band 0.026 = 5 SE, 1.68 sigma)",
+     "detail": "0.991293 vs 1.000000 (|d|=0.00871, band 0.0318 = 5 SE, 1.37 sigma)",
      "got": 0.9912926924541765,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.676738155156141,
+     "band": 0.031800523616591574,
+     "sigma": 1.369050970796052,
      "fallback": false
     },
     {
      "name": "var[3]",
      "status": "passed",
-     "detail": "1.985806 vs 2.000000 (|d|=0.0142, band 0.0519 = 5 SE, 1.37 sigma)",
+     "detail": "1.985806 vs 2.000000 (|d|=0.0142, band 0.0757 = 5 SE, 0.94 sigma)",
      "got": 1.9858058846274975,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.3666575286627458,
+     "band": 0.07570038779935845,
+     "sigma": 0.9375193301600745,
      "fallback": false
     },
     {
      "name": "cov[0,3]",
      "status": "passed",
-     "detail": "+0.994652 vs +1.000000 (|d|=0.00535, band 0.0367 = 5 SE, 0.73 sigma)",
+     "detail": "+0.994652 vs +1.000000 (|d|=0.00535, band 0.0636 = 5 SE, 0.42 sigma)",
      "got": 0.9946520690716858,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 0.728202481418921,
+     "band": 0.06360104723318315,
+     "sigma": 0.4204278986717675,
      "fallback": false
     },
     {
@@ -6446,21 +6646,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.996533 vs 1.000000 (|d|=0.00347, band 0.0318 = 5 SE, 0.55 sigma)",
+     "detail": "0.996533 vs 1.000000 (|d|=0.00347, band 0.0551 = 5 SE, 0.31 sigma)",
      "got": 0.9965325815173735,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 0.5451826083796718,
+     "band": 0.05508012261123059,
+     "sigma": 0.31476132570550586,
      "fallback": false
     }
    ],
@@ -6479,111 +6679,111 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "0.991664 vs 1.000000 (|d|=0.00834, band 0.026 = 5 SE, 1.61 sigma)",
+     "detail": "0.991664 vs 1.000000 (|d|=0.00834, band 0.0318 = 5 SE, 1.31 sigma)",
      "got": 0.9916642838183667,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.6051820035920383,
+     "band": 0.031800523616591574,
+     "sigma": 1.3106256176996163,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "1.981418 vs 2.000000 (|d|=0.0186, band 0.0519 = 5 SE, 1.79 sigma)",
+     "detail": "1.981418 vs 2.000000 (|d|=0.0186, band 0.0757 = 5 SE, 1.23 sigma)",
      "got": 1.9814180712795129,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.7891310670987581,
+     "band": 0.07570038779935845,
+     "sigma": 1.2273337865677763,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "0.995338 vs 1.000000 (|d|=0.00466, band 0.026 = 5 SE, 0.90 sigma)",
+     "detail": "0.995338 vs 1.000000 (|d|=0.00466, band 0.0318 = 5 SE, 0.73 sigma)",
      "got": 0.9953384322415724,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 0.8976630815286166,
+     "band": 0.031800523616591574,
+     "sigma": 0.7329388368931621,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "1.986758 vs 2.000000 (|d|=0.0132, band 0.0519 = 5 SE, 1.27 sigma)",
+     "detail": "1.986758 vs 2.000000 (|d|=0.0132, band 0.0757 = 5 SE, 0.87 sigma)",
      "got": 1.9867582209514438,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 1.2749633601440373,
+     "band": 0.07570038779935845,
+     "sigma": 0.8746176494929654,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+0.986561 vs +1.000000 (|d|=0.0134, band 0.0367 = 5 SE, 1.83 sigma)",
+     "detail": "+0.986561 vs +1.000000 (|d|=0.0134, band 0.0636 = 5 SE, 1.06 sigma)",
      "got": 0.9865605381339919,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 1.8299880104934405,
+     "band": 0.06360104723318315,
+     "sigma": 1.0565440704721756,
      "fallback": false
     },
     {
      "name": "mean[2]",
      "status": "passed",
-     "detail": "0.994213 vs 1.000000 (|d|=0.00579, band 0.026 = 5 SE, 1.11 sigma)",
+     "detail": "0.994213 vs 1.000000 (|d|=0.00579, band 0.0318 = 5 SE, 0.91 sigma)",
      "got": 0.9942128098009915,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.114420567638919,
+     "band": 0.031800523616591574,
+     "sigma": 0.9099205831927131,
      "fallback": false
     },
     {
      "name": "var[2]",
      "status": "passed",
-     "detail": "1.995152 vs 2.000000 (|d|=0.00485, band 0.0519 = 5 SE, 0.47 sigma)",
+     "detail": "1.995152 vs 2.000000 (|d|=0.00485, band 0.0757 = 5 SE, 0.32 sigma)",
      "got": 1.9951520002698493,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 0.46678184277695595,
+     "band": 0.07570038779935845,
+     "sigma": 0.32020970242584385,
      "fallback": false
     },
     {
      "name": "cov[0,2]",
      "status": "passed",
-     "detail": "+0.984894 vs +1.000000 (|d|=0.0151, band 0.0367 = 5 SE, 2.06 sigma)",
+     "detail": "+0.984894 vs +1.000000 (|d|=0.0151, band 0.0636 = 5 SE, 1.19 sigma)",
      "got": 0.9848942961421413,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 2.0568723082479186,
+     "band": 0.06360104723318315,
+     "sigma": 1.1875357808556228,
      "fallback": false
     },
     {
      "name": "mean[3]",
      "status": "passed",
-     "detail": "0.992127 vs 1.000000 (|d|=0.00787, band 0.026 = 5 SE, 1.52 sigma)",
+     "detail": "0.992127 vs 1.000000 (|d|=0.00787, band 0.0318 = 5 SE, 1.24 sigma)",
      "got": 0.9921269869114522,
      "want": 1.0,
-     "band": 0.025965018804658423,
-     "sigma": 1.5160807599983928,
+     "band": 0.031800523616591574,
+     "sigma": 1.237874756948996,
      "fallback": false
     },
     {
      "name": "var[3]",
      "status": "passed",
-     "detail": "1.977289 vs 2.000000 (|d|=0.0227, band 0.0519 = 5 SE, 2.19 sigma)",
+     "detail": "1.977289 vs 2.000000 (|d|=0.0227, band 0.0757 = 5 SE, 1.50 sigma)",
      "got": 1.9772893428194391,
      "want": 2.0,
-     "band": 0.051930037609316845,
-     "sigma": 2.1866590345475037,
+     "band": 0.07570038779935845,
+     "sigma": 1.500035722455925,
      "fallback": false
     },
     {
      "name": "cov[0,3]",
      "status": "passed",
-     "detail": "+0.976257 vs +1.000000 (|d|=0.0237, band 0.0367 = 5 SE, 3.23 sigma)",
+     "detail": "+0.976257 vs +1.000000 (|d|=0.0237, band 0.0636 = 5 SE, 1.87 sigma)",
      "got": 0.976256509167661,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 3.233038940371444,
+     "band": 0.06360104723318315,
+     "sigma": 1.8665959025239958,
      "fallback": false
     },
     {
@@ -6609,21 +6809,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.984748 vs 1.000000 (|d|=0.0153, band 0.0318 = 5 SE, 2.40 sigma)",
+     "detail": "0.984748 vs 1.000000 (|d|=0.0153, band 0.0551 = 5 SE, 1.38 sigma)",
      "got": 0.9847475962146165,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 2.39813720825429,
+     "band": 0.05508012261123059,
+     "sigma": 1.3845651627392719,
      "fallback": false
     }
    ],
@@ -6768,51 +6968,51 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "2.003177 vs 2.000000 (|d|=0.00318, band 0.0581 = 5 SE, 0.27 sigma)",
+     "detail": "2.003177 vs 2.000000 (|d|=0.00318, band 0.0687 = 5 SE, 0.23 sigma)",
      "got": 2.0031772551152867,
      "want": 2.0,
-     "band": 0.058059547084276575,
-     "sigma": 0.2736203841441186,
+     "band": 0.06869698254424177,
+     "sigma": 0.231251431839853,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "10.085932 vs 10.000000 (|d|=0.0859, band 0.26 = 5 SE, 1.65 sigma)",
+     "detail": "10.085932 vs 10.000000 (|d|=0.0859, band 0.356 = 5 SE, 1.21 sigma)",
      "got": 10.085932091252829,
      "want": 10.0,
-     "band": 0.25965018804658424,
-     "sigma": 1.6547665899901403,
+     "band": 0.3560144012353123,
+     "sigma": 1.2068625728995586,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "2.000325 vs 2.000000 (|d|=0.000325, band 0.0581 = 5 SE, 0.03 sigma)",
+     "detail": "2.000325 vs 2.000000 (|d|=0.000325, band 0.0687 = 5 SE, 0.02 sigma)",
      "got": 2.0003252408105197,
      "want": 2.0,
-     "band": 0.058059547084276575,
-     "sigma": 0.028009244547460142,
+     "band": 0.06869698254424177,
+     "sigma": 0.023672132201017448,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "10.110951 vs 10.000000 (|d|=0.111, band 0.26 = 5 SE, 2.14 sigma)",
+     "detail": "10.110951 vs 10.000000 (|d|=0.111, band 0.356 = 5 SE, 1.56 sigma)",
      "got": 10.1109514388559,
      "want": 10.0,
-     "band": 0.25965018804658424,
-     "sigma": 2.1365561043998405,
+     "band": 0.3560144012353123,
+     "sigma": 1.558243690015287,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+9.096433 vs +9.000000 (|d|=0.0964, band 0.184 = 5 SE, 2.63 sigma)",
+     "detail": "+9.096433 vs +9.000000 (|d|=0.0964, band 0.343 = 5 SE, 1.41 sigma)",
      "got": 9.096432650944969,
      "want": 9.0,
-     "band": 0.18360040870410196,
-     "sigma": 2.626155672136438,
+     "band": 0.34299386899233836,
+     "sigma": 1.4057489019887288,
      "fallback": false
     },
     {
@@ -6838,21 +7038,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "1.992991 vs 2.000000 (|d|=0.00701, band 0.0687 = 5 SE, 0.51 sigma)",
+     "detail": "1.992991 vs 2.000000 (|d|=0.00701, band 0.116 = 5 SE, 0.30 sigma)",
      "got": 1.9929907583822617,
      "want": 2.0,
-     "band": 0.06869698254424177,
-     "sigma": 0.5101564405120894,
+     "band": 0.11611909416855315,
+     "sigma": 0.30181262039316337,
      "fallback": false
     }
    ],
@@ -6871,51 +7071,51 @@
     {
      "name": "mean[0]",
      "status": "passed",
-     "detail": "0.996202 vs 1.000000 (|d|=0.0038, band 0.0318 = 5 SE, 0.60 sigma)",
+     "detail": "0.996202 vs 1.000000 (|d|=0.0038, band 0.0367 = 5 SE, 0.52 sigma)",
      "got": 0.996201552996627,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 0.5972302609179607,
+     "band": 0.03672008174082039,
+     "sigma": 0.5172165778637625,
      "fallback": false
     },
     {
      "name": "var[0]",
      "status": "passed",
-     "detail": "3.006267 vs 3.000000 (|d|=0.00627, band 0.0779 = 5 SE, 0.40 sigma)",
+     "detail": "3.006267 vs 3.000000 (|d|=0.00627, band 0.102 = 5 SE, 0.31 sigma)",
      "got": 3.006266877609379,
      "want": 3.0,
-     "band": 0.07789505641397526,
-     "sigma": 0.40226414216029127,
+     "band": 0.10222438125837258,
+     "sigma": 0.3065255828518781,
      "fallback": false
     },
     {
      "name": "mean[1]",
      "status": "passed",
-     "detail": "0.993350 vs 1.000000 (|d|=0.00665, band 0.0318 = 5 SE, 1.05 sigma)",
+     "detail": "0.993350 vs 1.000000 (|d|=0.00665, band 0.0367 = 5 SE, 0.91 sigma)",
      "got": 0.9933495386918963,
      "want": 1.0,
-     "band": 0.031800523616591574,
-     "sigma": 1.0456527993510532,
+     "band": 0.03672008174082039,
+     "sigma": 0.9055618877763243,
      "fallback": false
     },
     {
      "name": "var[1]",
      "status": "passed",
-     "detail": "3.014381 vs 3.000000 (|d|=0.0144, band 0.0779 = 5 SE, 0.92 sigma)",
+     "detail": "3.014381 vs 3.000000 (|d|=0.0144, band 0.102 = 5 SE, 0.70 sigma)",
      "got": 3.014380502053795,
      "want": 3.0,
-     "band": 0.07789505641397526,
-     "sigma": 0.923068979972843,
+     "band": 0.10222438125837258,
+     "sigma": 0.7033792661189241,
      "fallback": false
     },
     {
      "name": "cov[0,1]",
      "status": "passed",
-     "detail": "+2.008315 vs +2.000000 (|d|=0.00831, band 0.0551 = 5 SE, 0.75 sigma)",
+     "detail": "+2.008315 vs +2.000000 (|d|=0.00831, band 0.0899 = 5 SE, 0.46 sigma)",
      "got": 2.0083145757217573,
      "want": 2.0,
-     "band": 0.05508012261123059,
-     "sigma": 0.7547709888414452,
+     "band": 0.08994546357829941,
+     "sigma": 0.46220094882935914,
      "fallback": false
     },
     {
@@ -6941,21 +7141,21 @@
     {
      "name": "latent_mean",
      "status": "passed",
-     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.0184 = 5 SE, 2.28 sigma)",
+     "detail": "0.991643 vs 1.000000 (|d|=0.00836, band 0.026 = 5 SE, 1.61 sigma)",
      "got": 0.9916429349389977,
      "want": 1.0,
-     "band": 0.018360040870410196,
-     "sigma": 2.2758841115846598,
+     "band": 0.025965018804658423,
+     "sigma": 1.6092930884962342,
      "fallback": false
     },
     {
      "name": "latent_cov",
      "status": "passed",
-     "detail": "0.992772 vs 1.000000 (|d|=0.00723, band 0.0367 = 5 SE, 0.98 sigma)",
+     "detail": "0.992772 vs 1.000000 (|d|=0.00723, band 0.0609 = 5 SE, 0.59 sigma)",
      "got": 0.9927724332797735,
      "want": 1.0,
-     "band": 0.03672008174082039,
-     "sigma": 0.9841436044778575,
+     "band": 0.060893366702740793,
+     "sigma": 0.5934609228874512,
      "fallback": false
     }
    ],

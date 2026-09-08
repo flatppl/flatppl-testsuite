@@ -145,7 +145,8 @@ def test_the_pooled_normalize_divisor_would_be_caught_on_every_theta_row():
     assert rows, "no theta-dependent normalize rows in the space"
     for p in rows:
         chk = C.check_latent_mean(p.latent_tilt, p.latent_mean, p.latent_var,
-                                  _PESSIMISTIC_N_EFF)
+                                  _PESSIMISTIC_N_EFF,
+                                  estimator_var=p.latent_mean_estimator_var)
         assert chk.status == "failed", \
             f"{p.id}: the Z-tilted marginal would pass: {chk.detail}"
         assert chk.sigma > 20, \
@@ -158,7 +159,8 @@ def test_the_theta_rows_do_not_fire_on_the_prior_itself():
         if p.latent_tilt is None:
             continue
         chk = C.check_latent_mean(p.latent_mean, p.latent_mean, p.latent_var,
-                                  _PESSIMISTIC_N_EFF)
+                                  _PESSIMISTIC_N_EFF,
+                                  estimator_var=p.latent_mean_estimator_var)
         assert chk.status == "passed", f"{p.id}: {chk.detail}"
 
 
@@ -213,10 +215,9 @@ def test_the_mixing_rows_marginals_prove_nothing_on_their_own():
 def test_a_dropped_importance_weight_would_be_caught_on_every_weighted_row():
     """The teeth of every `weighted_variate` row.
 
-    Both rows carry the SAME failing hypothesis, because both represent their law
-    by reweighting `Normal(0, 1)` positions through the conjugate tilt e^x: drop
-    the weights and the reported mean is the unnormalized base's 0 where the
-    oracle is 1.
+    These rows reweight `Normal(0, 1)` positions through the conjugate tilt e^x.
+    The generative broadcast also adds Uniform(0,2) noise, so its dropped/doubled
+    weight means are 1 and 3 around the target 2. Other rows have zero-mean noise.
 
     `iid`'s composite fallback dropped the inner measure's per-position weights
     (flatppl-js #232). A MIS-FOLD is the other failure that row must catch:
@@ -240,12 +241,12 @@ def test_a_dropped_importance_weight_would_be_caught_on_every_weighted_row():
         assert p.weight_log_var is not None, \
             f"{p.id}: a weighted_variate row must record its weight's log variance"
         n_eff = p.n_draws / 4 * math.exp(-p.weight_log_var)
-        # 0 is the dropped-weight reading; 2 * p.mean is the doubled-stream one,
-        # the same distance the other way.
-        for wrong, why in ((0.0, "the unnormalized base's mean"),
-                           (2.0 * p.mean, "a doubled weight stream")):
+        wrong_means = ((1.0, 3.0) if p.wrap == "broadcast_generative_body_at_weighted_parameter"
+                       else (0.0, 2.0 * p.mean))
+        for wrong, why in zip(wrong_means, ("the unnormalized base's mean", "a doubled weight stream")):
             for i in range(p.k):
-                chk = C.check_mean(i, wrong, p.mean, p.var, n_eff)
+                chk = C.check_mean(i, wrong, p.mean, p.var, n_eff,
+                                   estimator_var=p.mean_estimator_var)
                 assert chk.status == "failed", \
                     f"{p.id} coord {i}: {why} would pass: {chk.detail}"
                 assert chk.sigma > 20, \
@@ -264,7 +265,8 @@ def test_a_per_coordinate_parameter_redraw_would_be_caught_on_the_covariance():
     assert rows, "no shared-parameter rows in the space"
     for p in rows:
         for i in range(1, p.k):
-            chk = C.check_cov(i, 0.0, p.cov, p.var, _PESSIMISTIC_N_EFF)
+            chk = C.check_cov(i, 0.0, p.cov, p.var, _PESSIMISTIC_N_EFF,
+                              estimator_var=p.cov_estimator_var)
             assert chk.status == "failed", \
                 f"{p.id} coord {i}: a per-coordinate re-draw would pass: {chk.detail}"
             assert chk.sigma > 20, \
@@ -306,6 +308,182 @@ def test_the_bands_do_not_fire_on_true_null_noise():
                                 MIX_VAR, MIX_MU4, N).status == "failed")
     assert mean_fp == 0, f"{mean_fp}/4000 false positives on the mean band"
     assert var_fp == 0, f"{var_fp}/4000 false positives on the variance band"
+
+
+@pytest.mark.parametrize("wrap,scale,shared,uniform", [
+    ("iid_normalize_weighted_variate", 1, 0, False),
+    ("iid3_at_weighted_parameter", 1, 0, False),
+    ("broadcast_generative_body_at_weighted_parameter", 1, 0, True),
+    ("kchain_3step_history_at_weighted_prior", 2, 5, False),
+    ("kchain_joint_base_at_weighted_prior", 1, 1, False),
+])
+def test_weighted_bands_use_squared_weight_influences(wrap, scale, shared, uniform):
+    """Integrate the SNIS influence functions, independently of the frozen bands."""
+    import numpy as np
+    from numpy.polynomial.hermite import hermgauss
+    from numpy.polynomial.legendre import leggauss
+
+    p = next(p for p in space.enumerate_probes() if p.wrap == wrap)
+    nodes, weights = hermgauss(3)
+    normal = (nodes * np.sqrt(2), weights / np.sqrt(np.pi))
+    nodes, weights = leggauss(3)
+    noise = (nodes, weights / 2) if uniform else normal
+    axes = [normal, normal, noise, noise]
+    z = np.meshgrid(*(a[0] for a in axes), indexing="ij")
+    quadrature = np.prod(np.meshgrid(*(a[1] for a in axes), indexing="ij"), axis=0)
+    # Squaring exp(theta) shifts the proposal N(0,1) to N(2,1).
+    # Centering at the target mean 1 leaves N(1,1) here.
+    theta = z[0] + 1
+    if wrap == "iid_normalize_weighted_variate":
+        y0, y1 = z[0] + 1, z[1] + 1
+    else:
+        history = scale * theta + math.sqrt(shared) * z[1]
+        y0, y1 = history + z[2], history + z[3]
+    influences = {
+        "mean[0]": y0,
+        "var[0]": y0**2 - p.var,
+        "cov[0,1]": y0*y1 - p.cov,
+    }
+    if p.latent:
+        influences.update(latent_mean=theta, latent_cov=theta*y0-p.latent_cov)
+    ess = p.n_draws * math.exp(-p.weight_log_var)
+    draws = engine.Draws(
+        id=p.id, status="DRAWS", n=p.n_draws, k=p.k,
+        sum=(p.mean,) * p.k, sumsq=(p.var + p.mean**2,) * p.k,
+        cross=(p.var + p.mean**2,) + (p.cov + p.mean**2,) * (p.k-1),
+        moment_denom=1, variate_n_eff=ess, log_totalmass=0,
+        latent_mean=p.latent_mean, latent_cov=p.latent_cov, latent_n_eff=ess,
+    )
+    row = table.evaluate(p, draws)
+    checks = {c["name"]: c for c in row.checks}
+    for name, influence in influences.items():
+        coefficient = float(np.sum(quadrature * influence**2))
+        assert checks[name]["band"] == pytest.approx(5 * math.sqrt(coefficient / ess)), name
+
+
+def test_sampler_diff_reports_removed_checks():
+    row = table.Row("p", "normal", "iid3", "DRAWS", 10, 3,
+                    checks=[{"name": "cov[0,1]", "status": "passed"}])
+    assert table.diff({"p": row}, {"p": dataclasses.replace(row, checks=[])})
+
+
+def test_weighted_box_latent_band_uses_the_output_weights():
+    """The latent mean uses importance weights even without weighted variate checks."""
+    from scipy.integrate import dblquad
+
+    p = next(p for p in space.enumerate_probes() if p.wrap == "normalize_theta_weighted_box")
+
+    def weight_squared(x, theta):
+        mass = math.expm1(theta) / theta if theta else 1
+        return (math.exp(theta*x) / mass)**2
+
+    second_weight = dblquad(weight_squared, 0, 4, 0, 1)[0] / 4
+    influence = dblquad(lambda x, theta: weight_squared(x, theta)*(theta-2)**2,
+                        0, 4, 0, 1)[0] / 4
+    ess = p.n_draws / second_weight
+    draws = engine.Draws(id=p.id, status="DRAWS", n=p.n_draws, k=1,
+                         sum=(0,), sumsq=(0,), cross=(0,), log_totalmass=0,
+                         latent_mean=2, latent_n_eff=ess)
+    row = table.evaluate(p, draws)
+    check = next(c for c in row.checks if c["name"] == "latent_mean")
+    assert check["band"] == pytest.approx(5 * math.sqrt(influence / p.n_draws))
+
+
+@pytest.mark.parametrize("wrap,check_name", [
+    ("iid_normalize_weighted_variate", "var[0]"),
+    ("iid3_at_weighted_parameter", "cov[0,1]"),
+    ("normalize_theta_weighted_box", "latent_mean"),
+    ("normalize_superpose_latent_mixing", "latent_cov"),
+])
+def test_collapsed_ess_cannot_pass_the_declared_fault_check(wrap, check_name):
+    """An uninformative ensemble must not pass by widening its own bands."""
+    p = next(p for p in space.enumerate_probes() if p.wrap == wrap)
+    mean, var, cov = p.mean or 0.0, p.var or 0.0, p.cov or 0.0
+    good = engine.Draws(
+        id=p.id, status="DRAWS", n=p.n_draws, k=p.k,
+        sum=(mean,) * p.k, sumsq=(var + mean**2,) * p.k,
+        cross=(var + mean**2,) + (cov + mean**2,) * (p.k - 1),
+        moment_denom=1, variate_n_eff=10000, log_totalmass=0,
+        latent_mean=p.latent_mean, latent_cov=p.latent_cov, latent_n_eff=10000,
+    )
+    # All normalized weight on one atom leaves the means plausible and every
+    # variance/covariance zero. ESS=1 previously let those values pass.
+    collapsed = dataclasses.replace(
+        good, sumsq=(mean**2,) * p.k, cross=(mean**2,) * p.k,
+        variate_n_eff=1, latent_n_eff=1, latent_cov=0,
+    )
+    valid_row, bad_row = table.evaluate(p, good), table.evaluate(p, collapsed)
+    assert all(c["status"] != "failed" for c in valid_row.checks)
+    check = next(c for c in bad_row.checks if c["name"] == check_name)
+    assert check["status"] == "failed"
+    assert "insufficient effective sample size/power" in check["detail"]
+    assert table.diff({p.id: valid_row}, {p.id: bad_row})
+
+
+def test_symmetric_two_point_variance_has_an_exact_binomial_band():
+    """Enumerate the finite null law without reusing scipy's quantile oracle."""
+    n, variance = 64, 0.25
+    checks = [C.check_var(0, 4*variance*k*(n-k)/n**2,
+                          variance, variance**2, n) for k in range(n + 1)]
+    assert all(c.status in {"passed", "failed"} for c in checks)
+    assert checks[0].status == "failed"  # all atoms collapse to one endpoint
+    assert checks[n // 2].status == "passed"
+    probability = [math.comb(n, k) / 2**n for k in range(n + 1)]
+    rejected = sum(p for p, c in zip(probability, checks) if c.status == "failed")
+    assert rejected <= C.KS_SIGMA_P
+    # The next narrower symmetric acceptance set exceeds the requested level.
+    upper = max(k for k, c in enumerate(checks) if c.status == "passed")
+    assert rejected + 2 * probability[upper] > C.KS_SIGMA_P
+
+
+def test_inconsistent_fourth_moment_fails_instead_of_skipping():
+    check = C.check_var(0, 0.25, 0.25, 0.01, 64)
+    assert check.status == "failed"
+    assert "oracle inconsistent" in check.detail
+
+
+@pytest.mark.parametrize("n,estimator_var", [(64.5, None), (64, 0.0)])
+def test_binomial_variance_band_requires_an_unweighted_integer_draw_count(n, estimator_var):
+    check = C.check_var(0, 0.25, 0.25, 0.0625, n, estimator_var=estimator_var)
+    assert check.status == "failed"
+
+
+def test_sampler_diff_rejects_malformed_even_when_frozen():
+    row = table.Row("p", "normal", "base", "MALFORMED", 10, 1, error="nonfinite")
+    assert table.diff({"p": row}, {"p": row})
+
+
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
+def test_native_sampler_rejects_continuous_bernoulli_substitute():
+    p = next(p for p in space.enumerate_probes() if p.id == "bernoulli.identity")
+    p = dataclasses.replace(p, n_draws=512)
+    wrong = dataclasses.replace(p, source="x ~ Normal(mu = 0.3, sigma = 0.458257569495584)\n")
+    draws = engine.run([wrong], seed=space.SEED, ks_subsample=32)[p.id]
+    row = table.evaluate(p, draws)
+    assert any(c["name"] == "support" and c["status"] == "failed" for c in row.checks)
+
+
+def test_native_support_check_requires_driver_evidence():
+    p = next(p for p in space.enumerate_probes() if p.id == "bernoulli.identity")
+    draws = engine.Draws(id=p.id, status="DRAWS", n=10, k=1,
+                         sum=(3,), sumsq=(3,), cross=(3,), log_totalmass=0)
+    row = table.evaluate(p, draws)
+    assert any(c["name"] == "support" and c["status"] == "failed" for c in row.checks)
+
+
+@pytest.mark.skipif(not _engine_available(), reason="no flatppl-js checkout found anywhere")
+def test_native_sampler_checks_affine_discrete_support():
+    p = next(p for p in space.enumerate_probes() if p.id == "bernoulli.iid_pushfwd3")
+    p = dataclasses.replace(p, n_draws=128)
+    wrong = dataclasses.replace(
+        p, id="off-lattice",
+        source="b ~ broadcast(Dirac, value = [1.0, 2.0, 3.0])\n")
+    draws = engine.run([p, wrong], seed=space.SEED, ks_subsample=16)
+    for probe, status in [(p, "passed"), (wrong, "failed")]:
+        row = table.evaluate(probe, draws[probe.id])
+        assert any(c["name"] == "support" and c["status"] == status for c in row.checks)
+    failed = next(c for c in table.evaluate(wrong, draws[wrong.id]).checks if c["name"] == "support")
+    assert failed["got"] == p.n_draws  # one illegal middle coordinate per draw
 
 
 def test_ks_catches_a_shape_defect_the_moments_would_miss():

@@ -34,7 +34,7 @@ def _report(args) -> int:
         print("no committed sampler table — run `pixi run sampler-sweep-regen`", file=sys.stderr)
         return 1
     print(f"sampler sweep — {meta.get('probe_count')} rows, "
-          f"n={meta.get('n_draws')} draws/row, {meta.get('sigma')}-sigma bands")
+          f"n={meta.get('n_draws')} draws/row, {meta.get('sigma')}-SE asymptotic moment bands")
     print(f"  engine {meta.get('engine_commit', '?')[:12]}  generated {meta.get('generated_at')}")
 
     counts: dict[str, int] = {}

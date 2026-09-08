@@ -217,7 +217,7 @@ def check_fanout_distribution(
     **_ignored,
 ) -> CheckResult:
     if stat.get("fanout_simplex"):
-        return _check_dirichlet_fanout(test_id, xs, params, moment_rel_tol)
+        return _check_dirichlet_fanout(test_id, xs, params, ks_stat_max, moment_rel_tol)
     if stat.get("fanout_dim"):
         return _check_mvnormal_fanout(test_id, xs, params)
     if stat.get("discrete"):
@@ -285,11 +285,17 @@ def _check_mvnormal_fanout(test_id, xs, params) -> CheckResult:
                         "" if ok else NUMERIC_MISMATCH, detail)
 
 
-def _check_dirichlet_fanout(test_id, xs, params, moment_rel_tol) -> CheckResult:
+def _check_dirichlet_fanout(test_id, xs, params, ks_stat_max, moment_rel_tol) -> CheckResult:
     alpha = np.asarray(params["alpha"], dtype=float)
     a0 = float(alpha.sum())
     n = len(xs)
     d = xs.shape[1]
+
+    if not np.all(np.isfinite(xs) & (xs >= 0) & (xs <= 1)):
+        return CheckResult(
+            test_id, "fanout_distribution", "failed", NUMERIC_MISMATCH,
+            "simplex coordinates must be finite and lie in [0, 1]",
+        )
 
     row_sums = xs.sum(axis=1)
     worst_row = float(np.max(np.abs(row_sums - 1.0)))
@@ -308,9 +314,18 @@ def _check_dirichlet_fanout(test_id, xs, params, moment_rel_tol) -> CheckResult:
     pairs = [(i, j) for i in range(d) for j in range(i + 1, d)]
     worst_corr = max(abs(corr[i, j] - dirichlet_theo_corr(alpha, a0, i, j)) for i, j in pairs)
 
-    ok = worst_row <= 1e-4 and mean_ok and worst_dvar_rel <= 0.05 and worst_corr <= 0.05
+    from scipy.stats import beta as beta_dist, kstest
+    worst_ks = max(float(kstest(xs[:, i], beta_dist(alpha[i], a0 - alpha[i]).cdf).statistic)
+                   for i in range(d))
+    # DKW plus a union bound: 2*d*exp(-2*n*limit²) equals the scalar check's
+    # 2*exp(-2*n*ks_stat_max²). This does not require independent coordinates.
+    ks_limit = math.sqrt(ks_stat_max**2 + math.log(d) / (2 * n))
+
+    ok = (worst_row <= 1e-4 and mean_ok and worst_dvar_rel <= 0.05
+          and worst_corr <= 0.05 and worst_ks <= ks_limit)
     detail = (f"n={n} [n,{d}] fanned draws; simplex row-sum maxΔ={worst_row:.2e}; "
               f"mean {emp_mean.tolist()} vs {ref_mean.tolist()}; "
-              f"var relΔ max={worst_dvar_rel:.3f}; comp-corr worstΔ={worst_corr:.3f}")
+              f"var relΔ max={worst_dvar_rel:.3f}; comp-corr worstΔ={worst_corr:.3f}; "
+              f"marginal KS={worst_ks:.4f} (max {ks_limit:.4f})")
     return CheckResult(test_id, "fanout_distribution", "passed" if ok else "failed",
                         "" if ok else NUMERIC_MISMATCH, detail)

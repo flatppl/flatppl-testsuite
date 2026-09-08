@@ -151,10 +151,7 @@ def evaluate(probe: space.Probe, draws: engine.Draws) -> Row:
         return row
 
     results: list[C.Check] = []
-    # A weighted-variate row's moments are self-normalised importance estimators,
-    # so their standard error carries the ensemble's effective sample size where
-    # an unweighted row carries n -- the same substitution `check_latent_mean`
-    # makes, for the same reason.
+    # Weighted rows need both ESS and proposal-specific influence variances.
     nb = draws.n
     if probe.weighted_variate:
         if not draws.variate_n_eff or draws.variate_n_eff <= 0:
@@ -165,18 +162,28 @@ def evaluate(probe: space.Probe, draws: engine.Draws) -> Row:
     for i in range(draws.k):
         want = probe.mean if probe.mean_by_coord is None else probe.mean_by_coord[i]
         results.append(C.check_mean(i, draws.mean(i), want, probe.var, nb,
-                                    probe.variate_skip_reason))
-        results.append(C.check_var(i, draws.var(i), probe.var, probe.fourth, nb,
-                                   probe.variate_skip_reason))
+                                    probe.variate_skip_reason,
+                                    estimator_var=probe.mean_estimator_var))
+        results.append(C.require_power(
+            C.check_var(i, draws.var(i), probe.var, probe.fourth, nb,
+                        probe.variate_skip_reason,
+                        estimator_var=probe.var_estimator_var), 0.0))
         if i > 0:
-            results.append(C.check_cov(i, draws.cov0(i), probe.cov, probe.var, nb))
+            results.append(C.require_power(
+                C.check_cov(i, draws.cov0(i), probe.cov, probe.var, nb,
+                            estimator_var=probe.cov_estimator_var), 0.0))
     results.append(C.check_ks(list(draws.ks_sample), probe.ks, len(draws.ks_sample)))
+    if probe.support is not None:
+        results.append(C.check_support(draws.outside_support))
     results.append(C.check_totalmass(draws.log_totalmass, probe.logtotalmass))
     if probe.latent is not None:
-        results.append(C.check_latent_mean(draws.latent_mean, probe.latent_mean,
-                                           probe.latent_var, draws.latent_n_eff))
-        results.append(C.check_latent_cov(draws.latent_cov, probe.latent_cov,
-                                          probe.latent_cov_var, draws.latent_n_eff))
+        results.append(C.require_power(
+            C.check_latent_mean(draws.latent_mean, probe.latent_mean,
+                                probe.latent_var, draws.latent_n_eff,
+                                estimator_var=probe.latent_mean_estimator_var), probe.latent_tilt))
+        results.append(C.require_power(
+            C.check_latent_cov(draws.latent_cov, probe.latent_cov,
+                               probe.latent_cov_var, draws.latent_n_eff), probe.latent_cov_null))
 
     row.checks = [
         {"name": c.name, "status": c.status, "detail": c.detail,
@@ -318,6 +325,9 @@ def diff(expected: dict[str, Row], actual: dict[str, Row]) -> list[str]:
         if a is None:
             problems.append(f"{pid}: in the table but not the live sweep (removed probe — refreeze)")
             continue
+        if a.outcome == Outcome.MALFORMED.value:
+            problems.append(f"{pid}: MALFORMED ({a.error})")
+            continue
         if e.outcome != a.outcome:
             problems.append(f"{pid}: outcome {e.outcome} -> {a.outcome}"
                             + (f" ({a.error})" if a.error else ""))
@@ -331,6 +341,9 @@ def diff(expected: dict[str, Row], actual: dict[str, Row]) -> list[str]:
                 f"    was: {e.error}\n    now: {a.error}")
             continue
         was = {c["name"]: c["status"] for c in e.checks}
+        missing = set(was) - {c["name"] for c in a.checks}
+        for name in sorted(missing):
+            problems.append(f"{pid}: removed check {name} (refreeze)")
         for c in a.checks:
             before = was.get(c["name"])
             if before is None:

@@ -142,6 +142,10 @@ class Probe:
     a pushforward carrying a vector shift -- and a shift that is equal in every
     coordinate cannot show a dropped or sign-flipped component."""
 
+    support: tuple[float, float | None, float] | None = None
+    """Inclusive lower/upper bounds and lattice step, checked on every draw.
+    The affine wrappers transform both bounds and step. None means no check."""
+
     latent: str | None = None
     """A second binding whose WEIGHTED marginal mean is checked (see
     `checks.check_latent_mean`). None on every row that needs no such check."""
@@ -161,8 +165,8 @@ class Probe:
     that reaches the variate only through the mixture's component choice: both
     marginals stay correct when the two decouple, so neither mean can see it."""
     latent_cov_var: float | None = None
-    """`n * Var(cov_hat)` for that estimator, closed form: `E[a^2 b^2] - cov^2`
-    with `a`, `b` the two centred variables. It bands the check."""
+    """Coefficient A in SE=sqrt(A/ESS), including squared-weight dependence.
+    With constant weights this is `E[a^2 b^2] - cov^2`."""
     latent_cov_null: float | None = None
     """What a lift that decouples the latent from the variate gives instead --
     0, since the mixture then draws at the pooled proportion. Checked by nothing
@@ -181,6 +185,13 @@ class Probe:
     from the weight's own distribution. The gate's teeth test bands with
     `n_draws / 4 * exp(-weight_log_var)`, so each such row derives its own
     pessimistic effective count instead of borrowing another row's."""
+
+    mean_estimator_var: float | None = None
+    var_estimator_var: float | None = None
+    cov_estimator_var: float | None = None
+    latent_mean_estimator_var: float | None = None
+    """Squared-weight influence coefficients A for SE=sqrt(A/ESS).
+    These describe the proposal and estimator, not the target's moments."""
 
     variate_skip_reason: str | None = None
     """Why this row's variate carries no mean/variance oracle, when the reason is
@@ -490,6 +501,11 @@ TARGETED: tuple[Probe, ...] = (
           note="the weighted-box witness: a latent inside the weight of a "
                "Lebesgue box, whose per-theta mass is a 128-point CRN estimate",
           latent="theta", latent_mean=2.0, latent_var=_UNIFORM_SPAN4_VAR,
+          # Under the ideal slice normalizer, E[w²|theta]=(theta/2)coth(theta/2).
+          # A=E[(theta-2)² E[w²|theta]]/E[w²] by quadrature on Uniform(0,4).
+          # The engine's 128-point CRN normalizer adds approximation bias that
+          # this asymptotic importance-sampling band does not quantify.
+          latent_mean_estimator_var=1.390888744654453,
           latent_tilt=2.8073315740022866,
           variate_skip_reason="the atoms are importance-weighted and NOT "
                               "equally weighted here, so an unweighted moment "
@@ -537,7 +553,10 @@ TARGETED: tuple[Probe, ...] = (
           note="iid over a normalize whose weights ARE the law: every coordinate "
                "is Normal(1, 1) by conjugacy, and the weights must fold as a "
                "product over the k coordinates",
-          n_draws=600_000, weighted_variate=True, weight_log_var=3.0),
+          # Squared weights shift each target-centered coordinate to N(1,1):
+          # E[a²]=2, E[(a²-1)²]=7, E[(ab)²]=4 for independent a,b.
+          n_draws=600_000, weighted_variate=True, weight_log_var=3.0,
+          mean_estimator_var=2.0, var_estimator_var=7.0, cov_estimator_var=4.0),
     # ------------------------------------- a draw AT a weighted parameter measure
     # The weight-drop witness one operator over (flatppl-js, the matSample fix).
     # §06 "The measure monad" defines bind as
@@ -563,6 +582,14 @@ TARGETED: tuple[Probe, ...] = (
     # proposal. The weight is one lognormal(0, 1) factor, so its log has variance
     # 1 and the ensemble's ESS/n is about e^(-1) = 37% -- no extra draws needed.
     #
+    # ESTIMATOR VARIANCES. Squared weights shift the centered latent to N(1,1).
+    # For a Gaussian output with target variance v, covariance c and shift d,
+    # E[g²] under that tilt gives mean v+d², variance 2v²+4vd²+d⁴, and pair
+    # covariance v²+c²+2d²(v+c)+d⁴. For theta/output covariance with y=a*theta+r,
+    # it gives 2v+5a². These are the coefficients A in SE=sqrt(A/ESS).
+    # Thus these scalar/leaf/broadcast Normal(theta,1) rows use 3,17,12,2,9
+    # for mean, variance, pair covariance, latent mean and latent covariance.
+    #
     # cov(theta, y) IS pinned but is NOT this row's teeth, and a reader must not
     # take it for them: with the weights dropped the atoms are Normal(0, 1) and
     # y = theta + noise, so an unweighted covariance is 1 as well. It is frozen
@@ -581,8 +608,10 @@ TARGETED: tuple[Probe, ...] = (
                "§06's bind integrates the kernel against the parameter measure, "
                "so theta's weights must reach y's atoms exactly once",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=9.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=3.0, var_estimator_var=17.0,
+          latent_mean_estimator_var=2.0),
     # ---------------------------------- an iid AT a weighted parameter measure
     # The row above's shape under `iid`, which is a DIFFERENT engine path: this
     # spelling resolves to a sample leaf and batches in one worker round-trip,
@@ -626,8 +655,10 @@ TARGETED: tuple[Probe, ...] = (
                "coordinate against the parameter measure, and the shared "
                "parameter draw enters an atom's weight exactly once",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=9.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=3.0, var_estimator_var=17.0, cov_estimator_var=12.0,
+          latent_mean_estimator_var=2.0),
     # ------------------------------- a BROADCAST at a weighted parameter measure
     # The same conjugate tilt again, now under `broadcast`, and once per EXECUTOR
     # in mat-broadcast.ts. Every one of them rebuilt its output with
@@ -687,8 +718,10 @@ TARGETED: tuple[Probe, ...] = (
                "independent product measure of the kernel applications, and "
                "each one integrates against the parameter measure",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=9.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=3.0, var_estimator_var=17.0, cov_estimator_var=12.0,
+          latent_mean_estimator_var=2.0),
     # 2. The IID-BODIED COMPOSITE, which folds (atom, cell, inner) into one
     #    batch: 2 cells x 2 inner draws = 4 positions, all four at one theta. The
     #    inner axis is no more a re-draw of theta than the cell axis is, so the
@@ -706,8 +739,10 @@ TARGETED: tuple[Probe, ...] = (
                "cell and inner axes fold into one batch and every position of "
                "an atom shares its single parameter draw",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=9.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=3.0, var_estimator_var=17.0, cov_estimator_var=12.0,
+          latent_mean_estimator_var=2.0),
     # 3. The GENERATIVE-BODIED COMPOSITE: the body closes over an INTERNAL DRAW,
     #    sampled fresh per (atom, cell) and carrying no weight of its own.
     #      y_j = theta + u_j,  u = 2 * Uniform(0, 1)
@@ -719,6 +754,9 @@ TARGETED: tuple[Probe, ...] = (
     #      cov(y_i, y_j) = Var[theta] = 1   (the draws are independent)
     #      cov(theta, y_j) = Var[theta] = 1
     #      n Var(cov_hat) = E[a^2 (a + w)^2] - 1 = (3 + 1/3) - 1 = 7/3
+    #    That last coefficient assumes direct target draws. Squared importance
+    #    weights shift a to N(1,1), giving coefficients 7/3,439/45,76/9,2,23/3
+    #    for mean, variance, pair covariance, latent mean and latent covariance.
     #    That the internal draw is FRESH per position is what makes the cross-
     #    position covariance 1 rather than 4/3.
     Probe("normal.broadcast_generative_body_at_weighted_parameter",
@@ -738,8 +776,10 @@ TARGETED: tuple[Probe, ...] = (
                "parameter: the internal draw is fresh per position and "
                "unweighted, so the atom's weight is the parameter's alone",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=2.3333333333333335,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=23.0 / 3.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=7.0 / 3.0, var_estimator_var=439.0 / 45.0,
+          cov_estimator_var=76.0 / 9.0, latent_mean_estimator_var=2.0),
     # 4. The JOINT-BODIED COMPOSITE: per cell the kernel draws a 2-component
     #    joint variate, both components Normal(theta, 1). The components are the
     #    variate's STRUCTURE, not a second weighting event, so cov(a_j, b_j) is
@@ -758,8 +798,10 @@ TARGETED: tuple[Probe, ...] = (
                "the components are the variate's structure, so the shared "
                "parameter draw still enters the atom's weight once",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=9.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=3.0, var_estimator_var=17.0, cov_estimator_var=12.0,
+          latent_mean_estimator_var=2.0),
     # 5. The NESTED-BROADCAST COMPOSITE, whose outer kernel body is itself a
     #    `broadcast`: 2 outer x 2 inner = 4 positions folded in one batch. theta
     #    arrives as a closed-over per-atom ref inside the INNER mu, which is the
@@ -782,8 +824,10 @@ TARGETED: tuple[Probe, ...] = (
                "outer and inner cell axes fold into one batch and every "
                "position of an atom shares its single parameter draw",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=3.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=9.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=3.0, var_estimator_var=17.0, cov_estimator_var=12.0,
+          latent_mean_estimator_var=2.0),
     # ------------------------------------------------- a LATENT mixing weight
     # §06 "Normalization and mass", the `normalize` entry's own recommended
     # mixture spelling: "To build a normalized mixture distribution, use
@@ -915,9 +959,12 @@ TARGETED: tuple[Probe, ...] = (
     # are drawn at ONE history, so a per-position re-draw of it reads 0 there
     # while both marginals stay correct. Dropping the prior's weights reads
     # theta ~ Normal(0, 1) and E[y] = 0.
-    # The band: with a = theta - 1 and b = y_0 - 2 = 2a + r for
+    # For direct target draws, with a = theta - 1 and b = y_0 - 2 = 2a + r for
     # r ~ Normal(0, 6) independent of a, E[a^2 b^2] = 4*E[a^4] + E[a^2]E[r^2]
     # = 12 + 6 = 18, so n*Var(cov_hat) = 18 - 4 = 14.
+    # Squared importance weights shift a to N(1,1), giving A=40 instead.
+    # The Gaussian formulas above at (v,c,d)=(10,9,2) give 14,376,349 for
+    # the output's mean, variance and pair covariance coefficients.
     Probe("normal.kchain_3step_history_at_weighted_prior",
           "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
           "theta ~ tm\n"
@@ -935,8 +982,10 @@ TARGETED: tuple[Probe, ...] = (
                "columns, so the prior's weights must reach the body's output "
                "exactly once and the two positions must share one history",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=2.0, latent_cov_var=14.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=2.0, latent_cov_var=40.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=14.0, var_estimator_var=376.0, cov_estimator_var=349.0,
+          latent_mean_estimator_var=2.0),
     # ------------- a positional-JOINT base marginal kchain at a weighted prior
     # The whole-variate boundary bind, which no existing row reaches. §06
     # `joint` makes the positional form's variate "the `cat` of the component
@@ -957,8 +1006,10 @@ TARGETED: tuple[Probe, ...] = (
     #   E[y] = 1, Var[y] = 3, E[(y - 1)^4] = 3 * 9 = 27
     #   cov(y_0, y_1) = Var(theta + e0) = 2
     #   cov(theta, y_0) = Var[theta] = 1
-    # The band: with a = theta - 1 and b = y_0 - 1 = a + r for r ~ Normal(0, 2),
+    # For direct target draws, with a = theta - 1 and b = y_0 - 1 = a + r for r ~ Normal(0, 2),
     # E[a^2 b^2] = E[a^4] + E[a^2]E[r^2] = 3 + 2 = 5, so n*Var(cov_hat) = 4.
+    # Squared importance weights give A=11 for this covariance. The Gaussian
+    # formulas at (v,c,d)=(3,2,1) give output coefficients 4,31,24.
     Probe("normal.kchain_joint_base_at_weighted_prior",
           "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
           "theta ~ tm\n"
@@ -975,8 +1026,10 @@ TARGETED: tuple[Probe, ...] = (
                "measureToParamValue, and the prior's weights must survive that "
                "bind exactly once",
           latent="theta", latent_mean=1.0, latent_var=1.0, latent_tilt=0.0,
-          latent_cov=1.0, latent_cov_var=4.0,
-          weighted_variate=True, weight_log_var=1.0),
+          latent_cov=1.0, latent_cov_var=11.0,
+          weighted_variate=True, weight_log_var=1.0,
+          mean_estimator_var=4.0, var_estimator_var=31.0, cov_estimator_var=24.0,
+          latent_mean_estimator_var=2.0),
     # ----------- the two spellings that SAMPLED NaN, now refused at the boundary
     # These are the ill-typed halves of the two rows above, and they are the
     # rows with teeth for the boundary check: against the pre-fix engine both
@@ -1049,13 +1102,26 @@ def _ks_for(fam: Family, xform: str):
         return None
     name, args, kwargs = fam.scipy
     if fam.discrete:
-        # A KS test needs a continuous cdf; a discrete family gets moments only.
+        # Continuous KS critical values do not apply to discrete laws.
         return None
     if xform == "identity":
         return ("dist", name, args, kwargs)
     if xform == "affine":
         return ("affine", _AFFINE_A, _AFFINE_B, name, args, kwargs)
     raise ValueError(f"unknown moment transform {xform!r}")
+
+
+def _support_for(fam: Family, xform: str):
+    if fam.support is None:
+        return None
+    lower, upper = fam.support
+    if xform == "identity":
+        return lower, upper, 1
+    if xform == "affine":
+        return (_AFFINE_A * lower + _AFFINE_B,
+                None if upper is None else _AFFINE_A * upper + _AFFINE_B,
+                _AFFINE_A)
+    raise ValueError(f"unknown support transform {xform!r}")
 
 
 def enumerate_probes() -> list[Probe]:
@@ -1069,6 +1135,7 @@ def enumerate_probes() -> list[Probe]:
             k=1, field=None, mean=fam.mean, var=fam.var, fourth=fam.fourth,
             cov=None, logtotalmass=0.0, ks=_ks_for(fam, "identity"),
             family=fam.slug, wrap="identity", note=fam.note,
+            support=_support_for(fam, "identity"),
         ))
 
     # Axis 2 — base-agnostic wraps over a spread of bases.
@@ -1085,6 +1152,7 @@ def enumerate_probes() -> list[Probe]:
                 cov=0.0 if wrap.k > 1 else None,
                 logtotalmass=wrap.logtotalmass, ks=_ks_for(fam, wrap.xform),
                 family=fam.slug, wrap=wrap.slug, note=wrap.note,
+                support=_support_for(fam, wrap.xform),
             ))
 
     # Axis 3 — composed wraps, Normal base, oracles written out per row.

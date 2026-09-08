@@ -24,6 +24,7 @@
     "cov"
   ],
   "draws": 100000,
+  "fanout_shape": [20000, 2],
   "key": [
     0,
     0
