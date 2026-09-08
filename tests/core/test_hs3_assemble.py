@@ -155,3 +155,104 @@ def _strip_generated_header(src: str) -> str:
     ):
         lines.pop(0)
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# `assemble` consults the prenormalized notion PER FACTOR inside a joint, and
+# binds the observation by the converter's observable NAME rather than by the
+# caller's column position. Both are structural: on the vendored fixtures the
+# two binding routes agree, and the mis-wrapped factor showed up only as a
+# determiniser refusal, so neither regression would move a number.
+# ---------------------------------------------------------------------------
+
+# A joint mixing a raw factor with an already-normalize-headed one -- rf305's
+# shape, reduced to the parts `assemble` reads.
+_MIXED_JOINT_SRC = (
+    "sigma = elementof(posreals)\n"
+    "obs_domain = cartprod(y = interval(-5.0, 5.0), x = interval(-5.0, 5.0))\n"
+    "model = joint(y = gaussy, x = gaussx)\n"
+    "gaussy = Normal(mu = 0.0, sigma = 3.0)\n"
+    "gaussx = normalize(logweighted((y, x) -> 0.0, Lebesgue(support = obs_domain)))\n"
+    'd = table(y = [1.0], x = [2.0])\n'
+)
+
+
+def test_a_normalize_headed_joint_factor_is_not_re_wrapped():
+    """The whole point of the per-factor check.
+
+    Wrapping an already-normalized factor makes a `normalize` node the base of
+    a `truncate`, which the determiniser refuses for want of a closed-form Z
+    over a multivariate base. Consulting the notion once for the head binding
+    cannot see this: the head is a `joint(...)`, which is not normalize-headed.
+    """
+    src, binding = assemble(_MIXED_JOINT_SRC, "model", "d", "y",
+                            {"x", "y"})
+    assert binding == "__L__"
+    assert "truncate(gaussx" not in src, (
+        "the normalize-headed factor was re-wrapped; `assemble` is consulting "
+        "the prenormalized notion for the product rather than per factor"
+    )
+    # ... while the RAW factor still gets its range normalization.
+    assert "normalize(truncate(gaussy, interval(-5.0, 5.0)))" in src
+    # Each factor is observed on its own axis, by label.
+    assert 'get(d, "y")' in src and 'get(d, "x")' in src
+
+
+def test_the_raw_joint_factors_are_still_wrapped():
+    """A joint of two raw dists must not change -- rf304_uncorrprod's shape."""
+    src_in = (
+        "obs_domain = cartprod(x = interval(-5.0, 5.0), y = interval(-5.0, 5.0))\n"
+        "gaussxy = joint(x = gx, y = gy)\n"
+        "gx = Normal(mu = 0.0, sigma = 1.0)\n"
+        "gy = Normal(mu = 0.0, sigma = 2.0)\n"
+        "d = table(x = [1.0], y = [2.0])\n"
+    )
+    src, _ = assemble(src_in, "gaussxy", "d", "x", {"x", "y"})
+    assert "normalize(truncate(gx, interval(-5.0, 5.0)))" in src
+    assert "normalize(truncate(gy, interval(-5.0, 5.0)))" in src
+
+
+def test_the_observation_is_bound_by_the_declared_observable_not_the_column():
+    """A `% observable:` annotation wins over the caller's column argument.
+
+    Position is not identity. Upstream reordered the rf30x datasets' axes after
+    their ROOT vectors were frozen, so a positional pick follows the reordering
+    silently; the converter's own annotation does not.
+    """
+    src_in = (
+        "% observable: x\n"
+        "gauss = Normal(mu = 0.0, sigma = 1.0)\n"
+        "obs_domain = cartprod(x = interval(-5.0, 5.0))\n"
+        'd = table(y = [9.0], x = [1.0])\n'
+    )
+    # The caller passes the WRONG column, as `data_columns(...)[0]` would after
+    # an axis reorder. The annotation must override it.
+    src, _ = assemble(src_in, "gauss", "d", "y", {"x"})
+    assert 'get(d, "x")' in src
+    assert 'get(d, "y")' not in src
+
+
+def test_the_callers_column_stands_when_no_observable_is_declared():
+    """No annotation for this pdf -> behaviour is exactly what it was."""
+    src_in = (
+        "model = normalize(superpose(weighted(f, gx), weighted(1.0 - f, px)))\n"
+        'd = table(x = [1.0])\n'
+    )
+    src, _ = assemble(src_in, "model", "d", "x", {"x"}, prenormalized=True)
+    assert 'get(d, "x")' in src
+
+
+def test_the_prenormalized_predicate_has_one_definition():
+    """`suites.hs3_import` keeps the old private name as a delegate.
+
+    Two copies of this predicate would drift, and the joint branch now depends
+    on it, so the importer owns it and the old import site forwards.
+    """
+    from flatppl_testsuite.formats.hs3.importer import binding_is_prenormalized
+    from flatppl_testsuite.suites.hs3_import import _binding_is_prenormalized
+
+    src = "m = normalize(weighted(f, g))\n"
+    assert binding_is_prenormalized(src, "m") is True
+    assert _binding_is_prenormalized(src, "m") is True
+    assert binding_is_prenormalized("g = Normal(mu = 0.0, sigma = 1.0)\n", "g") is False
+    assert _binding_is_prenormalized("g = Normal(mu = 0.0, sigma = 1.0)\n", "g") is False

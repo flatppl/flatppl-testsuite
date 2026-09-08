@@ -174,6 +174,39 @@ def _strip_provenance(src: str) -> str:
     return "\n".join(out)
 
 
+def binding_is_prenormalized(src: str, binding: str) -> bool:
+    """True if `<binding> = ...`'s RHS starts with `normalize(`.
+
+    An already range-normalized measure (mixture / chebychev / polynomial /
+    generic family, and the conditional lowering) must be iid'd directly:
+    re-wrapping it makes a `normalize` node the base of a `truncate`, which the
+    determiniser cannot resolve.
+
+    Canonical home for the predicate. `suites.hs3_import._binding_is_prenormalized`
+    delegates here so its existing import sites keep working.
+    """
+    m = re.search(rf"(?m)^{re.escape(binding)}\s*=\s*(.*)$", src)
+    return bool(m) and m.group(1).lstrip().startswith("normalize(")
+
+
+# `% observable: <name>` annotates the binding on the NEXT source line. Read
+# off the RAW converter output, before `_strip_provenance` drops the comments.
+_OBSERVABLE_ANNOTATION = re.compile(
+    r"^\s*%\s*observable:\s*(\S+)\s*\n\s*(\w+)\s*=", re.M)
+
+
+def declared_observables(src: str) -> dict[str, str]:
+    """Map each annotated binding to the observable name the converter gave it.
+
+    The converter is the authority on which variate a measure is over. Reading
+    it here is what lets `assemble` bind an observation BY NAME instead of by
+    the dataset's column order, which is not a safe proxy: upstream reordered
+    the rf30x datasets' axes after their ROOT vectors were frozen, so a
+    positional pick silently follows the wrong axis.
+    """
+    return {m.group(2): m.group(1) for m in _OBSERVABLE_ANNOTATION.finditer(src)}
+
+
 # The observable's declared range lives in a `cartprod(..., x = interval(lo, hi))`
 # domain binding. Match the interval keyed by the observable label.
 def _observable_interval(src: str, observable: str) -> tuple[float, float] | None:
@@ -255,8 +288,18 @@ def assemble(flatppl_src: str, pdf: str, data_name: str, column: str,
         terms = []
         for i, (axis, sub) in enumerate(joint_axes):
             iv = _observable_interval(body, axis)
-            meas = (f"normalize(truncate({sub}, interval({iv[0]!r}, {iv[1]!r})))"
-                    if iv is not None else sub)
+            # PER FACTOR, not once for the whole product. A joint can mix an
+            # already-normalized factor with a raw one -- rf305 pairs a raw
+            # `Normal` against a conditional lowered as `normalize(logweighted(…))`
+            # -- and the head binding being a `joint(...)` says nothing about
+            # either. Wrapping the normalized factor put a `normalize` node
+            # under a `truncate` over a multivariate base, which the
+            # determiniser refuses for want of a closed-form Z. Passing it
+            # through leaves the factor exactly as the converter emitted it.
+            if iv is None or binding_is_prenormalized(body, sub):
+                meas = sub
+            else:
+                meas = f"normalize(truncate({sub}, interval({iv[0]!r}, {iv[1]!r})))"
             obs = f'get({data_name}, "{axis}")'
             terms.append(
                 f"__L{i}__ = likelihoodof(iid({meas}, lengthof({obs})), {obs})")
@@ -281,8 +324,18 @@ def assemble(flatppl_src: str, pdf: str, data_name: str, column: str,
             # No declared range → score the bare (full-support) measure.
             measure = pdf
 
+    # Bind the observation BY NAME where the converter names the pdf's
+    # observable, rather than by the caller's column position. The two agree
+    # today on every scoring fixture, so this moves no value -- but position is
+    # not a safe proxy for identity: upstream reordered the rf30x datasets'
+    # axes after their ROOT vectors were frozen, and a positional pick follows
+    # the reordering silently. Where the converter annotates no observable for
+    # this pdf, the caller's column stands.
+    named = declared_observables(flatppl_src).get(pdf)
+    observed = named if named is not None else column
+
     extra = (
-        f'\n__obs__ = get({data_name}, "{column}")'
+        f'\n__obs__ = get({data_name}, "{observed}")'
         f"\n__M__ = {measure}"
         f"\n__L__ = likelihoodof(iid(__M__, lengthof(__obs__)), __obs__)\n"
     )

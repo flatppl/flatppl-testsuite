@@ -7,7 +7,8 @@ per-test-directory harness, `tests/test_unified.py`). This module survives as
 a shared helper library: `score_scan`/`score_points`/`_names_in_source` are
 now imported by `unified/runners/convert_detjs.py` (the `(convert, det-js)`
 runner that drives the migrated `corpora/hs3/` test directories), and
-`_binding_is_prenormalized` by `tests/test_prenormalized_structural.py`.
+`_binding_is_prenormalized` by `tests/test_prenormalized_structural.py` (now a
+thin delegate to the importer, which owns the predicate).
 `HS3_CORPUS`/`HS3_MANIFEST` are kept as the corpus-root/manifest-path
 constants they always were, for whatever future code wants a canonical
 HS3-corpus-root path -- but note `HS3_MANIFEST` no longer points at a real
@@ -26,12 +27,15 @@ HS3_MANIFEST: Path = HS3_CORPUS / "manifest.json"
 
 
 def _binding_is_prenormalized(src: str, pdf_name: str) -> bool:
-    """True if the converted `<pdf_name> = ...` RHS starts with `normalize(` —
-    an already range-normalized pdf (mixture / chebychev / polynomial / generic).
-    Such a pdf is iid'd directly; `assemble` must not re-wrap it in another
-    normalize (which makes a `normalize` node the truncate base — unscoreable)."""
-    m = re.search(rf"(?m)^{re.escape(pdf_name)}\s*=\s*(.*)$", src)
-    return bool(m) and m.group(1).lstrip().startswith("normalize(")
+    """Delegates to `formats.hs3.importer.binding_is_prenormalized`.
+
+    The predicate moved to the importer, which is where the emitted source and
+    its consumer (`assemble`) both live, and which now also applies it PER
+    FACTOR inside a joint. This name is kept because
+    `tests/test_prenormalized_structural.py` and `score_scan` below already
+    import it; one definition, two names, no second copy to drift."""
+    from ..formats.hs3.importer import binding_is_prenormalized
+    return binding_is_prenormalized(src, pdf_name)
 
 
 def _names_in_source(src: str) -> set[str]:

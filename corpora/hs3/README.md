@@ -60,32 +60,45 @@ function may not appear inside a record (spec §04)`. That was a hard failure,
 which `allow_skip` does NOT tolerate, so the four could not be vendored until
 the converter applied the function.
 
-They now refuse, and on TWO DIFFERENT gaps. Closing one will not light all
-four:
+All four now refuse on the SAME gap, and refuse **by design**:
 
-| Fixtures | Refused on | The gap |
-|---|---|---|
-| rf301, rf302, rf303 | the CONVERTER's own emitted `normalize` | `normalize of an unnormalized measure needs a closed-form mass rule; totalmass is not FlatPDL`, on the conditional lowering `normalize(logweighted(<lambda over the observable record>, Lebesgue(...)))` |
-| rf305 | the `normalize(truncate(...))` the HARNESS adds in `assemble` | the closed-form Z goes through `builtin_touniform`, the CDF only for a univariate continuous base (§07); this pdf's base is multivariate |
+```
+determinize: refuse normalize: normalize of an unnormalized measure needs a
+closed-form mass rule; `totalmass` is not FlatPDL
+```
 
-The rf301/302/303 gap is the same `totalmass` blocker the paragraph above
-names, reached by a different route. rf305's is the multivariate-normalize
-gap and is its own item.
+The conditional lowering is
+`normalize(logweighted(<lambda over the observable record>, Lebesgue(...)))`.
+FlatPDL has no numeric `totalmass`, so there is no closed-form mass rule to
+reach for and the determiniser is right to refuse. These rows are therefore
+**permanent** refusals, not pending ones: do not read them as work queued
+behind a capability. Their frozen `expected` vectors stay real ROOT values so
+the rows remain honest and would start comparing numbers if the fragment ever
+grew a mass rule, but nothing is scheduled to make that happen.
 
-Each dir's frozen `expected` stays a REAL ROOT vector, so all four start
-comparing numbers as their gap closes. Meanwhile `static_integrity` and
-`structure_import` both pass on all four and are what they gate.
+`static_integrity` and `structure_import` pass on all four and are what they
+gate.
 
-**Do not read a green scan row here as agreement without checking the column.**
-These are 2-D conditional models. The converter emits a joint-normalized density
-over the observable RECORD, but `importer.assemble`'s 1-D path observes
-`data_columns(...)[0]`, one column. Upstream reordered these datasets' axes after
-the ROOT vector was frozen, so that column is now `y` in rf301, rf302 and rf305
-while the Gaussian's variate is `x` and `y` is the conditioning observable. Each
-dir records its `upstream_axis_order` and repeats the caveat in its
-`refusal_note`. Whoever closes the gap needs `assemble` to handle the
-multivariate observable record; the frozen vector cannot vouch for which axis was
-scored. See `ATTRIBUTION.md` for the commit-level detail.
+rf305 used to refuse one level further out, with a different message, and that
+one WAS the harness's own defect rather than a property of the model:
+`assemble` consulted the prenormalized notion once for the whole product, so a
+`joint(...)` head made it re-wrap every factor. rf305 is
+`joint(y = gaussy, x = gaussx)` with `gaussy` a raw `Normal` and `gaussx` the
+conditional lowering, already `normalize`-headed; wrapping `gaussx` put a
+`normalize` node under a `truncate` over a multivariate base, and the resulting
+`builtin_touniform` message masked the real blocker. `assemble` now consults
+the notion per factor, so rf305 reports the same refusal as its three siblings.
+
+**Do not read a green scan row here as agreement without checking what was
+observed.** These are 2-D conditional models and the converter emits a density
+over the observable RECORD, while `assemble` observes one column per factor.
+The observation is now bound by the converter's own `% observable:` annotation
+rather than by `data_columns(...)[0]`, which matters because upstream reordered
+these datasets' axes after the ROOT vectors were frozen -- a positional pick
+follows a reorder silently, a name does not. Where the converter annotates no
+observable, the caller's column still stands, which is the case for rf301,
+rf302 and rf303. Each dir records its `upstream_axis_order` and repeats the
+caveat in its `refusal_note`. See `ATTRIBUTION.md` for the commit-level detail.
 
 ## Run
 
