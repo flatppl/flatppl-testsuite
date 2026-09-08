@@ -1,0 +1,5 @@
+flatppl_compat = "0.1"
+# Both fixed bindings become caller-supplied arguments under the query ABI.
+sigma = external(posreals)
+mu = exp(0.0)
+lp = logdensityof(Normal(mu = mu, sigma = sigma), 1.0)

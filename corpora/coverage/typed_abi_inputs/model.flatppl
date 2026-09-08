@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+v = elementof(cartpow(integers, 3))
+mu = elementof(reals)
+lp = logdensityof(Normal(sum(v) + mu, 2.0), 5.0)

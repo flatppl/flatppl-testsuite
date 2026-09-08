@@ -149,26 +149,67 @@ def _jax():
 DEFAULT_KEY = (0, 0)
 
 
-def _to_arg(jnp, v):
-    """A Python float / list / nested list -> an f32 JAX array of the shape the
-    emitted func arg expects (0-d for a scalar). A plain SCALAR Python ``int``
-    becomes an i32 array instead (a list of ints still routes to float32,
-    same as any other list) -- the emitter lowers an ``elementof(posintegers)``
-    ABI arg (e.g. Binomial's `n`) to `tensor<i32>`, and `hlo_call` asserts on a
-    dtype mismatch, not just a shape one."""
-    dtype = np.int32 if isinstance(v, int) and not isinstance(v, bool) else np.float32
-    return jnp.asarray(np.asarray(v, dtype=dtype))
+@lru_cache(maxsize=64)
+def _argument_dtypes(src: str) -> tuple:
+    """Read the emitted ABI types; JSON number spelling cannot determine them."""
+    from jax.interpreters import mlir
+    from jaxlib.mlir import ir
+
+    dtypes = {
+        "i1": np.bool_, "i32": np.int32, "i64": np.int64,
+        "ui64": np.uint64, "f32": np.float32, "f64": np.float64,
+    }
+    with mlir.make_ir_context():
+        module = ir.Module.parse(src)
+        for op in module.body:
+            if op.operation.name == "func.func" and op.sym_name.value == "main":
+                return tuple(
+                    dtypes[str(ir.RankedTensorType(arg.type).element_type)]
+                    for arg in op.regions[0].blocks[0].arguments
+                )
+    raise ValueError("emitted module has no @main function")
 
 
-def value(src: str, arg_values: list) -> float:
-    """Execute ``@main`` at ``arg_values`` and return the scalar result."""
-    jax, jnp, hlo_call = _jax()
-    args = [_to_arg(jnp, v) for v in arg_values]
+def _arguments(jnp, src: str, values: list) -> list:
+    dtypes = _argument_dtypes(src)
+    if len(values) != len(dtypes):
+        raise ValueError(f"ABI expects {len(dtypes)} arguments, got {len(values)}")
+    args = []
+    for value, dtype in zip(values, dtypes):
+        if np.issubdtype(dtype, np.integer):
+            limits = np.iinfo(dtype)
+            # Preserve Python integers: NumPy's inferred common type can round
+            # a mixed-width uint64 key through float64 before validation.
+            for scalar in np.asarray(value, dtype=object).flat:
+                integral = isinstance(scalar, (int, np.integer))
+                integral_float = (isinstance(scalar, (float, np.floating))
+                                  and np.isfinite(scalar) and scalar == np.floor(scalar))
+                if (isinstance(scalar, (bool, np.bool_))
+                        or not (integral or integral_float)
+                        or not limits.min <= int(scalar) <= limits.max):
+                    raise ValueError(f"value cannot be represented by integer ABI type {np.dtype(dtype)}")
+        elif dtype is np.bool_ and np.asarray(value).dtype.kind != "b":
+            raise ValueError("Boolean ABI input requires Boolean values")
+        args.append(jnp.asarray(np.asarray(value, dtype=dtype)))
+    return args
+
+
+@lru_cache(maxsize=64)
+def _jitted_value(src: str):
+    """Reuse the compiled module while points remain runtime arguments."""
+    jax, _, hlo_call = _jax()
 
     def f(*a):
         return hlo_call(*a, source=src)[0]
 
-    return float(jax.jit(f)(*args))
+    return jax.jit(f)
+
+
+def value(src: str, arg_values: list) -> float:
+    """Execute ``@main`` at ``arg_values`` and return the scalar result."""
+    _, jnp, _ = _jax()
+    args = _arguments(jnp, src, arg_values)
+    return float(_jitted_value(src)(*args))
 
 
 @lru_cache(maxsize=64)
@@ -196,7 +237,7 @@ def gradient(src: str, arg_values: list, argnums: list[int]) -> list:
     path. Returns one entry per requested argnum (a float for a scalar arg, a
     list for a vector arg), matching the finite-difference oracle's shape."""
     _, jnp, _ = _jax()
-    args = [_to_arg(jnp, v) for v in arg_values]
+    args = _arguments(jnp, src, arg_values)
 
     g = _jitted_gradient(src, tuple(argnums))(*args)
     out = []
@@ -233,9 +274,8 @@ def sample_call(
     array, e.g. a previous call's ``new_key``, to chain draws)."""
     _, jnp, _ = _jax()
     jit_f = _jitted_sample(src)
-    key_arr = jnp.asarray(np.asarray(key, dtype=np.uint64))
-    args = [_to_arg(jnp, v) for v in (arg_values or [])]
-    value, new_key = jit_f(key_arr, *args)
+    args = _arguments(jnp, src, [key, *(arg_values or [])])
+    value, new_key = jit_f(*args)
     return np.asarray(value), np.asarray(new_key)
 
 
@@ -248,11 +288,15 @@ def samples(
     old approach of calling one stateless jitted function ``n`` times and
     relying on XLA's per-call nondeterminism. One call = one draw (scalar or
     length-``k`` vector variate). Returns shape ``(n,)`` or ``(n, k)``."""
+    # Parameters stay fixed throughout a chain. Convert them once and retain
+    # the returned key on the device instead of round-tripping it per draw.
+    _, jnp, _ = _jax()
+    jit_f = _jitted_sample(src)
+    cur, *args = _arguments(jnp, src, [key, *(arg_values or [])])
     draws = []
-    cur = key
     for _ in range(n):
-        v, cur = sample_call(src, cur, arg_values)
-        draws.append(v)
+        v, cur = jit_f(cur, *args)
+        draws.append(np.asarray(v))
     return np.stack(draws)
 
 

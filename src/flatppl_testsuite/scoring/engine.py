@@ -23,13 +23,24 @@ from ..config import CONFIG
 def render_record(theta: dict) -> str:
     """Serialise a Python dict to a FlatPPL ``record(...)`` literal.
 
-    Int-valued numbers are emitted as ``N.0``; lists/tuples become arrays.
+    Booleans retain their literals, integers emit ``N.0``, and sequences become arrays.
     """
     def lit(v):
+        if isinstance(v, bool):
+            return "true" if v else "false"
         if isinstance(v, (list, tuple)):
             return "[" + ", ".join(lit(x) for x in v) + "]"
         return f"{v}.0" if isinstance(v, int) else repr(float(v))
     return "record(" + ", ".join(f"{k} = {lit(v)}" for k, v in theta.items()) + ")"
+
+
+def temporary_source_dir(model: Path, source: str) -> Path | None:
+    """Keep location-sensitive sources beside the model; others use system temp.
+
+    Only module/data loading needs the original directory. Standalone readable
+    models must not require write access to their containing directory.
+    """
+    return model.parent if "load_module" in source or "load_data" in source else None
 
 
 class FlatpplEngine(ABC):
@@ -87,7 +98,7 @@ class DetJsScoreEngine(FlatpplEngine):
     def log_density(self, model: Path, binding: str, theta: dict) -> float:
         src = model.read_text() + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n"
         with tempfile.NamedTemporaryFile(
-            suffix=".flatppl", mode="w", delete=False
+            suffix=".flatppl", mode="w", delete=False, dir=temporary_source_dir(model, src)
         ) as tf:
             tf.write(src)
             in_path = Path(tf.name)

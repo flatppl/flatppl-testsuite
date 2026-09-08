@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+active = elementof(booleans)
+center = ifelse(active, 2.0, -3.0)
+lp = logdensityof(Normal(center, 1.0), 0.0)

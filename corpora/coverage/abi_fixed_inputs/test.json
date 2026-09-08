@@ -1,0 +1,11 @@
+{
+  "test_type": "logdensity",
+  "engines": ["det-js", "stablehlo"],
+  "model": "model.flatppl",
+  "binding": "lp",
+  "inputs": ["sigma", "mu"],
+  "points": [{"sigma": 1.0, "mu": 0.0}, {"sigma": 2.0, "mu": 3.0}],
+  "expected": [-1.4189385332046727, -2.112085713764618],
+  "tolerance": {"atol": 1e-9, "rtol": 1e-9},
+  "stablehlo": {"tolerance": {"value_atol_f32": 1e-5}}
+}

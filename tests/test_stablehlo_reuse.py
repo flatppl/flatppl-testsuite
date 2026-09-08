@@ -42,6 +42,7 @@ def _unavailable(reason: str) -> None:
     pytest.skip(reason)
 
 
+@pytest.mark.stablehlo_only
 def test_load_data_module_reusable_across_datasets():
     for m in ("jax", "enzyme_ad"):
         try:

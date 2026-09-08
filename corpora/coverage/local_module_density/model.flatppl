@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+helpers = load_module("helpers.flatppl")
+x = elementof(reals)
+lp = logdensityof(helpers.M, x)
