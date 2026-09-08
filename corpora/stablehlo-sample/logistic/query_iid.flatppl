@@ -1,0 +1,5 @@
+rstate = rnginit([0])
+xs ~ iid(Logistic(mu = mu, s = s), 200)
+draws = rand(rstate, lawof(xs))
+inputs = (mu, s)
+outputs = (draws)

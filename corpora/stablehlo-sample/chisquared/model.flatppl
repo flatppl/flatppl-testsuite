@@ -1,0 +1,2 @@
+k = elementof(posreals)
+x = draw(ChiSquared(k = k))

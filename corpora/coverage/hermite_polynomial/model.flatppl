@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+z = elementof(reals)
+poly = standard_module("polynomials", "0.1")
+mu = poly.hermite(3, z)

@@ -1,0 +1,3 @@
+shape = elementof(posreals)
+scale = elementof(posreals)
+x = draw(Pareto(shape = shape, scale = scale))

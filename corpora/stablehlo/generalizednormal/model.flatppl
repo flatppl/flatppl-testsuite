@@ -1,0 +1,5 @@
+flatppl_compat = "0.1"
+mean = elementof(reals)
+alpha = elementof(posreals)
+beta = elementof(posreals)
+a ~ GeneralizedNormal(mean = mean, alpha = alpha, beta = beta)

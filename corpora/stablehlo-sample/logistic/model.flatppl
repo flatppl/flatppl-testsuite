@@ -1,0 +1,3 @@
+mu = elementof(reals)
+s = elementof(posreals)
+x = draw(Logistic(mu = mu, s = s))

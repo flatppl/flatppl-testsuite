@@ -1,0 +1,12 @@
+{
+  "test_type": "logdensity",
+  "engines": ["det-js"],
+  "model": "model.flatppl",
+  "binding": "lp",
+  "status": "lowers",
+  "inputs": ["v"],
+  "points": [{"v": [1.0, 2.0, 4.0]}, {"v": [2.0, 3.0, 5.0]}],
+  "expected": [-1.737085713764618, -1.612085713764618],
+  "tolerance": {"atol": 1e-9, "rtol": 1e-9},
+  "oracle": "closed form: column 2 plus zero-based A[1,2], then Normal log density"
+}

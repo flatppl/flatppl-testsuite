@@ -1,0 +1,5 @@
+rstate = rnginit([0])
+xs ~ iid(Weibull(shape = shape, scale = scale), 200)
+draws = rand(rstate, lawof(xs))
+inputs = (shape, scale)
+outputs = (draws)

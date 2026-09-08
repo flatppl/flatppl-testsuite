@@ -1,0 +1,3 @@
+shape = elementof(posreals)
+scale = elementof(posreals)
+x = draw(Weibull(shape = shape, scale = scale))

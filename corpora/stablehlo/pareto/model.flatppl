@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+shape = elementof(posreals)
+scale = elementof(posreals)
+a ~ Pareto(shape = shape, scale = scale)

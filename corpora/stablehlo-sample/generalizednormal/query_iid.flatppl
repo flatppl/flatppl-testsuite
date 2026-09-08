@@ -1,0 +1,5 @@
+rstate = rnginit([0])
+xs ~ iid(GeneralizedNormal(mean = mean, alpha = alpha, beta = beta), 200)
+draws = rand(rstate, lawof(xs))
+inputs = (mean, alpha, beta)
+outputs = (draws)

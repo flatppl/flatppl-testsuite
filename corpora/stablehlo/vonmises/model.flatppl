@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+mu = elementof(reals)
+kappa = elementof(posreals)
+a ~ VonMises(mu = mu, kappa = kappa)

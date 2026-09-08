@@ -1,0 +1,5 @@
+rstate = rnginit([0])
+xs ~ iid(ChiSquared(k = k), 200)
+draws = rand(rstate, lawof(xs))
+inputs = (k)
+outputs = (draws)

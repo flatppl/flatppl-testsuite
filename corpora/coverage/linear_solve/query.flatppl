@@ -1,0 +1,3 @@
+lp = logdensityof(Normal(mu, 2.0), 9.0)
+inputs = (b)
+outputs = (lp)

@@ -1,0 +1,92 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "shape",
+    "scale",
+    "xobs"
+  ],
+  "points": [
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": -1.0
+    },
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": 0.0
+    },
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": 1.0
+    },
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": 2.0
+    },
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": 3.0
+    },
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": 20.0
+    },
+    {
+      "shape": 3.0,
+      "scale": 2.0,
+      "xobs": 10000.0
+    },
+    {
+      "shape": 0.7,
+      "scale": 0.25,
+      "xobs": 0.2
+    },
+    {
+      "shape": 0.7,
+      "scale": 0.25,
+      "xobs": 0.25
+    },
+    {
+      "shape": 0.7,
+      "scale": 0.25,
+      "xobs": 10.0
+    },
+    {
+      "shape": 7.0,
+      "scale": 4.0,
+      "xobs": 4.0
+    },
+    {
+      "shape": 7.0,
+      "scale": 4.0,
+      "xobs": 7.0
+    }
+  ],
+  "expected": [
+    "-inf",
+    "-inf",
+    "-inf",
+    0.4054651081081645,
+    -1.2163953243244932,
+    -8.804875263868018,
+    -33.663307657556786,
+    "-inf",
+    1.0296194171811581,
+    -5.241475654812533,
+    0.5596157879354227,
+    -3.9173105155479586
+  ],
+  "tolerance": {
+    "value_atol_f32": 1e-05,
+    "value_rtol_f32": 2e-06
+  }
+}
