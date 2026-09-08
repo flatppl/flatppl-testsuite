@@ -101,7 +101,11 @@ def gate_drift(name: str, old_path: Path, new_path: Path) -> list[str]:
     if name == "density":
         from flatppl_testsuite.sweep import table as t
 
-        return t.diff(t.load(old_path), t.load(new_path))
+        old, new = t.load(old_path), t.load(new_path)
+        # The density CI diff permits a slice. Re-pin regenerates the FULL
+        # space, so losing a probe is a coverage change that needs review.
+        removed = [f"{pid}: removed probe (refreeze deliberately)" for pid in sorted(old.keys() - new.keys())]
+        return removed + t.diff(old, new)
     from flatppl_testsuite.sampler_sweep import table as t
 
     return t.diff(t.load(old_path)[1], t.load(new_path)[1])

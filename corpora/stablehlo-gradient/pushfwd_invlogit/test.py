@@ -20,12 +20,9 @@ so the term was `log 0` and its derivative undefined). It is now finite, about
 against a pre-#134 binary. `y = 1 - 1.19e-7`, the next f32 down, was finite both
 before and after and is pinned so the boundary cannot be "fixed" by moving it.
 
-`grad_atol` is 64.0, which reads large only out of context: the boundary
-derivative is 2.6e8, the analytic and executor values differ there by 16 in
-absolute terms, i.e. 6e-8 relative — about f32 epsilon — and the gradient
-runner's tolerance key is absolute-only with no `rtol` counterpart. The interior
-points agree to 3e-7 absolute and are tightly gated in any case by the sibling
-logdensity directory.
+The small absolute tolerance keeps interior derivatives sensitive to errors.
+The relative tolerance accommodates f32 rounding at the boundary, where the
+derivative has magnitude 2.6e8.
 """
 import math
 

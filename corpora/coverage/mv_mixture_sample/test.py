@@ -86,7 +86,7 @@ def moments() -> dict[str, float]:
     }
 
 
-def stat(name: str) -> tuple[float, float]:
+def _stat(name: str) -> tuple[float, float]:
     """(expected, atol) for one `sample_stats` check, refrozen offline by regen."""
     mean, cov = _mean(), _cov()
     n = N_SAMPLES
@@ -109,6 +109,15 @@ def stat(name: str) -> tuple[float, float]:
             )
         return float(cov[0, 1]), K * math.sqrt((fourth - cov[0, 1] ** 2) / n)
     raise KeyError(name)
+
+
+def stat() -> dict:
+    """Per-check moment expectations and bands for the shared regen interface."""
+    result = {}
+    for name in moments():
+        expected, atol = _stat(name)
+        result[name] = {"expected": expected, "atol": atol}
+    return result
 
 
 def logdensity(y1: float, y2: float) -> float:

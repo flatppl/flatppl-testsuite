@@ -20,16 +20,16 @@
       "kind": "sample_stats",
       "stat": "mean",
       "field": "y1",
-      "expected": 1.5,
-      "atol": 0.192029
+      "expected": 1.4999999999999996,
+      "atol": 0.19202864369671518
     },
     {
       "id": "mean_y2",
       "kind": "sample_stats",
       "stat": "mean",
       "field": "y2",
-      "expected": -0.4,
-      "atol": 0.125996
+      "expected": -0.39999999999999997,
+      "atol": 0.12599603168354154
     },
     {
       "id": "var_y1",
@@ -37,15 +37,15 @@
       "stat": "var",
       "field": "y1",
       "expected": 5.9,
-      "atol": 0.512058
+      "atol": 0.5120577360024939
     },
     {
       "id": "var_y2",
       "kind": "sample_stats",
       "stat": "var",
       "field": "y2",
-      "expected": 2.54,
-      "atol": 0.25792
+      "expected": 2.5399999999999996,
+      "atol": 0.25791956110384495
     },
     {
       "id": "cov_y1_y2",
@@ -56,7 +56,7 @@
         "y2"
       ],
       "expected": -2.01,
-      "atol": 0.256891,
+      "atol": 0.2568912707742324,
       "note": "THE PER-COORDINATE-SELECTION CATCH: both coordinates of one draw must come from the SAME component. Choosing per coordinate instead decorrelates them, which measured cov near -1.25 with both variances near 5.5 (flatppl-js, before the per-atom selection landed) against this closed-form -2.01."
     }
   ],

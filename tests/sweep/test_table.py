@@ -223,6 +223,14 @@ def test_diff_does_not_flag_a_known_defects_wrong_number():
     assert table.diff(e, a) == []
 
 
+def test_diff_flags_a_repaired_known_defect_returning():
+    """A historic defect label cannot excuse regression from a correct baseline."""
+    e = {"p": _row("p", outcome="LOWERS", value=-1.0, oracle=-1.0)}
+    a = {"p": _row("p", outcome="LOWERS", value=-math.inf, oracle=-1.0,
+                   known_defect=True)}
+    assert table.diff(e, a), "a repaired Poisson preimage defect returned silently"
+
+
 def _shared(shape, spelling="record_law", n=2):
     return SharedLatentProbe(id=f"shared.{shape}.n{n}.{spelling}.none", shape=shape,
                              n=n, spelling=spelling, latent_query="none",

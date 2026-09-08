@@ -20,11 +20,9 @@ about `∓2.65e7`, and NaN never satisfies the runner's comparison, so these two
 points fail against a pre-#134 binary. Both signs are pinned because the density
 is even in `y` and its derivative odd, so the pair also pins the sign.
 
-`grad_atol` is 8.0, which reads large only out of context: the boundary
-derivative is 2.6e7, the analytic and executor values differ there by 2 in
-absolute terms, i.e. 8e-8 relative, and the gradient runner's tolerance key is
-absolute-only with no `rtol` counterpart. The interior points agree to 5e-7
-absolute and are tightly gated in any case by the sibling logdensity directory.
+The small absolute tolerance keeps interior derivatives sensitive to errors.
+The relative tolerance accommodates f32 rounding at the boundary, where the
+derivative has magnitude 2.6e7.
 """
 import math
 

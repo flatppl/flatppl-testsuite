@@ -587,6 +587,11 @@ def diff(expected: dict[str, Row], actual: dict[str, Row]) -> list[str]:
             problems.append(f"{pid}: not in the committed table (run `pixi run sweep-regen`)")
             continue
 
+        # A known defect is excused only while the baseline still records it.
+        # Otherwise a historic structural label would hide its regression.
+        if a.known_defect and not e.known_defect:
+            problems.append(f"{pid}: known defect returned or appeared since the committed table")
+
         if a.outcome == Outcome.MALFORMED.value:
             problems.append(f"{pid}: MALFORMED (marker={a.marker}) -- always a defect")
         elif a.outcome == Outcome.LOWERS.value and e.outcome == Outcome.REFUSES.value:

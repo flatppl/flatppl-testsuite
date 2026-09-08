@@ -6,10 +6,9 @@ lookup, not oracle computation — see sample_checks.py's module docstring).
 
 `test_type == "sample"` directories come in two `stat()` shapes:
 
-* the stablehlo-sample shape -- `stat()` returns a single KS-test recipe
-  (`{"distribution": {...}, "discrete": bool}`), frozen wholesale under the
-  top-level `stat` key (`sample_checks.py` reconstructs a live scipy frozen
-  distribution from it at test time).
+* the stablehlo-sample shape -- checks are named by strings and `stat()`
+  returns one scalar or multivariate recipe, frozen wholesale under the
+  top-level `stat` key.
 * the per-check shape (e.g. `corpora/sample/hier_normal`) -- `stat()` returns
   `{check_id: {"expected": ..., "atol": ...}}` and each entry is merged into
   the matching `checks[i]` (by `id`) in place; there is no top-level `stat`
@@ -76,7 +75,7 @@ def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
     mod = load_test_module(dir)
     if test_type == "sample":
         stat = mod.stat()
-        if isinstance(stat, dict) and "distribution" in stat:
+        if all(isinstance(check, str) for check in raw["checks"]):
             raw["stat"] = _json_safe(stat)
         else:
             for check in raw["checks"]:
