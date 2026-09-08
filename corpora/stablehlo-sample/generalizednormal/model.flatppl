@@ -1,0 +1,4 @@
+mean = elementof(reals)
+alpha = elementof(posreals)
+beta = elementof(posreals)
+x = draw(GeneralizedNormal(mean = mean, alpha = alpha, beta = beta))

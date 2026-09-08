@@ -1,0 +1,5 @@
+flatppl_compat = "0.1"
+b = elementof(cartpow(reals, 2))
+A = rowstack([[3.0, 1.0], [2.0, 2.0]])
+x = linsolve(A, b)
+mu = x[1] + 3.0 * x[2]

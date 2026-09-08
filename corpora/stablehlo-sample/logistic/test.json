@@ -1,0 +1,43 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "mu": 0.3,
+    "s": 1.2
+  },
+  "inputs": [
+    "mu",
+    "s"
+  ],
+  "draws": 100000,
+  "fanout_shape": [
+    200
+  ],
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "distribution",
+    "key_reproducibility",
+    "key_advance",
+    "fanout_distribution"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "logistic",
+      "kwargs": {
+        "loc": 0.3,
+        "scale": 1.2
+      }
+    },
+    "discrete": false
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}

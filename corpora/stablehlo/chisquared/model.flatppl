@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+k = elementof(posreals)
+a ~ ChiSquared(k = k)

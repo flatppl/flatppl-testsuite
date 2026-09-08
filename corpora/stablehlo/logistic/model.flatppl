@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+mu = elementof(reals)
+s = elementof(posreals)
+a ~ Logistic(mu = mu, s = s)

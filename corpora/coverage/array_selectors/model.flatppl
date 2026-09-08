@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+v = elementof(cartpow(reals, 3))
+A = rowstack([v, [8.0, 16.0, 32.0]])
+mu = sum(A[:, 2]) + get0(A, 1, 2)

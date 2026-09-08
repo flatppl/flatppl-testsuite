@@ -1,0 +1,3 @@
+shape = elementof(posreals)
+scale = elementof(posreals)
+x = draw(InverseGamma(shape = shape, scale = scale))

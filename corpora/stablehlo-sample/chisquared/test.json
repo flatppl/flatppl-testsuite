@@ -1,0 +1,40 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "k": 4.5
+  },
+  "inputs": [
+    "k"
+  ],
+  "draws": 100000,
+  "fanout_shape": [
+    200
+  ],
+  "key": [
+    0,
+    0
+  ],
+  "checks": [
+    "distribution",
+    "key_reproducibility",
+    "key_advance",
+    "fanout_distribution"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "chi2",
+      "kwargs": {
+        "df": 4.5
+      }
+    },
+    "discrete": false
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}

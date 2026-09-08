@@ -25,18 +25,18 @@ _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
 # corpus -> number of test directories it must contain.
 EXPECTED_COUNTS = {
     "bayesian_inference": 5,
-    "coverage": 19,
+    "coverage": 22,
     "examples": 15,
     "fragment": 21,
     "hs3": 12,
     "pyhf": 171,
     "pyhf-rejects": 30,
     "sample": 1,
-    "stablehlo": 27,
+    "stablehlo": 33,
     "stablehlo-gradient": 21,
-    "stablehlo-sample": 18,
+    "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 340
+EXPECTED_TOTAL = 355
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -73,6 +73,7 @@ ENGINE_OVERRIDES = {
     "coverage/beam_bunch": {"det-js", "stablehlo"},
     "coverage/b_mass_peak": {"det-js", "stablehlo"},
     "coverage/censored_lifetimes": {"det-js", "stablehlo"},
+    "coverage/hermite_polynomial": {"det-js", "stablehlo"},
     "coverage/kscan_walk": {"det-js", "stablehlo"},
     "coverage/local_module_density": {"det-js", "stablehlo"},
     "coverage/paired_assay": {"det-js", "stablehlo"},
@@ -106,7 +107,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 397
+EXPECTED_CASES = 413
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
