@@ -65,6 +65,21 @@ class Outcome(str, Enum):
 _RESIDUAL_CALL = re.compile(r"\(%call\s")
 
 
+# A path holding a `tempfile` random component (`tmp` plus at least six name
+# characters), either as a directory or as the file itself. A refusal quotes
+# the probe's own temp file, so without this the random component reaches the
+# marker and every re-pin rewrites ~140 frozen rows with no verdict change.
+_TMP_PATH = re.compile(r"[^\s:)]*/tmp[A-Za-z0-9_]{6,}(?:/[^\s:)]*?)?(?=\.flatppl|[\s:)]|$)")
+
+# The corpus convention for a normalised temp path, as in
+# `corpora/hs3/fixtures/rf103_interprfuncs/test.json`'s frozen `refusal`.
+_TMP_PLACEHOLDER = "<tmp>"
+
+
+def _strip_tmp_paths(message: str) -> str:
+    return _TMP_PATH.sub(_TMP_PLACEHOLDER, message)
+
+
 @dataclass(frozen=True)
 class Verdict:
     probe_id: str
@@ -79,8 +94,11 @@ def _marker(stderr: str) -> str:
     The full reason is prose and will be reworded; the leading `refuse <head>`
     plus the first few significant words is stable enough to detect a CHANGED
     refusal without churning on every message edit.
+
+    The temp path the refusal quotes is normalised out first: its random
+    component carries no signal and would otherwise dominate the word slice.
     """
-    line = stderr.strip().splitlines()[0] if stderr.strip() else ""
+    line = _strip_tmp_paths(stderr).strip().splitlines()[0] if stderr.strip() else ""
     line = line.replace("determinize: ", "")
     head = re.match(r"refuse (\S+)", line)
     words = re.findall(r"[a-z]{4,}", line.lower())[:6]
@@ -100,7 +118,7 @@ def _crash_marker(message: str) -> str:
     on genuinely valid FlatPDL. The marker narrows a human's triage; it does
     not replace it.
     """
-    line = message.strip().splitlines()[0] if message.strip() else ""
+    line = _strip_tmp_paths(message).strip().splitlines()[0] if message.strip() else ""
     for prefix in ("score_flatpdl failed: ", "score_flatpdl: "):
         if line.startswith(prefix):
             line = line[len(prefix):]
