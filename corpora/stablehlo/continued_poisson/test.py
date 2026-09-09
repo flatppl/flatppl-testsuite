@@ -1,4 +1,4 @@
-"""Independent scipy oracle: §09 ContinuedPoisson log-density at rate = 4.5.
+"""Independent scipy oracle: §09 ContinuedPoisson log-density.
 
 §09's density is `lambda**x * exp(-lambda) / Gamma(x + 1)` for `x >= 0`, so the
 log form is `x*log(lambda) - lambda - gammaln(x + 1)`. Below zero the variate is
@@ -19,15 +19,16 @@ import math
 
 from scipy.special import gammaln
 
-_RATE = 4.5
-
-
 def oracle(point: dict) -> float:
     x = point["x"]
+    rate = point["rate"]
     if x < 0.0:
         return -math.inf
-    return x * math.log(_RATE) - _RATE - float(gammaln(x + 1.0))
+    # The density limit is one at x=0 and zero at x>0 when rate=0.
+    if rate == 0.0:
+        return 0.0 if x == 0.0 else -math.inf
+    return x * math.log(rate) - rate - float(gammaln(x + 1.0))
 
 
-def logdensity(x) -> float:
-    return oracle({"x": x})
+def logdensity(x, rate) -> float:
+    return oracle({"x": x, "rate": rate})

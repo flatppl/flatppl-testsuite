@@ -10,6 +10,16 @@ from tests.test_unified import _gate_engine
 
 
 @pytest.mark.stablehlo_only
+def test_continued_poisson_zero_variate_retains_the_rate_derivative():
+    _gate_engine("stablehlo")
+    directory = Path(__file__).resolve().parents[1] / "corpora/stablehlo/continued_poisson"
+    src = ex.emit_concat(directory, "logdensity")
+    # At x=0, §09 gives log-density = -rate, including rate=0.
+    for rate in (0.0, 1.0):
+        assert ex.gradient(src, [0.0, rate], [1]) == pytest.approx([-1.0])
+
+
+@pytest.mark.stablehlo_only
 @pytest.mark.parametrize("invalid", [1.5, 2**31])
 def test_integer_abi_accepts_integral_spelling_but_rejects_loss(invalid):
     _gate_engine("stablehlo")

@@ -1,3 +1,3 @@
-lp = logdensityof(aux_lik, record(x = x))
-inputs = (x)
+lp = logdensityof(aux_lik, record(rate = rate))
+inputs = (x, rate)
 outputs = (lp)
