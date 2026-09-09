@@ -8,5 +8,6 @@
 # `likelihoodof`.
 hep = standard_module("particle-physics", "0.1")
 x = elementof(reals)
-aux = functionof(hep.ContinuedPoisson(rate = 4.5))
+rate = elementof(nonnegreals)
+aux = functionof(hep.ContinuedPoisson(rate = rate))
 aux_lik = likelihoodof(aux, x)

@@ -3,31 +3,51 @@
   "engines": [
     "stablehlo"
   ],
-  "measure": "likelihoodof(functionof(hepphys.ContinuedPoisson(rate = 4.5)), x)",
+  "measure": "likelihoodof(functionof(hepphys.ContinuedPoisson(rate = rate)), x)",
   "inputs": [
-    "x"
+    "x",
+    "rate"
   ],
   "points": [
     {
-      "x": 0.0
+      "x": 0.0,
+      "rate": 4.5
     },
     {
-      "x": 1.0
+      "x": 1.0,
+      "rate": 4.5
     },
     {
-      "x": 3.0
+      "x": 3.0,
+      "rate": 4.5
     },
     {
-      "x": 3.7
+      "x": 3.7,
+      "rate": 4.5
     },
     {
-      "x": 12.5
+      "x": 12.5,
+      "rate": 4.5
     },
     {
-      "x": -0.5
+      "x": -0.5,
+      "rate": 4.5
     },
     {
-      "x": -1.5
+      "x": -1.5,
+      "rate": 4.5
+    },
+    {
+      "x": 0.0,
+      "rate": 0.0
+    },
+    {
+      "x": 0.5,
+      "rate": 0.0
+    },
+    {
+      "x": -0.5,
+      "rate": 0.0
     }
   ],
   "expected": [
@@ -36,6 +56,9 @@
     -1.779527278899233,
     -1.6713187782433527,
     -6.959108696541275,
+    "-inf",
+    "-inf",
+    0.0,
     "-inf",
     "-inf"
   ],
