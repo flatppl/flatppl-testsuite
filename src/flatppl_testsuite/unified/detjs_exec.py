@@ -60,7 +60,8 @@ def log_density_points(model: Path, binding: str, points: list[dict]) -> list["P
                 inp.write(src + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n")
                 inp.flush()
                 det = subprocess.run(
-                    [str(CONFIG.flatppl_bin), "determinize", inp.name, "-o", str(out_path)],
+                    [str(CONFIG.flatppl_bin), "determinize", inp.name,
+                     "--keep", "__score__", "-o", str(out_path)],
                     capture_output=True, text=True,
                 )
             if det.returncode == 3:

@@ -29,14 +29,14 @@ EXPECTED_COUNTS = {
     "examples": 15,
     "fragment": 21,
     "hs3": 12,
-    "pyhf": 172,
+    "pyhf": 179,
     "pyhf-rejects": 30,
     "sample": 1,
     "stablehlo": 33,
     "stablehlo-gradient": 21,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 356
+EXPECTED_TOTAL = 363
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -107,7 +107,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 414
+EXPECTED_CASES = 421
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
@@ -148,6 +148,9 @@ EXPECTED_PYHF_GROUPS = {
 # The named fixtures outside those prefixes: the surface items and defect
 # classes the audit called out one by one.
 EXPECTED_PYHF_NAMED = {
+    "atlas_sbottom_region_a", "atlas_sbottom_region_c", "atlas_stau_combined",
+    "atlas_ttbar_inclusive",
+    "atlas_onelepton_bb", "atlas_trilepton_onshell", "atlas_trilepton_offshell",
     "all_kinds_one_sample", "asimov_fractional_counts", "fixed_normsys",
     "histosys_shapesys",
     "lumi_multi_channel", "lumi_with_normsys", "many_bins", "multichan_old",

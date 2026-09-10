@@ -53,7 +53,7 @@ HERE = Path(__file__).resolve().parent
 # order and the engine's cannot reach it, while the smallest defect the audit
 # found (1.276e+0) is nine orders of magnitude outside it.
 #
-# `rtol` stays 0 deliberately. The corpus's deepest log-density is -4.66e+3, so
+# `rtol` stays 0 deliberately. The original audit's deepest log-density is -4.66e+3, so
 # an rtol of 1e-12 would admit 4.7e-9 there -- five times looser than atol, on
 # exactly the rows where a constant offset from a wrong normalization hides
 # best. An absolute band is what makes such an offset fail.
@@ -233,7 +233,7 @@ def generate(dir: Path) -> tuple[str, list[float]]:
             "version": pyhf.__version__,
             "backend": f"{pyhf.tensorlib.name} {pyhf.tensorlib.precision}",
             "generator": "corpora/pyhf/gen_expected.py",
-            "seed": SEED,
+            "seed": None if body.get("point_selection") == "suggested_init_and_shifts" else SEED,
             "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted",
         },
     }

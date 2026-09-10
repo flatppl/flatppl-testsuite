@@ -1,8 +1,9 @@
 # pyhf corpus
 
-172 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
-scored against **pyhf's own absolute `Model.logpdf`** at six parameter points
-each. 1032 frozen numbers. The whole matrix of the pyhf import audit
+179 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
+scored against **pyhf's own absolute `Model.logpdf`**. The 172 audit workspaces
+retain six parameter points each; seven paper-backed workspaces add eleven
+points each. 1109 frozen numbers. The whole matrix of the pyhf import audit
 (`flatppl-dev/audit-fix-pyhf.md`), which found five wrong-number defect classes
 in the converter — every one of which converted at exit 0 and passed every gate
 the suite had, because the suite had no way to hold a pyhf fixture at all.
@@ -37,7 +38,7 @@ environment exists only to regenerate:
 FLATPPL_BIN=/path/to/flatppl pixi run -e pyhf gen-pyhf
 ```
 
-The 172 rows add roughly 100 s to `pixi run test`: 415 s without them against
+The original 172 rows added roughly 100 s to `pixi run test`: 415 s without them against
 504 s, 510 s and 561 s with them over three runs on the same machine. The
 spread between those three is machine load, not the corpus.
 
@@ -54,20 +55,48 @@ before lowering, but the whole batch's Node evaluation runs in one process. That
 is what keeps 1032 points inside a couple of minutes: one Node start per
 fixture instead of one per point.
 
-**Tolerance is `atol = 1e-9`, `rtol = 0`.** Measured over all 1032 points, the
+The paper-backed models are larger and take minutes per fixture. They use
+the same scoring path, so each of their eleven points is determinized separately.
+The harness requests only `__score__` with `--keep`; the compiler retains all
+its dependencies and removes unrelated outputs before JS evaluation.
+
+**Default tolerance is `atol = 1e-9`, `rtol = 0`.** Measured over the original 1032 audit points, the
 worst absolute difference is **1.819e-12**, on `sw3_norm_norm_shap_shap_stat`
 whose log-density is about -1.9e+3 — a relative difference of 1e-15, one or two
 ulp of a double. The band is ~550x that, so float reassociation between pyhf's
 numpy reduction order and the engine's cannot reach it, while the smallest
 defect the audit found (1.276e+0) is nine orders of magnitude outside it.
 
-`rtol` stays 0 deliberately. The corpus's deepest log-density is -4.66e+3, so an
+`rtol` stays 0 deliberately. The original audit's deepest log-density is -4.66e+3, so an
 `rtol` of 1e-12 would admit 4.7e-9 there, five times looser than `atol`, on
 exactly the rows where a constant offset from a wrong normalization hides best.
+The added top-pair points reach -1.08e+6, where that relative tolerance would
+admit about 1.08e-6. Their absolute tolerance is `1e-8`, with `rtol = 0`.
+This exception accounts for independently measured arithmetic error in the
+million-count Poisson terms, not a changed normalization or reference subtraction.
+
+At the top-pair `per_bin_+0.5` point:
+
+| Calculation | Absolute log-density |
+|---|---:|
+| pyhf 0.7.6, NumPy float64 | -713.4899241221681 |
+| FlatPPL det-js | -713.4899241232741 |
+| Independent 45-digit density arithmetic | -713.4899241259955 |
+
+The independent calculation uses pyhf's computed float64 means as fixed inputs,
+then sums `n*log(rate) - rate - log(n!)` and all Gaussian auxiliary densities in
+45-digit decimal arithmetic. It uses exact factorials below 50 and Stirling's
+series through `n^-11` above 50; the error per factorial is below `6e-25`
+by the [Stirling remainder bound](https://dlmf.nist.gov/5.11#ii). This checks
+density arithmetic, not the modifier calculation. Pyhf's error reaches `3.83e-9`
+across these eleven points, already exceeding the default tolerance. At the
+displayed point FlatPPL is closer to the high-precision result; the engine/pyhf
+difference is `1.11e-9`. Across all eleven points, the largest engine/pyhf
+difference is `3.26e-9` at `mixed_+0.5`. Only this fixture uses the `1e-8` band.
 
 ## Parameter points
 
-Six per fixture: `suggested_init()` plus five drawn uniformly inside
+Six per audit fixture: `suggested_init()` plus five drawn uniformly inside
 `suggested_bounds()` clipped to init ± 2.5, with every `suggested_fixed()`
 component held at its init. `SEED = 137`, and the draw is one vectorised
 `rng.uniform` per point, so the whole corpus's point sets reproduce from
@@ -77,6 +106,25 @@ reproduces all 1032 points and all 1032 values bit for bit.
 A fixture whose `test.json` already carries points reuses them, so an ordinary
 regen is a pure re-measurement whose diff shows only moved values.
 
+The paper-backed fixtures start at `suggested_init()` and add ten deterministic
+shifts. Fixed parameters stay fixed, and shifts are clipped to suggested bounds:
+
+- POI alone: ±0.5 times `max(1, abs(init))`.
+- Constrained scalar nuisances: alternating ±0.5 constraint widths.
+- First unfixed `histosys` parameter in sorted-name order: ±1.5, testing both
+  extrapolation branches outside the nominal template interval.
+- Per-bin parameters: alternating ±0.5 constraint widths, including different
+  shifts within a vector. Unconstrained widths use `max(1, abs(init))`.
+- All parameter groups together: alternating ±0.5 widths, including free
+  normalization parameters.
+
+Alternating signs follow pyhf's flattened parameter order. Each direction and
+its negative form a pair. The exact points and labels are frozen in `test.json`;
+regeneration reuses them and has no random seed. All selected oracle values are
+finite. A trial simultaneous stau nuisance shift of 1.5 widths produced negative
+expected counts and `NaN` in pyhf itself; it is not a valid finite-likelihood
+comparison point. The individual template shifts remain finite.
+
 The record shape per parameter comes from the converter's own emitted
 `elementof` declaration, not a guess: pyhf's per-bin kinds (shapesys,
 staterror, shapefactor) become a vector even at one bin, while normfactor,
@@ -85,7 +133,7 @@ the generator fail loudly instead of skipping.
 
 ## Every fixture scores the binding the converter names
 
-All 172 rows score the module's own `likelihood`. That was briefly not true. A
+All rows score the module's own `likelihood`. That was briefly not true. A
 workspace whose only parameters are unconstrained — a normfactor or a
 shapefactor, which pyhf leaves free — has exactly one likelihood term, so the
 converter emits `likelihood = <channel>_likelihood`, a bare alias, and
@@ -114,6 +162,7 @@ should do.
 | `two_hist`, `two_norm`, `two_shap`, `two_stat` | 4 | each kind in two channels, per-channel names for the per-bin kinds |
 | `pyhfval_*` | 10 | pyhf's own `tests/test_validation.py` workspaces |
 | named | 35 | the surface items and defect classes the audit called out individually (below) |
+| `atlas_*` | 7 | paper-backed models described below |
 
 The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 `three_channels_all_kinds`, `all_kinds_one_sample`, `two_histosys`,
@@ -239,12 +288,48 @@ Its worst difference at rust `78e0b03` is **1.421e-14**, inside the corpus's
 
 ## Attribution
 
+### Paper-backed workspaces
+
+| Fixture | Paper | Channels / bins | Parameters |
+|---|---|---|---|
+| `atlas_sbottom_region_a` | [ATLAS bottom squarks, 1908.03122](https://arxiv.org/abs/1908.03122) | 2 / 6 | 64 |
+| `atlas_sbottom_region_c` | Same paper, separate Region C model | 3 / 6 | 66 |
+| `atlas_stau_combined` | [ATLAS staus, 1911.06660](https://arxiv.org/abs/1911.06660) | 5 / 5 | 120 |
+| `atlas_ttbar_inclusive` | [ATLAS top-pair cross section, 2006.13076](https://arxiv.org/abs/2006.13076) | 3 / 37 | 211 |
+| `atlas_onelepton_bb` | [ATLAS one-lepton plus bb, 1909.09226](https://arxiv.org/abs/1909.09226) | 8 / 14 | 126 |
+| `atlas_trilepton_onshell` | [ATLAS three-lepton search, 2106.01676](https://arxiv.org/abs/2106.01676), on-shell WZ | 23 / 23 | 120 |
+| `atlas_trilepton_offshell` | Same paper, off-shell WZ | 33 / 33 | 353 |
+
+These papers appear in [pyhf's published statistical models](https://pyhf.readthedocs.io/en/v0.7.6/citations.html#published-statistical-models).
+The sbottom source is [HEPData 89408 v3/r2](https://doi.org/10.17182/hepdata.89408.v3/r2),
+using `RegionA` and `RegionC` with patch `sbottom_1300_850_60`. The stau source is
+[HEPData 92006 v2/r2](https://doi.org/10.17182/hepdata.92006.v2/r2), using
+`Region-combined` with patch `DS_400_40_Staus`. Both use `pyhf.PatchSet.apply`,
+which verifies the published background digest before applying the signal patch.
+Original observations, channels and modifiers are unchanged. These HEPData
+datasets use CC0; each `test.json` records archive hashes and exact members.
+
+The top-pair workspace comes from a
+[pinned research-repository mirror](https://github.com/hreyes91/ML_LHClikelihoods/blob/3cffc20c5979d760e6eba998fd5d96a98d502e5b/data/2006.13076.tar.gz)
+of [HEPData 95748](https://doi.org/10.17182/hepdata.95748).
+The archive README states that the released JSON uses Gaussian MC-statistical
+constraints, unlike the paper's Poisson constraints. We preserve the JSON exactly
+and compare against pyhf, not the paper's fitted result. No constraints are pruned.
+
+The one-lepton and trilepton workspaces also use pinned mirrors of their
+published likelihood archives. Their signal patches pass `pyhf.PatchSet.apply`'s
+background digest checks. Every paper fixture has a local `README.md` citing
+the paper, original data location, actual retrieval location, and selected patch.
+Its `test.json` records the retrieved file or archive hashes. A pinned mirror
+hash identifies the retrieved bytes; it does not claim independent byte identity
+with an unavailable upstream archive.
+
 `pyhfval_*` are built from the `spec_*` fixtures of pyhf's
 `tests/test_validation.py` at pyhf `v0.7.6` together with the
 `validation/data/*.json` bindata they read, with observations set to the rounded
 nominal total per bin. pyhf is Apache-2.0.
 
-Every other workspace was written against `pyhf/schemas/1.0.0/defs.json`, the
+The remaining audit workspaces were written against `pyhf/schemas/1.0.0/defs.json`, the
 workspace schema pyhf 0.7.6 installs, and measured with pyhf 0.7.6 on the numpy
 backend at 64-bit precision. All but `asimov_fractional_counts` come from the
 import audit.
