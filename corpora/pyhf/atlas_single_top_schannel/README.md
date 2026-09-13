@@ -12,7 +12,7 @@ The file-specific [DataCite rights record](https://api.datacite.org/dois/10.1718
 declares [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
 `test.json` records the source hash and license links.
 
-The oracle uses pyhf 0.7.6, NumPy float64: the suggested initial point plus
+The oracle uses pyhf 0.7.6 with its default JAX backend: the suggested initial point plus
 POI, nuisance, template, per-bin, and mixed shifts within suggested bounds.
 Fixed parameters remain fixed. All checks compare absolute log-likelihoods.
 The original measurement label `cross-section_Measurement` remains in the

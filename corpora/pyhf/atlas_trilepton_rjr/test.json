@@ -1,0 +1,1387 @@
+{
+  "provenance": {
+    "paper": "https://arxiv.org/abs/1912.08479",
+    "resource": "https://doi.org/10.17182/hepdata.91127.v2/r3",
+    "download": "https://www.hepdata.net/record/resource/1404698?view=true",
+    "archive_sha256": "bd43e30bc8c32586f0755a59e7cf4d2ac77c794eb28d8c54a5ca594cd274f5c6",
+    "workspace": "BkgOnly.json",
+    "patchset": "patchset.json",
+    "patch": "ERJR_500p0_0p0",
+    "license": "CC0-1.0",
+    "license_source": "https://api.datacite.org/dois/10.17182/hepdata.91127.v2%2Fr3",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
+  },
+  "point_labels": [
+    "suggested_init",
+    "poi_-0.5",
+    "poi_+0.5",
+    "scalar_nuisance_-0.5",
+    "scalar_nuisance_+0.5",
+    "template_-1.5",
+    "template_+1.5",
+    "per_bin_-0.5",
+    "per_bin_+0.5",
+    "mixed_-0.5",
+    "mixed_+0.5"
+  ],
+  "point_selection": "suggested_init_and_shifts",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "ba74d3a7cc38606b7183c69937b7b5976ab9910cc49702dae6c763209a3805ce"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "EG_Eff": 0.0,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": 0.0,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 0.5,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": 0.0,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.5,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": -0.5,
+          "EG_SCALE_ALL": 0.5,
+          "JET_Flavor_Response": -0.5,
+          "JET_GroupedNP_1": 0.5,
+          "JET_GroupedNP_2": -0.5,
+          "JET_GroupedNP_3": 0.5,
+          "JET_JER_DataVsMC": -0.5,
+          "JET_JER_EffectiveNP_1": 0.5,
+          "JET_JER_EffectiveNP_2": -0.5,
+          "JET_JER_EffectiveNP_3": 0.5,
+          "JET_JER_EffectiveNP_4": -0.5,
+          "JET_JER_EffectiveNP_5": 0.5,
+          "JET_JER_EffectiveNP_6": -0.5,
+          "JET_JER_EffectiveNP_7restTerm": 0.5,
+          "MET_SoftTrk_Scale": -0.5,
+          "SigXSec": 0.5,
+          "pileup": -0.5,
+          "MET_SoftTrk_ResoPara": 0.5,
+          "MET_SoftTrk_ResoPerp": -0.5,
+          "btag_BT": 0.5,
+          "EG_RESOLUTION_ALL": -0.5,
+          "EG_Iso": 0.5,
+          "MUON_MS": -0.5,
+          "MUON_ID": 0.5,
+          "WZ_isr_QCD": -0.5,
+          "zeroEstimate_UL_SRISR": 0.5,
+          "WZ_low_QCD": -0.5,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.5,
+          "FFWeight_stat_elBin6": -0.5,
+          "FFWeight_stat_elBin7": 0.5,
+          "FFWeight_stat_muBin7": -0.5,
+          "FFWeight_stat_muBin8": 0.5,
+          "FFWeight_stat_muBin9": -0.5,
+          "FFWeight_syst_prompt_sub_el": 0.5,
+          "FFWeight_syst_prompt_sub_mu": -0.5,
+          "FF_syst_closure_el": 0.5,
+          "FF_syst_closure_mu": -0.5,
+          "FF_syst_param_el": 0.5,
+          "FF_syst_param_mu": -0.5,
+          "Norm_other": 0.5,
+          "topNFstat": -0.5,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": 0.5,
+          "EG_SCALE_ALL": -0.5,
+          "JET_Flavor_Response": 0.5,
+          "JET_GroupedNP_1": -0.5,
+          "JET_GroupedNP_2": 0.5,
+          "JET_GroupedNP_3": -0.5,
+          "JET_JER_DataVsMC": 0.5,
+          "JET_JER_EffectiveNP_1": -0.5,
+          "JET_JER_EffectiveNP_2": 0.5,
+          "JET_JER_EffectiveNP_3": -0.5,
+          "JET_JER_EffectiveNP_4": 0.5,
+          "JET_JER_EffectiveNP_5": -0.5,
+          "JET_JER_EffectiveNP_6": 0.5,
+          "JET_JER_EffectiveNP_7restTerm": -0.5,
+          "MET_SoftTrk_Scale": 0.5,
+          "SigXSec": -0.5,
+          "pileup": 0.5,
+          "MET_SoftTrk_ResoPara": -0.5,
+          "MET_SoftTrk_ResoPerp": 0.5,
+          "btag_BT": -0.5,
+          "EG_RESOLUTION_ALL": 0.5,
+          "EG_Iso": -0.5,
+          "MUON_MS": 0.5,
+          "MUON_ID": -0.5,
+          "WZ_isr_QCD": 0.5,
+          "zeroEstimate_UL_SRISR": -0.5,
+          "WZ_low_QCD": 0.5,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": -0.5,
+          "FFWeight_stat_elBin6": 0.5,
+          "FFWeight_stat_elBin7": -0.5,
+          "FFWeight_stat_muBin7": 0.5,
+          "FFWeight_stat_muBin8": -0.5,
+          "FFWeight_stat_muBin9": 0.5,
+          "FFWeight_syst_prompt_sub_el": -0.5,
+          "FFWeight_syst_prompt_sub_mu": 0.5,
+          "FF_syst_closure_el": -0.5,
+          "FF_syst_closure_mu": 0.5,
+          "FF_syst_param_el": -0.5,
+          "FF_syst_param_mu": 0.5,
+          "Norm_other": -0.5,
+          "topNFstat": 0.5,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": -1.5,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": 1.5,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.0
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_Eff": 0.0,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0949098989367485
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            0.9999988507470915
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.011869658716023
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1e-10
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0143658081069589
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            0.9096242934465408
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0294908564537764
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            0.9927417482249439
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0242403969168663
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            0.9484731033444405
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0257112830877304
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            0.7723835110664368
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0503974221646786
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            0.9846906866878271
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0520368218421936
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            0.9499999988824129
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0430926010012627
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            0.8265642374753952
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0139042343944311
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            0.983033649623394
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0260446947067976
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            0.6222522854804993
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.040687631815672
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1e-10
+          ]
+        },
+        {
+          "EG_Eff": 0.0,
+          "EG_SCALE_ALL": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_GroupedNP_1": 0.0,
+          "JET_GroupedNP_2": 0.0,
+          "JET_GroupedNP_3": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7restTerm": 0.0,
+          "MET_SoftTrk_Scale": 0.0,
+          "SigXSec": 0.0,
+          "pileup": 0.0,
+          "MET_SoftTrk_ResoPara": 0.0,
+          "MET_SoftTrk_ResoPerp": 0.0,
+          "btag_BT": 0.0,
+          "EG_RESOLUTION_ALL": 0.0,
+          "EG_Iso": 0.0,
+          "MUON_MS": 0.0,
+          "MUON_ID": 0.0,
+          "WZ_isr_QCD": 0.0,
+          "zeroEstimate_UL_SRISR": 0.0,
+          "WZ_low_QCD": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_WZISR": 1.0,
+          "mu_WZLow": 1.0,
+          "SigPDF": 0.0,
+          "FFWeight_stat_elBin6": 0.0,
+          "FFWeight_stat_elBin7": 0.0,
+          "FFWeight_stat_muBin7": 0.0,
+          "FFWeight_stat_muBin8": 0.0,
+          "FFWeight_stat_muBin9": 0.0,
+          "FFWeight_syst_prompt_sub_el": 0.0,
+          "FFWeight_syst_prompt_sub_mu": 0.0,
+          "FF_syst_closure_el": 0.0,
+          "FF_syst_closure_mu": 0.0,
+          "FF_syst_param_el": 0.0,
+          "FF_syst_param_mu": 0.0,
+          "Norm_other": 0.0,
+          "topNFstat": 0.0,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            0.9050901010632515
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0000011492529084
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            0.988130341283977
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            2.0812277793884277
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            0.9856341918930411
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0903757065534592
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            0.9705091435462236
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0072582517750561
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            0.9757596030831337
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0515268966555595
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            0.9742887169122696
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.2276164889335632
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            0.9496025778353214
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.015309313312173
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            0.9479631781578064
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0500000011175872
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            0.9569073989987373
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.1734357625246048
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            0.9860957656055689
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.016966350376606
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            0.9739553052932024
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.3777477145195007
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            0.9593123681843281
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            3.0818984508514404
+          ]
+        },
+        {
+          "EG_Eff": -0.5,
+          "EG_SCALE_ALL": 0.5,
+          "JET_Flavor_Response": -0.5,
+          "JET_GroupedNP_1": 0.5,
+          "JET_GroupedNP_2": -0.5,
+          "JET_GroupedNP_3": 0.5,
+          "JET_JER_DataVsMC": -0.5,
+          "JET_JER_EffectiveNP_1": 0.5,
+          "JET_JER_EffectiveNP_2": -0.5,
+          "JET_JER_EffectiveNP_3": 0.5,
+          "JET_JER_EffectiveNP_4": -0.5,
+          "JET_JER_EffectiveNP_5": 0.5,
+          "JET_JER_EffectiveNP_6": -0.5,
+          "JET_JER_EffectiveNP_7restTerm": 0.5,
+          "MET_SoftTrk_Scale": -0.5,
+          "SigXSec": 0.5,
+          "pileup": -0.5,
+          "MET_SoftTrk_ResoPara": 0.5,
+          "MET_SoftTrk_ResoPerp": -0.5,
+          "btag_BT": 0.5,
+          "EG_RESOLUTION_ALL": -0.5,
+          "EG_Iso": 0.5,
+          "MUON_MS": -0.5,
+          "MUON_ID": 0.5,
+          "WZ_isr_QCD": -0.5,
+          "zeroEstimate_UL_SRISR": 0.5,
+          "WZ_low_QCD": -0.5,
+          "lumi": 1.0,
+          "mu_SIG": 0.5,
+          "mu_WZISR": 1.5,
+          "mu_WZLow": 0.5,
+          "SigPDF": 0.5,
+          "FFWeight_stat_elBin6": -0.5,
+          "FFWeight_stat_elBin7": 0.5,
+          "FFWeight_stat_muBin7": -0.5,
+          "FFWeight_stat_muBin8": 0.5,
+          "FFWeight_stat_muBin9": -0.5,
+          "FFWeight_syst_prompt_sub_el": 0.5,
+          "FFWeight_syst_prompt_sub_mu": -0.5,
+          "FF_syst_closure_el": 0.5,
+          "FF_syst_closure_mu": -0.5,
+          "FF_syst_param_el": 0.5,
+          "FF_syst_param_mu": -0.5,
+          "Norm_other": 0.5,
+          "topNFstat": -0.5,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            1.0949098989367485
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            0.9999988507470915
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            1.011869658716023
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            1e-10
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            1.0143658081069589
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            0.9096242934465408
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            1.0294908564537764
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            0.9927417482249439
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            1.0242403969168663
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            0.9484731033444405
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            1.0257112830877304
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            0.7723835110664368
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            1.0503974221646786
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            0.9846906866878271
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            1.0520368218421936
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            0.9499999988824129
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            1.0430926010012627
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            0.8265642374753952
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            1.0139042343944311
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            0.983033649623394
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            1.0260446947067976
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            0.6222522854804993
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            1.040687631815672
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            1e-10
+          ]
+        },
+        {
+          "EG_Eff": 0.5,
+          "EG_SCALE_ALL": -0.5,
+          "JET_Flavor_Response": 0.5,
+          "JET_GroupedNP_1": -0.5,
+          "JET_GroupedNP_2": 0.5,
+          "JET_GroupedNP_3": -0.5,
+          "JET_JER_DataVsMC": 0.5,
+          "JET_JER_EffectiveNP_1": -0.5,
+          "JET_JER_EffectiveNP_2": 0.5,
+          "JET_JER_EffectiveNP_3": -0.5,
+          "JET_JER_EffectiveNP_4": 0.5,
+          "JET_JER_EffectiveNP_5": -0.5,
+          "JET_JER_EffectiveNP_6": 0.5,
+          "JET_JER_EffectiveNP_7restTerm": -0.5,
+          "MET_SoftTrk_Scale": 0.5,
+          "SigXSec": -0.5,
+          "pileup": 0.5,
+          "MET_SoftTrk_ResoPara": -0.5,
+          "MET_SoftTrk_ResoPerp": 0.5,
+          "btag_BT": -0.5,
+          "EG_RESOLUTION_ALL": 0.5,
+          "EG_Iso": -0.5,
+          "MUON_MS": 0.5,
+          "MUON_ID": -0.5,
+          "WZ_isr_QCD": 0.5,
+          "zeroEstimate_UL_SRISR": -0.5,
+          "WZ_low_QCD": 0.5,
+          "lumi": 1.0,
+          "mu_SIG": 1.5,
+          "mu_WZISR": 0.5,
+          "mu_WZLow": 1.5,
+          "SigPDF": -0.5,
+          "FFWeight_stat_elBin6": 0.5,
+          "FFWeight_stat_elBin7": -0.5,
+          "FFWeight_stat_muBin7": 0.5,
+          "FFWeight_stat_muBin8": -0.5,
+          "FFWeight_stat_muBin9": 0.5,
+          "FFWeight_syst_prompt_sub_el": -0.5,
+          "FFWeight_syst_prompt_sub_mu": 0.5,
+          "FF_syst_closure_el": -0.5,
+          "FF_syst_closure_mu": 0.5,
+          "FF_syst_param_el": -0.5,
+          "FF_syst_param_mu": 0.5,
+          "Norm_other": -0.5,
+          "topNFstat": 0.5,
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRISR_obs_cuts": [
+            0.9050901010632515
+          ],
+          "shape_mcstat_diboson3LISR_CRISR_obs_cuts": [
+            1.0000011492529084
+          ],
+          "shape_mcstat_diboson4L_CRISR_obs_cuts": [
+            0.988130341283977
+          ],
+          "shape_mcstat_fakes_CRISR_obs_cuts": [
+            2.0812277793884277
+          ],
+          "shape_mcstat_other_CRISR_obs_cuts": [
+            0.9856341918930411
+          ],
+          "shape_mcstat_top_CRISR_obs_cuts": [
+            1.0903757065534592
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_CRlow_obs_cuts": [
+            0.9705091435462236
+          ],
+          "shape_mcstat_diboson3LLow_CRlow_obs_cuts": [
+            1.0072582517750561
+          ],
+          "shape_mcstat_diboson4L_CRlow_obs_cuts": [
+            0.9757596030831337
+          ],
+          "shape_mcstat_fakes_CRlow_obs_cuts": [
+            1.0515268966555595
+          ],
+          "shape_mcstat_other_CRlow_obs_cuts": [
+            0.9742887169122696
+          ],
+          "shape_mcstat_top_CRlow_obs_cuts": [
+            1.2276164889335632
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRISR_obs_cuts": [
+            0.9496025778353214
+          ],
+          "shape_mcstat_diboson3LISR_SRISR_obs_cuts": [
+            1.015309313312173
+          ],
+          "shape_mcstat_diboson4L_SRISR_obs_cuts": [
+            0.9479631781578064
+          ],
+          "shape_mcstat_fakes_SRISR_obs_cuts": [
+            1.0500000011175872
+          ],
+          "shape_mcstat_other_SRISR_obs_cuts": [
+            0.9569073989987373
+          ],
+          "shape_mcstat_top_SRISR_obs_cuts": [
+            1.1734357625246048
+          ],
+          "shape_mcstat_MGPy8EG_A14N23LO_C1N2_WZ_500p0_0p0_3L_2L7_SRlow_obs_cuts": [
+            0.9860957656055689
+          ],
+          "shape_mcstat_diboson3LLow_SRlow_obs_cuts": [
+            1.016966350376606
+          ],
+          "shape_mcstat_diboson4L_SRlow_obs_cuts": [
+            0.9739553052932024
+          ],
+          "shape_mcstat_fakes_SRlow_obs_cuts": [
+            1.3777477145195007
+          ],
+          "shape_mcstat_other_SRlow_obs_cuts": [
+            0.9593123681843281
+          ],
+          "shape_mcstat_top_SRlow_obs_cuts": [
+            3.0818984508514404
+          ]
+        }
+      ],
+      "expected": [
+        -141.50834469305147,
+        -140.97705629583686,
+        -142.2435329050855,
+        -149.0410039103907,
+        -144.66405635694088,
+        -142.529260126205,
+        -142.7426219973186,
+        -149.54596075022096,
+        -145.208473405186,
+        -225.61314376749712,
+        -279.11512382938923
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ],
+  "test_type": "convert",
+  "engines": [
+    "det-js",
+    "iree"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "jax 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": null,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  }
+}

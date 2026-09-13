@@ -11,4 +11,4 @@ from `2108.07586/patchset_SM_C1C1_WW.json` to
 It retains every observation and constraint: 2 channels, 2 bins, 82 parameters.
 
 `test.json` records the archive hash, source paths, suggested parameter start,
-ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.

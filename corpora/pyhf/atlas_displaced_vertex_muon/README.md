@@ -16,6 +16,6 @@ and [archive landing page](https://www.hepdata.net/record/resource/2514540?landi
 declare [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
 `test.json` records archive and workspace hashes, the member path, and license links.
 
-The oracle uses pyhf 0.7.6, NumPy float64: the suggested initial point plus
+The oracle uses pyhf 0.7.6 with its default JAX backend: the suggested initial point plus
 POI, scalar-nuisance, per-bin, and mixed shifts within suggested bounds.
 All checks compare absolute log-likelihoods, including auxiliary constraints.

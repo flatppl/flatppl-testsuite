@@ -11,4 +11,4 @@ from `2106.01676/onshell_winobino_plus_patchset.json` to
 It retains every observation and constraint: 23 channels, 23 bins, 120 parameters.
 
 `test.json` records the archive hash, source paths, suggested parameter start,
-ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.

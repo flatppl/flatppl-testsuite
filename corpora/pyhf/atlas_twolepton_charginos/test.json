@@ -1,0 +1,2234 @@
+{
+  "provenance": {
+    "paper": "https://arxiv.org/abs/1908.08215",
+    "resource": "https://doi.org/10.17182/hepdata.89413.v4/r5",
+    "download": "https://www.hepdata.net/record/resource/2917462?view=true",
+    "archive_sha256": "316fc65822657f39987a62a056bdb001f97123e3af037c9e282e95d5eb021385",
+    "workspace": "bkgonly.json",
+    "patchset": "C1C1WW_patchset.json",
+    "patch": "C1C1_WW_300_50",
+    "license": "CC0-1.0",
+    "license_source": "https://api.datacite.org/dois/10.17182/hepdata.89413.v4%2Fr5",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
+  },
+  "point_labels": [
+    "suggested_init",
+    "poi_-0.5",
+    "poi_+0.5",
+    "scalar_nuisance_-0.5",
+    "scalar_nuisance_+0.5",
+    "template_-1.5",
+    "template_+1.5",
+    "per_bin_-0.5",
+    "per_bin_+0.5",
+    "mixed_-0.5",
+    "mixed_+0.5"
+  ],
+  "point_selection": "suggested_init_and_shifts",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "cba3a9b16f551b0967f16e43ec6f774ae58d33664834df32ce2fa50309e27dbd"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "EG_RES": 0.0,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": 0.0,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 0.5,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": 0.0,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.5,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": -0.5,
+          "EG_SCALE": 0.5,
+          "EL_EFF_ID": -0.5,
+          "EL_EFF_ISO": 0.5,
+          "EL_EFF_RECO": -0.5,
+          "EL_EFF_TRIG": 0.5,
+          "FT_EFF_B": -0.5,
+          "FT_EFF_C": 0.5,
+          "FT_EFF_Light": -0.5,
+          "FT_EFF_extrapolation": 0.5,
+          "FT_EFF_extrapolation_from_charm": -0.5,
+          "JET_EffectiveNP_Detector1": 0.5,
+          "JET_EffectiveNP_Mixed1": -0.5,
+          "JET_EffectiveNP_Mixed2": 0.5,
+          "JET_EffectiveNP_Modelling1": -0.5,
+          "JET_EffectiveNP_Modelling2": 0.5,
+          "JET_EffectiveNP_Modelling3": -0.5,
+          "JET_EffectiveNP_Statistical1": 0.5,
+          "JET_EffectiveNP_Statistical2": -0.5,
+          "JET_EffectiveNP_Statistical3": 0.5,
+          "JET_EffectiveNP_Statistical4": -0.5,
+          "JET_EffectiveNP_Statistical5": 0.5,
+          "JET_EffectiveNP_Statistical6": -0.5,
+          "JET_EtaIntercalibration_Modelling": 0.5,
+          "JET_EtaIntercalibration_NonClosure_negEta": -0.5,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.5,
+          "JET_EtaIntercalibration_TotalStat": -0.5,
+          "JET_Flavor_Composition": 0.5,
+          "JET_Flavor_Response": -0.5,
+          "JET_JER_DataVsMC": 0.5,
+          "JET_JER_EffectiveNP_1": -0.5,
+          "JET_JER_EffectiveNP_10": 0.5,
+          "JET_JER_EffectiveNP_11": -0.5,
+          "JET_JER_EffectiveNP_12restTerm": 0.5,
+          "JET_JER_EffectiveNP_2": -0.5,
+          "JET_JER_EffectiveNP_3": 0.5,
+          "JET_JER_EffectiveNP_4": -0.5,
+          "JET_JER_EffectiveNP_5": 0.5,
+          "JET_JER_EffectiveNP_6": -0.5,
+          "JET_JER_EffectiveNP_7": 0.5,
+          "JET_JER_EffectiveNP_8": -0.5,
+          "JET_JER_EffectiveNP_9": 0.5,
+          "JET_JvtEfficiency": -0.5,
+          "JET_Pileup_OffsetMu": 0.5,
+          "JET_Pileup_OffsetNPV": -0.5,
+          "JET_Pileup_PtTerm": 0.5,
+          "JET_Pileup_RhoTopology": -0.5,
+          "MET_ResoPara": 0.5,
+          "MET_ResoPerp": -0.5,
+          "MET_ScaleDown": 0.5,
+          "MET_ScaleUp": -0.5,
+          "MUONS_ID": 0.5,
+          "MUONS_MS": -0.5,
+          "MUONS_SCALE": 0.5,
+          "MUONS_SagReb": -0.5,
+          "MUONS_SagRho": 0.5,
+          "MUON_EFF_ISO_STAT": -0.5,
+          "MUON_EFF_ISO_SYS": 0.5,
+          "MUON_EFF_RECO_STAT": -0.5,
+          "MUON_EFF_RECO_SYS": 0.5,
+          "MUON_EFF_TrigStatUncertainty": -0.5,
+          "MUON_EFF_TrigSystUncertainty": 0.5,
+          "PRW_syst": -0.5,
+          "syst_wt_DS": 0.5,
+          "Factorization_VV": -0.5,
+          "Renormalization_VV": 0.5,
+          "syst_VV_PDF": -0.5,
+          "syst_VV_gen": 0.5,
+          "fakesSyst": -0.5,
+          "syst_ttbar_gen": 0.5,
+          "syst_ttbar_rad": -0.5,
+          "syst_ttbar_show": 0.5,
+          "lumi": 0.9915,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": 0.5,
+          "EG_SCALE": -0.5,
+          "EL_EFF_ID": 0.5,
+          "EL_EFF_ISO": -0.5,
+          "EL_EFF_RECO": 0.5,
+          "EL_EFF_TRIG": -0.5,
+          "FT_EFF_B": 0.5,
+          "FT_EFF_C": -0.5,
+          "FT_EFF_Light": 0.5,
+          "FT_EFF_extrapolation": -0.5,
+          "FT_EFF_extrapolation_from_charm": 0.5,
+          "JET_EffectiveNP_Detector1": -0.5,
+          "JET_EffectiveNP_Mixed1": 0.5,
+          "JET_EffectiveNP_Mixed2": -0.5,
+          "JET_EffectiveNP_Modelling1": 0.5,
+          "JET_EffectiveNP_Modelling2": -0.5,
+          "JET_EffectiveNP_Modelling3": 0.5,
+          "JET_EffectiveNP_Statistical1": -0.5,
+          "JET_EffectiveNP_Statistical2": 0.5,
+          "JET_EffectiveNP_Statistical3": -0.5,
+          "JET_EffectiveNP_Statistical4": 0.5,
+          "JET_EffectiveNP_Statistical5": -0.5,
+          "JET_EffectiveNP_Statistical6": 0.5,
+          "JET_EtaIntercalibration_Modelling": -0.5,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.5,
+          "JET_EtaIntercalibration_NonClosure_posEta": -0.5,
+          "JET_EtaIntercalibration_TotalStat": 0.5,
+          "JET_Flavor_Composition": -0.5,
+          "JET_Flavor_Response": 0.5,
+          "JET_JER_DataVsMC": -0.5,
+          "JET_JER_EffectiveNP_1": 0.5,
+          "JET_JER_EffectiveNP_10": -0.5,
+          "JET_JER_EffectiveNP_11": 0.5,
+          "JET_JER_EffectiveNP_12restTerm": -0.5,
+          "JET_JER_EffectiveNP_2": 0.5,
+          "JET_JER_EffectiveNP_3": -0.5,
+          "JET_JER_EffectiveNP_4": 0.5,
+          "JET_JER_EffectiveNP_5": -0.5,
+          "JET_JER_EffectiveNP_6": 0.5,
+          "JET_JER_EffectiveNP_7": -0.5,
+          "JET_JER_EffectiveNP_8": 0.5,
+          "JET_JER_EffectiveNP_9": -0.5,
+          "JET_JvtEfficiency": 0.5,
+          "JET_Pileup_OffsetMu": -0.5,
+          "JET_Pileup_OffsetNPV": 0.5,
+          "JET_Pileup_PtTerm": -0.5,
+          "JET_Pileup_RhoTopology": 0.5,
+          "MET_ResoPara": -0.5,
+          "MET_ResoPerp": 0.5,
+          "MET_ScaleDown": -0.5,
+          "MET_ScaleUp": 0.5,
+          "MUONS_ID": -0.5,
+          "MUONS_MS": 0.5,
+          "MUONS_SCALE": -0.5,
+          "MUONS_SagReb": 0.5,
+          "MUONS_SagRho": -0.5,
+          "MUON_EFF_ISO_STAT": 0.5,
+          "MUON_EFF_ISO_SYS": -0.5,
+          "MUON_EFF_RECO_STAT": 0.5,
+          "MUON_EFF_RECO_SYS": -0.5,
+          "MUON_EFF_TrigStatUncertainty": 0.5,
+          "MUON_EFF_TrigSystUncertainty": -0.5,
+          "PRW_syst": 0.5,
+          "syst_wt_DS": -0.5,
+          "Factorization_VV": 0.5,
+          "Renormalization_VV": -0.5,
+          "syst_VV_PDF": 0.5,
+          "syst_VV_gen": -0.5,
+          "fakesSyst": 0.5,
+          "syst_ttbar_gen": -0.5,
+          "syst_ttbar_rad": 0.5,
+          "syst_ttbar_show": -0.5,
+          "lumi": 1.0085,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": -1.5,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": 1.5,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0
+          ],
+          "staterror_CRWW_cuts": [
+            1.0
+          ],
+          "staterror_CRtop_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0
+          ]
+        },
+        {
+          "EG_RES": 0.0,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            1.0049707459672843
+          ],
+          "staterror_CRWW_cuts": [
+            0.9956233219981779
+          ],
+          "staterror_CRtop_cuts": [
+            1.0072676162534753
+          ],
+          "staterror_SRDF_0a_cuts": [
+            0.9606726094558526
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0310730937704833
+          ],
+          "staterror_SRDF_0c_cuts": [
+            0.9742177632042353
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.025895613292674
+          ],
+          "staterror_SRDF_0e_cuts": [
+            0.9733834880637117
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0340632015788527
+          ],
+          "staterror_SRDF_0g_cuts": [
+            0.9673651577917054
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0542051682476814
+          ],
+          "staterror_SRDF_0i_cuts": [
+            0.9433687373450003
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.033005950060411
+          ],
+          "staterror_SRDF_1b_cuts": [
+            0.9603663655452065
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.031450941251263
+          ],
+          "staterror_SRDF_1d_cuts": [
+            0.9730823798874394
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0360399329216852
+          ],
+          "staterror_SRDF_1f_cuts": [
+            0.9609655578489323
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0394741004402976
+          ],
+          "staterror_SRDF_1h_cuts": [
+            0.9333232717449752
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0786419622465915
+          ],
+          "staterror_SRSF_0a_cuts": [
+            0.9686897697526673
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.029686644856309
+          ],
+          "staterror_SRSF_0c_cuts": [
+            0.9783835528256994
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0259354202699174
+          ],
+          "staterror_SRSF_0e_cuts": [
+            0.9744504516720751
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0306943635809889
+          ],
+          "staterror_SRSF_0g_cuts": [
+            0.9619205074013639
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0665318387857576
+          ],
+          "staterror_SRSF_0i_cuts": [
+            0.957289903466437
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0372261393364552
+          ],
+          "staterror_SRSF_1b_cuts": [
+            0.9557267016905134
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0324218962312612
+          ],
+          "staterror_SRSF_1d_cuts": [
+            0.9614366755425559
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0483332304694448
+          ],
+          "staterror_SRSF_1f_cuts": [
+            0.9482635491021469
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0368789646413337
+          ],
+          "staterror_SRSF_1h_cuts": [
+            0.9227154821147855
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0790107967670322
+          ]
+        },
+        {
+          "EG_RES": 0.0,
+          "EG_SCALE": 0.0,
+          "EL_EFF_ID": 0.0,
+          "EL_EFF_ISO": 0.0,
+          "EL_EFF_RECO": 0.0,
+          "EL_EFF_TRIG": 0.0,
+          "FT_EFF_B": 0.0,
+          "FT_EFF_C": 0.0,
+          "FT_EFF_Light": 0.0,
+          "FT_EFF_extrapolation": 0.0,
+          "FT_EFF_extrapolation_from_charm": 0.0,
+          "JET_EffectiveNP_Detector1": 0.0,
+          "JET_EffectiveNP_Mixed1": 0.0,
+          "JET_EffectiveNP_Mixed2": 0.0,
+          "JET_EffectiveNP_Modelling1": 0.0,
+          "JET_EffectiveNP_Modelling2": 0.0,
+          "JET_EffectiveNP_Modelling3": 0.0,
+          "JET_EffectiveNP_Statistical1": 0.0,
+          "JET_EffectiveNP_Statistical2": 0.0,
+          "JET_EffectiveNP_Statistical3": 0.0,
+          "JET_EffectiveNP_Statistical4": 0.0,
+          "JET_EffectiveNP_Statistical5": 0.0,
+          "JET_EffectiveNP_Statistical6": 0.0,
+          "JET_EtaIntercalibration_Modelling": 0.0,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.0,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.0,
+          "JET_EtaIntercalibration_TotalStat": 0.0,
+          "JET_Flavor_Composition": 0.0,
+          "JET_Flavor_Response": 0.0,
+          "JET_JER_DataVsMC": 0.0,
+          "JET_JER_EffectiveNP_1": 0.0,
+          "JET_JER_EffectiveNP_10": 0.0,
+          "JET_JER_EffectiveNP_11": 0.0,
+          "JET_JER_EffectiveNP_12restTerm": 0.0,
+          "JET_JER_EffectiveNP_2": 0.0,
+          "JET_JER_EffectiveNP_3": 0.0,
+          "JET_JER_EffectiveNP_4": 0.0,
+          "JET_JER_EffectiveNP_5": 0.0,
+          "JET_JER_EffectiveNP_6": 0.0,
+          "JET_JER_EffectiveNP_7": 0.0,
+          "JET_JER_EffectiveNP_8": 0.0,
+          "JET_JER_EffectiveNP_9": 0.0,
+          "JET_JvtEfficiency": 0.0,
+          "JET_Pileup_OffsetMu": 0.0,
+          "JET_Pileup_OffsetNPV": 0.0,
+          "JET_Pileup_PtTerm": 0.0,
+          "JET_Pileup_RhoTopology": 0.0,
+          "MET_ResoPara": 0.0,
+          "MET_ResoPerp": 0.0,
+          "MET_ScaleDown": 0.0,
+          "MET_ScaleUp": 0.0,
+          "MUONS_ID": 0.0,
+          "MUONS_MS": 0.0,
+          "MUONS_SCALE": 0.0,
+          "MUONS_SagReb": 0.0,
+          "MUONS_SagRho": 0.0,
+          "MUON_EFF_ISO_STAT": 0.0,
+          "MUON_EFF_ISO_SYS": 0.0,
+          "MUON_EFF_RECO_STAT": 0.0,
+          "MUON_EFF_RECO_SYS": 0.0,
+          "MUON_EFF_TrigStatUncertainty": 0.0,
+          "MUON_EFF_TrigSystUncertainty": 0.0,
+          "PRW_syst": 0.0,
+          "syst_wt_DS": 0.0,
+          "Factorization_VV": 0.0,
+          "Renormalization_VV": 0.0,
+          "syst_VV_PDF": 0.0,
+          "syst_VV_gen": 0.0,
+          "fakesSyst": 0.0,
+          "syst_ttbar_gen": 0.0,
+          "syst_ttbar_rad": 0.0,
+          "syst_ttbar_show": 0.0,
+          "lumi": 1.0,
+          "mu_SIG": 1.0,
+          "mu_ttbar": 1.0,
+          "mu_WW": 1.0,
+          "mu_VZ": 1.0,
+          "staterror_CRVZ_cuts": [
+            0.9950292540327158
+          ],
+          "staterror_CRWW_cuts": [
+            1.0043766780018222
+          ],
+          "staterror_CRtop_cuts": [
+            0.9927323837465248
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0393273905441474
+          ],
+          "staterror_SRDF_0b_cuts": [
+            0.9689269062295168
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0257822367957647
+          ],
+          "staterror_SRDF_0d_cuts": [
+            0.9741043867073259
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0266165119362882
+          ],
+          "staterror_SRDF_0f_cuts": [
+            0.9659367984211473
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0326348422082945
+          ],
+          "staterror_SRDF_0h_cuts": [
+            0.9457948317523186
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0566312626549998
+          ],
+          "staterror_SRDF_1a_cuts": [
+            0.9669940499395889
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0396336344547936
+          ],
+          "staterror_SRDF_1c_cuts": [
+            0.9685490587487371
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0269176201125607
+          ],
+          "staterror_SRDF_1e_cuts": [
+            0.9639600670783148
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0390344421510675
+          ],
+          "staterror_SRDF_1g_cuts": [
+            0.9605258995597025
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0666767282550247
+          ],
+          "staterror_SRDF_1i_cuts": [
+            0.9213580377534086
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0313102302473327
+          ],
+          "staterror_SRSF_0b_cuts": [
+            0.970313355143691
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0216164471743006
+          ],
+          "staterror_SRSF_0d_cuts": [
+            0.9740645797300825
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0255495483279249
+          ],
+          "staterror_SRSF_0f_cuts": [
+            0.9693056364190111
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.038079492598636
+          ],
+          "staterror_SRSF_0h_cuts": [
+            0.9334681612142424
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.042710096533563
+          ],
+          "staterror_SRSF_1a_cuts": [
+            0.9627738606635448
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0442732983094865
+          ],
+          "staterror_SRSF_1c_cuts": [
+            0.9675781037687387
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0385633244574441
+          ],
+          "staterror_SRSF_1e_cuts": [
+            0.9516667695305552
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.051736450897853
+          ],
+          "staterror_SRSF_1g_cuts": [
+            0.9631210353586662
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0772845178852144
+          ],
+          "staterror_SRSF_1i_cuts": [
+            0.920989203232968
+          ]
+        },
+        {
+          "EG_RES": -0.5,
+          "EG_SCALE": 0.5,
+          "EL_EFF_ID": -0.5,
+          "EL_EFF_ISO": 0.5,
+          "EL_EFF_RECO": -0.5,
+          "EL_EFF_TRIG": 0.5,
+          "FT_EFF_B": -0.5,
+          "FT_EFF_C": 0.5,
+          "FT_EFF_Light": -0.5,
+          "FT_EFF_extrapolation": 0.5,
+          "FT_EFF_extrapolation_from_charm": -0.5,
+          "JET_EffectiveNP_Detector1": 0.5,
+          "JET_EffectiveNP_Mixed1": -0.5,
+          "JET_EffectiveNP_Mixed2": 0.5,
+          "JET_EffectiveNP_Modelling1": -0.5,
+          "JET_EffectiveNP_Modelling2": 0.5,
+          "JET_EffectiveNP_Modelling3": -0.5,
+          "JET_EffectiveNP_Statistical1": 0.5,
+          "JET_EffectiveNP_Statistical2": -0.5,
+          "JET_EffectiveNP_Statistical3": 0.5,
+          "JET_EffectiveNP_Statistical4": -0.5,
+          "JET_EffectiveNP_Statistical5": 0.5,
+          "JET_EffectiveNP_Statistical6": -0.5,
+          "JET_EtaIntercalibration_Modelling": 0.5,
+          "JET_EtaIntercalibration_NonClosure_negEta": -0.5,
+          "JET_EtaIntercalibration_NonClosure_posEta": 0.5,
+          "JET_EtaIntercalibration_TotalStat": -0.5,
+          "JET_Flavor_Composition": 0.5,
+          "JET_Flavor_Response": -0.5,
+          "JET_JER_DataVsMC": 0.5,
+          "JET_JER_EffectiveNP_1": -0.5,
+          "JET_JER_EffectiveNP_10": 0.5,
+          "JET_JER_EffectiveNP_11": -0.5,
+          "JET_JER_EffectiveNP_12restTerm": 0.5,
+          "JET_JER_EffectiveNP_2": -0.5,
+          "JET_JER_EffectiveNP_3": 0.5,
+          "JET_JER_EffectiveNP_4": -0.5,
+          "JET_JER_EffectiveNP_5": 0.5,
+          "JET_JER_EffectiveNP_6": -0.5,
+          "JET_JER_EffectiveNP_7": 0.5,
+          "JET_JER_EffectiveNP_8": -0.5,
+          "JET_JER_EffectiveNP_9": 0.5,
+          "JET_JvtEfficiency": -0.5,
+          "JET_Pileup_OffsetMu": 0.5,
+          "JET_Pileup_OffsetNPV": -0.5,
+          "JET_Pileup_PtTerm": 0.5,
+          "JET_Pileup_RhoTopology": -0.5,
+          "MET_ResoPara": 0.5,
+          "MET_ResoPerp": -0.5,
+          "MET_ScaleDown": 0.5,
+          "MET_ScaleUp": -0.5,
+          "MUONS_ID": 0.5,
+          "MUONS_MS": -0.5,
+          "MUONS_SCALE": 0.5,
+          "MUONS_SagReb": -0.5,
+          "MUONS_SagRho": 0.5,
+          "MUON_EFF_ISO_STAT": -0.5,
+          "MUON_EFF_ISO_SYS": 0.5,
+          "MUON_EFF_RECO_STAT": -0.5,
+          "MUON_EFF_RECO_SYS": 0.5,
+          "MUON_EFF_TrigStatUncertainty": -0.5,
+          "MUON_EFF_TrigSystUncertainty": 0.5,
+          "PRW_syst": -0.5,
+          "syst_wt_DS": 0.5,
+          "Factorization_VV": -0.5,
+          "Renormalization_VV": 0.5,
+          "syst_VV_PDF": -0.5,
+          "syst_VV_gen": 0.5,
+          "fakesSyst": -0.5,
+          "syst_ttbar_gen": 0.5,
+          "syst_ttbar_rad": -0.5,
+          "syst_ttbar_show": 0.5,
+          "lumi": 0.9915,
+          "mu_SIG": 1.5,
+          "mu_ttbar": 0.5,
+          "mu_WW": 1.5,
+          "mu_VZ": 0.5,
+          "staterror_CRVZ_cuts": [
+            1.0049707459672843
+          ],
+          "staterror_CRWW_cuts": [
+            0.9956233219981779
+          ],
+          "staterror_CRtop_cuts": [
+            1.0072676162534753
+          ],
+          "staterror_SRDF_0a_cuts": [
+            0.9606726094558526
+          ],
+          "staterror_SRDF_0b_cuts": [
+            1.0310730937704833
+          ],
+          "staterror_SRDF_0c_cuts": [
+            0.9742177632042353
+          ],
+          "staterror_SRDF_0d_cuts": [
+            1.025895613292674
+          ],
+          "staterror_SRDF_0e_cuts": [
+            0.9733834880637117
+          ],
+          "staterror_SRDF_0f_cuts": [
+            1.0340632015788527
+          ],
+          "staterror_SRDF_0g_cuts": [
+            0.9673651577917054
+          ],
+          "staterror_SRDF_0h_cuts": [
+            1.0542051682476814
+          ],
+          "staterror_SRDF_0i_cuts": [
+            0.9433687373450003
+          ],
+          "staterror_SRDF_1a_cuts": [
+            1.033005950060411
+          ],
+          "staterror_SRDF_1b_cuts": [
+            0.9603663655452065
+          ],
+          "staterror_SRDF_1c_cuts": [
+            1.031450941251263
+          ],
+          "staterror_SRDF_1d_cuts": [
+            0.9730823798874394
+          ],
+          "staterror_SRDF_1e_cuts": [
+            1.0360399329216852
+          ],
+          "staterror_SRDF_1f_cuts": [
+            0.9609655578489323
+          ],
+          "staterror_SRDF_1g_cuts": [
+            1.0394741004402976
+          ],
+          "staterror_SRDF_1h_cuts": [
+            0.9333232717449752
+          ],
+          "staterror_SRDF_1i_cuts": [
+            1.0786419622465915
+          ],
+          "staterror_SRSF_0a_cuts": [
+            0.9686897697526673
+          ],
+          "staterror_SRSF_0b_cuts": [
+            1.029686644856309
+          ],
+          "staterror_SRSF_0c_cuts": [
+            0.9783835528256994
+          ],
+          "staterror_SRSF_0d_cuts": [
+            1.0259354202699174
+          ],
+          "staterror_SRSF_0e_cuts": [
+            0.9744504516720751
+          ],
+          "staterror_SRSF_0f_cuts": [
+            1.0306943635809889
+          ],
+          "staterror_SRSF_0g_cuts": [
+            0.9619205074013639
+          ],
+          "staterror_SRSF_0h_cuts": [
+            1.0665318387857576
+          ],
+          "staterror_SRSF_0i_cuts": [
+            0.957289903466437
+          ],
+          "staterror_SRSF_1a_cuts": [
+            1.0372261393364552
+          ],
+          "staterror_SRSF_1b_cuts": [
+            0.9557267016905134
+          ],
+          "staterror_SRSF_1c_cuts": [
+            1.0324218962312612
+          ],
+          "staterror_SRSF_1d_cuts": [
+            0.9614366755425559
+          ],
+          "staterror_SRSF_1e_cuts": [
+            1.0483332304694448
+          ],
+          "staterror_SRSF_1f_cuts": [
+            0.9482635491021469
+          ],
+          "staterror_SRSF_1g_cuts": [
+            1.0368789646413337
+          ],
+          "staterror_SRSF_1h_cuts": [
+            0.9227154821147855
+          ],
+          "staterror_SRSF_1i_cuts": [
+            1.0790107967670322
+          ]
+        },
+        {
+          "EG_RES": 0.5,
+          "EG_SCALE": -0.5,
+          "EL_EFF_ID": 0.5,
+          "EL_EFF_ISO": -0.5,
+          "EL_EFF_RECO": 0.5,
+          "EL_EFF_TRIG": -0.5,
+          "FT_EFF_B": 0.5,
+          "FT_EFF_C": -0.5,
+          "FT_EFF_Light": 0.5,
+          "FT_EFF_extrapolation": -0.5,
+          "FT_EFF_extrapolation_from_charm": 0.5,
+          "JET_EffectiveNP_Detector1": -0.5,
+          "JET_EffectiveNP_Mixed1": 0.5,
+          "JET_EffectiveNP_Mixed2": -0.5,
+          "JET_EffectiveNP_Modelling1": 0.5,
+          "JET_EffectiveNP_Modelling2": -0.5,
+          "JET_EffectiveNP_Modelling3": 0.5,
+          "JET_EffectiveNP_Statistical1": -0.5,
+          "JET_EffectiveNP_Statistical2": 0.5,
+          "JET_EffectiveNP_Statistical3": -0.5,
+          "JET_EffectiveNP_Statistical4": 0.5,
+          "JET_EffectiveNP_Statistical5": -0.5,
+          "JET_EffectiveNP_Statistical6": 0.5,
+          "JET_EtaIntercalibration_Modelling": -0.5,
+          "JET_EtaIntercalibration_NonClosure_negEta": 0.5,
+          "JET_EtaIntercalibration_NonClosure_posEta": -0.5,
+          "JET_EtaIntercalibration_TotalStat": 0.5,
+          "JET_Flavor_Composition": -0.5,
+          "JET_Flavor_Response": 0.5,
+          "JET_JER_DataVsMC": -0.5,
+          "JET_JER_EffectiveNP_1": 0.5,
+          "JET_JER_EffectiveNP_10": -0.5,
+          "JET_JER_EffectiveNP_11": 0.5,
+          "JET_JER_EffectiveNP_12restTerm": -0.5,
+          "JET_JER_EffectiveNP_2": 0.5,
+          "JET_JER_EffectiveNP_3": -0.5,
+          "JET_JER_EffectiveNP_4": 0.5,
+          "JET_JER_EffectiveNP_5": -0.5,
+          "JET_JER_EffectiveNP_6": 0.5,
+          "JET_JER_EffectiveNP_7": -0.5,
+          "JET_JER_EffectiveNP_8": 0.5,
+          "JET_JER_EffectiveNP_9": -0.5,
+          "JET_JvtEfficiency": 0.5,
+          "JET_Pileup_OffsetMu": -0.5,
+          "JET_Pileup_OffsetNPV": 0.5,
+          "JET_Pileup_PtTerm": -0.5,
+          "JET_Pileup_RhoTopology": 0.5,
+          "MET_ResoPara": -0.5,
+          "MET_ResoPerp": 0.5,
+          "MET_ScaleDown": -0.5,
+          "MET_ScaleUp": 0.5,
+          "MUONS_ID": -0.5,
+          "MUONS_MS": 0.5,
+          "MUONS_SCALE": -0.5,
+          "MUONS_SagReb": 0.5,
+          "MUONS_SagRho": -0.5,
+          "MUON_EFF_ISO_STAT": 0.5,
+          "MUON_EFF_ISO_SYS": -0.5,
+          "MUON_EFF_RECO_STAT": 0.5,
+          "MUON_EFF_RECO_SYS": -0.5,
+          "MUON_EFF_TrigStatUncertainty": 0.5,
+          "MUON_EFF_TrigSystUncertainty": -0.5,
+          "PRW_syst": 0.5,
+          "syst_wt_DS": -0.5,
+          "Factorization_VV": 0.5,
+          "Renormalization_VV": -0.5,
+          "syst_VV_PDF": 0.5,
+          "syst_VV_gen": -0.5,
+          "fakesSyst": 0.5,
+          "syst_ttbar_gen": -0.5,
+          "syst_ttbar_rad": 0.5,
+          "syst_ttbar_show": -0.5,
+          "lumi": 1.0085,
+          "mu_SIG": 0.5,
+          "mu_ttbar": 1.5,
+          "mu_WW": 0.5,
+          "mu_VZ": 1.5,
+          "staterror_CRVZ_cuts": [
+            0.9950292540327158
+          ],
+          "staterror_CRWW_cuts": [
+            1.0043766780018222
+          ],
+          "staterror_CRtop_cuts": [
+            0.9927323837465248
+          ],
+          "staterror_SRDF_0a_cuts": [
+            1.0393273905441474
+          ],
+          "staterror_SRDF_0b_cuts": [
+            0.9689269062295168
+          ],
+          "staterror_SRDF_0c_cuts": [
+            1.0257822367957647
+          ],
+          "staterror_SRDF_0d_cuts": [
+            0.9741043867073259
+          ],
+          "staterror_SRDF_0e_cuts": [
+            1.0266165119362882
+          ],
+          "staterror_SRDF_0f_cuts": [
+            0.9659367984211473
+          ],
+          "staterror_SRDF_0g_cuts": [
+            1.0326348422082945
+          ],
+          "staterror_SRDF_0h_cuts": [
+            0.9457948317523186
+          ],
+          "staterror_SRDF_0i_cuts": [
+            1.0566312626549998
+          ],
+          "staterror_SRDF_1a_cuts": [
+            0.9669940499395889
+          ],
+          "staterror_SRDF_1b_cuts": [
+            1.0396336344547936
+          ],
+          "staterror_SRDF_1c_cuts": [
+            0.9685490587487371
+          ],
+          "staterror_SRDF_1d_cuts": [
+            1.0269176201125607
+          ],
+          "staterror_SRDF_1e_cuts": [
+            0.9639600670783148
+          ],
+          "staterror_SRDF_1f_cuts": [
+            1.0390344421510675
+          ],
+          "staterror_SRDF_1g_cuts": [
+            0.9605258995597025
+          ],
+          "staterror_SRDF_1h_cuts": [
+            1.0666767282550247
+          ],
+          "staterror_SRDF_1i_cuts": [
+            0.9213580377534086
+          ],
+          "staterror_SRSF_0a_cuts": [
+            1.0313102302473327
+          ],
+          "staterror_SRSF_0b_cuts": [
+            0.970313355143691
+          ],
+          "staterror_SRSF_0c_cuts": [
+            1.0216164471743006
+          ],
+          "staterror_SRSF_0d_cuts": [
+            0.9740645797300825
+          ],
+          "staterror_SRSF_0e_cuts": [
+            1.0255495483279249
+          ],
+          "staterror_SRSF_0f_cuts": [
+            0.9693056364190111
+          ],
+          "staterror_SRSF_0g_cuts": [
+            1.038079492598636
+          ],
+          "staterror_SRSF_0h_cuts": [
+            0.9334681612142424
+          ],
+          "staterror_SRSF_0i_cuts": [
+            1.042710096533563
+          ],
+          "staterror_SRSF_1a_cuts": [
+            0.9627738606635448
+          ],
+          "staterror_SRSF_1b_cuts": [
+            1.0442732983094865
+          ],
+          "staterror_SRSF_1c_cuts": [
+            0.9675781037687387
+          ],
+          "staterror_SRSF_1d_cuts": [
+            1.0385633244574441
+          ],
+          "staterror_SRSF_1e_cuts": [
+            0.9516667695305552
+          ],
+          "staterror_SRSF_1f_cuts": [
+            1.051736450897853
+          ],
+          "staterror_SRSF_1g_cuts": [
+            0.9631210353586662
+          ],
+          "staterror_SRSF_1h_cuts": [
+            1.0772845178852144
+          ],
+          "staterror_SRSF_1i_cuts": [
+            0.920989203232968
+          ]
+        }
+      ],
+      "expected": [
+        -114.23388343640293,
+        -113.01098274287166,
+        -119.52773444261003,
+        -147.287197435911,
+        -125.9072524201137,
+        -113.25885912641456,
+        -114.20295093540892,
+        -120.04702906359793,
+        -118.81920090690315,
+        -311.46907252302674,
+        -234.42549556280696
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ],
+  "test_type": "convert",
+  "engines": [
+    "det-js",
+    "iree"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "jax 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": null,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  }
+}

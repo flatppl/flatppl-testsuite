@@ -11,5 +11,5 @@ using `pyhf.PatchSet.apply`, including its digest check.
 It retains every observation and constraint: 3 channels, 3 bins, 16 parameters.
 
 `test.json` records the archive hash, source paths, suggested parameter start,
-six shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+six shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.
 There are no template or per-bin parameters, so those shift groups add no points.

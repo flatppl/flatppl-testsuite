@@ -11,4 +11,4 @@ to `BkgOnly.json` using `pyhf.PatchSet.apply`, including its digest check.
 It retains every observation and constraint: 8 channels, 14 bins, 126 parameters.
 
 `test.json` records both file hashes, source paths, suggested parameter start,
-ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.

@@ -9,4 +9,4 @@ patch. It retains every observation and constraint: 4 channels, 51 bins,
 333 parameters. The archive's separate parton-level workspace is not used.
 
 `test.json` records the archive hash, source path, suggested parameter start,
-ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.

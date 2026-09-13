@@ -46,7 +46,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-# Measured over all 1002 points: worst absolute difference 1.819e-12, on
+# Original NumPy audit, over 1002 points: worst absolute difference 1.819e-12, on
 # `sw3_norm_norm_shap_shap_stat`, whose log-density is about -1.9e+3 (a relative
 # difference of 1e-15, one or two ulp of a double). This band is ~550x that
 # worst case, so ordinary float reassociation between pyhf's numpy reduction
@@ -68,7 +68,7 @@ CLIP = 2.5
 # `name = elementof(cartpow(<set>, <n>))` -- a per-bin parameter, so the record
 # field is a vector of length n. Any other `elementof` RHS is a scalar.
 _ELEMENTOF = re.compile(
-    r"^\s*([A-Za-z_]\w*)\s*=\s*elementof\(\s*(cartpow\(\s*\w+\s*,\s*(\d+)\s*\)|\w+)\s*\)\s*$",
+    r"^\s*([A-Za-z_]\w*)\s*=\s*elementof\(\s*(cartpow\(\s*\w+\s*,\s*(\d+)\s*,?\s*\)|\w+)\s*,?\s*\)\s*$",
     re.M,
 )
 
@@ -264,7 +264,7 @@ def generate(dir: Path) -> tuple[str, list[float]]:
 def main() -> None:
     import pyhf
 
-    pyhf.set_backend("numpy", precision="64b")
+    pyhf.set_backend("jax")
     dirs = sorted(p.parent for p in HERE.rglob("pyhf.json"))
     if not dirs:
         sys.exit(f"no pyhf fixtures under {HERE}")

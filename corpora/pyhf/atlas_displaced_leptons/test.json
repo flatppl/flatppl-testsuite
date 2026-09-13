@@ -166,8 +166,8 @@
         -11.416091059468751,
         -12.911508427756832,
         -12.912694042557561,
-        -13.267626641928949,
-        -12.518348407413956
+        -13.26762664192895,
+        -12.518348407413958
       ],
       "tolerance": {
         "atol": 1e-09,
@@ -185,7 +185,7 @@
   "oracle": {
     "tool": "pyhf",
     "version": "0.7.6",
-    "backend": "numpy 64b",
+    "backend": "jax 64b",
     "generator": "corpora/pyhf/gen_expected.py",
     "seed": null,
     "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"

@@ -9,7 +9,7 @@
   "oracle": {
     "tool": "pyhf",
     "version": "0.7.6",
-    "backend": "numpy 64b",
+    "backend": "jax 64b",
     "generator": "corpora/pyhf/gen_expected.py",
     "seed": 137,
     "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
@@ -73,12 +73,12 @@
         }
       ],
       "expected": [
-        -3.8864382235502632,
-        -13.106410640506104,
-        -14.80962679176144,
-        -14.819214006904192,
-        -65.27965887020943,
-        -3.892462349165794
+        -3.8864382235502064,
+        -13.106410640506047,
+        -14.809626791761383,
+        -14.819214006904135,
+        -65.27965887020937,
+        -3.8924623491657373
       ],
       "tolerance": {
         "atol": 1e-09,

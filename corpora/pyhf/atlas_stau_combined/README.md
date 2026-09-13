@@ -9,4 +9,4 @@ to `Region-combined/BkgOnly.json` using `pyhf.PatchSet.apply`, including its dig
 It retains every observation and constraint: 5 channels, 5 bins, 120 parameters.
 
 `test.json` records the archive hash, source paths, suggested parameter start,
-ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.

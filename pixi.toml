@@ -112,7 +112,7 @@ numpy = ">=1.26,<2.1"
 scipy = ">=1.11"
 
 [feature.pyhf.pypi-dependencies]
-pyhf = "==0.7.6"
+pyhf = { version = "==0.7.6", extras = ["jax"] }
 
 [feature.pyhf.tasks]
 # Freeze each `corpora/pyhf/<fixture>/test.json`'s absolute logpdf vector from

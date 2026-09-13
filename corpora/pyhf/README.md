@@ -1,9 +1,9 @@
 # pyhf corpus
 
-186 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
+191 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
 scored against **pyhf's own absolute `Model.logpdf`**. The 172 audit workspaces
-retain six parameter points each; fourteen paper-backed workspaces add 148
-points. 1180 frozen numbers. The whole matrix of the pyhf import audit
+retain six parameter points each; nineteen paper-backed workspaces add 199
+points. 1231 frozen numbers. The whole matrix of the pyhf import audit
 (`flatppl-dev/audit-fix-pyhf.md`), which found five wrong-number defect classes
 in the converter — every one of which converted at exit 0 and passed every gate
 the suite had, because the suite had no way to hold a pyhf fixture at all.
@@ -38,6 +38,9 @@ environment exists only to regenerate:
 FLATPPL_BIN=/path/to/flatppl pixi run -e pyhf gen-pyhf
 ```
 
+Regeneration uses `pyhf.set_backend("jax")` with pyhf's default precision.
+Each fixture records the backend and precision used for its frozen values.
+
 ### StableHLO evaluation with IREE
 
 Every workspace also declares an `iree` engine row against the **same** frozen
@@ -64,9 +67,10 @@ tensors once at module load. The output must be one float64 score per point.
 Emission, compilation, and scoring errors
 fail the row rather than relaxing the numeric check.
 
-Large-model compilation is still a constraint. On macOS ARM64, the 172
-synthetic workspaces and all fourteen published workspaces pass these IREE checks,
-including stau. Every row retains the same points and tolerances as its JS check.
+Large-model compilation is still a constraint. Stock IREE 3.11.0 spends minutes
+in its concurrency scheduler on the one-lepton and two-lepton models. The
+RJ-mimic model also exposes an unresolved numeric mismatch. These remain strict
+checks, with the same points and tolerances as JS. No failed row is waived.
 
 The default environment still runs JS; unavailable IREE rows skip unless
 `FLATPPL_REQUIRE_ENGINES=iree` is set. No IREE dependency is added to the JS or
@@ -156,8 +160,9 @@ shifts. Fixed parameters stay fixed, and shifts are clipped to suggested bounds:
 
 Directions with no active parameters are omitted. The displaced-lepton fixture
 has neither template nor per-bin parameters, so it has seven distinct points.
-The displaced-vertex-plus-muon workspace has per-bin but no template parameters,
-so it has nine points. The other twelve paper-backed workspaces each have eleven.
+The displaced-vertex-plus-muon and both ttZ workspaces have per-bin but no
+template parameters, so each has nine points. The other fifteen paper-backed
+workspaces each have eleven.
 The FCNC photon workspace uses ±0.01 signal-strength shifts, including mixed
 points: its nominal signal strength is zero, and −0.5 produces negative Poisson
 means in pyhf despite lying within the fit bounds. Its nuisance shifts stay unchanged.
@@ -206,7 +211,7 @@ should do.
 | `two_hist`, `two_norm`, `two_shap`, `two_stat` | 4 | each kind in two channels, per-channel names for the per-bin kinds |
 | `pyhfval_*` | 10 | pyhf's own `tests/test_validation.py` workspaces |
 | named | 35 | the surface items and defect classes the audit called out individually (below) |
-| `atlas_*`, `belle2_*` | 14 | paper-backed models described below |
+| `atlas_*`, `belle2_*` | 19 | paper-backed models described below |
 
 The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 `three_channels_all_kinds`, `all_kinds_one_sample`, `two_histosys`,
@@ -350,9 +355,14 @@ Its worst difference at rust `78e0b03` is **1.421e-14**, inside the corpus's
 | `atlas_single_top_schannel` | [ATLAS single-top s-channel, 2209.08990](https://arxiv.org/abs/2209.08990) | 1 / 18 | 188 |
 | `atlas_top_fcnc_photon` | [ATLAS top–photon FCNC, 2205.02537](https://arxiv.org/abs/2205.02537), left-handed tuγ | 3 / 48 | 272 |
 | `atlas_displaced_vertex_muon` | [ATLAS displaced vertex plus muon, 2003.11956](https://arxiv.org/abs/2003.11956), SRMET stop R-hadron | 1 / 1 | 6 |
+| `atlas_trilepton_rjr` | [ATLAS recursive-jigsaw three-lepton search, 1912.08479](https://arxiv.org/abs/1912.08479), ERJR 500/0 | 4 / 4 | 69 |
+| `atlas_twolepton_charginos` | [ATLAS two-lepton chargino search, 1908.08215](https://arxiv.org/abs/1908.08215), C1C1 WW 300/50 | 39 / 39 | 116 |
+| `atlas_ttz_threelepton` | [ATLAS ttZ, 2103.12603](https://arxiv.org/abs/2103.12603), three-lepton fit | 3 / 3 | 197 |
+| `atlas_ttz_fourlepton` | Same paper, separate four-lepton fit | 5 / 5 | 182 |
+| `atlas_fourtop_multilepton` | [ATLAS four-top multilepton evidence, 2007.14858](https://arxiv.org/abs/2007.14858) | 5 / 31 | 249 |
 
 These analyses appear in [pyhf's usage list](https://pyhf.readthedocs.io/en/v0.7.6/citations.html).
-The three newest workspaces come directly from HEPData. Each has file-specific
+The newest workspaces come directly from HEPData. Each has file-specific
 CC0-1.0 rights metadata, recorded with the download URL and SHA-256 hash in its
 own directory. No paper-level open-access claim substitutes for a model license.
 Belle II's full likelihood has a later [dedicated release](https://arxiv.org/abs/2507.12393).

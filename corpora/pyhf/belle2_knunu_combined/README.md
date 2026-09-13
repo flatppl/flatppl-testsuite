@@ -11,6 +11,6 @@ repository's derived WET reinterpretation model. No signal patch is applied.
 It retains every observation and constraint: 5 channels, 30 bins, 232 parameters.
 
 `test.json` records the retrieved file hash, source path, suggested parameter
-start, ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+start, ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.
 The retrieval hash identifies the author-copy bytes; it does not assert
 independent byte identity with the unavailable upstream download.

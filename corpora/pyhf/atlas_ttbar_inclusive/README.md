@@ -11,7 +11,7 @@ reserialized without changing its model or observations: 3 channels, 37 bins,
 the paper's Poisson fit constraints. This fixture tests the released JSON.
 
 `test.json` records the archive hash, source path, suggested parameter start,
-ten shifts, and absolute log-likelihoods from pyhf 0.7.6, NumPy float64.
+ten shifts, and absolute log-likelihoods from pyhf 0.7.6 with its default JAX backend.
 Its absolute tolerance is `1e-8`, with no relative tolerance.
 The [corpus README](../README.md) documents the independent arithmetic check
 that justifies this exception for million-count Poisson terms.
