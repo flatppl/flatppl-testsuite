@@ -1,0 +1,193 @@
+{
+  "provenance": {
+    "paper": "https://arxiv.org/abs/2011.07812",
+    "resource": "https://doi.org/10.17182/hepdata.98796",
+    "mirror": "https://raw.githubusercontent.com/hreyes91/ML_LHClikelihoods/3cffc20c5979d760e6eba998fd5d96a98d502e5b/data/2011.07812.tar.gz",
+    "archive_sha256": "edff03ebfcdd2e7c901bb55f2bc167199618796cc7dc37bb78913130e5e854ae",
+    "workspace": "./2011.07812/Comb_bkgonly.json",
+    "patchset": "./2011.07812/Comb_patchset.json",
+    "patch": "DisplacedLeptons_Comb_1000_10"
+  },
+  "point_labels": [
+    "suggested_init",
+    "poi_-0.5",
+    "poi_+0.5",
+    "scalar_nuisance_-0.5",
+    "scalar_nuisance_+0.5",
+    "mixed_-0.5",
+    "mixed_+0.5"
+  ],
+  "point_selection": "suggested_init_and_shifts",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "794b6e7a2ddcd08438bc3cce1ddf6e1927d066bdbac452a6ad74b2b97b426852"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "lumi": 1.0,
+          "mu_Sig": 1.0,
+          "ucbSRee": 0.0,
+          "LRT": 0.0,
+          "LRTfilter": 0.0,
+          "SigXSec": 0.0,
+          "disp": 0.0,
+          "pileupWeight": 0.0,
+          "ucsSRee_Comb_1000_10": 0.0,
+          "ucbSRem": 0.0,
+          "el_reco": 0.0,
+          "mu_sel": 0.0,
+          "ucsSRem_Comb_1000_10": 0.0,
+          "ucbSRmm": 0.0,
+          "mu_trig": 0.0,
+          "ucsSRmm_Comb_1000_10": 0.0
+        },
+        {
+          "lumi": 1.0,
+          "mu_Sig": 0.5,
+          "ucbSRee": 0.0,
+          "LRT": 0.0,
+          "LRTfilter": 0.0,
+          "SigXSec": 0.0,
+          "disp": 0.0,
+          "pileupWeight": 0.0,
+          "ucsSRee_Comb_1000_10": 0.0,
+          "ucbSRem": 0.0,
+          "el_reco": 0.0,
+          "mu_sel": 0.0,
+          "ucsSRem_Comb_1000_10": 0.0,
+          "ucbSRmm": 0.0,
+          "mu_trig": 0.0,
+          "ucsSRmm_Comb_1000_10": 0.0
+        },
+        {
+          "lumi": 1.0,
+          "mu_Sig": 1.5,
+          "ucbSRee": 0.0,
+          "LRT": 0.0,
+          "LRTfilter": 0.0,
+          "SigXSec": 0.0,
+          "disp": 0.0,
+          "pileupWeight": 0.0,
+          "ucsSRee_Comb_1000_10": 0.0,
+          "ucbSRem": 0.0,
+          "el_reco": 0.0,
+          "mu_sel": 0.0,
+          "ucsSRem_Comb_1000_10": 0.0,
+          "ucbSRmm": 0.0,
+          "mu_trig": 0.0,
+          "ucsSRmm_Comb_1000_10": 0.0
+        },
+        {
+          "lumi": 0.9915,
+          "mu_Sig": 1.0,
+          "ucbSRee": -0.5,
+          "LRT": 0.5,
+          "LRTfilter": -0.5,
+          "SigXSec": 0.5,
+          "disp": -0.5,
+          "pileupWeight": 0.5,
+          "ucsSRee_Comb_1000_10": -0.5,
+          "ucbSRem": 0.5,
+          "el_reco": -0.5,
+          "mu_sel": 0.5,
+          "ucsSRem_Comb_1000_10": -0.5,
+          "ucbSRmm": 0.5,
+          "mu_trig": -0.5,
+          "ucsSRmm_Comb_1000_10": 0.5
+        },
+        {
+          "lumi": 1.0085,
+          "mu_Sig": 1.0,
+          "ucbSRee": 0.5,
+          "LRT": -0.5,
+          "LRTfilter": 0.5,
+          "SigXSec": -0.5,
+          "disp": 0.5,
+          "pileupWeight": -0.5,
+          "ucsSRee_Comb_1000_10": 0.5,
+          "ucbSRem": -0.5,
+          "el_reco": 0.5,
+          "mu_sel": -0.5,
+          "ucsSRem_Comb_1000_10": 0.5,
+          "ucbSRmm": -0.5,
+          "mu_trig": 0.5,
+          "ucsSRmm_Comb_1000_10": -0.5
+        },
+        {
+          "lumi": 0.9915,
+          "mu_Sig": 1.5,
+          "ucbSRee": -0.5,
+          "LRT": 0.5,
+          "LRTfilter": -0.5,
+          "SigXSec": 0.5,
+          "disp": -0.5,
+          "pileupWeight": 0.5,
+          "ucsSRee_Comb_1000_10": -0.5,
+          "ucbSRem": 0.5,
+          "el_reco": -0.5,
+          "mu_sel": 0.5,
+          "ucsSRem_Comb_1000_10": -0.5,
+          "ucbSRmm": 0.5,
+          "mu_trig": -0.5,
+          "ucsSRmm_Comb_1000_10": 0.5
+        },
+        {
+          "lumi": 1.0085,
+          "mu_Sig": 0.5,
+          "ucbSRee": 0.5,
+          "LRT": -0.5,
+          "LRTfilter": 0.5,
+          "SigXSec": -0.5,
+          "disp": 0.5,
+          "pileupWeight": -0.5,
+          "ucsSRee_Comb_1000_10": 0.5,
+          "ucbSRem": -0.5,
+          "el_reco": 0.5,
+          "mu_sel": -0.5,
+          "ucsSRem_Comb_1000_10": 0.5,
+          "ucbSRmm": -0.5,
+          "mu_trig": 0.5,
+          "ucsSRmm_Comb_1000_10": -0.5
+        }
+      ],
+      "expected": [
+        -11.03957274753601,
+        -10.663054437697557,
+        -11.416091059468751,
+        -12.911508427756832,
+        -12.912694042557561,
+        -13.267626641928949,
+        -12.518348407413956
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ],
+  "test_type": "convert",
+  "engines": [
+    "det-js",
+    "iree"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": null,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  }
+}

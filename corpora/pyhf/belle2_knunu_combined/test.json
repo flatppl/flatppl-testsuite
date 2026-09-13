@@ -1,0 +1,3308 @@
+{
+  "provenance": {
+    "paper": "https://arxiv.org/abs/2311.14647",
+    "likelihood_release": "https://arxiv.org/abs/2507.12393",
+    "resource": "https://doi.org/10.17182/hepdata.166082",
+    "mirror": "https://raw.githubusercontent.com/lorenzennio/knunu-reinterpretation-mini/710e304614ae47c044ec34f86c97b82b1f1ce956/scripts/data/combined_likelihood.json",
+    "workspace": "scripts/data/combined_likelihood.json",
+    "workspace_sha256": "9ec0d563197912e03e31de202f04fea10babe39a10de99b9770d9292df285ab3"
+  },
+  "point_labels": [
+    "suggested_init",
+    "poi_-0.5",
+    "poi_+0.5",
+    "scalar_nuisance_-0.5",
+    "scalar_nuisance_+0.5",
+    "template_-1.5",
+    "template_+1.5",
+    "per_bin_-0.5",
+    "per_bin_+0.5",
+    "mixed_-0.5",
+    "mixed_+0.5"
+  ],
+  "point_selection": "suggested_init_and_shifts",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "dd3e53bd634a0291f9f1f10cbf1e585a2c6a4d402e223f28dc133d44716d3fe7"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": 0.0,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 1.0,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": 0.0,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 0.5,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": 0.0,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 1.5,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": -0.5,
+          "corr_contW_c1": 0.5,
+          "corr_lumi_c1": -0.5,
+          "corr_neutralGamma_c1": 0.5,
+          "corr_neutralUnmatched_c1": -0.5,
+          "corr_pid_c1": 0.5,
+          "corr_pid_c2": -0.5,
+          "corr_pid_c3": 0.5,
+          "corr_pid_c4": -0.5,
+          "corr_pid_c5": 0.5,
+          "corr_pid_c6": -0.5,
+          "corr_pid_c7": 0.5,
+          "corr_trackingEff_c1": -0.5,
+          "corr_DKL_c1": 0.5,
+          "corr_KLKL_c1": -0.5,
+          "corr_KLKS_c1": 0.5,
+          "corr_bb_c1": -0.5,
+          "corr_br_c1": 0.5,
+          "corr_br_c2": -0.5,
+          "corr_br_c3": 0.5,
+          "corr_br_c4": -0.5,
+          "corr_br_c5": 0.5,
+          "corr_br_c6": -0.5,
+          "corr_br_c7": 0.5,
+          "corr_br_c8": -0.5,
+          "corr_br_c9": 0.5,
+          "corr_exoticD_c1": -0.5,
+          "corr_nnbar_c1": 0.5,
+          "corr_bdt_c1": -0.5,
+          "corr_ff_c1": 0.5,
+          "corr_ff_c2": -0.5,
+          "corr_ff_c3": 0.5,
+          "corr_contD_c1": -0.5,
+          "KL_1_had": 0.5,
+          "NEE_1_had": -0.5,
+          "PID_corr0_1_had": 0.5,
+          "PID_corr1_1_had": -0.5,
+          "PID_corr2_1_had": 0.5,
+          "gbc_1_had": -0.5,
+          "mu": 1.0,
+          "mu_bkg_ccbar": -0.5,
+          "mu_bkg_charged": 0.5,
+          "mu_bkg_ddbar": -0.5,
+          "mu_bkg_mixed": 0.5,
+          "mu_bkg_ssbar": -0.5,
+          "mu_bkg_taupair": 0.5,
+          "mu_bkg_uubar": -0.5,
+          "nBB": 0.5,
+          "norm_bbbar_1_had": -0.5,
+          "norm_ccbar_1_had": 0.5,
+          "norm_qqbar_1_had": -0.5,
+          "norm_sgn_1_had": 0.5,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.5,
+          "corr_contW_c1": -0.5,
+          "corr_lumi_c1": 0.5,
+          "corr_neutralGamma_c1": -0.5,
+          "corr_neutralUnmatched_c1": 0.5,
+          "corr_pid_c1": -0.5,
+          "corr_pid_c2": 0.5,
+          "corr_pid_c3": -0.5,
+          "corr_pid_c4": 0.5,
+          "corr_pid_c5": -0.5,
+          "corr_pid_c6": 0.5,
+          "corr_pid_c7": -0.5,
+          "corr_trackingEff_c1": 0.5,
+          "corr_DKL_c1": -0.5,
+          "corr_KLKL_c1": 0.5,
+          "corr_KLKS_c1": -0.5,
+          "corr_bb_c1": 0.5,
+          "corr_br_c1": -0.5,
+          "corr_br_c2": 0.5,
+          "corr_br_c3": -0.5,
+          "corr_br_c4": 0.5,
+          "corr_br_c5": -0.5,
+          "corr_br_c6": 0.5,
+          "corr_br_c7": -0.5,
+          "corr_br_c8": 0.5,
+          "corr_br_c9": -0.5,
+          "corr_exoticD_c1": 0.5,
+          "corr_nnbar_c1": -0.5,
+          "corr_bdt_c1": 0.5,
+          "corr_ff_c1": -0.5,
+          "corr_ff_c2": 0.5,
+          "corr_ff_c3": -0.5,
+          "corr_contD_c1": 0.5,
+          "KL_1_had": -0.5,
+          "NEE_1_had": 0.5,
+          "PID_corr0_1_had": -0.5,
+          "PID_corr1_1_had": 0.5,
+          "PID_corr2_1_had": -0.5,
+          "gbc_1_had": 0.5,
+          "mu": 1.0,
+          "mu_bkg_ccbar": 0.5,
+          "mu_bkg_charged": -0.5,
+          "mu_bkg_ddbar": 0.5,
+          "mu_bkg_mixed": -0.5,
+          "mu_bkg_ssbar": 0.5,
+          "mu_bkg_taupair": -0.5,
+          "mu_bkg_uubar": 0.5,
+          "nBB": -0.5,
+          "norm_bbbar_1_had": 0.5,
+          "norm_ccbar_1_had": -0.5,
+          "norm_qqbar_1_had": 0.5,
+          "norm_sgn_1_had": -0.5,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": -1.5,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 1.0,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": 1.5,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 1.0,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "ccbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qqbar_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "sgn_err_1_had": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": 0.0,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 1.0,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            0.9763361978062026,
+            1.03077285956569,
+            0.9640286020351112,
+            1.046316481475245,
+            0.9385534878083419,
+            1.0904031028433994
+          ],
+          "ccbar_err_1_had": [
+            0.9291110747290373,
+            1.1455916074227581,
+            0.8509030740493381,
+            1.2293030534096272,
+            0.6193705638628717,
+            1.5
+          ],
+          "qqbar_err_1_had": [
+            0.9309183860924575,
+            1.085893272944721,
+            0.7656943066182986,
+            1.268660101225896,
+            0.6244894581382112,
+            1.5
+          ],
+          "sgn_err_1_had": [
+            0.9199526688189278,
+            1.080047788725143,
+            0.9199516633199147,
+            1.0800483853009797,
+            0.9199505383916733,
+            1.080049850902231
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            0.987677086152074,
+            1.0144745828101687,
+            0.9805055815697343
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0241588010968705,
+            0.9704228417727885,
+            1.0376545240011201
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            0.9833796258484665,
+            1.0218067874283328,
+            0.9681367587168562,
+            1.0246455520035898,
+            0.9600552081434606,
+            1.0614519147394443,
+            0.9484813152049241,
+            1.0944760041012158,
+            0.8130809921506019
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0365973135803055,
+            0.9545951619784995,
+            1.0645045903398522,
+            0.9541369532806564,
+            1.0705166674405315,
+            0.8725023947638287,
+            1.115589799706456,
+            0.815233678100414,
+            1.5000903895092543
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            0.9903272955564494,
+            1.0059476156857463,
+            0.9955155254541955
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0109768195942506,
+            0.9929616579326748,
+            1.0057004979906916,
+            0.9878848048576836,
+            1.0091504596288299,
+            0.9919335288753437,
+            1.0138978675605819,
+            0.9872309676028325,
+            1.0148055083667527
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            0.9470505397038604,
+            1.0617514631585767,
+            0.9066199384623332
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0962679613851471,
+            0.8689760899230531,
+            1.1926622169002632
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            0.9197231130305425,
+            1.0886886285642405,
+            0.8532718500697157,
+            1.09505107372915,
+            0.8505925917469936,
+            1.355401153779301,
+            0.7911740606129226,
+            1.2587172821289163,
+            0.49995728759119107
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.1092831263728355,
+            0.7927924572384405,
+            1.5000043665071436,
+            0.8161079297762182,
+            1.2981152814395192,
+            0.49999264237013785,
+            1.3600304399500935,
+            0.4999456004351964,
+            1.5
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            0.9870591066663605,
+            1.0079562258544923,
+            0.9937814850366274
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0144132045339245,
+            0.9904092984318518,
+            1.0086984726251425,
+            0.9825741799829198,
+            1.0127300539338289,
+            0.9862822442091014,
+            1.0239524430805376,
+            0.9788116869443525,
+            1.029458420939481
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            0.9849055016260646,
+            1.0235110942755257,
+            0.9516517422878705
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.032479602613228,
+            0.9485078814505908,
+            1.1004030604552268
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            0.9801783717485147,
+            1.0353062366940384,
+            0.9341639691209289,
+            1.0310507936869557,
+            0.9402504185284951,
+            1.1388653011573822,
+            0.9344869005584233,
+            1.1665960668862319,
+            0.7093608961165286
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.043603078906513,
+            0.9214243607115474,
+            1.1399309512105935,
+            0.9352608642808715,
+            1.1353455015916156,
+            0.7491730074370049,
+            1.1604815530813002,
+            0.5000027742021395,
+            1.5000043839459898
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            0.9281685685270511,
+            1.076594911088655,
+            0.8952669791379468
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.1476138489727508,
+            0.8586486314065502,
+            1.1389193243730589
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            0.894919460712828,
+            1.1002119891203386,
+            0.8712383976004725,
+            1.1353254158912562,
+            0.862020707914311,
+            1.2590899926208292,
+            0.49999561458134156,
+            1.289966128564545,
+            0.5
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.2240051645913936,
+            0.7685867903938652,
+            1.1869866037319388,
+            0.7076383869516003,
+            1.2662095501799155,
+            0.7422366332856193,
+            1.5,
+            0.4998706499302049,
+            1.5
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            0.9758348627494615,
+            1.033141912831423,
+            0.9471827471764859
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0472519879582045,
+            0.9357531455294823,
+            1.1061753484380399
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            0.9668042167925908,
+            1.048233029402861,
+            0.921038029287647,
+            1.0504052046533952,
+            0.8959821332166071,
+            1.158675250632587,
+            0.9070570413992931,
+            1.256420569657967,
+            0.6378510974903391
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0638898754667843,
+            0.8913109103428953,
+            1.1467458291235564,
+            0.8807331043049007,
+            1.1325825037933521,
+            0.6200997824775167,
+            1.170956638232721,
+            0.49999501112519085,
+            1.5
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            0.9511371327048249,
+            1.047529144789439,
+            0.9472209208906733
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0524705444257496,
+            0.9494261453896619,
+            1.0635745012237632,
+            0.9483817949318945,
+            1.0503153547231268,
+            0.9312288734029054,
+            1.0390930872314672,
+            0.9388523244518964,
+            1.0871928987446662
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.0,
+          "corr_contW_c1": 0.0,
+          "corr_lumi_c1": 0.0,
+          "corr_neutralGamma_c1": 0.0,
+          "corr_neutralUnmatched_c1": 0.0,
+          "corr_pid_c1": 0.0,
+          "corr_pid_c2": 0.0,
+          "corr_pid_c3": 0.0,
+          "corr_pid_c4": 0.0,
+          "corr_pid_c5": 0.0,
+          "corr_pid_c6": 0.0,
+          "corr_pid_c7": 0.0,
+          "corr_trackingEff_c1": 0.0,
+          "corr_DKL_c1": 0.0,
+          "corr_KLKL_c1": 0.0,
+          "corr_KLKS_c1": 0.0,
+          "corr_bb_c1": 0.0,
+          "corr_br_c1": 0.0,
+          "corr_br_c2": 0.0,
+          "corr_br_c3": 0.0,
+          "corr_br_c4": 0.0,
+          "corr_br_c5": 0.0,
+          "corr_br_c6": 0.0,
+          "corr_br_c7": 0.0,
+          "corr_br_c8": 0.0,
+          "corr_br_c9": 0.0,
+          "corr_exoticD_c1": 0.0,
+          "corr_nnbar_c1": 0.0,
+          "corr_bdt_c1": 0.0,
+          "corr_ff_c1": 0.0,
+          "corr_ff_c2": 0.0,
+          "corr_ff_c3": 0.0,
+          "corr_contD_c1": 0.0,
+          "KL_1_had": 0.0,
+          "NEE_1_had": 0.0,
+          "PID_corr0_1_had": 0.0,
+          "PID_corr1_1_had": 0.0,
+          "PID_corr2_1_had": 0.0,
+          "gbc_1_had": 0.0,
+          "mu": 1.0,
+          "mu_bkg_ccbar": 0.0,
+          "mu_bkg_charged": 0.0,
+          "mu_bkg_ddbar": 0.0,
+          "mu_bkg_mixed": 0.0,
+          "mu_bkg_ssbar": 0.0,
+          "mu_bkg_taupair": 0.0,
+          "mu_bkg_uubar": 0.0,
+          "nBB": 0.0,
+          "norm_bbbar_1_had": 0.0,
+          "norm_ccbar_1_had": 0.0,
+          "norm_qqbar_1_had": 0.0,
+          "norm_sgn_1_had": 0.0,
+          "bbbar_err_1_had": [
+            1.0236638021937974,
+            0.96922714043431,
+            1.0359713979648888,
+            0.953683518524755,
+            1.061446512191658,
+            0.9095968971566007
+          ],
+          "ccbar_err_1_had": [
+            1.0708889252709626,
+            0.8544083925772419,
+            1.149096925950662,
+            0.7706969465903729,
+            1.3806294361371283,
+            0.5
+          ],
+          "qqbar_err_1_had": [
+            1.0690816139075425,
+            0.914106727055279,
+            1.2343056933817014,
+            0.731339898774104,
+            1.3755105418617888,
+            0.5
+          ],
+          "sgn_err_1_had": [
+            1.0800473311810723,
+            0.919952211274857,
+            1.0800483366800853,
+            0.9199516146990203,
+            1.0800494616083267,
+            0.9199501490977691
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0123229138479262,
+            0.9855254171898313,
+            1.0194944184302657
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            0.9758411989031296,
+            1.0295771582272115,
+            0.96234547599888
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0166203741515336,
+            0.9781932125716672,
+            1.0318632412831437,
+            0.9753544479964102,
+            1.0399447918565394,
+            0.9385480852605558,
+            1.051518684795076,
+            0.9055239958987841,
+            1.186919007849398
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            0.9634026864196945,
+            1.0454048380215004,
+            0.9354954096601478,
+            1.0458630467193437,
+            0.9294833325594685,
+            1.1274976052361712,
+            0.8844102002935439,
+            1.184766321899586,
+            0.49990961049074556
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0096727044435505,
+            0.9940523843142536,
+            1.0044844745458046
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            0.9890231804057494,
+            1.0070383420673252,
+            0.9942995020093085,
+            1.0121151951423164,
+            0.9908495403711702,
+            1.0080664711246563,
+            0.9861021324394182,
+            1.0127690323971676,
+            0.9851944916332472
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0529494602961396,
+            0.9382485368414233,
+            1.0933800615376668
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            0.9037320386148527,
+            1.131023910076947,
+            0.8073377830997369
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0802768869694575,
+            0.9113113714357595,
+            1.1467281499302842,
+            0.9049489262708502,
+            1.1494074082530064,
+            0.6445988462206991,
+            1.2088259393870775,
+            0.7412827178710837,
+            1.500042712408809
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            0.8907168736271643,
+            1.2072075427615596,
+            0.49999563349285636,
+            1.1838920702237818,
+            0.7018847185604808,
+            1.5000073576298623,
+            0.6399695600499065,
+            1.5000543995648035,
+            0.5
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0129408933336395,
+            0.9920437741455076,
+            1.0062185149633724
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            0.9855867954660755,
+            1.0095907015681482,
+            0.9913015273748574,
+            1.01742582001708,
+            0.9872699460661711,
+            1.0137177557908985,
+            0.9760475569194625,
+            1.0211883130556476,
+            0.970541579060519
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0150944983739354,
+            0.9764889057244743,
+            1.0483482577121295
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            0.9675203973867721,
+            1.051492118549409,
+            0.8995969395447732
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0198216282514854,
+            0.9646937633059616,
+            1.065836030879071,
+            0.9689492063130444,
+            1.059749581471505,
+            0.8611346988426177,
+            1.0655130994415767,
+            0.833403933113768,
+            1.2906391038834713
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            0.956396921093487,
+            1.0785756392884525,
+            0.8600690487894066,
+            1.0647391357191285,
+            0.8646544984083844,
+            1.2508269925629951,
+            0.8395184469186998,
+            1.4999972257978604,
+            0.4999956160540102
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.071831431472949,
+            0.9234050889113449,
+            1.1047330208620532
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            0.8523861510272492,
+            1.1413513685934498,
+            0.8610806756269412
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.1050805392871719,
+            0.8997880108796614,
+            1.1287616023995275,
+            0.8646745841087438,
+            1.137979292085689,
+            0.7409100073791708,
+            1.5000043854186584,
+            0.7100338714354549,
+            1.5
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            0.7759948354086064,
+            1.2314132096061348,
+            0.8130133962680612,
+            1.2923616130483997,
+            0.7337904498200845,
+            1.2577633667143808,
+            0.5,
+            1.5001293500697952,
+            0.5
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0241651372505385,
+            0.9668580871685769,
+            1.052817252823514
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            0.9527480120417954,
+            1.0642468544705177,
+            0.8938246515619601
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0331957832074092,
+            0.9517669705971389,
+            1.078961970712353,
+            0.9495947953466048,
+            1.1040178667833929,
+            0.841324749367413,
+            1.092942958600707,
+            0.7435794303420331,
+            1.362148902509661
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            0.9361101245332158,
+            1.1086890896571047,
+            0.8532541708764436,
+            1.1192668956950993,
+            0.8674174962066479,
+            1.3799002175224833,
+            0.8290433617672791,
+            1.5000049888748093,
+            0.5
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0488628672951752,
+            0.9524708552105611,
+            1.0527790791093266
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            0.9475294555742503,
+            1.050573854610338,
+            0.9364254987762367,
+            1.0516182050681055,
+            0.9496846452768731,
+            1.0687711265970945,
+            0.9609069127685328,
+            1.0611476755481037,
+            0.9128071012553338
+          ]
+        },
+        {
+          "corr_KLeff_c1": -0.5,
+          "corr_contW_c1": 0.5,
+          "corr_lumi_c1": -0.5,
+          "corr_neutralGamma_c1": 0.5,
+          "corr_neutralUnmatched_c1": -0.5,
+          "corr_pid_c1": 0.5,
+          "corr_pid_c2": -0.5,
+          "corr_pid_c3": 0.5,
+          "corr_pid_c4": -0.5,
+          "corr_pid_c5": 0.5,
+          "corr_pid_c6": -0.5,
+          "corr_pid_c7": 0.5,
+          "corr_trackingEff_c1": -0.5,
+          "corr_DKL_c1": 0.5,
+          "corr_KLKL_c1": -0.5,
+          "corr_KLKS_c1": 0.5,
+          "corr_bb_c1": -0.5,
+          "corr_br_c1": 0.5,
+          "corr_br_c2": -0.5,
+          "corr_br_c3": 0.5,
+          "corr_br_c4": -0.5,
+          "corr_br_c5": 0.5,
+          "corr_br_c6": -0.5,
+          "corr_br_c7": 0.5,
+          "corr_br_c8": -0.5,
+          "corr_br_c9": 0.5,
+          "corr_exoticD_c1": -0.5,
+          "corr_nnbar_c1": 0.5,
+          "corr_bdt_c1": -0.5,
+          "corr_ff_c1": 0.5,
+          "corr_ff_c2": -0.5,
+          "corr_ff_c3": 0.5,
+          "corr_contD_c1": -0.5,
+          "KL_1_had": 0.5,
+          "NEE_1_had": -0.5,
+          "PID_corr0_1_had": 0.5,
+          "PID_corr1_1_had": -0.5,
+          "PID_corr2_1_had": 0.5,
+          "gbc_1_had": -0.5,
+          "mu": 1.5,
+          "mu_bkg_ccbar": -0.5,
+          "mu_bkg_charged": 0.5,
+          "mu_bkg_ddbar": -0.5,
+          "mu_bkg_mixed": 0.5,
+          "mu_bkg_ssbar": -0.5,
+          "mu_bkg_taupair": 0.5,
+          "mu_bkg_uubar": -0.5,
+          "nBB": 0.5,
+          "norm_bbbar_1_had": -0.5,
+          "norm_ccbar_1_had": 0.5,
+          "norm_qqbar_1_had": -0.5,
+          "norm_sgn_1_had": 0.5,
+          "bbbar_err_1_had": [
+            0.9763361978062026,
+            1.03077285956569,
+            0.9640286020351112,
+            1.046316481475245,
+            0.9385534878083419,
+            1.0904031028433994
+          ],
+          "ccbar_err_1_had": [
+            0.9291110747290373,
+            1.1455916074227581,
+            0.8509030740493381,
+            1.2293030534096272,
+            0.6193705638628717,
+            1.5
+          ],
+          "qqbar_err_1_had": [
+            0.9309183860924575,
+            1.085893272944721,
+            0.7656943066182986,
+            1.268660101225896,
+            0.6244894581382112,
+            1.5
+          ],
+          "sgn_err_1_had": [
+            0.9199526688189278,
+            1.080047788725143,
+            0.9199516633199147,
+            1.0800483853009797,
+            0.9199505383916733,
+            1.080049850902231
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            0.987677086152074,
+            1.0144745828101687,
+            0.9805055815697343
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            1.0241588010968705,
+            0.9704228417727885,
+            1.0376545240011201
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            0.9833796258484665,
+            1.0218067874283328,
+            0.9681367587168562,
+            1.0246455520035898,
+            0.9600552081434606,
+            1.0614519147394443,
+            0.9484813152049241,
+            1.0944760041012158,
+            0.8130809921506019
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            1.0365973135803055,
+            0.9545951619784995,
+            1.0645045903398522,
+            0.9541369532806564,
+            1.0705166674405315,
+            0.8725023947638287,
+            1.115589799706456,
+            0.815233678100414,
+            1.5000903895092543
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            0.9903272955564494,
+            1.0059476156857463,
+            0.9955155254541955
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            1.0109768195942506,
+            0.9929616579326748,
+            1.0057004979906916,
+            0.9878848048576836,
+            1.0091504596288299,
+            0.9919335288753437,
+            1.0138978675605819,
+            0.9872309676028325,
+            1.0148055083667527
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            0.9470505397038604,
+            1.0617514631585767,
+            0.9066199384623332
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            1.0962679613851471,
+            0.8689760899230531,
+            1.1926622169002632
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            0.9197231130305425,
+            1.0886886285642405,
+            0.8532718500697157,
+            1.09505107372915,
+            0.8505925917469936,
+            1.355401153779301,
+            0.7911740606129226,
+            1.2587172821289163,
+            0.49995728759119107
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            1.1092831263728355,
+            0.7927924572384405,
+            1.5000043665071436,
+            0.8161079297762182,
+            1.2981152814395192,
+            0.49999264237013785,
+            1.3600304399500935,
+            0.4999456004351964,
+            1.5
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            0.9870591066663605,
+            1.0079562258544923,
+            0.9937814850366274
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            1.0144132045339245,
+            0.9904092984318518,
+            1.0086984726251425,
+            0.9825741799829198,
+            1.0127300539338289,
+            0.9862822442091014,
+            1.0239524430805376,
+            0.9788116869443525,
+            1.029458420939481
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            0.9849055016260646,
+            1.0235110942755257,
+            0.9516517422878705
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            1.032479602613228,
+            0.9485078814505908,
+            1.1004030604552268
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            0.9801783717485147,
+            1.0353062366940384,
+            0.9341639691209289,
+            1.0310507936869557,
+            0.9402504185284951,
+            1.1388653011573822,
+            0.9344869005584233,
+            1.1665960668862319,
+            0.7093608961165286
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            1.043603078906513,
+            0.9214243607115474,
+            1.1399309512105935,
+            0.9352608642808715,
+            1.1353455015916156,
+            0.7491730074370049,
+            1.1604815530813002,
+            0.5000027742021395,
+            1.5000043839459898
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            0.9281685685270511,
+            1.076594911088655,
+            0.8952669791379468
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            1.1476138489727508,
+            0.8586486314065502,
+            1.1389193243730589
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            0.894919460712828,
+            1.1002119891203386,
+            0.8712383976004725,
+            1.1353254158912562,
+            0.862020707914311,
+            1.2590899926208292,
+            0.49999561458134156,
+            1.289966128564545,
+            0.5
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            1.2240051645913936,
+            0.7685867903938652,
+            1.1869866037319388,
+            0.7076383869516003,
+            1.2662095501799155,
+            0.7422366332856193,
+            1.5,
+            0.4998706499302049,
+            1.5
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            0.9758348627494615,
+            1.033141912831423,
+            0.9471827471764859
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            1.0472519879582045,
+            0.9357531455294823,
+            1.1061753484380399
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            0.9668042167925908,
+            1.048233029402861,
+            0.921038029287647,
+            1.0504052046533952,
+            0.8959821332166071,
+            1.158675250632587,
+            0.9070570413992931,
+            1.256420569657967,
+            0.6378510974903391
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            1.0638898754667843,
+            0.8913109103428953,
+            1.1467458291235564,
+            0.8807331043049007,
+            1.1325825037933521,
+            0.6200997824775167,
+            1.170956638232721,
+            0.49999501112519085,
+            1.5
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            0.9511371327048249,
+            1.047529144789439,
+            0.9472209208906733
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            1.0524705444257496,
+            0.9494261453896619,
+            1.0635745012237632,
+            0.9483817949318945,
+            1.0503153547231268,
+            0.9312288734029054,
+            1.0390930872314672,
+            0.9388523244518964,
+            1.0871928987446662
+          ]
+        },
+        {
+          "corr_KLeff_c1": 0.5,
+          "corr_contW_c1": -0.5,
+          "corr_lumi_c1": 0.5,
+          "corr_neutralGamma_c1": -0.5,
+          "corr_neutralUnmatched_c1": 0.5,
+          "corr_pid_c1": -0.5,
+          "corr_pid_c2": 0.5,
+          "corr_pid_c3": -0.5,
+          "corr_pid_c4": 0.5,
+          "corr_pid_c5": -0.5,
+          "corr_pid_c6": 0.5,
+          "corr_pid_c7": -0.5,
+          "corr_trackingEff_c1": 0.5,
+          "corr_DKL_c1": -0.5,
+          "corr_KLKL_c1": 0.5,
+          "corr_KLKS_c1": -0.5,
+          "corr_bb_c1": 0.5,
+          "corr_br_c1": -0.5,
+          "corr_br_c2": 0.5,
+          "corr_br_c3": -0.5,
+          "corr_br_c4": 0.5,
+          "corr_br_c5": -0.5,
+          "corr_br_c6": 0.5,
+          "corr_br_c7": -0.5,
+          "corr_br_c8": 0.5,
+          "corr_br_c9": -0.5,
+          "corr_exoticD_c1": 0.5,
+          "corr_nnbar_c1": -0.5,
+          "corr_bdt_c1": 0.5,
+          "corr_ff_c1": -0.5,
+          "corr_ff_c2": 0.5,
+          "corr_ff_c3": -0.5,
+          "corr_contD_c1": 0.5,
+          "KL_1_had": -0.5,
+          "NEE_1_had": 0.5,
+          "PID_corr0_1_had": -0.5,
+          "PID_corr1_1_had": 0.5,
+          "PID_corr2_1_had": -0.5,
+          "gbc_1_had": 0.5,
+          "mu": 0.5,
+          "mu_bkg_ccbar": 0.5,
+          "mu_bkg_charged": -0.5,
+          "mu_bkg_ddbar": 0.5,
+          "mu_bkg_mixed": -0.5,
+          "mu_bkg_ssbar": 0.5,
+          "mu_bkg_taupair": -0.5,
+          "mu_bkg_uubar": 0.5,
+          "nBB": -0.5,
+          "norm_bbbar_1_had": 0.5,
+          "norm_ccbar_1_had": -0.5,
+          "norm_qqbar_1_had": 0.5,
+          "norm_sgn_1_had": -0.5,
+          "bbbar_err_1_had": [
+            1.0236638021937974,
+            0.96922714043431,
+            1.0359713979648888,
+            0.953683518524755,
+            1.061446512191658,
+            0.9095968971566007
+          ],
+          "ccbar_err_1_had": [
+            1.0708889252709626,
+            0.8544083925772419,
+            1.149096925950662,
+            0.7706969465903729,
+            1.3806294361371283,
+            0.5
+          ],
+          "qqbar_err_1_had": [
+            1.0690816139075425,
+            0.914106727055279,
+            1.2343056933817014,
+            0.731339898774104,
+            1.3755105418617888,
+            0.5
+          ],
+          "sgn_err_1_had": [
+            1.0800473311810723,
+            0.919952211274857,
+            1.0800483366800853,
+            0.9199516146990203,
+            1.0800494616083267,
+            0.9199501490977691
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_Y4S": [
+            1.0123229138479262,
+            0.9855254171898313,
+            1.0194944184302657
+          ],
+          "uncorr_bkguncrt_ccbar_zoomCR_offres": [
+            0.9758411989031296,
+            1.0295771582272115,
+            0.96234547599888
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_Y4S": [
+            1.0166203741515336,
+            0.9781932125716672,
+            1.0318632412831437,
+            0.9753544479964102,
+            1.0399447918565394,
+            0.9385480852605558,
+            1.051518684795076,
+            0.9055239958987841,
+            1.186919007849398
+          ],
+          "uncorr_bkguncrt_ccbar_zoomSR_offres": [
+            0.9634026864196945,
+            1.0454048380215004,
+            0.9354954096601478,
+            1.0458630467193437,
+            0.9294833325594685,
+            1.1274976052361712,
+            0.8844102002935439,
+            1.184766321899586,
+            0.49990961049074556
+          ],
+          "uncorr_bkguncrt_charged_zoomCR_Y4S": [
+            1.0096727044435505,
+            0.9940523843142536,
+            1.0044844745458046
+          ],
+          "uncorr_bkguncrt_charged_zoomSR_Y4S": [
+            0.9890231804057494,
+            1.0070383420673252,
+            0.9942995020093085,
+            1.0121151951423164,
+            0.9908495403711702,
+            1.0080664711246563,
+            0.9861021324394182,
+            1.0127690323971676,
+            0.9851944916332472
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_Y4S": [
+            1.0529494602961396,
+            0.9382485368414233,
+            1.0933800615376668
+          ],
+          "uncorr_bkguncrt_ddbar_zoomCR_offres": [
+            0.9037320386148527,
+            1.131023910076947,
+            0.8073377830997369
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_Y4S": [
+            1.0802768869694575,
+            0.9113113714357595,
+            1.1467281499302842,
+            0.9049489262708502,
+            1.1494074082530064,
+            0.6445988462206991,
+            1.2088259393870775,
+            0.7412827178710837,
+            1.500042712408809
+          ],
+          "uncorr_bkguncrt_ddbar_zoomSR_offres": [
+            0.8907168736271643,
+            1.2072075427615596,
+            0.49999563349285636,
+            1.1838920702237818,
+            0.7018847185604808,
+            1.5000073576298623,
+            0.6399695600499065,
+            1.5000543995648035,
+            0.5
+          ],
+          "uncorr_bkguncrt_mixed_zoomCR_Y4S": [
+            1.0129408933336395,
+            0.9920437741455076,
+            1.0062185149633724
+          ],
+          "uncorr_bkguncrt_mixed_zoomSR_Y4S": [
+            0.9855867954660755,
+            1.0095907015681482,
+            0.9913015273748574,
+            1.01742582001708,
+            0.9872699460661711,
+            1.0137177557908985,
+            0.9760475569194625,
+            1.0211883130556476,
+            0.970541579060519
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_Y4S": [
+            1.0150944983739354,
+            0.9764889057244743,
+            1.0483482577121295
+          ],
+          "uncorr_bkguncrt_ssbar_zoomCR_offres": [
+            0.9675203973867721,
+            1.051492118549409,
+            0.8995969395447732
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_Y4S": [
+            1.0198216282514854,
+            0.9646937633059616,
+            1.065836030879071,
+            0.9689492063130444,
+            1.059749581471505,
+            0.8611346988426177,
+            1.0655130994415767,
+            0.833403933113768,
+            1.2906391038834713
+          ],
+          "uncorr_bkguncrt_ssbar_zoomSR_offres": [
+            0.956396921093487,
+            1.0785756392884525,
+            0.8600690487894066,
+            1.0647391357191285,
+            0.8646544984083844,
+            1.2508269925629951,
+            0.8395184469186998,
+            1.4999972257978604,
+            0.4999956160540102
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_Y4S": [
+            1.071831431472949,
+            0.9234050889113449,
+            1.1047330208620532
+          ],
+          "uncorr_bkguncrt_taupair_zoomCR_offres": [
+            0.8523861510272492,
+            1.1413513685934498,
+            0.8610806756269412
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_Y4S": [
+            1.1050805392871719,
+            0.8997880108796614,
+            1.1287616023995275,
+            0.8646745841087438,
+            1.137979292085689,
+            0.7409100073791708,
+            1.5000043854186584,
+            0.7100338714354549,
+            1.5
+          ],
+          "uncorr_bkguncrt_taupair_zoomSR_offres": [
+            0.7759948354086064,
+            1.2314132096061348,
+            0.8130133962680612,
+            1.2923616130483997,
+            0.7337904498200845,
+            1.2577633667143808,
+            0.5,
+            1.5001293500697952,
+            0.5
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_Y4S": [
+            1.0241651372505385,
+            0.9668580871685769,
+            1.052817252823514
+          ],
+          "uncorr_bkguncrt_uubar_zoomCR_offres": [
+            0.9527480120417954,
+            1.0642468544705177,
+            0.8938246515619601
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_Y4S": [
+            1.0331957832074092,
+            0.9517669705971389,
+            1.078961970712353,
+            0.9495947953466048,
+            1.1040178667833929,
+            0.841324749367413,
+            1.092942958600707,
+            0.7435794303420331,
+            1.362148902509661
+          ],
+          "uncorr_bkguncrt_uubar_zoomSR_offres": [
+            0.9361101245332158,
+            1.1086890896571047,
+            0.8532541708764436,
+            1.1192668956950993,
+            0.8674174962066479,
+            1.3799002175224833,
+            0.8290433617672791,
+            1.5000049888748093,
+            0.5
+          ],
+          "uncorr_siguncrt_signal_zoomCR_Y4S": [
+            1.0488628672951752,
+            0.9524708552105611,
+            1.0527790791093266
+          ],
+          "uncorr_siguncrt_signal_zoomSR_Y4S": [
+            0.9475294555742503,
+            1.050573854610338,
+            0.9364254987762367,
+            1.0516182050681055,
+            0.9496846452768731,
+            1.0687711265970945,
+            0.9609069127685328,
+            1.0611476755481037,
+            0.9128071012553338
+          ]
+        }
+      ],
+      "expected": [
+        -127.21182488859057,
+        -136.724765413002,
+        -118.74875703814962,
+        -333.33616340313694,
+        -329.0455338511921,
+        -129.72403700626185,
+        -127.32899112342957,
+        -151.73606964094802,
+        -154.22440568224448,
+        -352.9256044670638,
+        -375.11231144005956
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ],
+  "test_type": "convert",
+  "engines": [
+    "det-js",
+    "iree"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": null,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  }
+}

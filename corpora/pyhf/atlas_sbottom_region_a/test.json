@@ -829,7 +829,8 @@
   ],
   "test_type": "convert",
   "engines": [
-    "det-js"
+    "det-js",
+    "iree"
   ],
   "fixture_kind": "pyhf",
   "source": "pyhf.json",

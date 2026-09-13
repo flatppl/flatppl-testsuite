@@ -8,7 +8,7 @@ from dataclasses import replace
 from flatppl_testsuite.scoring.result import CheckResult
 from flatppl_testsuite.unified.loader import TestSpec, load_test, merged_body
 from flatppl_testsuite.unified.runners import (
-    convert_detjs, gradient_stablehlo, logdensity_detjs, logdensity_stablehlo,
+    convert_detjs, convert_iree, gradient_stablehlo, logdensity_detjs, logdensity_stablehlo,
     sample_detjs, sample_stablehlo,
 )
 
@@ -20,6 +20,7 @@ _RUNNERS = {
     ("logdensity", "det-js"): logdensity_detjs.run,
     ("sample", "det-js"): sample_detjs.run,
     ("convert", "det-js"): convert_detjs.run,
+    ("convert", "iree"): convert_iree.run,
 }
 
 

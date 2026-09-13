@@ -1,0 +1,3824 @@
+{
+  "channels": [
+    {
+      "name": "CR4Q_cuts",
+      "samples": [
+        {
+          "data": [
+            1.4709837436676025
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.2629611271573426
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "tX_0L4Q"
+        },
+        {
+          "data": [
+            24.02806854248047
+          ],
+          "modifiers": [
+            {
+              "data": [
+                1.6331842888140888
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "diboson_0L4Q"
+        },
+        {
+          "data": [
+            26.951744079589844
+          ],
+          "modifiers": [
+            {
+              "data": [
+                1.34818626083336
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "Wjets_0L4Q"
+        },
+        {
+          "data": [
+            0.01859378069639206
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.0029014353666566564
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "higgs_0L4Q"
+        },
+        {
+          "data": [
+            87.59728240966797
+          ],
+          "modifiers": [
+            {
+              "data": [
+                3.4757461965042413
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "Zjets_0L4Q"
+        },
+        {
+          "data": [
+            0.8648450970649719
+          ],
+          "modifiers": [
+            {
+              "data": null,
+              "name": "lumi",
+              "type": "lumi"
+            },
+            {
+              "data": [
+                0.11752450226937376
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8505166172981262
+                ],
+                "lo_data": [
+                  0.8674478530883789
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8489099740982056
+                ],
+                "lo_data": [
+                  0.8692761659622192
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8738681077957153
+                ],
+                "lo_data": [
+                  0.8537387847900391
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.9570949077606201
+                ],
+                "lo_data": [
+                  0.8260511159896851
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_TagEffUnc_GlobalSignal",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8720424175262451
+                ],
+                "lo_data": [
+                  0.8736581802368164
+                ]
+              },
+              "name": "JET_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8772069811820984
+                ],
+                "lo_data": [
+                  0.8855447769165039
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8850024938583374
+                ],
+                "lo_data": [
+                  0.8724328279495239
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.863417387008667
+                ],
+                "lo_data": [
+                  0.8662728071212769
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8989633321762085
+                ],
+                "lo_data": [
+                  0.8307268619537354
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8862215280532837
+                ],
+                "lo_data": [
+                  0.8434686660766602
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8822302222251892
+                ],
+                "lo_data": [
+                  0.8474599719047546
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8871178030967712
+                ],
+                "lo_data": [
+                  0.8425723910331726
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8885141611099243
+                ],
+                "lo_data": [
+                  0.8411760330200195
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_5",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8894526362419128
+                ],
+                "lo_data": [
+                  0.840237557888031
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8906705379486084
+                ],
+                "lo_data": [
+                  0.8390196561813354
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8720349669456482
+                ],
+                "lo_data": [
+                  0.8853962421417236
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8648450970649719
+                ],
+                "lo_data": [
+                  0.8648450970649719
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.8657827377319336
+                ],
+                "lo_data": [
+                  0.8639074563980103
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi": 1.49947,
+                "lo": 0.500534
+              },
+              "name": "xsec_VVV",
+              "type": "normsys"
+            }
+          ],
+          "name": "triboson"
+        },
+        {
+          "data": [
+            1.5393033027648926
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.1306146730408343
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "ttbar_0L4Q"
+        },
+        {
+          "data": [
+            1.3134758472442627
+          ],
+          "modifiers": [
+            {
+              "data": null,
+              "name": "lumi",
+              "type": "lumi"
+            },
+            {
+              "data": [
+                0.1823624341671187
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.0688652992248535
+                ],
+                "lo_data": [
+                  1.6017900705337524
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_B_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.274064302444458
+                ],
+                "lo_data": [
+                  1.3702757358551025
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.2944225072860718
+                ],
+                "lo_data": [
+                  1.3486977815628052
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3119637966156006
+                ],
+                "lo_data": [
+                  1.33095121383667
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation_from_charm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3058648109436035
+                ],
+                "lo_data": [
+                  1.333879828453064
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.335013508796692
+                ],
+                "lo_data": [
+                  1.2874689102172852
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3279528617858887
+                ],
+                "lo_data": [
+                  1.2975825071334839
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_MatrixElement",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.2963265180587769
+                ],
+                "lo_data": [
+                  1.3292406797409058
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_ExtrapolationPt",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3426316976547241
+                ],
+                "lo_data": [
+                  1.3134900331497192
+                ]
+              },
+              "name": "JET_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.310642957687378
+                ],
+                "lo_data": [
+                  1.3288451433181763
+                ]
+              },
+              "name": "JET_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.298208236694336
+                ],
+                "lo_data": [
+                  1.3118523359298706
+                ]
+              },
+              "name": "JET_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3680990934371948
+                ],
+                "lo_data": [
+                  1.3262659311294556
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3374983072280884
+                ],
+                "lo_data": [
+                  1.3502602577209473
+                ]
+              },
+              "name": "JET_EtaIntercalibration_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3619344234466553
+                ],
+                "lo_data": [
+                  1.3131262063980103
+                ]
+              },
+              "name": "JET_EtaIntercalibration_NonClosure_2018data",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3459523916244507
+                ],
+                "lo_data": [
+                  1.3507287502288818
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3202059268951416
+                ],
+                "lo_data": [
+                  1.3798623085021973
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.29036283493042
+                ],
+                "lo_data": [
+                  1.3365888595581055
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.2790074348449707
+                ],
+                "lo_data": [
+                  1.3479442596435547
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.266128659248352
+                ],
+                "lo_data": [
+                  1.3608230352401733
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.2793643474578857
+                ],
+                "lo_data": [
+                  1.3475873470306396
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.2844793796539307
+                ],
+                "lo_data": [
+                  1.3424723148345947
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.293472170829773
+                ],
+                "lo_data": [
+                  1.3334795236587524
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_5",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.301291823387146
+                ],
+                "lo_data": [
+                  1.3256598711013794
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.2739806175231934
+                ],
+                "lo_data": [
+                  1.352971076965332
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3260735273361206
+                ],
+                "lo_data": [
+                  1.327338695526123
+                ]
+              },
+              "name": "JET_LargeR_TopologyUncertainty_top",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3174502849578857
+                ],
+                "lo_data": [
+                  1.3469212055206299
+                ]
+              },
+              "name": "JET_Pileup_OffsetMu",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3310571908950806
+                ],
+                "lo_data": [
+                  1.3283882141113281
+                ]
+              },
+              "name": "JET_Pileup_OffsetNPV",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3403512239456177
+                ],
+                "lo_data": [
+                  1.3125886917114258
+                ]
+              },
+              "name": "JET_Pileup_PtTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3552783727645874
+                ],
+                "lo_data": [
+                  1.3183726072311401
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.3206285238265991
+                ],
+                "lo_data": [
+                  1.3063231706619263
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.333545207977295
+                ],
+                "lo_data": [
+                  1.2934064865112305
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.206639528274536
+                ],
+                "lo_data": [
+                  0.42031216621398926
+                ]
+              },
+              "name": "ttbarX_Norm",
+              "type": "histosys"
+            }
+          ],
+          "name": "ttbarX"
+        },
+        {
+          "data": [
+            4.019091606140137
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.13695197918709984
+              ],
+              "name": "staterror_CR4Q_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.42100191116333
+                ],
+                "lo_data": [
+                  3.6171796321868896
+                ]
+              },
+              "name": "SigTheory",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.5173749923706055
+                ],
+                "lo_data": [
+                  3.520803928375244
+                ]
+              },
+              "name": "SigXSec",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  3.953080892562866
+                ],
+                "lo_data": [
+                  4.084667205810547
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.054899215698242
+                ],
+                "lo_data": [
+                  3.973454475402832
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.070342063903809
+                ],
+                "lo_data": [
+                  3.9628143310546875
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_ExtrapolationPt",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.0691938400268555
+                ],
+                "lo_data": [
+                  3.9604063034057617
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Statistics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.426564693450928
+                ],
+                "lo_data": [
+                  3.8475985527038574
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_TagEffUnc_GlobalSignal",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.023287773132324
+                ],
+                "lo_data": [
+                  4.014895439147949
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.013406276702881
+                ],
+                "lo_data": [
+                  4.024776935577393
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.010279655456543
+                ],
+                "lo_data": [
+                  4.0279035568237305
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.012304782867432
+                ],
+                "lo_data": [
+                  4.025878429412842
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.0184407234191895
+                ],
+                "lo_data": [
+                  4.019742488861084
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.025472164154053
+                ],
+                "lo_data": [
+                  4.012711048126221
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_5",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.0167694091796875
+                ],
+                "lo_data": [
+                  4.021413803100586
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.01539421081543
+                ],
+                "lo_data": [
+                  4.022789001464844
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.033755302429199
+                ],
+                "lo_data": [
+                  4.004427909851074
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  4.022894859313965
+                ],
+                "lo_data": [
+                  4.015288352966309
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_SIG",
+              "type": "normfactor"
+            }
+          ],
+          "name": "sig_SM_C1C1_WW_1000_0"
+        }
+      ]
+    },
+    {
+      "name": "SR4QWW_cuts",
+      "samples": [
+        {
+          "data": [
+            0.016527198255062103
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.011974767605368737
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.01879565417766571
+                ],
+                "lo_data": [
+                  0.02495606616139412
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_B_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.024721499532461166
+                ],
+                "lo_data": [
+                  0.02018672414124012
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.02248057909309864
+                ],
+                "lo_data": [
+                  0.02227342128753662
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.022524233907461166
+                ],
+                "lo_data": [
+                  0.022230148315429688
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.02272011525928974
+                ],
+                "lo_data": [
+                  0.02204264886677265
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation_from_charm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016772404313087463
+                ],
+                "lo_data": [
+                  0.016337880864739418
+                ]
+              },
+              "name": "jvtWeight_JET_JvtEfficiency",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.019575556740164757
+                ],
+                "lo_data": [
+                  0.01548946276307106
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.017807817086577415
+                ],
+                "lo_data": [
+                  0.015215519815683365
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016836315393447876
+                ],
+                "lo_data": [
+                  0.016216011717915535
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Gammajet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.017084497958421707
+                ],
+                "lo_data": [
+                  0.015950586646795273
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_ExtrapolationPt",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016834786161780357
+                ],
+                "lo_data": [
+                  0.016203980892896652
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Statistics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016660958528518677
+                ],
+                "lo_data": [
+                  0.016307659447193146
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Statistical2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.01653186045587063
+                ],
+                "lo_data": [
+                  0.01633892022073269
+                ]
+              },
+              "name": "JET_Pileup_OffsetMu",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.017447268590331078
+                ],
+                "lo_data": [
+                  0.015607127919793129
+                ]
+              },
+              "name": "transfer_factor_fraction",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.015759622678160667
+                ],
+                "lo_data": [
+                  0.016695456579327583
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.015324472449719906
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.014384886249899864
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.015125617384910583
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016014693304896355
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.015331430360674858
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.01945251226425171
+                ],
+                "lo_data": [
+                  0.014411716721951962
+                ]
+              },
+              "name": "tX_isrfsr",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.01672947220504284
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016381826251745224
+                ],
+                "lo_data": [
+                  0.01577378436923027
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.01631259359419346
+                ],
+                "lo_data": [
+                  0.016467420384287834
+                ]
+              },
+              "name": "JET_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016209807246923447
+                ],
+                "lo_data": [
+                  0.016688445582985878
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016468390822410583
+                ],
+                "lo_data": [
+                  0.01672808825969696
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016785841435194016
+                ],
+                "lo_data": [
+                  0.01614270731806755
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016649382188916206
+                ],
+                "lo_data": [
+                  0.016325728967785835
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.015619560144841671
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016978081315755844
+                ],
+                "lo_data": [
+                  0.015880102291703224
+                ]
+              },
+              "name": "tX_pdf",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016448546200990677
+                ],
+                "lo_data": [
+                  0.016707981005311012
+                ]
+              },
+              "name": "JET_EtaIntercalibration_NonClosure_2018data",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.016059981659054756
+                ],
+                "lo_data": [
+                  0.016527198255062103
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "tX_0L4Q"
+        },
+        {
+          "data": [
+            0.385489821434021
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.1465675786763175
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.43219467997550964
+                ],
+                "lo_data": [
+                  0.42633897066116333
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_B_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.43507128953933716
+                ],
+                "lo_data": [
+                  0.42341646552085876
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.43111494183540344
+                ],
+                "lo_data": [
+                  0.427290678024292
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4306187629699707
+                ],
+                "lo_data": [
+                  0.4277116656303406
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4287301003932953
+                ],
+                "lo_data": [
+                  0.4296889901161194
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation_from_charm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37935686111450195
+                ],
+                "lo_data": [
+                  0.38838014006614685
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4162464141845703
+                ],
+                "lo_data": [
+                  0.35470256209373474
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4040209949016571
+                ],
+                "lo_data": [
+                  0.36665594577789307
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Gammajet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.39666852355003357
+                ],
+                "lo_data": [
+                  0.3734279274940491
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3924303948879242
+                ],
+                "lo_data": [
+                  0.37823936343193054
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_MatrixElement",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3814106583595276
+                ],
+                "lo_data": [
+                  0.3872402310371399
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_TagEffUnc_GlobalSignal",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.42728573083877563
+                ],
+                "lo_data": [
+                  0.3521009385585785
+                ]
+              },
+              "name": "diboson_muR",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.46922919154167175
+                ],
+                "lo_data": [
+                  0.3184112012386322
+                ]
+              },
+              "name": "diboson_muRF",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.39778080582618713
+                ],
+                "lo_data": [
+                  0.37860608100891113
+                ]
+              },
+              "name": "diboson_muF",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.38213175535202026
+                ],
+                "lo_data": [
+                  0.37959808111190796
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.374064564704895
+                ],
+                "lo_data": [
+                  0.39148274064064026
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.380489319562912
+                ],
+                "lo_data": [
+                  0.385489821434021
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37904518842697144
+                ],
+                "lo_data": [
+                  0.385489821434021
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37770876288414
+                ],
+                "lo_data": [
+                  0.385489821434021
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.38082194328308105
+                ],
+                "lo_data": [
+                  0.385489821434021
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37323927879333496
+                ],
+                "lo_data": [
+                  0.38332799077033997
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.40695008635520935
+                ],
+                "lo_data": [
+                  0.36402955651283264
+                ]
+              },
+              "name": "transfer_factor_fraction",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3810977339744568
+                ],
+                "lo_data": [
+                  0.385489821434021
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37877821922302246
+                ],
+                "lo_data": [
+                  0.3853919208049774
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.38734081387519836
+                ],
+                "lo_data": [
+                  0.380248099565506
+                ]
+              },
+              "name": "MET_SoftTrk",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37962570786476135
+                ],
+                "lo_data": [
+                  0.3864271938800812
+                ]
+              },
+              "name": "JET_LargeR_TopologyUncertainty_V",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.379623681306839
+                ],
+                "lo_data": [
+                  0.3850694000720978
+                ]
+              },
+              "name": "JET_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3787851929664612
+                ],
+                "lo_data": [
+                  0.3868851661682129
+                ]
+              },
+              "name": "JET_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3776814043521881
+                ],
+                "lo_data": [
+                  0.3883361220359802
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3813973665237427
+                ],
+                "lo_data": [
+                  0.38648444414138794
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.37673258781433105
+                ],
+                "lo_data": [
+                  0.38636481761932373
+                ]
+              },
+              "name": "JET_EtaIntercalibration_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.41914644837379456
+                ],
+                "lo_data": [
+                  0.32688212394714355
+                ]
+              },
+              "name": "diboson_pdf",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3791377544403076
+                ],
+                "lo_data": [
+                  0.3886759877204895
+                ]
+              },
+              "name": "JET_EtaIntercalibration_NonClosure_2018data",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "diboson_0L4Q"
+        },
+        {
+          "data": [
+            0.4087241590023041
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.20311599146095594
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4090685248374939
+                ],
+                "lo_data": [
+                  0.4130634367465973
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4091987609863281
+                ],
+                "lo_data": [
+                  0.41320279240608215
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3914787173271179
+                ],
+                "lo_data": [
+                  0.4227398633956909
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.45139625668525696
+                ],
+                "lo_data": [
+                  0.3649296760559082
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.42518940567970276
+                ],
+                "lo_data": [
+                  0.3916627764701843
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Gammajet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.41481927037239075
+                ],
+                "lo_data": [
+                  0.4019027352333069
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.41526374220848083
+                ],
+                "lo_data": [
+                  0.4087241590023041
+                ]
+              },
+              "name": "Wjets_Vjets_QSF",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4039156436920166
+                ],
+                "lo_data": [
+                  0.4105207324028015
+                ]
+              },
+              "name": "Wjets_Vjets_muRF",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3991396129131317
+                ],
+                "lo_data": [
+                  0.41885262727737427
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4314778745174408
+                ],
+                "lo_data": [
+                  0.38597044348716736
+                ]
+              },
+              "name": "transfer_factor_fraction",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.4244731664657593
+                ],
+                "lo_data": [
+                  0.3695547580718994
+                ]
+              },
+              "name": "Wjets_Vjets_pdf",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.42221206426620483
+                ],
+                "lo_data": [
+                  0.40422818064689636
+                ]
+              },
+              "name": "Wjets_Vjets_CKKW",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.3956482410430908
+                ],
+                "lo_data": [
+                  0.418108195066452
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "Wjets_0L4Q"
+        },
+        {
+          "data": [
+            0.000494058127515018
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.0004940581354137379
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005808862042613328
+                ],
+                "lo_data": [
+                  0.0005009211599826813
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_B_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.000549510819837451
+                ],
+                "lo_data": [
+                  0.0005384901887737215
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005419917870312929
+                ],
+                "lo_data": [
+                  0.0005458861705847085
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005796218756586313
+                ],
+                "lo_data": [
+                  0.0005070678307674825
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005453166086226702
+                ],
+                "lo_data": [
+                  0.0005425796844065189
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation_from_charm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004136251227464527
+                ],
+                "lo_data": [
+                  0.0005443394184112549
+                ]
+              },
+              "name": "jvtWeight_JET_JvtEfficiency",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004869868862442672
+                ],
+                "lo_data": [
+                  0.0005108414916321635
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005369384889490902
+                ],
+                "lo_data": [
+                  0.00044960257946513593
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004818593733943999
+                ],
+                "lo_data": [
+                  0.000506890588440001
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Gammajet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005047352169640362
+                ],
+                "lo_data": [
+                  0.0004956552293151617
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Statistical2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004937043413519859
+                ],
+                "lo_data": [
+                  0.0004716450930573046
+                ]
+              },
+              "name": "JET_Pileup_OffsetMu",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005215624114498496
+                ],
+                "lo_data": [
+                  0.0004665538726840168
+                ]
+              },
+              "name": "transfer_factor_fraction",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004947740235365927
+                ],
+                "lo_data": [
+                  0.0005044718855060637
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Detector1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004946304252371192
+                ],
+                "lo_data": [
+                  0.0005047352169640362
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Statistical4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004947889829054475
+                ],
+                "lo_data": [
+                  0.0005047352169640362
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005047352169640362
+                ],
+                "lo_data": [
+                  0.0004949293797835708
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.000490419683046639
+                ],
+                "lo_data": [
+                  0.0005072290659882128
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004697043914347887
+                ],
+                "lo_data": [
+                  0.000494058127515018
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.00046707302681170404
+                ],
+                "lo_data": [
+                  0.000494058127515018
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004835410800296813
+                ],
+                "lo_data": [
+                  0.000494058127515018
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004956094198860228
+                ],
+                "lo_data": [
+                  0.0005045936559326947
+                ]
+              },
+              "name": "JET_EtaIntercalibration_R10_TotalStat",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004963460378348827
+                ],
+                "lo_data": [
+                  0.0005044335266575217
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Statistical1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004691081994678825
+                ],
+                "lo_data": [
+                  0.000494070933200419
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005049045430496335
+                ],
+                "lo_data": [
+                  0.000493377388920635
+                ]
+              },
+              "name": "JET_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004937913618050516
+                ],
+                "lo_data": [
+                  0.0005054784705862403
+                ]
+              },
+              "name": "JET_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004933729651384056
+                ],
+                "lo_data": [
+                  0.0005052126944065094
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004952127928845584
+                ],
+                "lo_data": [
+                  0.0005047352169640362
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005047352169640362
+                ],
+                "lo_data": [
+                  0.0004962176317349076
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004946688422933221
+                ],
+                "lo_data": [
+                  0.0005044779973104596
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.00046872367965988815
+                ],
+                "lo_data": [
+                  0.0005230158567428589
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0004839713219553232
+                ],
+                "lo_data": [
+                  0.0004913569428026676
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.00047256331890821457
+                ],
+                "lo_data": [
+                  0.000494058127515018
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005043845158070326
+                ],
+                "lo_data": [
+                  0.0004962044768035412
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.00048285527736879885
+                ],
+                "lo_data": [
+                  0.0005055626970715821
+                ]
+              },
+              "name": "MET_SoftTrk",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.000493217317853123
+                ],
+                "lo_data": [
+                  0.0004827220691367984
+                ]
+              },
+              "name": "JET_Pileup_OffsetNPV",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0005049382452853024
+                ],
+                "lo_data": [
+                  0.0004936575423926115
+                ]
+              },
+              "name": "JET_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.00046614441089332104
+                ],
+                "lo_data": [
+                  0.000494058127515018
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "higgs_0L4Q"
+        },
+        {
+          "data": [
+            1.115991473197937
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.15957408123499406
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.127312421798706
+                ],
+                "lo_data": [
+                  1.1283867359161377
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_B_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1310738325119019
+                ],
+                "lo_data": [
+                  1.1257745027542114
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1305408477783203
+                ],
+                "lo_data": [
+                  1.1263236999511719
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1319220066070557
+                ],
+                "lo_data": [
+                  1.1249446868896484
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1284706592559814
+                ],
+                "lo_data": [
+                  1.1283668279647827
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation_from_charm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.0971827507019043
+                ],
+                "lo_data": [
+                  1.139684796333313
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.180694818496704
+                ],
+                "lo_data": [
+                  1.0490394830703735
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1802817583084106
+                ],
+                "lo_data": [
+                  1.0518747568130493
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Gammajet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1528191566467285
+                ],
+                "lo_data": [
+                  1.1037155389785767
+                ]
+              },
+              "name": "Zjets_Vjets_CKKW",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.092792272567749
+                ],
+                "lo_data": [
+                  1.141144037246704
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.0989525318145752
+                ],
+                "lo_data": [
+                  1.1330326795578003
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1781188249588013
+                ],
+                "lo_data": [
+                  1.0538641214370728
+                ]
+              },
+              "name": "transfer_factor_fraction",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1028622388839722
+                ],
+                "lo_data": [
+                  1.1208969354629517
+                ]
+              },
+              "name": "Zjets_Vjets_muRF",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.158992886543274
+                ],
+                "lo_data": [
+                  1.0090422630310059
+                ]
+              },
+              "name": "Zjets_Vjets_pdf",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.0977437496185303
+                ],
+                "lo_data": [
+                  1.130766749382019
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1338473558425903
+                ],
+                "lo_data": [
+                  1.115991473197937
+                ]
+              },
+              "name": "Zjets_Vjets_QSF",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  1.1061428785324097
+                ],
+                "lo_data": [
+                  1.1288727521896362
+                ]
+              },
+              "name": "JET_EtaIntercalibration_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "Zjets_0L4Q"
+        },
+        {
+          "data": [
+            0.17082548141479492
+          ],
+          "modifiers": [
+            {
+              "data": null,
+              "name": "lumi",
+              "type": "lumi"
+            },
+            {
+              "data": [
+                0.030046913706350233
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1685471087694168
+                ],
+                "lo_data": [
+                  0.17452381551265717
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.16995961964130402
+                ],
+                "lo_data": [
+                  0.1731349527835846
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.18316850066184998
+                ],
+                "lo_data": [
+                  0.16192187368869781
+                ]
+              },
+              "name": "pileupWeightUp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.18707342445850372
+                ],
+                "lo_data": [
+                  0.15524840354919434
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1799684464931488
+                ],
+                "lo_data": [
+                  0.16189099848270416
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_MatrixElement",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1781858205795288
+                ],
+                "lo_data": [
+                  0.16362601518630981
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Radiation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.16837960481643677
+                ],
+                "lo_data": [
+                  0.17328906059265137
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_BinVariation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.18213258683681488
+                ],
+                "lo_data": [
+                  0.1598365753889084
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_ExtrapolationPt",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17391374707221985
+                ],
+                "lo_data": [
+                  0.16776585578918457
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Propagated_AllOthers",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.18435613811016083
+                ],
+                "lo_data": [
+                  0.15782368183135986
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Statistics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.16876660287380219
+                ],
+                "lo_data": [
+                  0.17289400100708008
+                ]
+              },
+              "name": "JET_BJT_bTag_B_0",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17172881960868835
+                ],
+                "lo_data": [
+                  0.1742507964372635
+                ]
+              },
+              "name": "JET_EtaIntercalibration_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17245709896087646
+                ],
+                "lo_data": [
+                  0.17477266490459442
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1752394139766693
+                ],
+                "lo_data": [
+                  0.1707673966884613
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1751869022846222
+                ],
+                "lo_data": [
+                  0.16646406054496765
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17558035254478455
+                ],
+                "lo_data": [
+                  0.1660706102848053
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.16966311633586884
+                ],
+                "lo_data": [
+                  0.171987846493721
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1744958758354187
+                ],
+                "lo_data": [
+                  0.16715508699417114
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1745016723871231
+                ],
+                "lo_data": [
+                  0.16714929044246674
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1744958758354187
+                ],
+                "lo_data": [
+                  0.16715508699417114
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_5",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17014025151729584
+                ],
+                "lo_data": [
+                  0.171510711312294
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.1744958758354187
+                ],
+                "lo_data": [
+                  0.16715508699417114
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17082548141479492
+                ],
+                "lo_data": [
+                  0.17645767331123352
+                ]
+              },
+              "name": "JET_Pileup_OffsetMu",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17082548141479492
+                ],
+                "lo_data": [
+                  0.17518110573291779
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17082548141479492
+                ],
+                "lo_data": [
+                  0.17082548141479492
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.17082548141479492
+                ],
+                "lo_data": [
+                  0.17082548141479492
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi": 1.5,
+                "lo": 0.5
+              },
+              "name": "xsec_VVV",
+              "type": "normsys"
+            }
+          ],
+          "name": "triboson"
+        },
+        {
+          "data": [
+            0.0430133230984211
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.020414852091569492
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.037504080682992935
+                ],
+                "lo_data": [
+                  0.04341644421219826
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_B_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.040348418056964874
+                ],
+                "lo_data": [
+                  0.040356967598199844
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_C_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0408877432346344
+                ],
+                "lo_data": [
+                  0.03984617069363594
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_Light_systematics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04030565544962883
+                ],
+                "lo_data": [
+                  0.04042183235287666
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04092966020107269
+                ],
+                "lo_data": [
+                  0.03981358930468559
+                ]
+              },
+              "name": "bTagWeight_FT_EFF_extrapolation_from_charm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04563599079847336
+                ],
+                "lo_data": [
+                  0.04025914520025253
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Dijet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0439615398645401
+                ],
+                "lo_data": [
+                  0.042037446051836014
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Gammajet_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.044032685458660126
+                ],
+                "lo_data": [
+                  0.04193125665187836
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04357534274458885
+                ],
+                "lo_data": [
+                  0.04243076965212822
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_MatrixElement",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.043650634586811066
+                ],
+                "lo_data": [
+                  0.04236678034067154
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Radiation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04390091821551323
+                ],
+                "lo_data": [
+                  0.04212227463722229
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_ExtrapolationPt",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04422132670879364
+                ],
+                "lo_data": [
+                  0.0417817123234272
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Statistics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.042054954916238785
+                ],
+                "lo_data": [
+                  0.04314810410141945
+                ]
+              },
+              "name": "JET_Pileup_OffsetMu",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04540788009762764
+                ],
+                "lo_data": [
+                  0.040618766099214554
+                ]
+              },
+              "name": "transfer_factor_fraction",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04093072563409805
+                ],
+                "lo_data": [
+                  0.04361078888177872
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Modelling1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.041456449776887894
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04002850875258446
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.041058462113142014
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04191385582089424
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04232211410999298
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_5",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04172733053565025
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.041813574731349945
+                ],
+                "lo_data": [
+                  0.04277745261788368
+                ]
+              },
+              "name": "JET_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04199078306555748
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04206890985369682
+                ],
+                "lo_data": [
+                  0.042832255363464355
+                ]
+              },
+              "name": "JET_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04222854599356651
+                ],
+                "lo_data": [
+                  0.03959956765174866
+                ]
+              },
+              "name": "ttbar_pdf",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04239022359251976
+                ],
+                "lo_data": [
+                  0.04337291046977043
+                ]
+              },
+              "name": "JET_EffectiveNP_R10_Mixed1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04136393591761589
+                ],
+                "lo_data": [
+                  0.04339228570461273
+                ]
+              },
+              "name": "JET_EtaIntercalibration_Modelling",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04212360456585884
+                ],
+                "lo_data": [
+                  0.04338621348142624
+                ]
+              },
+              "name": "JET_Flavor_Response",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0424949936568737
+                ],
+                "lo_data": [
+                  0.04241562634706497
+                ]
+              },
+              "name": "JET_Pileup_RhoTopology",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04111886024475098
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.041701968759298325
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04183545708656311
+                ],
+                "lo_data": [
+                  0.043200019747018814
+                ]
+              },
+              "name": "JET_EtaIntercalibration_NonClosure_2018data",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04300440102815628
+                ],
+                "lo_data": [
+                  0.04191857576370239
+                ]
+              },
+              "name": "MET_SoftTrk",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.041405901312828064
+                ],
+                "lo_data": [
+                  0.0430133230984211
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.0418071448802948
+                ],
+                "lo_data": [
+                  0.04289922118186951
+                ]
+              },
+              "name": "JET_Pileup_OffsetNPV",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.04172211512923241
+                ],
+                "lo_data": [
+                  0.03956253454089165
+                ]
+              },
+              "name": "ttbar_isrfsr",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  0.041402388364076614
+                ],
+                "lo_data": [
+                  0.04236775264143944
+                ]
+              },
+              "name": "JET_Flavor_Composition",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_nonResoBG_0L4Q",
+              "type": "normfactor"
+            }
+          ],
+          "name": "ttbar_0L4Q"
+        },
+        {
+          "data": [
+            2.143080472946167
+          ],
+          "modifiers": [
+            {
+              "data": [
+                0.10243483757042988
+              ],
+              "name": "staterror_SR4QWW_cuts",
+              "type": "staterror"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.3573873043060303
+                ],
+                "lo_data": [
+                  1.9287716150283813
+                ]
+              },
+              "name": "SigTheory",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.4087798595428467
+                ],
+                "lo_data": [
+                  1.8773797750473022
+                ]
+              },
+              "name": "SigXSec",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.33705735206604
+                ],
+                "lo_data": [
+                  1.9569940567016602
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Hadronisation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.2512829303741455
+                ],
+                "lo_data": [
+                  2.037322759628296
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_MatrixElement",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.2374701499938965
+                ],
+                "lo_data": [
+                  2.0507359504699707
+                ]
+              },
+              "name": "JET_BJT_JetTagSF_Radiation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1106317043304443
+                ],
+                "lo_data": [
+                  2.1757748126983643
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_BinVariation",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.2844111919403076
+                ],
+                "lo_data": [
+                  2.006011724472046
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_ExtrapolationPt",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1822428703308105
+                ],
+                "lo_data": [
+                  2.104273796081543
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Propagated_AllOthers",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.32218599319458
+                ],
+                "lo_data": [
+                  1.9711734056472778
+                ]
+              },
+              "name": "JET_BJT_WTagIncl_SigEff50_SigSF_Statistics",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1144628524780273
+                ],
+                "lo_data": [
+                  2.1718673706054688
+                ]
+              },
+              "name": "JET_BJT_bTag_B_0",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1300885677337646
+                ],
+                "lo_data": [
+                  2.1560723781585693
+                ]
+              },
+              "name": "JET_JER_DataVsMC_MC16",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.133801221847534
+                ],
+                "lo_data": [
+                  2.1523597240448
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_1",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1249709129333496
+                ],
+                "lo_data": [
+                  2.1611900329589844
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_2",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.129331588745117
+                ],
+                "lo_data": [
+                  2.156829357147217
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_3",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.11702823638916
+                ],
+                "lo_data": [
+                  2.169132709503174
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_4",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1421074867248535
+                ],
+                "lo_data": [
+                  2.1440534591674805
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_5",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.145448684692383
+                ],
+                "lo_data": [
+                  2.140712261199951
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_6",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1333377361297607
+                ],
+                "lo_data": [
+                  2.1528232097625732
+                ]
+              },
+              "name": "JET_JER_EffectiveNP_7restTerm",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.149742841720581
+                ],
+                "lo_data": [
+                  2.136418104171753
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPara",
+              "type": "histosys"
+            },
+            {
+              "data": {
+                "hi_data": [
+                  2.1473329067230225
+                ],
+                "lo_data": [
+                  2.1388280391693115
+                ]
+              },
+              "name": "MET_SoftTrk_ResoPerp",
+              "type": "histosys"
+            },
+            {
+              "data": null,
+              "name": "mu_SIG",
+              "type": "normfactor"
+            }
+          ],
+          "name": "sig_SM_C1C1_WW_1000_0"
+        }
+      ]
+    }
+  ],
+  "measurements": [
+    {
+      "config": {
+        "parameters": [
+          {
+            "auxdata": [
+              1.0
+            ],
+            "bounds": [
+              [
+                0.915,
+                1.085
+              ]
+            ],
+            "fixed": false,
+            "inits": [
+              1.0
+            ],
+            "name": "lumi",
+            "sigmas": [
+              0.017
+            ]
+          },
+          {
+            "bounds": [
+              [
+                0.0,
+                5.0
+              ]
+            ],
+            "fixed": false,
+            "inits": [
+              1.0
+            ],
+            "name": "mu_nonResoBG_0L4Q"
+          },
+          {
+            "bounds": [
+              [
+                0.0,
+                5.0
+              ]
+            ],
+            "fixed": false,
+            "inits": [
+              1.0
+            ],
+            "name": "mu_SIG"
+          }
+        ],
+        "poi": "mu_SIG"
+      },
+      "name": "NormalMeasurement"
+    }
+  ],
+  "observations": [
+    {
+      "data": [
+        129.0
+      ],
+      "name": "CR4Q_cuts"
+    },
+    {
+      "data": [
+        2.0
+      ],
+      "name": "SR4QWW_cuts"
+    }
+  ],
+  "version": "1.0.0"
+}

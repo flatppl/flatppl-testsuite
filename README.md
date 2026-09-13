@@ -93,6 +93,9 @@ pixi run convert <in.json> <out.flatppl>   # convert one fixture (debugging aid)
 FLATPPL_BIN=/path/to/flatppl PYTHONPATH=$PWD/src pixi run -e stablehlo unified
 # Regenerate a test dir's frozen expected/stat from its test.py oracle:
 pixi run -e stablehlo regen corpora/stablehlo/linear_regression
+
+# pyhf through float64 StableHLO and IREE CPU, against the same frozen oracle:
+FLATPPL_BIN=/path/to/flatppl FLATPPL_REQUIRE_ENGINES=iree pixi run -e iree unified
 ```
 
 ## Engine pins

@@ -1,9 +1,9 @@
 # pyhf corpus
 
-179 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
+183 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
 scored against **pyhf's own absolute `Model.logpdf`**. The 172 audit workspaces
-retain six parameter points each; seven paper-backed workspaces add eleven
-points each. 1109 frozen numbers. The whole matrix of the pyhf import audit
+retain six parameter points each; eleven paper-backed workspaces add 117
+points. 1149 frozen numbers. The whole matrix of the pyhf import audit
 (`flatppl-dev/audit-fix-pyhf.md`), which found five wrong-number defect classes
 in the converter — every one of which converted at exit 0 and passed every gate
 the suite had, because the suite had no way to hold a pyhf fixture at all.
@@ -38,6 +38,40 @@ environment exists only to regenerate:
 FLATPPL_BIN=/path/to/flatppl pixi run -e pyhf gen-pyhf
 ```
 
+### StableHLO evaluation with IREE
+
+Every workspace also declares an `iree` engine row against the **same** frozen
+points, absolute log-likelihoods, and tolerances. Run these separately:
+
+```sh
+FLATPPL_BIN=/path/to/flatppl FLATPPL_REQUIRE_ENGINES=iree \
+  pixi run -e iree unified
+```
+
+The Rust binary must support `stablehlo --dtype f64`. This path converts the
+workspace with Rust, then emits float64 StableHLO once per model. A single
+packed parameter matrix supplies all runtime points; the query reconstructs
+each scalar or per-bin vector, including length-one vectors. Packing reduces
+input bindings without changing the likelihood. IREE also coalesces bindings
+that provably share an allocation, including writable dispatch buffers.
+
+The isolated `iree` environment pins compiler and runtime 3.11.0. It uses the
+native CPU backend and host system linker, so a working host C toolchain is
+required. Float64 demotion is disabled. System linking resolves the float64
+maths functions; eager constant evaluation is disabled because its internal
+JIT still uses embedded linking. Constant-expression hoisting computes invariant
+tensors once at module load. The output must be one float64 score per point.
+Emission, compilation, and scoring errors
+fail the row rather than relaxing the numeric check.
+
+Large-model compilation is still a constraint. On macOS ARM64, the 172
+synthetic workspaces and all eleven published workspaces pass these IREE checks,
+including stau. Every row retains the same points and tolerances as its JS check.
+
+The default environment still runs JS; unavailable IREE rows skip unless
+`FLATPPL_REQUIRE_ENGINES=iree` is set. No IREE dependency is added to the JS or
+Enzyme/JAX environments, and their precision defaults stay unchanged.
+
 The original 172 rows added roughly 100 s to `pixi run test`: 415 s without them against
 504 s, 510 s and 561 s with them over three runs on the same machine. The
 spread between those three is machine load, not the corpus.
@@ -49,16 +83,18 @@ convert --from pyhf  ->  logdensityof(<binding>, <record>) at each point
                      ->  compare_vectors against the frozen pyhf logpdf
 ```
 
-Scoring is the det-js path (`unified/detjs_exec.log_density_points`), batched:
-each point needs its own `determinize`, because theta is spliced into the source
-before lowering, but the whole batch's Node evaluation runs in one process. That
-is what keeps 1032 points inside a couple of minutes: one Node start per
-fixture instead of one per point.
+Scoring uses the det-js path (`unified/detjs_exec.log_density_points`). Rust
+determinizes one parameterized density per model. JS parses that FlatPDL once,
+reifies the density with `functionof`, and broadcasts it over point indices.
+The result is one ordered score vector. Points share fields, shapes, and element
+kinds. Column lookup retains each parameter's complete value, including nested
+array axes, instead of broadcasting over its elements.
 
-The paper-backed models are larger and take minutes per fixture. They use
-the same scoring path, so each of their eleven points is determinized separately.
-The harness requests only `__score__` with `--keep`; the compiler retains all
-its dependencies and removes unrelated outputs before JS evaluation.
+This also applies to the larger paper-backed models. The harness retains only
+the density, its parameter bindings, and their dependencies with `--keep`.
+Neither Rust determinization nor JS parsing repeats for each point. A batch
+evaluation error fails all its points; nonfinite numeric scores remain individual
+values. The harness validates the score-vector length before comparison.
 
 **Default tolerance is `atol = 1e-9`, `rtol = 0`.** Measured over the original 1032 audit points, the
 worst absolute difference is **1.819e-12**, on `sw3_norm_norm_shap_shap_stat`
@@ -106,7 +142,7 @@ reproduces all 1032 points and all 1032 values bit for bit.
 A fixture whose `test.json` already carries points reuses them, so an ordinary
 regen is a pure re-measurement whose diff shows only moved values.
 
-The paper-backed fixtures start at `suggested_init()` and add ten deterministic
+The paper-backed fixtures start at `suggested_init()` and add up to ten deterministic
 shifts. Fixed parameters stay fixed, and shifts are clipped to suggested bounds:
 
 - POI alone: ±0.5 times `max(1, abs(init))`.
@@ -117,6 +153,10 @@ shifts. Fixed parameters stay fixed, and shifts are clipped to suggested bounds:
   shifts within a vector. Unconstrained widths use `max(1, abs(init))`.
 - All parameter groups together: alternating ±0.5 widths, including free
   normalization parameters.
+
+Directions with no active parameters are omitted. The displaced-lepton fixture
+has neither template nor per-bin parameters, so it has seven distinct points;
+the other ten paper-backed fixtures each have eleven.
 
 Alternating signs follow pyhf's flattened parameter order. Each direction and
 its negative form a pair. The exact points and labels are frozen in `test.json`;
@@ -162,7 +202,7 @@ should do.
 | `two_hist`, `two_norm`, `two_shap`, `two_stat` | 4 | each kind in two channels, per-channel names for the per-bin kinds |
 | `pyhfval_*` | 10 | pyhf's own `tests/test_validation.py` workspaces |
 | named | 35 | the surface items and defect classes the audit called out individually (below) |
-| `atlas_*` | 7 | paper-backed models described below |
+| `atlas_*`, `belle2_*` | 11 | paper-backed models described below |
 
 The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 `three_channels_all_kinds`, `all_kinds_one_sample`, `two_histosys`,
@@ -299,8 +339,13 @@ Its worst difference at rust `78e0b03` is **1.421e-14**, inside the corpus's
 | `atlas_onelepton_bb` | [ATLAS one-lepton plus bb, 1909.09226](https://arxiv.org/abs/1909.09226) | 8 / 14 | 126 |
 | `atlas_trilepton_onshell` | [ATLAS three-lepton search, 2106.01676](https://arxiv.org/abs/2106.01676), on-shell WZ | 23 / 23 | 120 |
 | `atlas_trilepton_offshell` | Same paper, off-shell WZ | 33 / 33 | 353 |
+| `atlas_single_top_photon` | [ATLAS single-top plus photon, 2302.01283](https://arxiv.org/abs/2302.01283), particle level | 4 / 51 | 333 |
+| `atlas_boosted_ww` | [ATLAS boosted hadronic bosons, 2108.07586](https://arxiv.org/abs/2108.07586), WW | 2 / 2 | 82 |
+| `atlas_displaced_leptons` | [ATLAS displaced leptons, 2011.07812](https://arxiv.org/abs/2011.07812), combined | 3 / 3 | 16 |
+| `belle2_knunu_combined` | [Belle II B to K neutrinos, 2311.14647](https://arxiv.org/abs/2311.14647), combined ITA + HTA | 5 / 30 | 232 |
 
-These papers appear in [pyhf's published statistical models](https://pyhf.readthedocs.io/en/v0.7.6/citations.html#published-statistical-models).
+These analyses appear in [pyhf's usage list](https://pyhf.readthedocs.io/en/v0.7.6/citations.html).
+Belle II's full likelihood has a later [dedicated release](https://arxiv.org/abs/2507.12393).
 The sbottom source is [HEPData 89408 v3/r2](https://doi.org/10.17182/hepdata.89408.v3/r2),
 using `RegionA` and `RegionC` with patch `sbottom_1300_850_60`. The stau source is
 [HEPData 92006 v2/r2](https://doi.org/10.17182/hepdata.92006.v2/r2), using
@@ -323,6 +368,12 @@ the paper, original data location, actual retrieval location, and selected patch
 Its `test.json` records the retrieved file or archive hashes. A pinned mirror
 hash identifies the retrieved bytes; it does not claim independent byte identity
 with an unavailable upstream archive.
+
+The single-top, boosted-WW and displaced-lepton sources use the same pinned
+research-repository mirror. The latter two apply published signal patches with
+background digest checks. The Belle II source is the complete combined
+likelihood from a pinned author repository, not its derived reinterpretation
+model. All four retain the published observations, channels and constraints.
 
 `pyhfval_*` are built from the `spec_*` fixtures of pyhf's
 `tests/test_validation.py` at pyhf `v0.7.6` together with the

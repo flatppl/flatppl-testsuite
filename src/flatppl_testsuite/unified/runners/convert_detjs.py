@@ -40,6 +40,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
 
 from flatppl_testsuite.scoring.compare import compare_vectors
@@ -202,7 +203,10 @@ def _run_conversion(tid: str, dir: Path, body: dict) -> list[CheckResult]:
     return results
 
 
-def _run_pyhf(tid: str, dir: Path, body: dict) -> list[CheckResult]:
+def run_pyhf(
+    tid: str, dir: Path, body: dict,
+    scorer: Callable[[Path, str, list[dict]], list[ex.PointScore]],
+) -> list[CheckResult]:
     """`fixture_kind: "pyhf"` -- convert a pyhf workspace, score ABSOLUTE
     log-densities, compare against pyhf's own `Model.logpdf`.
 
@@ -241,7 +245,7 @@ def _run_pyhf(tid: str, dir: Path, body: dict) -> list[CheckResult]:
             model_path = Path(tmp) / "model.flatppl"
             model_path.write_text(src)
             try:
-                scores = ex.log_density_points(model_path, check["binding"], check["points"])
+                scores = scorer(model_path, check["binding"], check["points"])
             except DeterminizeRefused as e:
                 results.append(CheckResult(tid, check_id, "skipped", DETERMINIZE_SKIP, str(e)))
                 continue
@@ -334,5 +338,5 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     if fixture_kind == "conversion":
         return _run_conversion(tid, dir, body)
     if fixture_kind == "pyhf":
-        return _run_pyhf(tid, dir, body)
+        return run_pyhf(tid, dir, body, ex.log_density_points)
     raise ValueError(f"{dir}: unknown fixture_kind {fixture_kind!r}")

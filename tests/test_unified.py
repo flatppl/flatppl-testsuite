@@ -40,7 +40,9 @@ _CASE_IDS = [f"{d.relative_to(_CORPORA)}::{engine}" for d, engine in _CASES]
 # mark and stays out of the stablehlo-only selection without anyone having
 # to touch this file again.
 _CASE_PARAMS = [
-    pytest.param(d, engine, marks=pytest.mark.stablehlo_only if engine == "stablehlo" else ())
+    pytest.param(d, engine, marks={
+        "stablehlo": pytest.mark.stablehlo_only, "iree": pytest.mark.iree_only,
+    }.get(engine, ()))
     for d, engine in _CASES
 ]
 
@@ -90,6 +92,16 @@ def _gate_engine(engine: str) -> None:
                 engine,
                 "FLATPPL_BIN must point at a `flatppl` built with the `stablehlo` feature",
             )
+    elif engine == "iree":
+        for mod in ("iree.compiler", "iree.runtime"):
+            try:
+                importlib.import_module(mod)
+            except ImportError:
+                _unavailable(engine, f"IREE runner needs `{mod}` (the `iree` env)")
+        from flatppl_testsuite.unified import stablehlo_exec as ex
+
+        if not ex.binary_supports_stablehlo():
+            _unavailable(engine, "FLATPPL_BIN must support StableHLO emission")
     elif engine == "det-js":
         from flatppl_testsuite.unified import detjs_exec as ex
 

@@ -225,7 +225,7 @@ def generate(dir: Path) -> tuple[str, list[float]]:
 
     envelope = {
         "test_type": "convert",
-        "engines": ["det-js"],
+        "engines": ["det-js", "iree"],
         "fixture_kind": "pyhf",
         "source": "pyhf.json",
         "oracle": {

@@ -171,6 +171,19 @@ regen = "python -m flatppl_testsuite.unified.regen"
 # pure duplicate work already covered, correctly, by `pixi run test`.
 unified = "python -m pytest tests/test_unified.py tests/test_stablehlo_reuse.py tests/test_stablehlo_execution.py -q -m stablehlo_only"
 
+[feature.iree.dependencies]
+python = "3.12.*"
+numpy = ">=1.26,<2.1"
+scipy = ">=1.11"
+
+[feature.iree.pypi-dependencies]
+pytest = ">=8"
+iree-base-compiler = "==3.11.0"
+iree-base-runtime = "==3.11.0"
+
+[feature.iree.tasks]
+unified = "python -m pytest tests/test_unified.py -q -m iree_only"
+
 [environments]
 root = ["root"]
 pyhs3 = ["pyhs3"]
@@ -178,3 +191,4 @@ pyhs3 = ["pyhs3"]
 # scoring path, so a frozen number cannot come from the engine under test.
 pyhf = { features = ["pyhf"], no-default-feature = true }
 stablehlo = { features = ["stablehlo"], no-default-feature = true }
+iree = { features = ["iree"], no-default-feature = true }
