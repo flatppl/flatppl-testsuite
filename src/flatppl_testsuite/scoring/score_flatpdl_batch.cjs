@@ -10,7 +10,7 @@
 // per point.
 //
 // Usage:
-//   node score_flatpdl_batch.cjs <sources.json> <binding> [--engine <dir>]
+//   node score_flatpdl_batch.cjs <sources.json> <binding> [--engine <dir>] [--vector-size N]
 //
 //   <sources.json>  a JSON array of FlatPDL source strings, one per point, in
 //                   order. Each is independently processSource'd/materialised
@@ -19,6 +19,8 @@
 //                   behaviour this replaces.
 //   <binding>       the deterministic binding to evaluate in each source (the
 //                   ABI query's `outputs` binding).
+//   --vector-size N  evaluate ONE source returning an N-element score vector,
+//                   and emit one result row per element, in order.
 //
 // Prints a JSON array to stdout, one entry per source IN ORDER:
 //   {"ok": true, "value": <number>}     -- binding materialised to a value
@@ -26,6 +28,8 @@
 // A per-point failure never aborts the batch or the process -- the caller
 // (score_abi_points) turns an {"ok": false, ...} entry into that point's own
 // CheckResult instead of failing every point in the test dir.
+// Vector mode instead reports a whole-vector failure if its one evaluation
+// throws. Nonfinite numeric elements remain independent score values.
 //
 // Engine resolution mirrors score_flatpdl.cjs exactly (--engine, then
 // $FLATPPL_JS_DIR, then the ~/.cache/flatppl-js clone); keep the two in sync
@@ -37,21 +41,26 @@ const path = require('path');
 function usage(msg) {
   if (msg) process.stderr.write('score_flatpdl_batch: ' + msg + '\n');
   process.stderr.write(
-    'usage: node score_flatpdl_batch.cjs <sources.json> <binding> [--engine <dir>]\n');
+    'usage: node score_flatpdl_batch.cjs <sources.json> <binding> [--engine <dir>] [--vector-size N]\n');
   process.exit(2);
 }
 
 function parseArgs(argv) {
   const pos = [];
   let engineDir = null;
+  let vectorSize = null;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--engine') { engineDir = argv[++i]; }
+    else if (a === '--vector-size') {
+      vectorSize = Number(argv[++i]);
+      if (!Number.isSafeInteger(vectorSize) || vectorSize < 1) usage('invalid vector size');
+    }
     else if (a.startsWith('--')) { usage('unknown flag ' + a); }
     else { pos.push(a); }
   }
   if (pos.length !== 2) usage('expected <sources.json> <binding>');
-  return { sourcesPath: pos[0], binding: pos[1], engineDir };
+  return { sourcesPath: pos[0], binding: pos[1], engineDir, vectorSize };
 }
 
 function resolveEngine(explicit) {
@@ -70,7 +79,7 @@ function resolveEngine(explicit) {
 // One point: a fresh derivation graph and sample cache, sharing only the
 // already-loaded engine module and the worker handler -- mirrors the isolation
 // score_flatpdl.cjs gets for free by being a fresh process per point.
-async function scoreOne(src, binding, processSource, orchestrator, materialiser, w) {
+async function scoreOne(src, binding, processSource, orchestrator, materialiser, w, vectorSize) {
   const proc = processSource(src);
   for (const d of proc.diagnostics || []) {
     if (d.severity === 'error') throw new Error('diagnostic: ' + d.message);
@@ -97,13 +106,21 @@ async function scoreOne(src, binding, processSource, orchestrator, materialiser,
   };
 
   const measure = await ctx.getMeasure(binding);
+  if (vectorSize !== null) {
+    const value = measure && measure.value;
+    if (!value || !value.shape || value.shape.length !== 1
+        || value.shape[0] !== vectorSize || !value.data || value.data.length !== vectorSize) {
+      throw new Error('expected a score vector of length ' + vectorSize + ' for ' + binding);
+    }
+    return Array.from(value.data);
+  }
   if (measure && measure.value && measure.value.data) return measure.value.data[0];
   if (measure && measure.samples && measure.samples.length) return measure.samples[0];
   throw new Error('no value for binding ' + binding);
 }
 
 async function main() {
-  const { sourcesPath, binding, engineDir } = parseArgs(process.argv.slice(2));
+  const { sourcesPath, binding, engineDir, vectorSize } = parseArgs(process.argv.slice(2));
   const engine = resolveEngine(engineDir);
   const { processSource, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
   const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
@@ -112,22 +129,27 @@ async function main() {
   if (!Array.isArray(sources) || !sources.length) {
     usage('sources.json must be a non-empty JSON array of source strings');
   }
+  if (vectorSize !== null && sources.length !== 1) usage('vector mode requires one source');
 
   const w = createWorkerHandler();
   w.handle({ type: 'init', seed: 3 });
 
-  const results = new Array(sources.length);
+  const results = [];
   for (let i = 0; i < sources.length; i++) {
     try {
-      const value = await scoreOne(sources[i], binding, processSource, orchestrator, materialiser, w);
+      const value = await scoreOne(sources[i], binding, processSource, orchestrator, materialiser, w, vectorSize);
       // JSON has no encoding for NaN/±Infinity (JSON.stringify(-Infinity) is
       // null) -- an out-of-support point's log-density is exactly -inf, and
       // this corpus carries that shape (score_abi_points' caller compares
       // against frozen "-inf"/"nan" strings). Send those through as strings;
       // Python's float() already parses "Infinity"/"-Infinity"/"NaN" natively.
-      results[i] = { ok: true, value: Number.isFinite(value) ? value : String(value) };
+      for (const score of vectorSize === null ? [value] : value) {
+        results.push({ ok: true, value: Number.isFinite(score) ? score : String(score) });
+      }
     } catch (e) {
-      results[i] = { ok: false, error: e && e.message ? e.message : String(e) };
+      for (let j = 0; j < (vectorSize === null ? 1 : vectorSize); j++) {
+        results.push({ ok: false, error: e && e.message ? e.message : String(e) });
+      }
     }
   }
 

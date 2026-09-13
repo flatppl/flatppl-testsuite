@@ -34,43 +34,64 @@ def log_density_at(model: Path, binding: str, theta: dict) -> float:
 
 
 def log_density_points(model: Path, binding: str, points: list[dict]) -> list["PointScore"]:
-    """`logdensityof(binding, theta)` at each theta, batched into one Node run.
+    """Determinize one parameterized density, then score all model points.
 
-    Same theta-splice lowering as `log_density_at` -- theta is substituted into
-    the source before `determinize`, so each point needs its own determinize --
-    but the Node half runs once for the whole batch instead of once per point,
-    which is where the ~0.3 s engine load lives. Used by the pyhf corpus, whose
-    check compares an ABSOLUTE log-density at several points in one model.
-
-    A point whose determinize refuses raises `DeterminizeRefused` for the whole
-    batch, matching `log_density_at`: a refusal is a property of the model, not
-    of one theta.
+    Broadcast the reified density over point indices in one JS evaluation.
+    All points must have the same fields and input shapes.
     """
-    from flatppl_testsuite.scoring.engine import render_record
+    if not points:
+        return []
+    fields = list(points[0])
+    domains = {field: _input_set(points[0][field]) for field in fields}
+    for point in points:
+        if set(point) != set(fields) or any(
+            _input_set(point[field]) != domains[field] for field in fields
+        ):
+            raise ValueError("model points must have matching fields, shapes, and element kinds")
+    prefix = "__point_"
+    model_source = model.read_text()
+    while prefix in model_source:
+        prefix = "_" + prefix
+    names = [f"{prefix}{i}__" for i in range(len(fields))]
+    score, function, result = (prefix + suffix for suffix in ("score__", "fn__", "result__"))
+    declarations = "\n".join(
+        f"{name} = elementof({domains[field]})" for name, field in zip(names, fields)
+    )
+    record = ", ".join(f"{field} = {name}" for name, field in zip(names, fields))
+    flatpdl = _determinize(
+        model, f"{declarations}\n{score} = logdensityof({binding}, record({record}))\n", [score, *names],
+    )
+    columns = "\n".join(
+        f"{name}column = {_literal([point[field] for point in points])}"
+        for name, field in zip(names, fields)
+    )
+    index = prefix + "index__"
+    # Iterate only points. Broadcasting nested columns directly also iterates
+    # their inner event axes, whereas indexing preserves each complete value.
+    def bind_point(m: re.Match[str]) -> str:
+        name = m.group(1).split("=", 1)[0].strip()
+        return f"{m.group(1)}get({name}column, {index})\n"
 
-    src = model.read_text()
-    sources: list[str] = []
-    with tempfile.TemporaryDirectory() as tmp:
-        for i, theta in enumerate(points):
-            out_path = Path(tmp) / f"p{i}.flatpdl.flatppl"
-            # Relative module imports resolve against the source file's directory.
-            with tempfile.NamedTemporaryFile(
-                suffix=".flatppl", mode="w", dir=temporary_source_dir(model, src)
-            ) as inp:
-                inp.write(src + f"\n__score__ = logdensityof({binding}, {render_record(theta)})\n")
-                inp.flush()
-                det = subprocess.run(
-                    [str(CONFIG.flatppl_bin), "determinize", inp.name,
-                     "--keep", "__score__", "-o", str(out_path)],
-                    capture_output=True, text=True,
-                )
-            if det.returncode == 3:
-                raise DeterminizeRefused(det.stderr.strip())
-            if det.returncode != 0:
-                raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
-            sources.append(out_path.read_text())
+    flatpdl, count = _input_rhs(names).subn(bind_point, flatpdl)
+    if count != len(names):
+        raise ValueError("determinization lost a point input")
+    flatpdl += (
+        f"\n{columns}\n{index} = elementof(integers)\n"
+        f"{function} = functionof({score}, {index} = {index})\n"
+        f"{result} = broadcast({function}, "
+        f"{index} = [{', '.join(str(i) for i in range(1, len(points) + 1))}])\n"
+    )
+    return _score_flatpdl_batch([flatpdl], result, vector_size=len(points))
 
-    return _score_flatpdl_batch(sources, "__score__")
+
+def _input_set(value) -> str:
+    """Preserve scalar versus nested-array inputs without baking their values."""
+    if isinstance(value, (list, tuple)):
+        elem = _input_set(value[0]) if value else "reals"
+        if any(_input_set(v) != elem for v in value):
+            raise ValueError("model inputs must be rectangular arrays of one element kind")
+        return f"cartpow({elem}, {len(value)})"
+    return "booleans" if isinstance(value, bool) else "reals"
 
 
 def parse_expected(v):
@@ -102,9 +123,9 @@ def parse_expected(v):
 # Canonical full syntax puts top-level binding names at column zero and indents
 # continued expressions. Consume the complete RHS, including wrapped defaults.
 # §13 also promotes external and derived fixed inputs.
-def _input_rhs(name: str) -> re.Pattern[str]:
+def _input_rhs(names: list[str]) -> re.Pattern[str]:
     return re.compile(
-        r"^(" + re.escape(name) + r"[ \t]*=[ \t]*)(.*?)"
+        r"^((?:" + "|".join(re.escape(name) for name in names) + r")[ \t]*=[ \t]*)(.*?)"
         r"(?=^\w+[ \t]*(?:=|~|:)|\Z)",
         re.M | re.S,
     )
@@ -130,7 +151,7 @@ def abi_input_names(flatpdl_src: str) -> list[str]:
     whose model already declares its point coordinates as `elementof` reuses
     those bindings directly. Tuple order IS the ABI order (flatppl-design
     "Determinization" -> "Signature: `inputs` and `outputs`")."""
-    m = _input_rhs("inputs").search(flatpdl_src)
+    m = _input_rhs(["inputs"]).search(flatpdl_src)
     if m is None:
         raise ValueError("module declares no `inputs` binding (not an ABI module)")
     rhs = m.group(2).strip()
@@ -146,7 +167,11 @@ def determinize_abi(model: Path, query: Path) -> str:
     the same module, so both engines score byte-identical source. Done ONCE per
     model: the result is reused across every point, unlike the theta-splice path
     which re-determinizes per point."""
-    src = model.read_text().rstrip() + "\n" + query.read_text().lstrip()
+    return _determinize(model, query.read_text(), ["inputs", "outputs"])
+
+
+def _determinize(model: Path, query: str, roots: list[str]) -> str:
+    src = model.read_text().rstrip() + "\n" + query.lstrip()
     # §04 resolves relative module/data paths from the containing source file.
     # Keep the concatenated input beside the model, as emit_concat does.
     with tempfile.NamedTemporaryFile(
@@ -157,7 +182,8 @@ def determinize_abi(model: Path, query: Path) -> str:
         in_path = Path(inp.name)
         out_path = Path(tmp) / "abi.flatpdl.flatppl"
         det = subprocess.run(
-            [str(CONFIG.flatppl_bin), "determinize", str(in_path), "-o", str(out_path)],
+            [str(CONFIG.flatppl_bin), "determinize", str(in_path),
+             *[arg for root in roots for arg in ("--keep", root)], "-o", str(out_path)],
             capture_output=True, text=True,
         )
         if det.returncode == 3:
@@ -178,10 +204,11 @@ def determinize_abi(model: Path, query: Path) -> str:
 
 @dataclass
 class PointScore:
-    """One ABI point's scoring outcome. `error` set means this point's
-    binding could not be evaluated -- the caller turns that into a failed
-    CheckResult for this point alone, leaving every other point's outcome
-    (in the same batch) unaffected."""
+    """One point's score or evaluation error.
+
+    A failed vector evaluation marks every point in that vector as failed.
+    Nonfinite numeric results remain individual values, not evaluation errors.
+    """
     value: float | None
     error: str | None = None
 
@@ -212,7 +239,7 @@ def score_abi_points(
         for name, field in zip(names, fields):
             if field not in pt:
                 raise ValueError(f"point {pt} has no value for ABI field {field!r}")
-            pat = _input_rhs(name)
+            pat = _input_rhs([name])
             src, n = pat.subn(lambda m: m.group(1) + _literal(pt[field]) + "\n", src, count=1)
             if n != 1:
                 raise ValueError(
@@ -238,7 +265,9 @@ def _score_flatpdl_binding(flatpdl_path: Path, binding: str) -> float:
     return float(proc.stdout.strip())
 
 
-def _score_flatpdl_batch(sources: list[str], binding: str) -> list[PointScore]:
+def _score_flatpdl_batch(
+    sources: list[str], binding: str, *, vector_size: int | None = None,
+) -> list[PointScore]:
     """Evaluate `binding` in each of `sources`, in ONE Node process -- the
     `sample_sweep.cjs` pattern applied to the ABI-point path (see
     `scoring/score_flatpdl_batch.cjs`'s header). Pays the ~0.3s engine-load
@@ -246,8 +275,10 @@ def _score_flatpdl_batch(sources: list[str], binding: str) -> list[PointScore]:
 
     A source that fails to evaluate comes back as `{"ok": false, "error":
     ...}` from the batch script rather than a nonzero exit, so one bad point
-    surfaces as that point's `PointScore.error` -- the rest of the batch's
-    results are still returned."""
+    surfaces as that source's `PointScore.error`. With `vector_size`, evaluate
+    one source and return one row per vector element; a source-level error
+    fails the entire vector, while nonfinite scores remain individual values.
+    """
     with tempfile.TemporaryDirectory() as tmp:
         sources_path = Path(tmp) / "sources.json"
         sources_path.write_text(json.dumps(sources))
@@ -255,6 +286,7 @@ def _score_flatpdl_batch(sources: list[str], binding: str) -> list[PointScore]:
             [
                 CONFIG.node_bin, str(CONFIG.flatpdl_batch_scorer), str(sources_path), binding,
                 "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
+                *(["--vector-size", str(vector_size)] if vector_size is not None else []),
             ],
             capture_output=True, text=True,
         )
@@ -265,9 +297,10 @@ def _score_flatpdl_batch(sources: list[str], binding: str) -> list[PointScore]:
             raise RuntimeError(f"score_flatpdl_batch failed: {proc.stderr.strip()}")
         rows = json.loads(proc.stdout)
 
-    if len(rows) != len(sources):
+    expected_rows = vector_size if vector_size is not None else len(sources)
+    if len(rows) != expected_rows:
         raise RuntimeError(
-            f"score_flatpdl_batch returned {len(rows)} rows for {len(sources)} sources"
+            f"score_flatpdl_batch returned {len(rows)} rows, expected {expected_rows}"
         )
 
     out: list[PointScore] = []
