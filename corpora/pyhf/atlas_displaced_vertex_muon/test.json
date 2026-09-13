@@ -1,0 +1,199 @@
+{
+  "provenance": {
+    "paper": "https://arxiv.org/abs/2003.11956",
+    "resource": "https://doi.org/10.17182/hepdata.91760.v2/r1",
+    "download": "https://www.hepdata.net/record/resource/2514540?view=true",
+    "source_sha256": "06d276bf9106bc6955bb3218d3d72f2efb5d390b7df6de8578374d5f91deec53",
+    "workspace": "Likelihoods/DVPlusMuConfig/SRMET_StopRHadron_1000_100.json",
+    "workspace_sha256": "994567e32d1adb4c1111a389a09475c9f360d99dbe254cb90d8803ab8c5aef2d",
+    "license": "CC0-1.0",
+    "license_source": "https://api.datacite.org/dois/10.17182/hepdata.91760.v2%2Fr1",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
+  },
+  "point_labels": [
+    "suggested_init",
+    "poi_-0.5",
+    "poi_+0.5",
+    "scalar_nuisance_-0.5",
+    "scalar_nuisance_+0.5",
+    "per_bin_-0.5",
+    "per_bin_+0.5",
+    "mixed_-0.5",
+    "mixed_+0.5"
+  ],
+  "point_selection": "suggested_init_and_shifts",
+  "checks": [
+    {
+      "id": "static_integrity",
+      "kind": "static_integrity",
+      "canonical_sha256": "688ccbe9ba1c92842b28f947327096364b9d2386c38ce73cf1e91309de85a77b"
+    },
+    {
+      "id": "logpdf_points",
+      "kind": "logpdf_points",
+      "binding": "likelihood",
+      "comparison": {
+        "type": "pointwise_comp",
+        "rule": "|evaluated - expected| <= atol + rtol * |expected|"
+      },
+      "points": [
+        {
+          "lumi": 1.0,
+          "mu_Sig": 1.0,
+          "SigXSec": 0.0,
+          "BGSyst": [
+            1.0
+          ],
+          "SigSyst": [
+            1.0
+          ],
+          "BGStat": [
+            1.0
+          ]
+        },
+        {
+          "lumi": 1.0,
+          "mu_Sig": 0.5,
+          "SigXSec": 0.0,
+          "BGSyst": [
+            1.0
+          ],
+          "SigSyst": [
+            1.0
+          ],
+          "BGStat": [
+            1.0
+          ]
+        },
+        {
+          "lumi": 1.0,
+          "mu_Sig": 1.5,
+          "SigXSec": 0.0,
+          "BGSyst": [
+            1.0
+          ],
+          "SigSyst": [
+            1.0
+          ],
+          "BGStat": [
+            1.0
+          ]
+        },
+        {
+          "lumi": 0.9915,
+          "mu_Sig": 1.0,
+          "SigXSec": -0.5,
+          "BGSyst": [
+            1.0
+          ],
+          "SigSyst": [
+            1.0
+          ],
+          "BGStat": [
+            1.0
+          ]
+        },
+        {
+          "lumi": 1.0085,
+          "mu_Sig": 1.0,
+          "SigXSec": 0.5,
+          "BGSyst": [
+            1.0
+          ],
+          "SigSyst": [
+            1.0
+          ],
+          "BGStat": [
+            1.0
+          ]
+        },
+        {
+          "lumi": 1.0,
+          "mu_Sig": 1.0,
+          "SigXSec": 0.0,
+          "BGSyst": [
+            1.1860465116279069
+          ],
+          "SigSyst": [
+            0.9042934171661373
+          ],
+          "BGStat": [
+            1.1860465116279069
+          ]
+        },
+        {
+          "lumi": 1.0,
+          "mu_Sig": 1.0,
+          "SigXSec": 0.0,
+          "BGSyst": [
+            0.813953488372093
+          ],
+          "SigSyst": [
+            1.0957065828338628
+          ],
+          "BGStat": [
+            0.813953488372093
+          ]
+        },
+        {
+          "lumi": 0.9915,
+          "mu_Sig": 1.5,
+          "SigXSec": -0.5,
+          "BGSyst": [
+            1.1860465116279069
+          ],
+          "SigSyst": [
+            0.9042934171661373
+          ],
+          "BGStat": [
+            1.1860465116279069
+          ]
+        },
+        {
+          "lumi": 1.0085,
+          "mu_Sig": 0.5,
+          "SigXSec": 0.5,
+          "BGSyst": [
+            0.813953488372093
+          ],
+          "SigSyst": [
+            1.0957065828338628
+          ],
+          "BGStat": [
+            0.813953488372093
+          ]
+        }
+      ],
+      "expected": [
+        -321.68288544906466,
+        -162.1504703726944,
+        -481.2153005254349,
+        -301.19179819121325,
+        -342.39013831468344,
+        -291.6911407908896,
+        -352.45997872686945,
+        -408.0712105608518,
+        -189.11683466808407
+      ],
+      "tolerance": {
+        "atol": 1e-09,
+        "rtol": 0.0
+      }
+    }
+  ],
+  "test_type": "convert",
+  "engines": [
+    "det-js",
+    "iree"
+  ],
+  "fixture_kind": "pyhf",
+  "source": "pyhf.json",
+  "oracle": {
+    "tool": "pyhf",
+    "version": "0.7.6",
+    "backend": "numpy 64b",
+    "generator": "corpora/pyhf/gen_expected.py",
+    "seed": null,
+    "quantity": "pyhf.Model.logpdf(pars, workspace.data(model)) -- ABSOLUTE, no reference point subtracted"
+  }
+}

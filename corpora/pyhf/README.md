@@ -1,9 +1,9 @@
 # pyhf corpus
 
-183 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
+186 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
 scored against **pyhf's own absolute `Model.logpdf`**. The 172 audit workspaces
-retain six parameter points each; eleven paper-backed workspaces add 117
-points. 1149 frozen numbers. The whole matrix of the pyhf import audit
+retain six parameter points each; fourteen paper-backed workspaces add 148
+points. 1180 frozen numbers. The whole matrix of the pyhf import audit
 (`flatppl-dev/audit-fix-pyhf.md`), which found five wrong-number defect classes
 in the converter — every one of which converted at exit 0 and passed every gate
 the suite had, because the suite had no way to hold a pyhf fixture at all.
@@ -65,7 +65,7 @@ Emission, compilation, and scoring errors
 fail the row rather than relaxing the numeric check.
 
 Large-model compilation is still a constraint. On macOS ARM64, the 172
-synthetic workspaces and all eleven published workspaces pass these IREE checks,
+synthetic workspaces and all fourteen published workspaces pass these IREE checks,
 including stau. Every row retains the same points and tolerances as its JS check.
 
 The default environment still runs JS; unavailable IREE rows skip unless
@@ -155,8 +155,12 @@ shifts. Fixed parameters stay fixed, and shifts are clipped to suggested bounds:
   normalization parameters.
 
 Directions with no active parameters are omitted. The displaced-lepton fixture
-has neither template nor per-bin parameters, so it has seven distinct points;
-the other ten paper-backed fixtures each have eleven.
+has neither template nor per-bin parameters, so it has seven distinct points.
+The displaced-vertex-plus-muon workspace has per-bin but no template parameters,
+so it has nine points. The other twelve paper-backed workspaces each have eleven.
+The FCNC photon workspace uses ±0.01 signal-strength shifts, including mixed
+points: its nominal signal strength is zero, and −0.5 produces negative Poisson
+means in pyhf despite lying within the fit bounds. Its nuisance shifts stay unchanged.
 
 Alternating signs follow pyhf's flattened parameter order. Each direction and
 its negative form a pair. The exact points and labels are frozen in `test.json`;
@@ -202,7 +206,7 @@ should do.
 | `two_hist`, `two_norm`, `two_shap`, `two_stat` | 4 | each kind in two channels, per-channel names for the per-bin kinds |
 | `pyhfval_*` | 10 | pyhf's own `tests/test_validation.py` workspaces |
 | named | 35 | the surface items and defect classes the audit called out individually (below) |
-| `atlas_*`, `belle2_*` | 11 | paper-backed models described below |
+| `atlas_*`, `belle2_*` | 14 | paper-backed models described below |
 
 The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 `three_channels_all_kinds`, `all_kinds_one_sample`, `two_histosys`,
@@ -343,8 +347,14 @@ Its worst difference at rust `78e0b03` is **1.421e-14**, inside the corpus's
 | `atlas_boosted_ww` | [ATLAS boosted hadronic bosons, 2108.07586](https://arxiv.org/abs/2108.07586), WW | 2 / 2 | 82 |
 | `atlas_displaced_leptons` | [ATLAS displaced leptons, 2011.07812](https://arxiv.org/abs/2011.07812), combined | 3 / 3 | 16 |
 | `belle2_knunu_combined` | [Belle II B to K neutrinos, 2311.14647](https://arxiv.org/abs/2311.14647), combined ITA + HTA | 5 / 30 | 232 |
+| `atlas_single_top_schannel` | [ATLAS single-top s-channel, 2209.08990](https://arxiv.org/abs/2209.08990) | 1 / 18 | 188 |
+| `atlas_top_fcnc_photon` | [ATLAS top–photon FCNC, 2205.02537](https://arxiv.org/abs/2205.02537), left-handed tuγ | 3 / 48 | 272 |
+| `atlas_displaced_vertex_muon` | [ATLAS displaced vertex plus muon, 2003.11956](https://arxiv.org/abs/2003.11956), SRMET stop R-hadron | 1 / 1 | 6 |
 
 These analyses appear in [pyhf's usage list](https://pyhf.readthedocs.io/en/v0.7.6/citations.html).
+The three newest workspaces come directly from HEPData. Each has file-specific
+CC0-1.0 rights metadata, recorded with the download URL and SHA-256 hash in its
+own directory. No paper-level open-access claim substitutes for a model license.
 Belle II's full likelihood has a later [dedicated release](https://arxiv.org/abs/2507.12393).
 The sbottom source is [HEPData 89408 v3/r2](https://doi.org/10.17182/hepdata.89408.v3/r2),
 using `RegionA` and `RegionC` with patch `sbottom_1300_850_60`. The stau source is
