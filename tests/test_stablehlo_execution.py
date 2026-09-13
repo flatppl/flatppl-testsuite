@@ -182,6 +182,8 @@ def test_iid_broadcast_preserves_multivariate_cells(
 
 @pytest.mark.stablehlo_only
 @pytest.mark.parametrize(("body", "expected"), [
+    ("x = elementof(reals)\ng = functionof(x + 1.0)\nf = functionof(g(x = x))\nscore = f(x = sum(xs)) + f(x = 2.0)", 8.5),
+    ("f(x) = x\nscore = sum(f(xs)) + f(xs[1]) + sum(f([xs[2], xs[3]]))", 9.0),
     ('hep = standard_module("particle-physics", "0.1")\ng = hep.kallen\nscore = sum(g.(xs, 1.0, 2.0))', -15.25),
     ('hep = standard_module("particle-physics", "0.1")\nf(x) = sum(hep.interp_poly6_exp.([0.5, 0.25], 1.0, [2.0, 4.0], 2*x-3))\nscore = sum(f.(xs))', 22.3125),
     ('poly = standard_module("polynomials", "0.1")\nn = 2\nscore = sum(poly.legendre.(n, xs))', 11.625),
