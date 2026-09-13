@@ -98,7 +98,8 @@ def test_promoted_input_replaces_a_wrapped_default_not_its_documentation(tmp_pat
 
 
 @pytest.mark.skipif(not ex.engine_available(), reason="det-js path unavailable")
-def test_an_out_of_support_point_scores_as_minus_inf_not_a_crash():
+@pytest.mark.parametrize("scorer", ["abi", "broadcast"])
+def test_an_out_of_support_point_scores_as_minus_inf_not_a_crash(scorer):
     """A point outside a parameter's support has a log-density of exactly
     -inf -- a live corpus shape (`detjs_exec.parse_expected`'s docstring names
     it, e.g. fragment/trunc_out), not a broken point. The batched scorer sends
@@ -112,14 +113,21 @@ def test_an_out_of_support_point_scores_as_minus_inf_not_a_crash():
     point = dict(body["points"][0])
     point["sigma1"] = 50.0  # outside Uniform(interval(0.1, 20.0)) in model.flatppl
 
-    scores = ex.score_abi_points(
-        model=dir / body["model"],
-        query=dir / "query.flatppl",
-        fields=body["inputs"],
-        points=[point],
-    )
+    points = [body["points"][0], point, body["points"][0]]
+    if scorer == "broadcast":
+        scores = ex.log_density_points(dir / body["model"], body["binding"], points)
+    else:
+        scores = ex.score_abi_points(
+            model=dir / body["model"],
+            query=dir / "query.flatppl",
+            fields=body["inputs"],
+            points=points,
+        )
 
-    assert len(scores) == 1
-    score = scores[0]
+    assert len(scores) == 3
+    assert scores[0].error is None and scores[2].error is None
+    assert math.isfinite(scores[0].value)
+    assert scores[0].value == scores[2].value
+    score = scores[1]
     assert score.error is None, f"out-of-support point should score, not error: {score.error}"
     assert score.value == float("-inf"), f"expected -inf, got {score.value!r}"

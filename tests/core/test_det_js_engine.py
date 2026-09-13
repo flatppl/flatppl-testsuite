@@ -11,8 +11,10 @@ here from `math` (independent of both flatppl-js and the sibling engine).
 """
 from __future__ import annotations
 
+import json
 import math
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -47,12 +49,59 @@ def test_det_js_scores_gaussian(tmp_path):
     )
 
 
+def test_log_density_points_determinizes_once_per_model(tmp_path, monkeypatch):
+    model = tmp_path / "batch.flatppl"
+    model.write_text(
+        "__point_0__ = 0.0\ninputs = (__point_0__)\noutputs = 1.0\n"
+        "M = joint(a = Normal(__point_0__, 1.0), b = iid(Normal(0.0, 1.0), 2))\n"
+    )
+    run = subprocess.run
+    determinizations = []
+    evaluated_sources = []
+
+    def tracked_run(command, *args, **kwargs):
+        if len(command) > 1 and command[1] == "determinize":
+            determinizations.append(command)
+        if len(command) > 2 and str(command[1]) == str(CONFIG.flatpdl_batch_scorer):
+            evaluated_sources.extend(json.loads(Path(command[2]).read_text()))
+        return run(command, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", tracked_run)
+    points = [
+        {"a": 0.0, "b": [0.0, 0.0]},
+        {"b": [2.0, 3.0], "a": 1.0},
+        {"a": 0.0, "b": [0.0, 0.0]},
+    ]
+    scores = log_density_points(model, "M", points)
+    base = -1.5 * math.log(2 * math.pi)
+    assert all(score.error is None for score in scores), scores
+    assert [score.value for score in scores] == pytest.approx(
+        [base, base - 7.0, base], rel=0, abs=1e-9,
+    )
+    assert len(determinizations) == 1
+    assert len(evaluated_sources) == 1
+
+
 def _record_scores(model, binding, points, scorer):
     if scorer == "single":
         return [get_engine("det-js").log_density(model, binding, point) for point in points]
     scores = log_density_points(model, binding, points)
     assert all(score.error is None for score in scores)
     return [score.value for score in scores]
+
+
+def test_log_density_points_preserves_nested_event_axes(tmp_path):
+    model = tmp_path / "nested.flatppl"
+    model.write_text(
+        "b = elementof(cartpow(cartpow(reals, 2), 2))\n"
+        "mu = sum(exp.(sum.(b)))\nM = likelihoodof(Normal(mu, 1.0), 0.0)\n"
+    )
+    values = _record_scores(model, "M", [
+        {"b": [[0.0, 0.0], [0.0, 0.0]]},
+        {"b": [[0.0, 1.0], [1.0, 0.0]]},
+    ], "batch")
+    base = -0.5 * math.log(2 * math.pi)
+    assert values == pytest.approx([base - 2, base - 2 * math.exp(2)], rel=0, abs=1e-9)
 
 
 @pytest.mark.parametrize("scorer", ["single", "batch"])
