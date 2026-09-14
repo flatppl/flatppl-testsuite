@@ -205,6 +205,7 @@ def test_iid_broadcast_preserves_multivariate_cells(
     ("f(x) = ifelse(isfinite(log10(x)), x, 0.0)\nscore = sum(f.(xs))", 4.5),
     ("f(i) = xs[i]\nscore = sum(f.([1, 2, 3]))", 4.5),
     ("f(x) = sum(get([x, x + 1.0, x + 2.0], [3, 1, 3]))\nscore = sum(f.(xs))", 25.5),
+    ("f(a, b) = a\np = f.([xs[1]], [1.0, 2.0, 3.0, 4.0])\nq = f.([xs[2]], [1.0, 2.0, 3.0, 4.0])\nscore = exp(p[4]) + exp(p[2]) + q[4]*q[4] + q[1]*q[1]", 2*np.exp(0.5) + 4.5),
     ("f(x) = (x > 1.0) && !(x > 2.0)\nscore = sum(f.(xs))", 1),
     ("f(x) = lall([x > 1.0, x > 2.0])\nscore = sum(f.(xs))", 1),
 ])
