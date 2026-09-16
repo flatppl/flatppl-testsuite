@@ -293,8 +293,9 @@ _HELD_OUT = {
         "element and the coordinate chart give 1.0, 0.6816 and 0.5 for the same "
         "volume term. The oracle withholds (`oracle._MANIFOLD_SAFE_FORWARDS`), so a "
         "generated row here would carry no checkable value. Tracked as an open spec "
-        "question in flatppl-dev/measure-algebra-audit.md; this hold-out retires when "
-        "that question is ruled on, NOT when an engine changes -- "
+        "question for flatppl-design §06 (see flatppl-js "
+        "packages/engine/ARCHITECTURE.md, 'Measure-algebra scar zones'); this hold-out "
+        "retires when that question is ruled on, NOT when an engine changes -- "
         "`tests/sweep/test_vector_arms.py` fails if either the emitted value or the "
         "oracle's withhold moves",
     ),

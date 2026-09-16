@@ -19,7 +19,7 @@ One hold-out remains, and its cause is NOT an engine gap:
 `dirichlet + pushfwd(exp)` scores fine — the sweep has nothing to check the number
 against, because §06 scopes `Lebesgue` to lower-dimensional embedded **affine**
 sets and `exp`'s image of the simplex is curved. It retires on a spec ruling
-(`flatppl-dev/measure-algebra-audit.md`), not on an engine release, and the pin
+(an open spec question for `flatppl-design` §06), not on an engine release, and the pin
 here fails if the emitted value, the oracle's withhold, or the recorded category
 moves. The distinction matters: an engine-gap hold-out and an oracle-gap hold-out
 retire on different events, so `space._HELD_OUT` records the category per shape.
@@ -269,8 +269,7 @@ def test_the_dirichlet_pushfwd_exp_holdout_is_an_oracle_gap_not_an_engine_gap():
        shape must be reinstated with a real oracle value);
     3. the shape is still out of the generated family.
 
-    It retires on a SPEC RULING, recorded in
-    `flatppl-dev/measure-algebra-audit.md`, not on an engine release.
+    It retires on a SPEC RULING in `flatppl-design` §06, not on an engine release.
     """
     probe = _probe("dirichlet", Wrap("pushfwd", ("exp",)))
 
@@ -283,8 +282,8 @@ def test_the_dirichlet_pushfwd_exp_holdout_is_an_oracle_gap_not_an_engine_gap():
         f"the determiniser now emits {verdict.value} for pushfwd(exp, Dirichlet), not "
         f"the ambient-Jacobian {_DIRICHLET_PUSHFWD_EXP_EMITTED}. If it moved to the "
         "Hausdorff (0.6816) or chart (0.5) volume term, the manifold question has "
-        "been decided somewhere -- check flatppl-dev/measure-algebra-audit.md and "
-        "reinstate this shape with the matching oracle rule")
+        "been decided somewhere -- check flatppl-design §06 and reinstate this "
+        "shape with the matching oracle rule")
 
     with pytest.raises(OracleUnsupported, match="affine"):
         true_logpdf(probe)
@@ -299,8 +298,8 @@ def test_the_dirichlet_pushfwd_exp_holdout_is_an_oracle_gap_not_an_engine_gap():
     assert "affine" in reason.lower(), (
         "the reason no longer names the §06 affine scoping that justifies the "
         "withhold")
-    assert "measure-algebra-audit" in reason, (
-        "the reason no longer points at where the open spec question is tracked")
+    assert "open spec question" in reason, (
+        "the reason no longer says this is an unruled spec question rather than a bug")
 
 
 def test_the_emitted_ambient_volume_term_is_exactly_one_on_the_simplex():
