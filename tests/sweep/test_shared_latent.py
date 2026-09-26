@@ -9,6 +9,7 @@ which lowering produced it** — a row can claim to cover the shared-ancestor re
 law while the emitted FlatPDL scored two independent marginals.
 """
 import math
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -587,7 +588,12 @@ def _binding(emitted: str, name: str) -> str:
         if ln and not ln[0].isspace():
             break
         out.append(ln)
-    return "\n".join(out).strip()
+    # Generated density-lambda IDs depend on unrelated earlier queries.
+    # Rename them consistently, preserving distinct variables and every use.
+    body = "\n".join(out).strip()
+    names = {}
+    return re.sub(r"\bdensity_point_\d+\b", lambda match: names.setdefault(
+        match[0], f"density_point_{len(names)}"), body)
 
 
 def _determinize(probe) -> tuple[int, str, str]:
