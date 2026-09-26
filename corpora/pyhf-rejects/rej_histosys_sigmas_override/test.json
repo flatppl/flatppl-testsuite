@@ -23,7 +23,7 @@
       "id": "convert_outcome",
       "kind": "convert_outcome",
       "expect_exit": 1,
-      "stderr_contains": "unsupported HS3 construct: measurement `m` sets `sigmas` on parameter `h`, but a `histosys` modifier's parameter does not use `sigmas`"
+      "stderr_contains": "unsupported HS3 construct: configuration sets `sigmas` on parameter `h`, but a `histosys` modifier's parameter does not use `sigmas`"
     }
   ]
 }
