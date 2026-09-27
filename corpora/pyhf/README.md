@@ -1,13 +1,19 @@
 # pyhf corpus
 
-172 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
+173 vendored pyhf workspaces, converted with `flatppl convert --from pyhf` and
 scored against **pyhf's own absolute `Model.logpdf`** at six parameter points
-each. 1032 frozen numbers. The whole matrix of the pyhf import audit
+each. 1038 frozen numbers. The whole matrix of the pyhf import audit
 (`flatppl-dev/audit-fix-pyhf.md`), which found five wrong-number defect classes
 in the converter — every one of which converted at exit 0 and passed every gate
 the suite had, because the suite had no way to hold a pyhf fixture at all.
 
 The refusal side lives beside this, in `corpora/pyhf-rejects/`.
+
+`parameter_names` promotes the former `rej_bad_param_name` document to numeric
+coverage. Its source keeps `mu-1`. The fixture records
+`"parameter_names": {"mu-1": "mu_1"}`, matching the converter's explicit mapping.
+The generator uses source names for pyhf and emitted names for FlatPPL records,
+checks the mapping against emitted bindings, and retains it during regeneration.
 
 ## What makes it different from `corpora/hs3/`
 

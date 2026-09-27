@@ -210,16 +210,25 @@ def generate(dir: Path) -> tuple[str, list[float]]:
 
     test_path = dir / "test.json"
     body = json.loads(test_path.read_text()) if test_path.exists() else {}
+    # The fixture records explicit source-name -> emitted-binding mappings.
+    renamed = body.get("parameter_names", {})
+    names = {p: renamed.get(p, p) for p in model.config.par_order}
+    if (set(renamed) - set(names) or len(set(names.values())) != len(names)
+            or set(names.values()) != set(shapes)):
+        raise RuntimeError("fixture parameter names do not match the emitted bindings")
+    source_shapes = {p: shapes[target] for p, target in names.items()}
     check = next(
         (c for c in body.get("checks", []) if c.get("kind") == "logpdf_points"), None
     )
 
     if check is not None and check.get("points"):
         records = check["points"]
-        par_points = [record_to_pars(model, r) for r in records]
+        par_points = [record_to_pars(model, {p: r[target] for p, target in names.items()})
+                      for r in records]
     else:
         par_points = draw_points(model)
-        records = [as_record(model, p, shapes) for p in par_points]
+        records = [{names[name]: value for name, value in as_record(model, p, source_shapes).items()}
+                   for p in par_points]
 
     expected = [float(model.logpdf(p, data)[0]) for p in par_points]
 

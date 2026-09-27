@@ -29,8 +29,8 @@ EXPECTED_COUNTS = {
     "examples": 15,
     "fragment": 21,
     "hs3": 12,
-    "pyhf": 172,
-    "pyhf-rejects": 30,
+    "pyhf": 173,
+    "pyhf-rejects": 29,
     "sample": 1,
     "stablehlo": 33,
     "stablehlo-gradient": 21,
@@ -152,7 +152,7 @@ EXPECTED_PYHF_NAMED = {
     "histosys_shapesys",
     "lumi_multi_channel", "lumi_with_normsys", "many_bins", "multichan_old",
     "normfactor_shared_across_channels_diff_bins", "normsys_auxdata_override",
-    "normsys_histosys_share_a_name", "one_bin", "poi_bounds_inits",
+    "normsys_histosys_share_a_name", "one_bin", "parameter_names", "poi_bounds_inits",
     "shapefactor_shared_across_channels", "shapesys_factors_override",
     "shapesys_zero_nominal_bin", "shapesys_zero_unc_bin",
     "shared_histosys_across_samples", "shared_normfactor_across_channels",
@@ -166,11 +166,10 @@ EXPECTED_PYHF_NAMED = {
     "two_hist", "two_norm", "two_shap", "two_stat",
     "two_measurements_conflicting_auxdata", "two_measurements_diff_poi",
 }
-# The rejection corpus, pinned by name: 31 documents, one per pyhf
-# validation-failure class plus the six the converter and pyhf disagree about.
+# The rejection corpus, pinned by name: 29 documents, one per pyhf
+# validation-failure class plus the four the converter and pyhf disagree about.
 # A dropped document silently removes a whole failure class from the gate.
 EXPECTED_PYHF_REJECTS = {
-    "rej_bad_param_name",
     "rej_channel_no_samples",
     "rej_duplicate_channel_name",
     "rej_duplicate_sample_name",
@@ -206,7 +205,7 @@ EXPECTED_PYHF_REJECTS = {
 # `corpora/pyhf-rejects/README.md`. A new name appearing here is a real finding
 # and needs a reason before the pin moves.
 EXPECTED_PYHF_MISMATCHES = {
-    "rej_bad_param_name", "rej_measurement_missing_poi", "rej_no_measurements",
+    "rej_measurement_missing_poi", "rej_no_measurements",
     "rej_modifier_extra_key", "shapefactor_shared_diff_bins",
 }
 # Examples deliberately NOT given a test dir (recorded when the legacy
