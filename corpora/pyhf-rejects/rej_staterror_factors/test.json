@@ -23,7 +23,7 @@
       "id": "convert_outcome",
       "kind": "convert_outcome",
       "expect_exit": 1,
-      "stderr_contains": "unsupported HS3 construct: measurement `m` sets `factors` on parameter `st`, but a `staterror` modifier's parameter does not use `factors`"
+      "stderr_contains": "unsupported HS3 construct: configuration sets `factors` on parameter `st`, but a `staterror` modifier's parameter does not use `factors`"
     }
   ]
 }

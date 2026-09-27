@@ -9,30 +9,34 @@ syst3 = elementof(reals)
 model_channel1_observed = [122.0, 112.0]
 % Nominal yields for sample "signal".
 model_channel1_signal_nominal = [20.0, 10.0]
-% Expected yields for sample "signal" (nominal x modifiers).
-model_channel1_signal_expected = mul.(
-  model_channel1_signal_nominal .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst1),
-  mu,
-)
 % Nominal yields for sample "background1".
 model_channel1_background1_nominal = [100.0, 0.0]
-% Expected yields for sample "background1" (nominal x modifiers).
-model_channel1_background1_expected = mul.(
-  model_channel1_background1_nominal .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst2),
-  mcstat,
-)
 % Nominal yields for sample "background2".
 model_channel1_background2_nominal = [0.0, 100.0]
+% Distinct normalization factors.
+model_channel1_normsys_interp_poly6_exp = hepphys.interp_poly6_exp.(
+  [0.95, 0.95, 0.95],
+  1.0,
+  [1.05, 1.05, 1.05],
+  [syst1, syst2, syst3],
+)
+% Expected yields for sample "signal" (nominal x modifiers).
+model_channel1_signal_expected = mul.(
+  model_channel1_signal_nominal .* model_channel1_normsys_interp_poly6_exp[1],
+  mu,
+)
+% Expected yields for sample "background1" (nominal x modifiers).
+model_channel1_background1_expected = mul.(
+  model_channel1_background1_nominal .* model_channel1_normsys_interp_poly6_exp[2],
+  mcstat,
+)
 % Expected yields for sample "background2" (nominal x modifiers).
 model_channel1_background2_expected = mul.(
-  model_channel1_background2_nominal .* hepphys.interp_poly6_exp(0.95, 1.0, 1.05, syst3),
+  model_channel1_background2_nominal .* model_channel1_normsys_interp_poly6_exp[3],
   mcstat,
 )
 % Total expected counts per bin (sum over samples).
-model_channel1_expected = add.(
-  model_channel1_signal_expected .+ model_channel1_background1_expected,
-  model_channel1_background2_expected,
-)
+model_channel1_expected[.col] := rowstack([model_channel1_signal_expected, model_channel1_background1_expected, model_channel1_background2_expected])[.row, .col]
 % Per-bin Poisson observation model for channel "model_channel1".
 model_channel1_model = functionof(Poisson.(model_channel1_expected))
 % Observation likelihood term for channel "model_channel1".

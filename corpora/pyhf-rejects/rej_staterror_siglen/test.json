@@ -23,7 +23,7 @@
       "id": "convert_outcome",
       "kind": "convert_outcome",
       "expect_exit": 1,
-      "stderr_contains": "unsupported HS3 construct: measurement `m` sets 1 `sigmas` value(s) on parameter `st`, which has 2"
+      "stderr_contains": "unsupported HS3 construct: configuration sets 1 `sigmas` value(s) on parameter `st`, which has 2"
     }
   ]
 }
