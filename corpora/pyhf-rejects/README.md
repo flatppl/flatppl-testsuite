@@ -1,11 +1,11 @@
 # pyhf rejection corpus
 
-30 pyhf documents with no log-density to freeze, so what each row holds is the
+29 pyhf documents with no log-density to freeze, so what each row holds is the
 converter's **outcome**: its exit code and, for a refusal, a substring of its
 message. The refusal half of `corpora/pyhf/`, from the same import audit
 (`flatppl-dev/audit-fix-pyhf.md`).
 
-One document per pyhf validation-failure class, plus the five where the
+One document per pyhf validation-failure class, plus the four where the
 converter and pyhf disagree. A `logpdf_points` row cannot cover this: a
 document that exits 1 has nothing to score, and the property under test is that
 the converter refuses it *for the same reason pyhf does*.
@@ -43,11 +43,10 @@ document it rejects and manufacture a mismatch that is not one.
 
 ## Outcomes
 
-23 both refuse, 2 both accept and agree, 5 disagree.
+23 both refuse, 2 both accept and agree, 4 disagree.
 
 | Document | pyhf | converter | agree | The defect the converter names |
 |---|---|---|:--:|---|
-| `rej_bad_param_name` | accepts | exit 1 | **no** | parameter name `mu-1` contains `-`, so it cannot be a FlatPPL binding |
 | `rej_channel_no_samples` | refuses | exit 1 | yes | channel `c` has no samples, so it has no expected counts |
 | `rej_duplicate_channel_name` | refuses | exit 1 | yes | channel name `c` appears twice |
 | `rej_duplicate_sample_name` | refuses | exit 1 | yes | channel `c` has two samples named `b` |
@@ -83,18 +82,14 @@ a lumi modifier under a non-constant name; pyhf's schema requires the literal
 name `lumi`, and the converter reaches the same conclusion by the route it
 takes, so it reports the missing config entry.
 
-## The five mismatches
+## The four mismatches
 
 Each carries a `mismatch_reason` in its `test.json` and is pinned as a
 mismatch, not treated as a defect. `tests/core/test_corpus_roster.py` asserts
-the mismatch set is exactly these five and that each has a reason, in both
+the mismatch set is exactly these four and that each has a reason, in both
 directions: a new mismatch is a finding that needs understanding before it is
 pinned, and a mismatch that quietly *resolves* means the converter changed
 behaviour on a document whose divergence was deliberate.
-
-**The converter is stricter.** `rej_bad_param_name` — `mu-1` is not a FlatPPL
-`Name` (spec §05), so no binding can hold it, and an importer must not rename a
-parameter behind the user's back.
 
 **Schema pedantry the converter does not mirror.**
 `rej_measurement_missing_poi` (pyhf's schema requires the `poi` key; an *empty*
@@ -114,6 +109,10 @@ the native HS3 path, which legitimately carries `parameter`, `constraint`,
   the third channel-B component from the preceding parameter, so it returns a
   number that is not the document's.
 ## The tripwire fired
+
+`rej_bad_param_name` now lives at `corpora/pyhf/parameter_names`. The converter
+assigns a valid binding and records the original name explicitly, so its six
+pyhf log-density values now replace the former refusal check.
 
 `staterror_shared_across_channels` used to sit here, refused, with a note
 saying the row would fail on its exit code once the spanning lowering landed
