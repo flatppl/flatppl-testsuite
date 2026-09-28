@@ -59,12 +59,15 @@ mcstat_tau = [400.0, 100.0]
 mcstat_constraint = functionof(hepphys.ContinuedPoisson.(mcstat .* mcstat_tau))
 % staterror constraint likelihood term.
 mcstat_constraint_likelihood = likelihoodof(mcstat_constraint, mcstat_tau)
+% Independent auxiliary measurements evaluated as one tensor block.
+normal_constraints_likelihood = likelihoodof(
+  functionof(Normal.(cat([syst1], [syst2], [syst3]), cat([1.0], [1.0], [1.0]))),
+  cat([0.0], [0.0], [0.0]),
+)
 % Full likelihood: observation and constraint terms.
 likelihood = joint_likelihood(
   model_channel1_likelihood,
-  syst1_constraint_likelihood,
-  syst2_constraint_likelihood,
-  syst3_constraint_likelihood,
+  normal_constraints_likelihood,
   mcstat_constraint_likelihood,
 )
 default_domain = cartprod(
