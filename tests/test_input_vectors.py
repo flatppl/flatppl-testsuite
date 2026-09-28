@@ -8,25 +8,31 @@ from tests.test_unified import _gate_engine
 
 
 @pytest.mark.stablehlo_only
-@pytest.mark.parametrize("output", ["pick", "totals"])
+@pytest.mark.parametrize("output", ["pick", "totals", "cat_pick", "strided_pick"])
 def test_input_vector_preserves_cells_and_weighted_adjoint(tmp_path, output):
     _gate_engine("stablehlo")
     (tmp_path / "model.flatppl").write_text(
         "pick(x) = [x[4, :, :], x[1, :, :], x[4, :, :], x[2, :, :], x[1, :, :]]\n"
+        "cat_pick(x) = cat([x[4, :, :]], [x[1, :, :]], [x[4, :, :]], [x[2, :, :]], [x[1, :, :]])\n"
+        "strided_pick(x) = cat([x[1, :, :]], [x[4, :, :]])\n"
         "totals(x) = sum.(pick(x))\n"
         "batch_pick(x) = pick.(x)\n"
         "batch_totals(x) = totals.(x)\n"
+        "batch_cat_pick(x) = cat_pick.(x)\n"
+        "batch_strided_pick(x) = strided_pick.(x)\n"
     )
     query = tmp_path / "query.flatppl"
     query.write_text(
         'm = load_module("model.flatppl")\nbatch_pick = m.batch_pick\nbatch_totals = m.batch_totals\n'
+        "batch_cat_pick = m.batch_cat_pick\n"
+        "batch_strided_pick = m.batch_strided_pick\n"
         "points = elementof(cartpow(cartpow(cartpow(reals, [7, 2, 3]), 3), 2))\n"
         f"inputs = points\noutputs = batch_{output}.(points)\n"
     )
     source = ex.emit(query, "logdensity", dtype="f64")
     jax, jnp, hlo_call = ex._jax()
     evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
-    rows = [3, 0, 3, 1, 0]
+    rows = [0, 3] if output == "strided_pick" else [3, 0, 3, 1, 0]
     points = np.arange(252, dtype=float).reshape(2, 3, 7, 2, 3) / 8 - 5
     expected_value = points[:, :, rows]
     if output == "totals":
@@ -36,7 +42,7 @@ def test_input_vector_preserves_cells_and_weighted_adjoint(tmp_path, output):
     gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs) * weights)))
     expected = np.zeros_like(points)
     for i, row in enumerate(rows):
-        expected[:, :, row] += weights[:, :, i] if output == "pick" else weights[:, :, i, None, None]
+        expected[:, :, row] += weights[:, :, i] if output != "totals" else weights[:, :, i, None, None]
     np.testing.assert_array_equal(gradient(points), expected)
     points[0, 0, 0, 0, 0] = np.nan
     points[0, 1, 1, 1, 2] = np.inf
@@ -48,11 +54,42 @@ def test_input_vector_preserves_cells_and_weighted_adjoint(tmp_path, output):
 
 
 @pytest.mark.stablehlo_only
-def test_input_vector_fallbacks_keep_distinct_sources(tmp_path):
+def test_input_cat_preserves_explicit_indices_and_weighted_adjoint(tmp_path):
     _gate_engine("stablehlo")
     (tmp_path / "model.flatppl").write_text(
-        "pick(x) = [x[4], x[1], x[4], x[2], x[1]]\n"
-        "mixed(x, y) = [x[4], y[1], x[4], y[2], x[1]]\n"
+        "pick(x, i) = [cat([x[4]], [x[1]], x[[1, 4]], [x[2]], [x[1]]),\n"
+        "              cat([x[4]], [x[1]], x[i], [x[2]], [x[1]])]\n"
+    )
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        'm = load_module("model.flatppl")\npick = m.pick\n'
+        "point = elementof(cartpow(reals, 7))\n"
+        "indices = elementof(cartpow(posintegers, 2))\n"
+        "inputs = (point, indices)\noutputs = pick(point, indices)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype="f64")
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda xs, i: hlo_call(xs, i, source=source)[0])
+    point = np.arange(7, dtype=float) / 8 - 5
+    indices = np.array([5, 3], dtype=np.int64)
+    rows = np.array([[3, 0, 0, 3, 1, 0], [3, 0, 4, 2, 1, 0]])
+    weights = np.arange(12, dtype=float).reshape(2, 6) + 1
+    np.testing.assert_array_equal(evaluate(point, indices), point[rows])
+    expected = np.zeros_like(point)
+    for row, weight in zip(rows.ravel(), weights.ravel()):
+        expected[row] += weight
+    gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs, indices) * weights)))
+    np.testing.assert_array_equal(gradient(point), expected)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("as_cat", [False, True])
+def test_input_vector_fallbacks_keep_distinct_sources(tmp_path, as_cat):
+    _gate_engine("stablehlo")
+    pick = "cat([x[4]], x[[1, 4]], [x[2]], [x[1]])" if as_cat else "[x[4], x[1], x[4], x[2], x[1]]"
+    mixed = "cat([x[4]], [y[1]], [x[4]], [y[2]], [x[1]])" if as_cat else "[x[4], y[1], x[4], y[2], x[1]]"
+    (tmp_path / "model.flatppl").write_text(
+        f"pick(x) = {pick}\nmixed(x, y) = {mixed}\n"
         "both(x, y) = [mixed(x, y), pick(x .+ 10)]\n"
     )
     query = tmp_path / "query.flatppl"
@@ -63,7 +100,8 @@ def test_input_vector_fallbacks_keep_distinct_sources(tmp_path):
         "inputs = (a, b)\noutputs = both.(a, b)\n"
     )
     source = ex.emit(query, "logdensity", dtype="f64")
-    assert '"stablehlo.gather"' not in source
+    if not as_cat:
+        assert '"stablehlo.gather"' not in source
     jax, _, hlo_call = ex._jax()
     evaluate = jax.jit(lambda a, b: hlo_call(a, b, source=source)[0])
     a = np.arange(21, dtype=float).reshape(3, 7)
