@@ -109,3 +109,53 @@ def test_input_vector_fallbacks_keep_distinct_sources(tmp_path, as_cat):
     mixed = np.stack([a[:, 3], b[:, 0], a[:, 3], b[:, 1], a[:, 0]], axis=1)
     expected = np.stack([mixed, a[:, [3, 0, 3, 1, 0]] + 10], axis=1)
     np.testing.assert_array_equal(evaluate(a, b), expected)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("mode", ["direct", "computed", "mixed", "strided"])
+def test_shared_input_packet_preserves_cells_and_adjoint(tmp_path, mode):
+    _gate_engine("stablehlo")
+    (tmp_path / "model.flatppl").write_text("mapped(x) = exp.(x) .* sin.(x) .+ cos.(x)\n")
+    rows = [0, 3, 6, 9, 12, 15] if mode == "strided" else [4, 0, 6, 2, 5, 4]
+    shape, axis = ((18,), 0) if mode == "strided" else ((2, 7, 3), 1)
+    domain = "cartpow(reals, 18)" if mode == "strided" else "cartpow(reals, [2, 7, 3])"
+    selector = "[{}]" if mode == "strided" else ":, [{}], :"
+    owners = [0, 1, 0, 1, 0, 0] if mode == "mixed" else [0] * 6
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        'm = load_module("model.flatppl")\nmapped = m.mapped\n'
+        f"points = elementof({domain})\n"
+        + ("other = elementof(cartpow(reals, [2, 7, 3]))\n" if mode == "mixed" else "")
+        + ("data = points .+ 0.25\n" if mode == "computed" else "data = points\n")
+        + "".join(f"{name} = {'other' if owner else 'data'}[{selector.format(row + 1)}]\n"
+                  for name, owner, row in zip("abcdef", owners, rows))
+        + ("inputs = (points, other)\n" if mode == "mixed" else "inputs = points\n")
+        + "outputs = [a, b, c, d, e, f, mapped(a), mapped(b), mapped(c), mapped(d), mapped(e), mapped(f)]\n"
+    )
+    source = ex.emit(query, "logdensity", dtype="f64")
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda *xs: hlo_call(*xs, source=source)[0])
+    points = np.arange(np.prod(shape), dtype=float).reshape(shape) / 32 - 0.5
+    inputs = [points, -0.5 * points] if mode == "mixed" else [points]
+    selected = np.stack([np.take(inputs[owner], [row], axis=axis) for owner, row in zip(owners, rows)])
+    if mode == "computed":
+        selected += 0.25
+    expected = np.concatenate([selected, np.exp(selected) * np.sin(selected) + np.cos(selected)])
+    np.testing.assert_allclose(evaluate(*inputs), expected, atol=1e-12, rtol=1e-12)
+    weights = np.arange(1, expected.size + 1, dtype=float).reshape(expected.shape)
+    derivatives = np.exp(selected) * (np.sin(selected) + np.cos(selected)) - np.sin(selected)
+    expected_gradients = [np.zeros_like(xs) for xs in inputs]
+    for lane, (owner, row) in enumerate(zip(owners, rows)):
+        index = [slice(None)] * len(shape)
+        index[axis] = slice(row, row + 1)
+        expected_gradients[owner][tuple(index)] += weights[lane] + weights[lane + 6] * derivatives[lane]
+    gradient = jax.jit(jax.grad(lambda *xs: jnp.sum(evaluate(*xs) * weights), argnums=tuple(range(len(inputs)))))
+    for actual, expected in zip(gradient(*inputs), expected_gradients):
+        np.testing.assert_allclose(actual, expected, atol=1e-12, rtol=1e-12)
+    points.flat[0], points.flat[-2], points.flat[-1] = np.nan, np.inf, -np.inf
+    selected = np.stack([np.take(inputs[owner], [row], axis=axis) for owner, row in zip(owners, rows)])
+    if mode == "computed":
+        selected += 0.25
+    with np.errstate(invalid="ignore"):
+        expected = np.concatenate([selected, np.exp(selected) * np.sin(selected) + np.cos(selected)])
+    np.testing.assert_allclose(evaluate(*inputs), expected, atol=1e-12, rtol=1e-12)
