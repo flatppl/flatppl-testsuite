@@ -58,22 +58,24 @@ def test_segment_sums_preserve_order_nonfinites_and_weighted_gradient(tmp_path):
 def test_computed_segment_identities_and_weighted_adjoint(tmp_path):
     _gate_engine("stablehlo")
     (tmp_path / "model.flatppl").write_text(
-        "segments(x, y) = [prod([x[1], y[3], x[1]]), prod(cat([y[7]], [x[2]])),\n"
+        "segments(x, y, z) = [prod(cat([z[7]], [y[2]], [x[2]])), prod([x[1], z[3], x[1]]),\n"
+        "               prod([z[6], z[2], z[6]]),\n"
         "               sum([x[4], x[5]]), sum([x[6], x[2], x[6]])]\n"
-        "mapped(x) = segments(-x, 2 * x)\nbatch(x) = mapped.(x)\n"
+        "mapped(p) = segments(-p[[1, 2, 3, 4, 5, 6, 7]],\n"
+        "    2 * p[[1, 2, 3, 4, 5, 6, 7, 8]], 3 * p)\nbatch(x) = mapped.(x)\n"
     )
     query = tmp_path / "query.flatppl"
     query.write_text(
         'm = load_module("model.flatppl")\nbatch = m.batch\n'
-        "points = elementof(cartpow(cartpow(cartpow(reals, 7), 3), 2))\n"
+        "points = elementof(cartpow(cartpow(cartpow(reals, 9), 3), 2))\n"
         "inputs = points\noutputs = batch.(points)\n"
     )
     source = ex.emit(query, "logdensity", dtype="f64")
     jax, jnp, hlo_call = ex._jax()
     evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
-    selections = ([0, 2, 0], [6, 1], [3, 4], [5, 1, 5])
-    scales = ([-1, 2, -1], [2, -1], [-1, -1], [-1, -1, -1])
-    reductions = (np.prod, np.prod, np.sum, np.sum)
+    selections = ([6, 1, 1], [0, 2, 0], [5, 1, 5], [3, 4], [5, 1, 5])
+    scales = ([3, 2, -1], [-1, 3, -1], [3, 3, 3], [-1, -1], [-1, -1, -1])
+    reductions = (np.prod, np.prod, np.prod, np.sum, np.sum)
 
     def oracle(xs):
         return np.stack([
@@ -81,16 +83,16 @@ def test_computed_segment_identities_and_weighted_adjoint(tmp_path):
             for rows, scale, f in zip(selections, scales, reductions)
         ], axis=-1)
 
-    points = np.arange(42, dtype=float).reshape(2, 3, 7) / 8 - 3
+    points = (np.arange(54, dtype=float).reshape(2, 3, 9) + 0.25) / 8 - 3
     np.testing.assert_allclose(evaluate(points), oracle(points), rtol=1e-12, atol=1e-12)
-    weights = np.arange(24, dtype=float).reshape(2, 3, 4) / 4 - 3
+    weights = np.arange(30, dtype=float).reshape(2, 3, 5) / 4 - 3
     gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs) * weights)))
     expected = np.zeros_like(points)
     for output, rows in enumerate(selections):
         for lane, row in enumerate(rows):
             derivative = (
                 np.prod(np.delete(points[..., rows] * scales[output], lane, axis=-1), axis=-1)
-                if output < 2 else 1.0
+                if output < 3 else 1.0
             )
             expected[..., row] += weights[..., output] * scales[output][lane] * derivative
     np.testing.assert_allclose(gradient(points), expected, rtol=1e-12, atol=1e-12)
@@ -106,4 +108,36 @@ def test_computed_segment_identities_and_weighted_adjoint(tmp_path):
     actual, expected = np.asarray(evaluate(zeros)), oracle(zeros)
     np.testing.assert_array_equal(actual, expected)
     # StableHLO may omit the +0 sum initializer. Product zero signs are invariant.
-    np.testing.assert_array_equal(np.signbit(actual[..., :2]), np.signbit(expected[..., :2]))
+    np.testing.assert_array_equal(np.signbit(actual[..., :3]), np.signbit(expected[..., :3]))
+
+
+@pytest.mark.stablehlo_only
+def test_dependent_segment_source_preserves_value_and_adjoint(tmp_path):
+    _gate_engine("stablehlo")
+    (tmp_path / "model.flatppl").write_text(
+        "prefix(p) = prod(p[[1, 3, 1]])\n"
+        "combine(p, y) = [prefix(p), prod([p[7], y[2]])]\n"
+        "score(p) = combine(p, p * prefix(p))\n"
+    )
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        'm = load_module("model.flatppl")\nscore = m.score\n'
+        "points = elementof(cartpow(cartpow(reals, 7), 2))\n"
+        "inputs = points\noutputs = score.(points)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype="f64")
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
+    points = np.arange(1, 15, dtype=float).reshape(2, 7) / 8 - 0.5
+    a = points[:, 0] ** 2 * points[:, 2]
+    expected = np.stack([a, a * points[:, 6] * points[:, 1]], axis=-1)
+    np.testing.assert_allclose(evaluate(points), expected, rtol=1e-12, atol=1e-12)
+    weights = np.array([[0.25, -3.0], [2.0, -0.125]])
+    gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs) * weights)))
+    expected = np.zeros_like(points)
+    chain = weights[:, 0] + weights[:, 1] * points[:, 6] * points[:, 1]
+    expected[:, 0] = chain * 2 * points[:, 0] * points[:, 2]
+    expected[:, 2] = chain * points[:, 0] ** 2
+    expected[:, 6] = weights[:, 1] * a * points[:, 1]
+    expected[:, 1] = weights[:, 1] * a * points[:, 6]
+    np.testing.assert_allclose(gradient(points), expected, rtol=1e-12, atol=1e-12)
