@@ -4,6 +4,7 @@ import subprocess
 
 import numpy as np
 import pytest
+from scipy.special import digamma, gammaln
 
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
@@ -76,3 +77,56 @@ def test_short_selections_keep_shared_children_and_weighted_adjoint(tmp_path):
     np.testing.assert_allclose(
         gradient(points), expected_gradient * weights[:, None], rtol=1e-12, atol=1e-12,
     )
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("dtype,tolerance", [("f32", 2e-5), ("f64", 1e-11)])
+def test_special_function_packets_preserve_lanes_and_shared_adjoint(tmp_path, dtype, tolerance):
+    _gate_engine("stablehlo")
+    (tmp_path / "model.flatppl").write_text(
+        'hep = standard_module("particle-physics", "0.1")\n'
+        "logp(x, s) = logdensityof(hep.ContinuedPoisson(s), x)\n"
+        "f(p, s) = [logp(p[1], s), logp(p[3], s), logp(p[1], s), "
+        "logp(p[2], s), loggamma(s), p[1]]\n"
+        "batch(q, s) = f.(q, s)\n"
+    )
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        'm = load_module("model.flatppl")\nbatch = m.batch\n'
+        "points = elementof(cartpow(cartpow(cartpow(posreals, 3), 3), 2))\n"
+        "scales = elementof(cartpow(posreals, 2))\n"
+        "inputs = (points, scales)\noutputs = batch.(points, scales)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=dtype)
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda xs, ss: hlo_call(xs, ss, source=source)[0])
+    numpy_dtype = np.float32 if dtype == "f32" else np.float64
+    weights = (np.arange(1, 37) * np.where(np.arange(36) % 3, 1, -2)).reshape(2, 3, 6)
+    weights = weights.astype(numpy_dtype)
+    gradient = jax.jit(jax.grad(
+        lambda xs, ss: jnp.sum(evaluate(xs, ss) * weights), argnums=(0, 1),
+    ))
+    for shift in (0.0, 0.25):
+        points = (np.arange(1, 19).reshape(2, 3, 3) / 2 + shift).astype(numpy_dtype)
+        scales = np.array([0.5 + shift, 3.5 + shift], dtype=numpy_dtype)
+        # SciPy is independent of the emitted CHLO and its Enzyme adjoint.
+        xs, ss = points.astype(np.float64), scales.astype(np.float64)
+        g = xs * np.log(ss[:, None, None]) - ss[:, None, None] - gammaln(xs + 1)
+        expected = np.stack([
+            g[..., 0], g[..., 2], g[..., 0], g[..., 1],
+            np.broadcast_to(gammaln(ss)[:, None], xs.shape[:-1]), xs[..., 0],
+        ], axis=-1)
+        np.testing.assert_allclose(evaluate(points, scales), expected, rtol=tolerance, atol=tolerance)
+        psi = np.log(ss[:, None, None]) - digamma(xs + 1)
+        point_gradient = np.stack([
+            (weights[..., 0] + weights[..., 2]) * psi[..., 0] + weights[..., 5],
+            weights[..., 3] * psi[..., 1], weights[..., 1] * psi[..., 2],
+        ], axis=-1)
+        rate_terms = xs / ss[:, None, None] - 1
+        scale_gradient = digamma(ss) * weights[..., 4].sum(axis=1) + (
+            (weights[..., 0] + weights[..., 2]) * rate_terms[..., 0]
+            + weights[..., 3] * rate_terms[..., 1] + weights[..., 1] * rate_terms[..., 2]
+        ).sum(axis=1)
+        actual_points, actual_scales = gradient(points, scales)
+        np.testing.assert_allclose(actual_points, point_gradient, rtol=tolerance, atol=tolerance)
+        np.testing.assert_allclose(actual_scales, scale_gradient, rtol=tolerance, atol=tolerance)
