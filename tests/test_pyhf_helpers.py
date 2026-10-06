@@ -170,20 +170,26 @@ def test_normsys_reference_call_forms(tmp_path, dtype, tolerance):
     subprocess.run([str(ex.flatppl_bin()), "determinize", str(query),
                     "--keep", "inputs", "--keep", "outputs", "-o", str(fallback)],
                    capture_output=True, text=True, check=True)
-    jax, _, _ = ex._jax()
+    jax, jnp, hlo_call = ex._jax()
     expected = np.array([[oracle.interp_poly6_exp(lo, 1., hi, a),
                           oracle.interp_poly6_exp(hi, 1., lo, -a),
                           oracle.interp_poly6_exp(lo, 1., hi, a),
                           oracle.interp_poly6_exp(lo, 1., hi, a)]
                          for lo, hi, a in points])
-    # Use stock XLA: Enzyme 0.0.15 mis-rewrites packet widths in this valid IR.
-    # Separate calls below check adjoints without claiming that path is fixed.
+    weights = np.arange(1, 5, dtype=points.dtype)
+    expected_gradient = np.array([_gradient(oracle, lo, 1., hi, a)[[0, 2, 3]]
+                                  for lo, hi, a in points]) * weights.sum()
     device = jax.devices()[0]
     for path in (query, fallback):
         source = ex.emit(path, "logdensity", dtype=dtype)
         executable = device.client.compile_and_load(source, [device])
         actual = executable.execute([jax.device_put(points)])[0]
         np.testing.assert_allclose(actual, expected, rtol=tolerance, atol=tolerance)
+        source = ex.emit(path, "logdensity", dtype=dtype, enzyme_compatible=True)
+        evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
+        gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs) * weights)))
+        np.testing.assert_allclose(evaluate(points), expected, rtol=tolerance, atol=tolerance)
+        np.testing.assert_allclose(gradient(points), expected_gradient, rtol=tolerance, atol=tolerance)
 
 
 @pytest.mark.stablehlo_only
