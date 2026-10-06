@@ -30,11 +30,11 @@ mu ~ Normal(0.0, 5.0)
 # fly: the result record auto-splats into Gamma's shape/rate arguments.
 sigma ~ Gamma(gamma_shape_rate(2.0, 1.0))
 
-prior = lawof(record(mu = mu, sigma = sigma))
+Pi_prior = lawof(record(mu = mu, sigma = sigma))
 
 # --- Likelihood ---
 y ~ iid(Normal(mu, sigma), n)
 
-forward_kernel = kernelof(record(y = y), mu = mu, sigma = sigma)
-L = likelihoodof(forward_kernel, record(y = y_data))
-posterior = bayesupdate(L, prior)
+K_model = kernelof(record(y = y), mu = mu, sigma = sigma) % Forward kernel (observation model)
+L = likelihoodof(K_model, record(y = y_data))
+Pi_post = bayesupdate(L, Pi_prior)

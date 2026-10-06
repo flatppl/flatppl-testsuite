@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -172,5 +172,11 @@
     "phi",
     "kappa",
     "theta"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/partial-pooling.flatppl",
+    "sha256": "507614df7b6d006323f2806e2bf0fa3dd6945d1502263ceb74f13ba585de522e"
+  }
 }

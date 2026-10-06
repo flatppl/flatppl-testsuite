@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -181,5 +181,11 @@
   "inputs": [
     "theta",
     "b"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/rasch-1pl.flatppl",
+    "sha256": "dd620d2ba7f16d502a1182f6fc363613539956fb96930f4fd81709d9d57d3002"
+  }
 }

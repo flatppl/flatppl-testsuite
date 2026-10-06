@@ -1,0 +1,2 @@
+inputs = A
+outputs = sum(C) + 2*sum(D) + 3*sum(V) + 4*sum(S) + 5*sum(P)

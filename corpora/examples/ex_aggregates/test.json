@@ -1,0 +1,58 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "outputs",
+  "inputs": [
+    "A"
+  ],
+  "points": [
+    {
+      "A": [
+        [
+          1,
+          3,
+          5
+        ],
+        [
+          9,
+          5,
+          1
+        ]
+      ]
+    },
+    {
+      "A": [
+        [
+          2,
+          4,
+          6
+        ],
+        [
+          10,
+          6,
+          2
+        ]
+      ]
+    }
+  ],
+  "expected": [
+    2108.0,
+    3842.0
+  ],
+  "tolerance": {
+    "atol": 1e-10,
+    "rtol": 1e-10,
+    "value_atol_f32": 1e-05
+  },
+  "oracle": "NumPy matrix products, weighted squares, unbiased variance, slices and products",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/aggregates.flatppl",
+    "sha256": "acfbf8bf7ab3860a6b75c153920e7394ec00c060fe200a1d0f1c8eb0a3613086"
+  }
+}

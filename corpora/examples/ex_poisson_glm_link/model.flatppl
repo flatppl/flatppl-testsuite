@@ -20,7 +20,7 @@ y_data = [0, 1, 2, 3, 8]
 intercept ~ Normal(0.0, 1.0)
 slope     ~ Normal(0.0, 1.0)
 
-prior = lawof(record(intercept = intercept, slope = slope))
+Pi_prior = lawof(record(intercept = intercept, slope = slope))
 
 # --- Named linear predictor and inverse log-link (spec §05) ---
 predict(a, b, x) = a + b * x
@@ -33,6 +33,6 @@ mu  = rate.(eta)
 
 y ~ Poisson.(mu)
 
-forward_kernel = kernelof(record(y = y), intercept = intercept, slope = slope)
-L = likelihoodof(forward_kernel, record(y = y_data))
-posterior = bayesupdate(L, prior)
+K_model = kernelof(record(y = y), intercept = intercept, slope = slope) % Forward kernel (observation model)
+L = likelihoodof(K_model, record(y = y_data))
+Pi_post = bayesupdate(L, Pi_prior)

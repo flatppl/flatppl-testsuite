@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -178,5 +178,11 @@
     "m_B",
     "lam",
     "B"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/signal-background-counting.flatppl",
+    "sha256": "20eafba39a84a727d83f0fe7fb0ad9b44888742fd207022115ffc3ecde66fb56"
+  }
 }

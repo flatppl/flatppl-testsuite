@@ -3,7 +3,7 @@
   "engines": [
     "stablehlo"
   ],
-  "measure": "bayesupdate(L, prior) \u2014 5 datasets, 37 events, two-component mixture per event",
+  "measure": "bayesupdate(L, prior) — 5 datasets, 37 events, two-component mixture per event",
   "inputs": [
     "S",
     "sigma_B",
@@ -259,5 +259,11 @@
         -0.4316318683257506
       ]
     }
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/signal-background-counting.flatppl",
+    "sha256": "20eafba39a84a727d83f0fe7fb0ad9b44888742fd207022115ffc3ecde66fb56"
+  }
 }

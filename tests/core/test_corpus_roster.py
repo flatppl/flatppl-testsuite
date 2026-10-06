@@ -17,6 +17,7 @@ test dir should be a deliberate one-line edit here, not an invisible drift.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -25,18 +26,18 @@ _CORPORA = Path(__file__).resolve().parents[2] / "corpora"
 # corpus -> number of test directories it must contain.
 EXPECTED_COUNTS = {
     "bayesian_inference": 5,
-    "coverage": 22,
-    "examples": 15,
+    "coverage": 23,
+    "examples": 22,
     "fragment": 21,
     "hs3": 12,
     "pyhf": 173,
     "pyhf-rejects": 29,
     "sample": 1,
     "stablehlo": 33,
-    "stablehlo-gradient": 21,
+    "stablehlo-gradient": 25,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 356
+EXPECTED_TOTAL = 368
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -67,6 +68,9 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    # JS cannot evaluate nested metricsum or positional cartprod membership.
+    "examples/ex_dminus_to_3pi_amplitude": {"stablehlo"},
+    "examples/ex_minimal": {"stablehlo"},
     "coverage/abi_fixed_inputs": {"det-js", "stablehlo"},
     "coverage/allele_freq": {"det-js", "stablehlo"},
     "coverage/ar1_drift": {"det-js", "stablehlo"},
@@ -76,6 +80,7 @@ ENGINE_OVERRIDES = {
     "coverage/hermite_polynomial": {"det-js", "stablehlo"},
     "coverage/kscan_walk": {"det-js", "stablehlo"},
     "coverage/local_module_density": {"det-js", "stablehlo"},
+    "coverage/metric_tensor": {"stablehlo"},
     "coverage/paired_assay": {"det-js", "stablehlo"},
     "coverage/sensor_calibration": {"det-js", "stablehlo"},
     "coverage/spectral_lines": {"det-js", "stablehlo"},
@@ -107,10 +112,13 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 414
+EXPECTED_CASES = 431
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
+    "ex_minimal",
+    "ex_aggregates", "ex_bayesian_inference_3", "ex_bayesian_inference_4",
+    "ex_dminus_to_3pi_amplitude", "ex_hgf_binary_2level", "ex_hgf_binary_3level",
     "ex_bayesian_inference_1", "ex_bayesian_inference_2", "ex_best_estimation",
     "ex_capture_recapture", "ex_dissimilar_mixture", "ex_eight_schools",
     "ex_gamma_reparam", "ex_hierarchical_logistic", "ex_linear_regression",
@@ -211,8 +219,7 @@ EXPECTED_PYHF_MISMATCHES = {
 # Examples deliberately NOT given a test dir (recorded when the legacy
 # manifest.json that listed them was deleted).
 EXCLUDED_EXAMPLES = {
-    "minimal", "aggregates", "bayesian_inference_common",
-    "bayesian_inference_priors", "bayesian_inference_3", "bayesian_inference_4",
+    "bayesian_inference_common", "bayesian_inference_priors",
 }
 
 
@@ -242,6 +249,19 @@ def test_total_test_dir_count():
 
 def test_examples_roster_by_name():
     assert _dirs_by_corpus().get("examples", set()) == EXPECTED_EXAMPLES
+
+
+def test_vendored_sources_match_their_recorded_hashes():
+    for path in _CORPORA.rglob("test.json"):
+        body = json.loads(path.read_text())
+        source = body.get("source")
+        if not isinstance(source, dict) or "sha256" not in source:
+            continue
+        files = {body.get("model", "model.flatppl"): source["sha256"]}
+        files.update(source.get("imports", {}))
+        for name, expected in files.items():
+            file = path.parent / name
+            assert hashlib.sha256(file.read_bytes()).hexdigest() == expected, file
 
 
 def test_hs3_roster_by_name():
@@ -327,7 +347,7 @@ def test_every_pyhf_dir_freezes_an_absolute_logpdf_vector():
 
 
 def test_excluded_examples_have_no_test_dir():
-    """The 6 deliberately-excluded examples must not acquire one silently."""
+    """The deliberately-excluded examples must not acquire one silently."""
     present = _dirs_by_corpus().get("examples", set())
     leaked = sorted(EXCLUDED_EXAMPLES & {p.removeprefix("ex_") for p in present})
     assert not leaked, f"excluded example(s) gained a test dir: {leaked}"
@@ -394,6 +414,10 @@ def test_total_collected_case_count():
 # the pairs stay byte-identical, in both directions: editing either copy fails
 # here until both are updated.
 GRADIENT_MODEL_TWINS = {
+    "stablehlo-gradient/minimal": "examples/ex_minimal",
+    "stablehlo-gradient/hgf_binary_2level": "examples/ex_hgf_binary_2level",
+    "stablehlo-gradient/hgf_binary_3level": "examples/ex_hgf_binary_3level",
+    "stablehlo-gradient/dminus_to_3pi_amplitude": "examples/ex_dminus_to_3pi_amplitude",
     "stablehlo-gradient/dissimilar_mixture":
         "examples/ex_dissimilar_mixture",
     "stablehlo-gradient/signal_background_counting":

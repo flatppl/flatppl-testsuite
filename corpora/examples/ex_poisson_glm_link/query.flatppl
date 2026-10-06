@@ -1,4 +1,4 @@
 t_intercept = elementof(reals)
 t_slope = elementof(reals)
 inputs = (t_intercept, t_slope)
-outputs = logdensityof(posterior, record(intercept = t_intercept, slope = t_slope))
+outputs = logdensityof(Pi_post, record(intercept = t_intercept, slope = t_slope))

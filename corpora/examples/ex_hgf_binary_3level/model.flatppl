@@ -1,0 +1,66 @@
+%%%
+# Three-level binary HGF with learned volatility
+
+Port of HierarchicalGaussianFiltering.jl's `binary_3level` with its default
+updates: ClassicUpdate for outcome log odds, EnhancedUpdate for volatility.
+The volatility belief controls how quickly the outcome belief can change.
+Thirty-two outcomes include stable blocks and frequent reversals.
+Choices follow updated log odds through HGFSoftmax. Outcomes are fixed inputs.
+%%%
+flatppl_compat = "0.1"
+
+u_data = [1,1,1,1,1,1,1,0, 0,0,0,0,0,0,0,1, 1,0,1,0,1,0,1,0, 1,1,0,0,1,1,0,0]
+choice_data = [1,1,0,1,1,1,1,1, 1,0,0,1,0,0,0,0, 0,1,1,0,1,0,0,1, 1,0,1,0,1,1,0,0]
+
+omega ~ Uniform(interval(-4, -1))
+omega_vol ~ Uniform(interval(-6, -2))
+log_noise ~ Normal(0, 0.5)
+action_noise = exp(log_noise)
+
+# Unit couplings and time steps, zero drifts, unit autoconnections.
+predict(state) = record(
+    mean = state.mean,
+    precision = 1 / (1 / state.precision + exp(omega + state.volatility_mean)),
+    volatility_mean = state.volatility_mean,
+    volatility_precision = 1 / (1 / state.volatility_precision + exp(omega_vol))
+)
+update_volatility(pred, mean, precision, surprise, weight) = record(
+    mean = mean,
+    precision = precision,
+    volatility_mean = pred.volatility_mean + weight * surprise / (2 * pred.volatility_precision),
+    volatility_precision = pred.volatility_precision + weight^2 * (0.5 + surprise) - 0.5 * weight * surprise
+)
+finish(pred, mean, precision) = update_volatility(pred, mean, precision,
+    pred.precision / precision + pred.precision * (mean - pred.mean)^2 - 1,
+    exp(omega + pred.volatility_mean) * pred.precision)
+update_mean(pred, input, probability, precision) = finish(pred,
+    pred.mean + (input - probability) / precision, precision)
+update_probability(pred, input, probability) = update_mean(pred, input, probability,
+    pred.precision + probability * (1 - probability))
+correct(pred, input) = update_probability(pred, input, invlogit(pred.mean))
+update(state, input) = correct(predict(state = state), input)
+
+s0 = record(mean = 0, precision = 1, volatility_mean = 0, volatility_precision = 1)
+states = scan(update, s0, u_data)
+state_mean(state) = state.mean
+state_precision(state) = state.precision
+state_volatility_mean(state) = state.volatility_mean
+state_volatility_precision(state) = state.volatility_precision
+means = state_mean.(states)
+precisions = state_precision.(states)
+volatility_means = state_volatility_mean.(states)
+volatility_precisions = state_volatility_precision.(states)
+choice_probability = invlogit.(means ./ action_noise)
+choice ~ Bernoulli.(choice_probability)
+
+prior = lawof(record(omega = omega, omega_vol = omega_vol, log_noise = log_noise))
+forward_kernel = kernelof(record(choice = choice), omega = omega, omega_vol = omega_vol, log_noise = log_noise)
+L = likelihoodof(forward_kernel, record(choice = choice_data))
+posterior = bayesupdate(L, prior)
+
+mean_trajectory = functionof(means, omega = omega, omega_vol = omega_vol)
+precision_trajectory = functionof(precisions, omega = omega, omega_vol = omega_vol)
+volatility_trajectory = functionof(volatility_means, omega = omega, omega_vol = omega_vol)
+volatility_precision_trajectory = functionof(volatility_precisions, omega = omega, omega_vol = omega_vol)
+choice_probabilities = functionof(choice_probability, omega = omega, omega_vol = omega_vol, log_noise = log_noise)
+default_pars = record(omega = -2, omega_vol = -4, log_noise = 0)

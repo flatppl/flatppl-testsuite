@@ -17,7 +17,7 @@ def test_gradient_checks_detect_zero_interior_derivatives(monkeypatch, name):
         point["y"]: expected["y"]
         for point, expected in zip(spec.body["points"], spec.body["expected_grad"])
     }
-    monkeypatch.setattr(runner.ex, "emit_concat", lambda *args: "emitted")
+    monkeypatch.setattr(runner.ex, "emit_concat", lambda *args, **kwargs: "emitted")
     monkeypatch.setattr(runner.ex, "gradient", lambda src, args, argnums: [
         float(np.float32(reference[args[0]])),
     ])

@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -60,5 +60,11 @@
   "oracle": "scipy 1.18",
   "inputs": [
     "rcp"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/capture-recapture.flatppl",
+    "sha256": "8430d91d125e003dcc3df04905e3bc5930a3fc1d452d54f754e522f57b7329b1"
+  }
 }

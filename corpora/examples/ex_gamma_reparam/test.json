@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -71,5 +71,11 @@
   "inputs": [
     "mu",
     "sigma"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/gamma-reparam.flatppl",
+    "sha256": "4f7b08d3126fdbe8e3ebed3eab40b39162a304d759ff243896064ac595ee5e69"
+  }
 }

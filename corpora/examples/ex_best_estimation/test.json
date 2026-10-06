@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -104,5 +104,11 @@
     "sigma1",
     "sigma2",
     "nu"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/best-estimation.flatppl",
+    "sha256": "9796b94dde62d87eee0eb423edac5f3e0a1d808eaa649218b162396e7cd4a0b0"
+  }
 }

@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "inputs": [
     "sigma_step_v"
@@ -36,5 +36,11 @@
     "value_atol_f32": 1e-05,
     "value_rtol_f32": 1e-06
   },
-  "oracle": "closed form (product of step conditionals) + scipy half-Cauchy"
+  "oracle": "closed form (product of step conditionals) + scipy half-Cauchy",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/ar1-noise-estimation.flatppl",
+    "sha256": "d9c0a91e029487e1aea1e911c696fa8da72d680c951461d8170635c61340746f"
+  }
 }

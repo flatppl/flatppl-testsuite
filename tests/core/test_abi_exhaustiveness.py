@@ -1,4 +1,4 @@
-"""No corpus ABI query leaves a dead `elementof` behind.
+"""No handwritten corpus ABI query leaves a dead `elementof` behind.
 
 This is a deliberate HOUSE RULE, stricter than the spec -- read the next
 paragraph before treating a failure here as a conformance bug.
@@ -12,11 +12,16 @@ The normative rule (flatppl-design "Determinization" -> "Signature: `inputs` and
 
 So an UNREACHED `elementof` is explicitly well-formed and simply eliminated, and
 `flatppl stablehlo` accepts such a module (exit 0). This test additionally
-forbids it, because in THIS corpus a parameterized param that no output reaches
-is always an authoring slip -- a query that meant to feed it and does not, or a
+forbids it in handwritten fixtures, where a parameterized param that no output
+reaches is an authoring slip -- a query that meant to feed it and does not, or a
 leftover shadowing duplicate of a binding the model already declares. Catching
 that early is worth a rule the spec does not impose; it is not evidence of
 non-conformance.
+
+Full vendored model snapshots follow the spec instead. Their reified helpers
+can leave unused top-level leaves, and the source hash requires unchanged model
+bytes. Apply this house rule to their query additions only; executed corpus
+tests still enforce the compiler's reachable-input rule for the whole module.
 
 The reached case IS enforced by the emitter, and loudly -- an `elementof` that an
 output depends on but that `inputs` omits is refused with exit 3
@@ -82,10 +87,12 @@ _IDS = [str(d.relative_to(_CORPORA)) for d in _abi_dirs()]
 
 @pytest.mark.parametrize("dir", _abi_dirs(), ids=_IDS)
 def test_inputs_lists_every_parameterized_param(dir: Path):
-    model = _model_path(dir).read_text()
     query = (dir / "query.flatppl").read_text()
+    source = json.loads((dir / "test.json").read_text()).get("source", {})
 
-    params = set(_ELEMENTOF.findall(model)) | set(_ELEMENTOF.findall(query))
+    params = set(_ELEMENTOF.findall(query))
+    if not isinstance(source, dict) or "sha256" not in source:
+        params.update(_ELEMENTOF.findall(_model_path(dir).read_text()))
     listed = set(_declared_inputs(query))
 
     # A param pinned to a load_data column (`x_data = data.x` at the density

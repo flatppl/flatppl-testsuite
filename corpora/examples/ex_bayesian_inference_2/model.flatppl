@@ -28,21 +28,21 @@ b = f_b(theta1, theta2)
 obs ~ iid(Normal(mu = a, sigma = b), 10)
 
 # Reify different sub-DAGs to prior and forward model kernel
-prior = lawof(record(theta1 = theta1, theta2 = theta2))
-forward_kernel = kernelof(record(obs = obs), theta1 = theta1, theta2 = theta2)
+Pi_prior = lawof(record(theta1 = theta1, theta2 = theta2))
+K_model = kernelof(record(obs = obs), theta1 = theta1, theta2 = theta2) % Forward kernel (observation model)
 
 # Observed data
-observed_data = [1.2, 3.4, 5.1, 2.8, 4.0, 3.7, 5.5, 2.1, 4.3, 3.9]
+D = [1.2, 3.4, 5.1, 2.8, 4.0, 3.7, 5.5, 2.1, 4.3, 3.9] % Observed data
 
 # Likelihood and posterior
 % The likelihood
-L = likelihoodof(forward_kernel, record(obs = observed_data))
+L = likelihoodof(K_model, record(obs = D))
 % Non-normalized posterior
-posterior = bayesupdate(L, prior)
+Pi_post = bayesupdate(L, Pi_prior)
 
 # Preset points:
-default_pars = record(theta1 = 0.5,  theta2 = 1.0)
-alternative_pars = record(theta1 = -1.5, theta2 = fixed(0.8))
+theta_default = record(theta1 = 0.5,  theta2 = 1.0) % Default parameter point
+theta_alt = record(theta1 = -1.5, theta2 = fixed(0.8)) % Alternative parameter point
 
 # Preset domain:
-pars_domain = cartprod(theta1 = interval(-3, 3), theta2 = interval(0, 2))
+Theta = cartprod(theta1 = interval(-3, 3), theta2 = interval(0, 2)) % Parameter space

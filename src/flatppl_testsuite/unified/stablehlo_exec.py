@@ -60,13 +60,15 @@ class EmitRefused(RuntimeError):
 def emit(
     model_path: Path, mode: str, *, dtype: str | None = None,
     restrict_enzyme_compatible: bool = True,
+    numerical_integrals: bool = False,
 ) -> str:
     """Emit StableHLO text for ``model_path`` in ``mode`` (logdensity|sample),
     with the entry symbol renamed to ``@main`` for ``hlo_call``."""
     proc = subprocess.run(
         [str(flatppl_bin()), "stablehlo", str(model_path), "--mode", mode]
         + (["--dtype", dtype] if dtype is not None else [])
-        + ([] if restrict_enzyme_compatible else ["--restrict-enzyme-compatible=false"]),
+        + ([] if restrict_enzyme_compatible else ["--restrict-enzyme-compatible=false"])
+        + (["--numerical-integrals"] if numerical_integrals else []),
         capture_output=True, text=True,
     )
     if proc.returncode == 3:
@@ -86,6 +88,7 @@ def emit_concat(
     query_name: str = "query.flatppl",
     model_name: str = "model.flatppl",
     *, restrict_enzyme_compatible: bool = True,
+    numerical_integrals: bool = False,
 ) -> str:
     """Emit ``model_name`` + ``query_name`` concatenated into one module.
 
@@ -108,7 +111,8 @@ def emit_concat(
         f.write(src_text)
         tmp = Path(f.name)
     try:
-        return emit(tmp, mode, restrict_enzyme_compatible=restrict_enzyme_compatible)
+        return emit(tmp, mode, restrict_enzyme_compatible=restrict_enzyme_compatible,
+                    numerical_integrals=numerical_integrals)
     finally:
         tmp.unlink(missing_ok=True)
 

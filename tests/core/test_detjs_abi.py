@@ -41,6 +41,7 @@ def _abi_example_dirs() -> list[Path]:
     return sorted(
         d for d in (_CORPORA / "examples").iterdir()
         if (d / "query.flatppl").exists() and (d / "test.json").exists()
+        and "det-js" in json.loads((d / "test.json").read_text())["engines"]
     )
 
 

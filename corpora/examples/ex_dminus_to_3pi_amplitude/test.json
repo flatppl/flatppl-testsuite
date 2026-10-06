@@ -1,0 +1,59 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "amplitude_measure",
+  "inputs": [
+    "coordinates"
+  ],
+  "points": [
+    {
+      "coordinates": [
+        1.0,
+        0.35
+      ]
+    },
+    {
+      "coordinates": [
+        0.8,
+        -0.2
+      ]
+    },
+    {
+      "coordinates": [
+        1.4,
+        0.6
+      ]
+    },
+    {
+      "coordinates": [
+        1.0,
+        -0.35
+      ]
+    }
+  ],
+  "expected": [
+    3.771918688295926,
+    2.822870960684102,
+    1.5734239701026624,
+    3.771918688295926
+  ],
+  "tolerance": {
+    "atol": 1e-10,
+    "rtol": 1e-10,
+    "value_atol_f32": 1e-05,
+    "value_rtol_f32": 2e-06
+  },
+  "oracle": "NumPy Lorentz contractions and native complex amplitudes",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/dminus-to-3pi-amplitude.flatppl",
+    "sha256": "46143fcc05977f4e659f50bc7e05807a5804651a2dbd3104445f606d0504a41f"
+  },
+  "engine_limits": {
+    "det-js": "Nested metric tensor expressions and positional Cartesian support membership do not evaluate in current JS."
+  }
+}

@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -60,5 +60,11 @@
   "oracle": "scipy 1.18",
   "inputs": [
     "lambda"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/poisson-model.flatppl",
+    "sha256": "5374e6d143662239dfe8a377f29910125c51778244f38d6809fe439961c218bb"
+  }
 }

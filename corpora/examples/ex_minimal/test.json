@@ -1,0 +1,61 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "inputs": [
+    "point"
+  ],
+  "points": [
+    {
+      "point": [
+        1.0,
+        1.5,
+        2.0
+      ]
+    },
+    {
+      "point": [
+        1.6,
+        1.5,
+        1.4
+      ]
+    },
+    {
+      "point": [
+        2.0,
+        0.5,
+        3.5
+      ]
+    },
+    {
+      "point": [
+        6.5,
+        4.5,
+        -0.5
+      ]
+    }
+  ],
+  "numerical_integrals": true,
+  "oracle": "Analytic radial density after integrating one shared Exponential variance",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "336152f11040fa57eb06f769fc433bdc43b61b49",
+    "path": "examples/minimal.flatppl",
+    "sha256": "3b1d5e74a565ec374621b8eb1895e9255f504d8ab55917198d2df43713f7be8a"
+  },
+  "engine_limits": {
+    "det-js": "Numerical marginal integration requires the StableHLO extension."
+  },
+  "expected": [
+    -2.491303476129373,
+    -0.08186556369527365,
+    -5.907361453915042,
+    -12.374468033353885
+  ],
+  "tolerance": {
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 2e-05
+  }
+}

@@ -28,13 +28,13 @@ rate = mu/sigma^2 = 2.
 %%%
 sigma_a ~ Gamma(shape = 4.0, rate = 2.0)
 
-% Per-group intercepts: G iid draws sharing mean mu_a and scale sigma_a.
+% Per-group intercepts: G iid draws sharing mean mu_a and scale sigma_a
 a ~ iid(Normal(mu_a, sigma_a), G)
 
-% Heavy-tailed slope prior: location-scale Student-t, nu=3, mu=0, sigma=2.5.
+% Heavy-tailed slope prior: location-scale Student-t, nu=3, mu=0, sigma=2.5
 b ~ locscale(StudentT(3.0), 0.0, 2.5)
 
-prior = lawof(record(mu_a = mu_a, sigma_a = sigma_a, a = a, b = b))
+Pi_prior = lawof(record(mu_a = mu_a, sigma_a = sigma_a, a = a, b = b))
 
 # --- Linear predictor and likelihood ---
 %%%
@@ -47,6 +47,6 @@ p   = invlogit.(eta)
 y ~ Bernoulli.(p)
 
 # --- Posterior assembly ---
-forward_kernel = kernelof(record(y = y), mu_a = mu_a, sigma_a = sigma_a, a = a, b = b)
-L              = likelihoodof(forward_kernel, record(y = y_data))
-posterior      = bayesupdate(L, prior)
+K_model = kernelof(record(y = y), mu_a = mu_a, sigma_a = sigma_a, a = a, b = b) % Forward kernel (observation model)
+L              = likelihoodof(K_model, record(y = y_data))
+Pi_post      = bayesupdate(L, Pi_prior)

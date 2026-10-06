@@ -1,0 +1,2 @@
+inputs = (metric_entries, v)
+outputs = score
