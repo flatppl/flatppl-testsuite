@@ -57,12 +57,16 @@ class EmitRefused(RuntimeError):
     legalisation refusal, surfaced verbatim."""
 
 
-def emit(model_path: Path, mode: str, *, dtype: str | None = None) -> str:
+def emit(
+    model_path: Path, mode: str, *, dtype: str | None = None,
+    enzyme_compatible: bool = False,
+) -> str:
     """Emit StableHLO text for ``model_path`` in ``mode`` (logdensity|sample),
     with the entry symbol renamed to ``@main`` for ``hlo_call``."""
     proc = subprocess.run(
         [str(flatppl_bin()), "stablehlo", str(model_path), "--mode", mode]
-        + (["--dtype", dtype] if dtype is not None else []),
+        + (["--dtype", dtype] if dtype is not None else [])
+        + (["--enzyme-compatible"] if enzyme_compatible else []),
         capture_output=True, text=True,
     )
     if proc.returncode == 3:

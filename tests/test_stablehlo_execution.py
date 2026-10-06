@@ -10,6 +10,49 @@ from tests.test_unified import _gate_engine
 
 
 @pytest.mark.stablehlo_only
+@pytest.mark.parametrize("dtype, tolerance", [("f64", 1e-11), ("f32", 2e-5)])
+def test_enzyme_mode_preserves_zero_products_and_selected_axes(tmp_path, dtype, tolerance):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        'flatppl_compat = "0.1"\n'
+        "x = elementof(cartpow(reals, 6))\n"
+        "m = elementof(cartpow(reals, [2, 3, 4]))\ninputs = (x, m)\n"
+        "outputs = prod(x[[1, 3, 5]]) + 2.0 * prod(x[[2, 4, 6]])"
+        "  + x[1] * x[3] * x[5] + sum(aggregate(prod, [.i, .k], m[.i, .j, .k]))\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=dtype, enzyme_compatible=True)
+    jax, _, hlo_call = ex._jax()
+    scalar = np.float64 if dtype == "f64" else np.float32
+    x = np.array([0, 2, 3, 0, 5, 6], dtype=scalar)
+    m = np.arange(1, 25, dtype=scalar).reshape(2, 3, 4) / 10
+    m[0, 0, 0] = m[1, 0, 1] = m[1, 1, 1] = 0
+    value, (dx, dm) = jax.jit(jax.value_and_grad(
+        lambda x, m: hlo_call(x, m, source=source)[0], argnums=(0, 1),
+    ))(x, m)
+    # A product derivative multiplies the other factors, without division by x.
+    expected_dm = np.stack([
+        np.prod(np.delete(m, i, axis=1), axis=1) for i in range(3)
+    ], axis=1)
+    np.testing.assert_allclose(value, m.prod(axis=1).sum(), rtol=tolerance, atol=tolerance)
+    np.testing.assert_allclose(dx, [30, 0, 0, 24, 0, 0], rtol=tolerance, atol=tolerance)
+    np.testing.assert_allclose(dm, expected_dm, rtol=tolerance, atol=tolerance)
+
+
+@pytest.mark.stablehlo_only
+def test_enzyme_mode_refuses_unqualified_derivative_paths(tmp_path):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    for expression in ("probit.(x)", "cumprod(x)"):
+        query.write_text('flatppl_compat = "0.1"\n'
+                         "x = elementof(cartpow(reals, 3))\ninputs = x\n"
+                         f"outputs = {expression}\n")
+        ex.emit(query, "logdensity")
+        with pytest.raises(ex.EmitRefused):
+            ex.emit(query, "logdensity", enzyme_compatible=True)
+
+
+@pytest.mark.stablehlo_only
 def test_masked_loop_preserves_values_and_adjoints():
     _gate_engine("stablehlo")
     jax, jnp, hlo_call = ex._jax()
