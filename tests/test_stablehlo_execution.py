@@ -47,7 +47,7 @@ def test_enzyme_mode_refuses_unqualified_derivative_paths(tmp_path):
         query.write_text('flatppl_compat = "0.1"\n'
                          "x = elementof(cartpow(reals, 3))\ninputs = x\n"
                          f"outputs = {expression}\n")
-        ex.emit(query, "logdensity", enzyme_compatible=False)
+        ex.emit(query, "logdensity", restrict_enzyme_compatible=False)
         with pytest.raises(ex.EmitRefused):
             ex.emit(query, "logdensity")
 
@@ -125,7 +125,7 @@ def test_integer_abi_accepts_integral_spelling_but_rejects_loss(invalid):
 def test_full_width_tuple_key_matches_the_same_uint64_array(key):
     _gate_engine("stablehlo")
     directory = Path(__file__).resolve().parents[1] / "corpora/stablehlo-sample/normal"
-    src = ex.emit_concat(directory, "sample", enzyme_compatible=False)
+    src = ex.emit_concat(directory, "sample", restrict_enzyme_compatible=False)
     tuple_result = ex.sample_call(src, key, [0.0, 1.0])
     array_result = ex.sample_call(src, np.asarray(key, dtype=np.uint64), [0.0, 1.0])
     for actual, expected in zip(tuple_result, array_result):

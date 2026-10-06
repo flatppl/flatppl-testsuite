@@ -59,14 +59,14 @@ class EmitRefused(RuntimeError):
 
 def emit(
     model_path: Path, mode: str, *, dtype: str | None = None,
-    enzyme_compatible: bool = True,
+    restrict_enzyme_compatible: bool = True,
 ) -> str:
     """Emit StableHLO text for ``model_path`` in ``mode`` (logdensity|sample),
     with the entry symbol renamed to ``@main`` for ``hlo_call``."""
     proc = subprocess.run(
         [str(flatppl_bin()), "stablehlo", str(model_path), "--mode", mode]
         + (["--dtype", dtype] if dtype is not None else [])
-        + ([] if enzyme_compatible else ["--enzyme-compatible=false"]),
+        + ([] if restrict_enzyme_compatible else ["--restrict-enzyme-compatible=false"]),
         capture_output=True, text=True,
     )
     if proc.returncode == 3:
@@ -85,7 +85,7 @@ def emit_concat(
     mode: str,
     query_name: str = "query.flatppl",
     model_name: str = "model.flatppl",
-    *, enzyme_compatible: bool = True,
+    *, restrict_enzyme_compatible: bool = True,
 ) -> str:
     """Emit ``model_name`` + ``query_name`` concatenated into one module.
 
@@ -108,7 +108,7 @@ def emit_concat(
         f.write(src_text)
         tmp = Path(f.name)
     try:
-        return emit(tmp, mode, enzyme_compatible=enzyme_compatible)
+        return emit(tmp, mode, restrict_enzyme_compatible=restrict_enzyme_compatible)
     finally:
         tmp.unlink(missing_ok=True)
 

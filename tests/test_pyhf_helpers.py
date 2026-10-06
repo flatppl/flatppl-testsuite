@@ -185,7 +185,7 @@ def test_normsys_reference_call_forms(tmp_path, dtype, tolerance):
         executable = device.client.compile_and_load(source, [device])
         actual = executable.execute([jax.device_put(points)])[0]
         np.testing.assert_allclose(actual, expected, rtol=tolerance, atol=tolerance)
-        source = ex.emit(path, "logdensity", dtype=dtype, enzyme_compatible=True)
+        source = ex.emit(path, "logdensity", dtype=dtype, restrict_enzyme_compatible=True)
         evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
         gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs) * weights)))
         np.testing.assert_allclose(evaluate(points), expected, rtol=tolerance, atol=tolerance)

@@ -48,7 +48,7 @@ def test_yield_model_axes_and_empty_identities(yield_query, dtype, tolerance):
         body += "outputs = pyhf.expected_counts.(block.(n, a, m))\n"
         for reference in (False, True):
             for mode in (False, True):
-                source = ex.emit(yield_query(body, reference), "logdensity", dtype=dtype, enzyme_compatible=mode)
+                source = ex.emit(yield_query(body, reference), "logdensity", dtype=dtype, restrict_enzyme_compatible=mode)
                 executable = device.client.compile_and_load(source, [device])
                 actual = executable.execute([jax.device_put(value) for value in arrays])[0]
                 np.testing.assert_allclose(actual, expected, rtol=tolerance, atol=tolerance)
@@ -78,7 +78,7 @@ def test_yield_zero_factor_adjoints_accumulate_shared_batches(yield_query, dtype
         "outputs = pyhf.expected_counts.(yields)\n"
     )
     for reference in (False, True):
-        source = ex.emit(yield_query(body, reference), "logdensity", dtype=dtype, enzyme_compatible=True)
+        source = ex.emit(yield_query(body, reference), "logdensity", dtype=dtype, restrict_enzyme_compatible=True)
         evaluate = jax.jit(lambda n, a, m: jnp.sum(hlo_call(n, a, m, source=source)[0] * weights))
         np.testing.assert_allclose(evaluate(nominal, shifts, factors), 732, rtol=tolerance, atol=tolerance)
         gradient = jax.jit(jax.grad(evaluate, argnums=(0, 1, 2)))
