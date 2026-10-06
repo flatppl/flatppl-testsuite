@@ -22,7 +22,7 @@ _SCALAR_CHECKS = {"distribution", "independence", "key_reproducibility", "key_ad
 
 
 def _emit(dir: Path, query_name: str) -> str:
-    return ex.emit_concat(dir, "sample", query_name)
+    return ex.emit_concat(dir, "sample", query_name, restrict_enzyme_compatible=False)
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
