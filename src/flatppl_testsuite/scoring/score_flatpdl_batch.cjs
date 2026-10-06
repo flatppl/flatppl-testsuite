@@ -11,6 +11,9 @@
 //
 // Usage:
 //   node score_flatpdl_batch.cjs <sources.json> <binding> [--engine <dir>] [--vector-size N]
+//   node score_flatpdl_batch.cjs --worker [--engine <dir>]
+// Worker mode accepts one {sources, binding, vectorSize} JSON object per line
+// and returns one score array per line. EOF closes the worker.
 //
 //   <sources.json>  a JSON array of FlatPDL source strings, one per point, in
 //                   order. Each is independently processSource'd/materialised
@@ -49,9 +52,11 @@ function parseArgs(argv) {
   const pos = [];
   let engineDir = null;
   let vectorSize = null;
+  let worker = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--engine') { engineDir = argv[++i]; }
+    else if (a === '--worker') { worker = true; }
     else if (a === '--vector-size') {
       vectorSize = Number(argv[++i]);
       if (!Number.isSafeInteger(vectorSize) || vectorSize < 1) usage('invalid vector size');
@@ -59,8 +64,8 @@ function parseArgs(argv) {
     else if (a.startsWith('--')) { usage('unknown flag ' + a); }
     else { pos.push(a); }
   }
-  if (pos.length !== 2) usage('expected <sources.json> <binding>');
-  return { sourcesPath: pos[0], binding: pos[1], engineDir, vectorSize };
+  if (pos.length !== (worker ? 0 : 2)) usage('expected <sources.json> <binding> or --worker');
+  return { sourcesPath: pos[0], binding: pos[1], engineDir, vectorSize, worker };
 }
 
 function resolveEngine(explicit) {
@@ -120,40 +125,52 @@ async function scoreOne(src, binding, processSource, orchestrator, materialiser,
 }
 
 async function main() {
-  const { sourcesPath, binding, engineDir, vectorSize } = parseArgs(process.argv.slice(2));
+  const { sourcesPath, binding, engineDir, vectorSize, worker } = parseArgs(process.argv.slice(2));
   const engine = resolveEngine(engineDir);
   const { processSource, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
   const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
 
-  const sources = JSON.parse(fs.readFileSync(sourcesPath, 'utf8'));
-  if (!Array.isArray(sources) || !sources.length) {
-    usage('sources.json must be a non-empty JSON array of source strings');
-  }
-  if (vectorSize !== null && sources.length !== 1) usage('vector mode requires one source');
-
-  const w = createWorkerHandler();
-  w.handle({ type: 'init', seed: 3 });
-
-  const results = [];
-  for (let i = 0; i < sources.length; i++) {
-    try {
-      const value = await scoreOne(sources[i], binding, processSource, orchestrator, materialiser, w, vectorSize);
-      // JSON has no encoding for NaN/±Infinity (JSON.stringify(-Infinity) is
-      // null) -- an out-of-support point's log-density is exactly -inf, and
-      // this corpus carries that shape (score_abi_points' caller compares
-      // against frozen "-inf"/"nan" strings). Send those through as strings;
-      // Python's float() already parses "Infinity"/"-Infinity"/"NaN" natively.
-      for (const score of vectorSize === null ? [value] : value) {
-        results.push({ ok: true, value: Number.isFinite(score) ? score : String(score) });
-      }
-    } catch (e) {
-      for (let j = 0; j < (vectorSize === null ? 1 : vectorSize); j++) {
-        results.push({ ok: false, error: e && e.message ? e.message : String(e) });
+  async function scoreBatch({ sources, binding, vectorSize = null }) {
+    if (!Array.isArray(sources) || !sources.length) {
+      throw new Error('sources must be a non-empty JSON array of source strings');
+    }
+    if (vectorSize !== null && (!Number.isSafeInteger(vectorSize) || vectorSize < 1 || sources.length !== 1)) {
+      throw new Error('vector mode requires one source and a positive vector size');
+    }
+    // Match one-shot state: share loaded code, never a previous request's env/RNG/cache.
+    const w = createWorkerHandler();
+    w.handle({ type: 'init', seed: 3 });
+    const results = [];
+    for (let i = 0; i < sources.length; i++) {
+      try {
+        const value = await scoreOne(sources[i], binding, processSource, orchestrator, materialiser, w, vectorSize);
+        // JSON cannot encode nonfinite values. Python's float() accepts these strings.
+        for (const score of vectorSize === null ? [value] : value) {
+          results.push({ ok: true, value: Number.isFinite(score) ? score : String(score) });
+        }
+      } catch (e) {
+        for (let j = 0; j < (vectorSize === null ? 1 : vectorSize); j++) {
+          results.push({ ok: false, error: e && e.message ? e.message : String(e) });
+        }
       }
     }
+
+    return results;
   }
 
-  process.stdout.write(JSON.stringify(results) + '\n');
+  if (worker) {
+    const lines = require('readline').createInterface({ input: process.stdin, crlfDelay: Infinity });
+    for await (const line of lines) {
+      try {
+        process.stdout.write(JSON.stringify(await scoreBatch(JSON.parse(line))) + '\n');
+      } catch (e) {
+        process.stdout.write(JSON.stringify({ error: e && e.message ? e.message : String(e) }) + '\n');
+      }
+    }
+  } else {
+    const sources = JSON.parse(fs.readFileSync(sourcesPath, 'utf8'));
+    process.stdout.write(JSON.stringify(await scoreBatch({ sources, binding, vectorSize })) + '\n');
+  }
 }
 
 main().catch((e) => {

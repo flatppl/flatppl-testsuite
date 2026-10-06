@@ -12,6 +12,7 @@ import json
 import re
 import subprocess
 import tempfile
+from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -297,7 +298,64 @@ def _score_flatpdl_batch(
             raise RuntimeError(f"score_flatpdl_batch failed: {proc.stderr.strip()}")
         rows = json.loads(proc.stdout)
 
-    expected_rows = vector_size if vector_size is not None else len(sources)
+    return _point_scores(rows, vector_size if vector_size is not None else len(sources))
+
+
+class ScoreWorkerFailed(RuntimeError):
+    """The scoring process or its reply stream failed, not an individual model."""
+
+
+@contextmanager
+def batch_score_worker():
+    """Reuse one Node engine while keeping every source's graph/cache separate.
+
+    The caller owns the lifetime and timeout of this context. The child stays
+    in the caller's process group so a corpus-worker timeout also stops Node.
+    """
+    with tempfile.TemporaryFile(mode="w+") as errors:
+        process = subprocess.Popen(
+            [CONFIG.node_bin, str(CONFIG.flatpdl_batch_scorer), "--worker",
+             "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine")],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=errors,
+            text=True, bufsize=1,
+        )
+
+        def score(sources, binding, *, vector_size=None):
+            request = dict(sources=sources, binding=binding, vectorSize=vector_size)
+            try:
+                process.stdin.write(json.dumps(request) + "\n")
+                process.stdin.flush()
+                reply = process.stdout.readline()
+            except OSError as error:
+                raise ScoreWorkerFailed(f"score worker connection failed: {error}") from error
+            if not reply:
+                errors.seek(0)
+                raise ScoreWorkerFailed(f"score worker exited: {errors.read().strip()}")
+            try:
+                rows = json.loads(reply)
+            except ValueError as error:
+                raise ScoreWorkerFailed(f"invalid score worker reply: {reply[:200]}") from error
+            if isinstance(rows, dict) and "error" in rows:
+                raise RuntimeError(rows["error"])
+            return _point_scores(rows, vector_size if vector_size is not None else len(sources))
+
+        try:
+            yield score
+        finally:
+            try:
+                process.stdin.close()
+            except BrokenPipeError:
+                pass
+            try:
+                process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+            finally:
+                process.stdout.close()
+
+
+def _point_scores(rows, expected_rows):
     if len(rows) != expected_rows:
         raise RuntimeError(
             f"score_flatpdl_batch returned {len(rows)} rows, expected {expected_rows}"
