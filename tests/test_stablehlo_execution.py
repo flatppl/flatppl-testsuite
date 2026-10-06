@@ -21,7 +21,7 @@ def test_enzyme_mode_preserves_zero_products_and_selected_axes(tmp_path, dtype, 
         "outputs = prod(x[[1, 3, 5]]) + 2.0 * prod(x[[2, 4, 6]])"
         "  + x[1] * x[3] * x[5] + sum(aggregate(prod, [.i, .k], m[.i, .j, .k]))\n"
     )
-    source = ex.emit(query, "logdensity", dtype=dtype, enzyme_compatible=True)
+    source = ex.emit(query, "logdensity", dtype=dtype)
     jax, _, hlo_call = ex._jax()
     scalar = np.float64 if dtype == "f64" else np.float32
     x = np.array([0, 2, 3, 0, 5, 6], dtype=scalar)
@@ -47,9 +47,9 @@ def test_enzyme_mode_refuses_unqualified_derivative_paths(tmp_path):
         query.write_text('flatppl_compat = "0.1"\n'
                          "x = elementof(cartpow(reals, 3))\ninputs = x\n"
                          f"outputs = {expression}\n")
-        ex.emit(query, "logdensity")
+        ex.emit(query, "logdensity", enzyme_compatible=False)
         with pytest.raises(ex.EmitRefused):
-            ex.emit(query, "logdensity", enzyme_compatible=True)
+            ex.emit(query, "logdensity")
 
 
 @pytest.mark.stablehlo_only
@@ -125,7 +125,7 @@ def test_integer_abi_accepts_integral_spelling_but_rejects_loss(invalid):
 def test_full_width_tuple_key_matches_the_same_uint64_array(key):
     _gate_engine("stablehlo")
     directory = Path(__file__).resolve().parents[1] / "corpora/stablehlo-sample/normal"
-    src = ex.emit_concat(directory, "sample")
+    src = ex.emit_concat(directory, "sample", enzyme_compatible=False)
     tuple_result = ex.sample_call(src, key, [0.0, 1.0])
     array_result = ex.sample_call(src, np.asarray(key, dtype=np.uint64), [0.0, 1.0])
     for actual, expected in zip(tuple_result, array_result):
