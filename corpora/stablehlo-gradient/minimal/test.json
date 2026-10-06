@@ -1,0 +1,88 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "inputs": [
+    "point"
+  ],
+  "points": [
+    {
+      "point": [
+        1.0,
+        1.5,
+        2.0
+      ]
+    },
+    {
+      "point": [
+        1.6,
+        1.5,
+        1.4
+      ]
+    },
+    {
+      "point": [
+        2.0,
+        0.5,
+        3.5
+      ]
+    },
+    {
+      "point": [
+        6.5,
+        4.5,
+        -0.5
+      ]
+    }
+  ],
+  "numerical_integrals": true,
+  "oracle": "Analytic radial density after integrating one shared Exponential variance",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "336152f11040fa57eb06f769fc433bdc43b61b49",
+    "path": "examples/minimal.flatppl",
+    "sha256": "3b1d5e74a565ec374621b8eb1895e9255f504d8ab55917198d2df43713f7be8a"
+  },
+  "engine_limits": {
+    "det-js": "Numerical marginal integration requires the StableHLO extension."
+  },
+  "grad_params": [
+    "point"
+  ],
+  "expected_grad": [
+    {
+      "point": [
+        1.9999999999999998,
+        -0.0,
+        -1.9999999999999998
+      ]
+    },
+    {
+      "point": [
+        -5.999999999999995,
+        -0.0,
+        5.999999999999995
+      ]
+    },
+    {
+      "point": [
+        -0.4038447951622791,
+        0.8076895903245582,
+        -1.6153791806491165
+      ]
+    },
+    {
+      "point": [
+        -1.2786576167212302,
+        -0.767194570032738,
+        0.5114630466884921
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 2e-05,
+    "grad_rtol": 0.0002
+  }
+}

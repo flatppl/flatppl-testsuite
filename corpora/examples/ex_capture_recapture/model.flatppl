@@ -17,7 +17,7 @@ rcp ~ Uniform(interval(0, rcp_max))
 % Recapture stochastic node
 R ~ Binomial(C_obs, rcp)
 
-prior = lawof(record(rcp = rcp))
-forward_kernel = kernelof(record(R = R), rcp = rcp)
-L = likelihoodof(forward_kernel, record(R = R_obs))
-posterior = bayesupdate(L, prior)
+Pi_prior = lawof(record(rcp = rcp))
+K_model = kernelof(record(R = R), rcp = rcp) % Forward kernel (observation model)
+L = likelihoodof(K_model, record(R = R_obs))
+Pi_post = bayesupdate(L, Pi_prior)

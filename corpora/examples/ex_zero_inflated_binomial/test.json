@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -71,5 +71,11 @@
   "inputs": [
     "p",
     "psi"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/zero-inflated-binomial.flatppl",
+    "sha256": "8b3225edab3e4250150c8f9ff3cd4dc2b592100c722223c60f71014ae4ce38c6"
+  }
 }

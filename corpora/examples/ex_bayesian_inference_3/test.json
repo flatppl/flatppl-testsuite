@@ -1,0 +1,85 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "status": "lowers",
+  "points": [
+    {
+      "theta1": 0.5,
+      "theta2": 1.0
+    },
+    {
+      "theta1": -1.5,
+      "theta2": 0.8
+    },
+    {
+      "theta1": -2.5,
+      "theta2": 0.05
+    },
+    {
+      "theta1": 0.25,
+      "theta2": 0.5
+    },
+    {
+      "theta1": 3.0,
+      "theta2": 2.0
+    },
+    {
+      "theta1": -0.75,
+      "theta2": 1.5
+    },
+    {
+      "theta1": 1.75,
+      "theta2": 0.25
+    },
+    {
+      "theta1": -3.0,
+      "theta2": 3.5
+    },
+    {
+      "theta1": 2.25,
+      "theta2": 0.6
+    },
+    {
+      "theta1": 0.9,
+      "theta2": 4.0
+    }
+  ],
+  "expected": [
+    -74.10185205965193,
+    -19.724594988746496,
+    -4073.288908448453,
+    -866.6451584484529,
+    -40.42730744642084,
+    -79.20073755514856,
+    -187.85135956197814,
+    -50.453822468632204,
+    -21.425804974939965,
+    -131.67837219641524
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09,
+    "value_atol_f32": 0.001,
+    "value_rtol_f32": 0.0001
+  },
+  "oracle": "scipy 1.18",
+  "inputs": [
+    "theta1",
+    "theta2"
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/bayesian_inference_3.flatppl",
+    "sha256": "fb26c85cf01eac9707baf71ff7edec5958b6986c49e35c918fb1aaad0608d7b9",
+    "imports": {
+      "bayesian_inference_common.flatppl": "e04f46d67833a0b0871238e719f812c9f2ad048fe6c5d11db98c8ceb8c313b33",
+      "bayesian_inference_priors.flatppl": "ee48ebc0e17db6fcda924866d18af6cf650780564fc310b54651ec221352007d"
+    }
+  }
+}

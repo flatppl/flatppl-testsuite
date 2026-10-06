@@ -1,13 +1,5 @@
 %%%
 # Signal-plus-background rare-event search (BAT.jl paper example)
-
-Hierarchical counting experiment over 5 detector datasets: a Gaussian signal
-peak (fixed shape) over an exponential background. Full description and the
-side-by-side BAT.jl source are in `README.md`.
-
-Julia's `Exponential(λ)` is scale-parameterised (the BAT example's convention),
-FlatPPL's `Exponential(rate)` is rate-parameterised, so the background mixand is
-`Exponential(1 / lam)`.
 %%%
 flatppl_compat = "0.1"
 
@@ -33,21 +25,19 @@ S_mu    = 100.0
 S_sigma = 2.0
 
 # Priors.
-S       ~ Uniform(interval(0.0, 10.0))       % signal strength
-sigma_B ~ Uniform(interval(0.1, 1.0))        % background-rate log-scale
-m_B     ~ Uniform(interval(1e-10, 20.0))     % background-rate mean (0.1 * (E_max - E_min))
-lam     ~ Uniform(interval(1e-10, 100.0))    % exponential background scale
+S       ~ Uniform(interval(0.0, 10.0))       % Signal strength
+sigma_B ~ Uniform(interval(0.1, 1.0))        % Background-rate log-scale
+m_B     ~ Uniform(interval(1e-10, 20.0))     % Background-rate mean (0.1 * (E_max - E_min))
+lam     ~ Uniform(interval(1e-10, 100.0))    % Exponential background scale
 
-% Hierarchical per-dataset background rates, chosen so that E[B_i] = m_B.
+# Hierarchical per-dataset background rates, chosen so that E[B_i] = m_B.
 B ~ iid(LogNormal(log(m_B) - sigma_B^2 / 2.0, sigma_B), 5)
 
-prior = lawof(record(S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B))
+Pi_prior = lawof(record(S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B))
 
-# Expected background/signal yields per dataset, and the per-dataset background
-# mixing weight w = nu_B / (nu_B + nu_S).
+# Expected background and signal yields per dataset.
 nu_B = exposure .* B
 nu_S = exposure .* efficiency .* S
-w    = nu_B ./ (nu_B .+ nu_S)
 
 # Shared mixture components.
 bkg = Exponential(1.0 / lam)
@@ -56,26 +46,32 @@ sig = Normal(S_mu, S_sigma)
 # Observed count per dataset.
 event_counts ~ Poisson.(nu_B .+ nu_S)
 
-###
-Per-event energy is a two-component mixture of background `bkg` (weight `w_i`)
-and signal `sig` (weight `1 - w_i`), the weights fixed by each dataset's yields.
-Ideally one broadcast over all events; the reference engine cannot yet score a
-broadcast whose kernel is a composite measure, so it is written as one `iid`
-block per dataset (the mixing weight is constant within a dataset).
-###
-E1 ~ iid(normalize(superpose(weighted(w[1], bkg), weighted(1.0 - w[1], sig))), 13)
-E2 ~ iid(normalize(superpose(weighted(w[2], bkg), weighted(1.0 - w[2], sig))), 10)
-E3 ~ iid(normalize(superpose(weighted(w[3], bkg), weighted(1.0 - w[3], sig))), 10)
-E4 ~ iid(normalize(superpose(weighted(w[4], bkg), weighted(1.0 - w[4], sig))), 2)
-E5 ~ iid(normalize(superpose(weighted(w[5], bkg), weighted(1.0 - w[5], sig))), 2)
+# All measured energies in one column, and the dataset each event belongs to.
+E_data = cat(E1_data, E2_data, E3_data, E4_data, E5_data)
+dataset_of_event = cat(fill(1, counts_data[1]), fill(2, counts_data[2]),
+                       fill(3, counts_data[3]), fill(4, counts_data[4]),
+                       fill(5, counts_data[5]))
 
-# Posterior: prior x likelihood (per-dataset counts + per-event energies).
-forward_kernel = kernelof(
-    record(event_counts = event_counts, E1 = E1, E2 = E2, E3 = E3, E4 = E4, E5 = E5),
+###
+Per-event energy is a two-component mixture of background `bkg` and signal
+`sig`, mixed in proportion to that event's dataset's yields, as one broadcast
+over all 37 events.
+
+`normalize` divides by the superposition's total mass, so the two components
+may carry the *unnormalised* yields: $(\nu_B p + \nu_S q) / (\nu_B + \nu_S)$
+is the same measure as $w p + (1 - w) q$ with $w = \nu_B / (\nu_B + \nu_S)$.
+Written with the yields, the model never forms $1 - w$, which loses every
+significant digit of the signal weight once $w$ rounds to one.
+###
+energy = (b, s) -> normalize(superpose(weighted(b, bkg), weighted(s, sig)))
+E ~ energy.(nu_B[dataset_of_event], nu_S[dataset_of_event])
+
+K_model = kernelof(
+    record(event_counts = event_counts, E = E),
     S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B,
-)
-L = likelihoodof(forward_kernel, record(
+) % Forward kernel (observation model)
+L = likelihoodof(K_model, record(
     event_counts = counts_data,
-    E1 = E1_data, E2 = E2_data, E3 = E3_data, E4 = E4_data, E5 = E5_data,
+    E = E_data,
 ))
-posterior = bayesupdate(L, prior)
+Pi_post = bayesupdate(L, Pi_prior)

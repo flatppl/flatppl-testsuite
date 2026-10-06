@@ -1,0 +1,76 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "inputs": [
+    "coordinates"
+  ],
+  "points": [
+    {
+      "coordinates": [
+        1.0,
+        0.35
+      ]
+    },
+    {
+      "coordinates": [
+        0.8,
+        -0.2
+      ]
+    },
+    {
+      "coordinates": [
+        1.4,
+        0.6
+      ]
+    },
+    {
+      "coordinates": [
+        1.0,
+        -0.35
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 5e-05,
+    "grad_rtol": 1e-05
+  },
+  "oracle": "Five-point derivative of independent NumPy amplitude, h=1e-5",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/dminus-to-3pi-amplitude.flatppl",
+    "sha256": "46143fcc05977f4e659f50bc7e05807a5804651a2dbd3104445f606d0504a41f"
+  },
+  "grad_params": [
+    "coordinates"
+  ],
+  "expected_grad": [
+    {
+      "coordinates": [
+        -11.172175609349317,
+        -14.428741171738459
+      ]
+    },
+    {
+      "coordinates": [
+        0.13368281745658922,
+        -10.397524721661442
+      ]
+    },
+    {
+      "coordinates": [
+        18.826189264603553,
+        -7.688754178121943
+      ]
+    },
+    {
+      "coordinates": [
+        -11.172175609349317,
+        14.428741171716254
+      ]
+    }
+  ]
+}

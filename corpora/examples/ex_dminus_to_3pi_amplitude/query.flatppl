@@ -1,0 +1,3 @@
+coordinates = elementof(cartpow(reals, 2))
+inputs = coordinates
+outputs = logdensityof(amplitude_measure, coordinates)

@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -71,5 +71,11 @@
   "inputs": [
     "intercept",
     "slope"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/poisson-glm-link.flatppl",
+    "sha256": "5d97124eb80bc14e5f2309d26e570d8408d401d714be40356d05c2bd4f9f37d8"
+  }
 }

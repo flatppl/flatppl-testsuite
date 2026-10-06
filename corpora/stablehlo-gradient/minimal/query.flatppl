@@ -1,0 +1,3 @@
+point = elementof(cartpow(reals, 3))
+inputs = point
+outputs = logdensityof(dist, point)

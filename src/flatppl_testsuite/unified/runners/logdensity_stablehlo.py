@@ -50,7 +50,8 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                             "(run regen)")]
 
     try:
-        src = ex.emit_concat(dir, "logdensity", model_name=model_name)
+        src = ex.emit_concat(dir, "logdensity", model_name=model_name,
+                             numerical_integrals=body.get("numerical_integrals", False))
     except ex.EmitRefused as e:
         # A refusal is a SKIP, matching `logdensity_detjs`'s DeterminizeRefused
         # handling: the construct is outside what the determiniser/emitter

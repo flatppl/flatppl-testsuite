@@ -1,0 +1,54 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "inputs": [
+    "omega_v",
+    "log_noise_v"
+  ],
+  "points": [
+    {
+      "omega_v": -2.0,
+      "log_noise_v": 0.0
+    },
+    {
+      "omega_v": -1.5,
+      "log_noise_v": 0.25
+    },
+    {
+      "omega_v": -2.5,
+      "log_noise_v": -0.3
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 2e-05,
+    "grad_rtol": 2e-05
+  },
+  "oracle": "Complex-step derivative (h=1e-20) of independent scalar recurrence",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/hgf-binary-2level.flatppl",
+    "sha256": "1f6c8b19a15b4b2eac047a7db08e669543cc058bdcb42a5ebf8364ea7b1a1b58"
+  },
+  "grad_params": [
+    "omega_v",
+    "log_noise_v"
+  ],
+  "expected_grad": [
+    {
+      "omega_v": 0.03501765194577403,
+      "log_noise_v": -0.09058186663359263
+    },
+    {
+      "omega_v": -0.45972128545135504,
+      "log_noise_v": -1.1070258608671852
+    },
+    {
+      "omega_v": 0.5281853054311022,
+      "log_noise_v": 1.156141733695054
+    }
+  ]
+}

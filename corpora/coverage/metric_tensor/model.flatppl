@@ -1,0 +1,9 @@
+flatppl_compat = "0.1"
+metric_entries = elementof(cartpow(reals, 4))
+v = elementof(cartpow(reals, 2))
+g = rowstack([[metric_entries[1], metric_entries[2]], [metric_entries[3], metric_entries[4]]])
+A = rowstack([[1.,2.],[3.,4.]])
+g: norm[] := v[.i^]*v[.i_]
+g: trace[] := A[.i^, .i_]
+g: raised[.i_] := 2*v[.i_]
+score = norm + trace + sum(raised)

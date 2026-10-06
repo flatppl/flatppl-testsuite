@@ -1,0 +1,49 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "inputs": [
+    "omega_v",
+    "omega_vol_v",
+    "log_noise_v"
+  ],
+  "points": [
+    {
+      "omega_v": -2.0,
+      "omega_vol_v": -4.0,
+      "log_noise_v": 0.0
+    },
+    {
+      "omega_v": -2.4,
+      "omega_vol_v": -3.5,
+      "log_noise_v": 0.25
+    },
+    {
+      "omega_v": -1.6,
+      "omega_vol_v": -4.5,
+      "log_noise_v": -0.3
+    }
+  ],
+  "expected": [
+    -20.915987967735404,
+    -21.857833258981852,
+    -20.39934221596288
+  ],
+  "tolerance": {
+    "atol": 1e-10,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 2e-06
+  },
+  "oracle": "Independent scalar recurrence and Gaussian/Uniform log densities",
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/hgf-binary-3level.flatppl",
+    "sha256": "aa61e54f1ddd0cb42d8f6f35c6eba007fd6a21f60a3179622704966ccbd090e7"
+  }
+}

@@ -42,7 +42,8 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     argnums = [inputs.index(p) for p in grad_params]
 
     try:
-        src = ex.emit_concat(dir, "logdensity")
+        src = ex.emit_concat(dir, "logdensity",
+                             numerical_integrals=body.get("numerical_integrals", False))
     except ex.EmitRefused as e:
         return [CheckResult(tid, "gradient", "failed", UNSCOREABLE, f"emit refused: {e}")]
 

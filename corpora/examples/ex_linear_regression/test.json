@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "posterior",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -82,5 +82,11 @@
     "alpha",
     "beta",
     "sigma"
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/linear-regression.flatppl",
+    "sha256": "ffb4248aeea0463da7b507c6b547fad28684931252f11ed75bc5920253db6225"
+  }
 }

@@ -15,8 +15,8 @@ lambda ~ Gamma(2, 1)
 % IID Poisson counts
 y ~ iid(Poisson(lambda), n)
 
-prior = lawof(record(lambda = lambda))
+Pi_prior = lawof(record(lambda = lambda))
 
-forward_kernel = kernelof(record(y = y), lambda = lambda)
-L = likelihoodof(forward_kernel, record(y = counts_data))
-posterior = bayesupdate(L, prior)
+K_model = kernelof(record(y = y), lambda = lambda) % Forward kernel (observation model)
+L = likelihoodof(K_model, record(y = counts_data))
+Pi_post = bayesupdate(L, Pi_prior)

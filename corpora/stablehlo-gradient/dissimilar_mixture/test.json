@@ -137,5 +137,11 @@
       "shape": 9.329611270619116,
       "rate": -36.44511691249538
     }
-  ]
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "path": "examples/dissimilar-mixture.flatppl",
+    "sha256": "c37dd5ac9655a9bfda42f898962e8554bd7f10bc3e86001f1706601839bd6daf"
+  }
 }

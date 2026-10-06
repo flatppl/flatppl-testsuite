@@ -13,9 +13,9 @@ p ~ Beta(2, 2)
 
 % Mean of Normal mixand
 mu ~ Normal(0, 1)
-sigma2 ~ InverseGamma(2, 2)
+sigma_sq ~ InverseGamma(2, 2)
 % Standard deviation of Normal mixand
-sigma = sqrt(sigma2)
+sigma = sqrt(sigma_sq)
 % Normal mixand
 normal_mixand = Normal(mu, sigma)
 
@@ -34,7 +34,7 @@ mixture = normalize(superpose(
 
 y ~ iid(mixture, N)
 
-prior = lawof(record(p = p, mu = mu, sigma = sigma, shape = shape, rate = rate))
-forward_kernel = kernelof(record(y = y), p = p, mu = mu, sigma = sigma, shape = shape, rate = rate)
-L = likelihoodof(forward_kernel, record(y = y_obs))
-posterior = bayesupdate(L, prior)
+Pi_prior = lawof(record(p = p, mu = mu, sigma = sigma, shape = shape, rate = rate))
+K_model = kernelof(record(y = y), p = p, mu = mu, sigma = sigma, shape = shape, rate = rate) % Forward kernel (observation model)
+L = likelihoodof(K_model, record(y = y_obs))
+Pi_post = bayesupdate(L, Pi_prior)

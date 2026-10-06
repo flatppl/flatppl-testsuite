@@ -26,7 +26,7 @@ hits_data    = [12, 15, 10, 18,  8,  29,  6,  71]
 N = 8
 
 # --- Population hyperpriors ---
-% League-wide mean batting rate, on the unit interval.
+% League-wide mean batting rate, on the unit interval
 phi ~ Uniform(interval(0.0, 1.0))
 
 %%%
@@ -43,12 +43,12 @@ beta  = (1.0 - phi) * kappa
 # --- Per-player rates (partially pooled) ---
 theta ~ iid(Beta(alpha, beta), N)
 
-prior = lawof(record(phi = phi, kappa = kappa, theta = theta))
+Pi_prior = lawof(record(phi = phi, kappa = kappa, theta = theta))
 
 # --- Likelihood: hits out of at-bats, broadcast over players ---
 y ~ Binomial.(at_bats_data, theta)
 
 # --- Posterior assembly ---
-forward_kernel = kernelof(record(y = y), phi = phi, kappa = kappa, theta = theta)
-L              = likelihoodof(forward_kernel, record(y = hits_data))
-posterior      = bayesupdate(L, prior)
+K_model = kernelof(record(y = y), phi = phi, kappa = kappa, theta = theta) % Forward kernel (observation model)
+L              = likelihoodof(K_model, record(y = hits_data))
+Pi_post      = bayesupdate(L, Pi_prior)

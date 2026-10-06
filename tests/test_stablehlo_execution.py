@@ -40,6 +40,41 @@ def test_enzyme_mode_preserves_zero_products_and_selected_axes(tmp_path, dtype, 
 
 
 @pytest.mark.stablehlo_only
+def test_scalar_product_from_a_slice_has_a_vector_output_adjoint(tmp_path):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "x = elementof(cartpow(reals, 2))\n"
+        "inputs = x\noutputs = [2.0*x[1]]\n"
+    )
+    source = ex.emit(query, "logdensity")
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda x: hlo_call(x, source=source)[0])
+    point = jnp.array([1., 3.], dtype=jnp.float32)
+    np.testing.assert_array_equal(evaluate(point), [2.])
+    gradient = jax.jit(jax.grad(lambda x: jnp.sum(evaluate(x))))
+    np.testing.assert_array_equal(gradient(point), [2., 0.])
+
+
+@pytest.mark.stablehlo_only
+def test_complex_projections_preserve_extreme_scales(tmp_path):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "scale = elementof(posreals)\n"
+        "z = complex(3.0*scale, 4.0*scale)\n"
+        "ratio = z / complex(scale, -scale)\n"
+        "inputs = scale\noutputs = (abs(z), real(ratio), imag(ratio))\n"
+    )
+    source = ex.emit(query, "logdensity", dtype="f32")
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda scale: hlo_call(scale, source=source))
+    for scale in (1e-20, 1.0, 1e20):
+        actual = evaluate(jnp.float32(scale))
+        np.testing.assert_allclose(actual, [5*scale, -0.5, 3.5], rtol=3e-6, atol=0)
+
+
+@pytest.mark.stablehlo_only
 def test_enzyme_mode_refuses_unqualified_derivative_paths(tmp_path):
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"

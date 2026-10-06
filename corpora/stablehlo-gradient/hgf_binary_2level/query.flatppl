@@ -1,0 +1,4 @@
+omega_v = elementof(reals)
+log_noise_v = elementof(reals)
+inputs = (omega_v, log_noise_v)
+outputs = logdensityof(posterior, record(omega=omega_v, log_noise=log_noise_v))
