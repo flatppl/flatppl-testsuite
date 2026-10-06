@@ -80,6 +80,31 @@ def test_the_guard_sees_the_corpus():
 
 
 @pytest.mark.skipif(not ex.engine_available(), reason="det-js path unavailable")
+def test_score_worker_isolates_models_and_recovers_after_a_failed_source(monkeypatch):
+    directory = _CORPORA / "examples" / "ex_best_estimation"
+    body = json.loads((directory / "test.json").read_text())
+    outside = dict(body["points"][0], sigma1=50.0)
+    args = dict(model=directory / body["model"], query=directory / "query.flatppl",
+                fields=body["inputs"], points=[body["points"][0], outside])
+    densities = ex.score_abi_points(**args)
+    assert densities[0].value == pytest.approx(float(body["expected"][0]))
+    assert densities[1].value == -math.inf
+    sources = ['flatppl_compat = "0.1"\noutputs = [2.0, -inf]\n']
+    expected = ex._score_flatpdl_batch(sources, "outputs", vector_size=2)
+    with ex.batch_score_worker() as score:
+        monkeypatch.setattr(ex, "_score_flatpdl_batch", score)
+        assert ex.score_abi_points(**args) == densities
+        assert score(sources, "outputs", vector_size=2) == expected
+        assert score(sources, "missing", vector_size=2)[0].error is not None
+        changed = [sources[0].replace("2.0", "7.0")]
+        values = score(changed, "outputs", vector_size=2)
+        assert [row.value for row in values] == [7.0, -math.inf]
+        assert all(row.error is None for row in values)
+        assert score(sources, "outputs", vector_size=2) == expected
+        assert ex.score_abi_points(**args) == densities
+
+
+@pytest.mark.skipif(not ex.engine_available(), reason="det-js path unavailable")
 def test_promoted_input_replaces_a_wrapped_default_not_its_documentation(tmp_path: Path):
     """A long fixed default and a doc example cannot change runtime ABI values."""
     model = tmp_path / "model.flatppl"
