@@ -277,3 +277,31 @@ def test_histosys_zero_centered_shift_and_adjoint(tmp_path, dtype, tolerance):
         np.testing.assert_allclose(evaluate(points), expected, rtol=tolerance, atol=tolerance)
         np.testing.assert_allclose(gradient(points), np.asarray(derivatives) * weights[:, None],
                                    rtol=tolerance, atol=tolerance)
+
+
+@pytest.mark.stablehlo_only
+def test_fixed_histosys_anchors_preserve_broadcast_shape_and_adjoint(tmp_path):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+                     "zero(a) = pyhf.histosys_shift.([3., 5.], [3., 5.], [3., 5.], a)\n"
+                     "mixed(a) = pyhf.histosys_shift.([3., 4.], [3., 5.], [3., 6.], a)\n"
+                     "points = elementof(cartpow(reals, 8))\n"
+                     "inputs = points\noutputs = cat(zero.(points), mixed.(points))\n")
+    jax, jnp, hlo_call = ex._jax()
+    points = np.array([-2., -1., -.5, -0., 0., .5, 1., 2.])
+    for restricted in (True, False):
+        source = ex.emit(query, "logdensity", dtype="f64",
+                         restrict_enzyme_compatible=restricted)
+        evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
+        values = evaluate(points)
+        zero, mixed = values[:8], values[8:]
+        expected_zero = np.broadcast_to((points * 0.)[:, None], (8, 2))
+        np.testing.assert_array_equal(zero, expected_zero)
+        tails = np.abs(points) >= 1
+        np.testing.assert_array_equal(np.signbit(zero[tails]), np.signbit(expected_zero[tails]))
+        np.testing.assert_allclose(mixed, np.column_stack((np.zeros(8), points)), atol=1e-12)
+        # Equal anchors give zero. Symmetric unit shifts give the identity.
+        if restricted:
+            gradient = jax.jit(jax.grad(lambda xs: jnp.sum(evaluate(xs))))
+            np.testing.assert_allclose(gradient(points), np.ones(8), atol=1e-12)
