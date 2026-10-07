@@ -1,0 +1,2 @@
+inputs = (rates, lows, highs, points)
+outputs = sum(broadcast(score, rates, lows, highs, points))

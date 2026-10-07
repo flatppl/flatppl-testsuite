@@ -1,0 +1,2 @@
+inputs = (scale, x)
+outputs = score

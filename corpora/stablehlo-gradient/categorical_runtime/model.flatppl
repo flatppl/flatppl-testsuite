@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+p = elementof(stdsimplex(3))
+observed = external(cartpow(integers, 3))
+score = logdensityof(iid(Categorical(p), 3), observed)

@@ -1,0 +1,16 @@
+{
+  "test_type": "gradient",
+  "engines": ["stablehlo"],
+  "numerical_integrals": true,
+  "inputs": ["lo", "hi", "px", "py"],
+  "grad_params": ["lo", "hi", "px", "py"],
+  "points": [
+    {"lo": 0.0, "hi": 1.0, "px": 0.2, "py": 1.1},
+    {"lo": -1.0, "hi": 0.5, "px": 1.2, "py": -0.5}
+  ],
+  "expected_grad": [
+    {"lo": 0.2759560181306667, "hi": -0.02264285400128052, "px": 0.323343417935307, "py": -0.5766565820646932},
+    {"lo": 0.5026292061271138, "hi": 0.32570214055517777, "px": -1.2641656733411457, "py": 0.4358343266588542}
+  ],
+  "tolerance": {"grad_atol": 3e-6, "grad_rtol": 3e-5}
+}

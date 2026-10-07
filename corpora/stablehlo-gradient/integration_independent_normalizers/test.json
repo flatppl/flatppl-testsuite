@@ -1,0 +1,10 @@
+{
+  "test_type": "gradient",
+  "engines": ["stablehlo"],
+  "numerical_integrals": true,
+  "inputs": ["a"],
+  "grad_params": ["a"],
+  "points": [{"a": 2.0}, {"a": -1.3}],
+  "expected_grad": [{"a": -1.4079381816625782}, {"a": -0.5652890428977853}],
+  "tolerance": {"grad_atol": 3e-6, "grad_rtol": 3e-5}
+}

@@ -1,0 +1,2 @@
+inputs = a
+outputs = logdensityof(iid(inner, 3), [0.1, 0.2, 0.4]) + logdensityof(outer, 0.25)

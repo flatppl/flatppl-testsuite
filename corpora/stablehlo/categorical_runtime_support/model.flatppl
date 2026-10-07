@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+p = elementof(stdsimplex(3))
+observed = external(integers)
+score = logdensityof(Categorical0(p), observed)

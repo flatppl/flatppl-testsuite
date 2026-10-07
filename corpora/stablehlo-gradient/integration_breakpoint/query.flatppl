@@ -1,0 +1,2 @@
+inputs = cut
+outputs = logdensityof(measure, point)

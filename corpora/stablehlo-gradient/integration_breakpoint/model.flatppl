@@ -1,0 +1,4 @@
+cut = 0.3
+point = 0.8
+weight(x) = ifelse(x < cut, 1.0, 2.0)
+measure = normalize(weighted(weight, Lebesgue(interval(0.0, 1.0))))
