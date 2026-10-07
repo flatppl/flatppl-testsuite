@@ -1,4 +1,4 @@
-"""No handwritten corpus ABI query leaves a dead `elementof` behind.
+"""No handwritten corpus ABI query leaves an unaccounted `elementof` behind.
 
 This is a deliberate HOUSE RULE, stricter than the spec -- read the next
 paragraph before treating a failure here as a conformance bug.
@@ -16,15 +16,18 @@ forbids it in handwritten fixtures, where a parameterized param that no output
 reaches is an authoring slip -- a query that meant to feed it and does not, or a
 leftover shadowing duplicate of a binding the model already declares. Catching
 that early is worth a rule the spec does not impose; it is not evidence of
-non-conformance.
+non-conformance. Explicit `functionof`/`kernelof` boundary references also
+account for their leaves: those parameters belong to the callable rather than
+the query ABI. This is an accounting check, not semantic liveness analysis;
+it does not establish whether a reified helper is used.
 
 Full vendored model snapshots follow the spec instead. Their reified helpers
 can leave unused top-level leaves, and the source hash requires unchanged model
 bytes. Apply this house rule to their query additions only; executed corpus
 tests still enforce the compiler's reachable-input rule for the whole module.
 
-The reached case IS enforced by the emitter, and loudly -- an `elementof` that an
-output depends on but that `inputs` omits is refused with exit 3
+The reached free case IS enforced by the compiler, and loudly -- an `elementof`
+that an output depends on but that `inputs` omits is refused with exit 3
 ("elementof parameter `x` is not listed in `inputs`"), so for that case this test
 is a fast local echo of a check that already exists. What it uniquely covers is
 the CONCATENATION: a test dir's emitted module is `model.flatppl` + `query.flatppl`
@@ -52,6 +55,14 @@ _LOAD_DATA = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*load_data\s*\(", re
 # column (`x_data = data.x`), the one feeding route that is not `inputs`.
 _FIELD_PIN = re.compile(
     r"([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([A-Za-z_][A-Za-z0-9_]*)\.[A-Za-z_]"
+)
+_IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+# Keep strings and punctuation intact so their contents cannot become arguments.
+_TOKENS = re.compile(
+    r'\#\#\#[ \t]*\n[\s\S]*?^[ \t]*\#\#\#[ \t]*(?=\n|$)'
+    r'|%%%[^\n]*\n[\s\S]*?^[ \t]*%%%[ \t]*(?=\n|$)'
+    r'|[\#%][^\n;]*|"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z0-9_]*|\S',
+    re.M,
 )
 
 
@@ -82,22 +93,54 @@ def _declared_inputs(query_src: str) -> list[str]:
     return [t.strip() for t in rhs.split(",") if t.strip()]
 
 
+def _reified_parameters(source: str) -> set[str]:
+    """Account only for explicit bare references at a callable boundary."""
+    source = source.replace("\r\n", "\n").replace("\r", "\n")
+    tokens = [t for t in _TOKENS.findall(source) if not t.startswith(("#", "%"))]
+    bound = set()
+    for i, token in enumerate(tokens[:-1]):
+        if token not in ("functionof", "kernelof") or tokens[i + 1] != "(":
+            continue
+        if i and tokens[i - 1] == ".":
+            continue
+        depth = 0
+        arguments = [[]]
+        for token in tokens[i + 2:]:
+            if token == ")" and depth == 0:
+                break
+            if token == "," and depth == 0:
+                arguments.append([])
+                continue
+            if token in ("(", "[", "{"):
+                depth += 1
+            elif token in (")", "]", "}"):
+                depth -= 1
+            arguments[-1].append(token)
+        for argument in arguments[1:]:
+            if (len(argument) == 3 and argument[1] == "="
+                    and _IDENTIFIER.fullmatch(argument[0])
+                    and _IDENTIFIER.fullmatch(argument[2])):
+                bound.add(argument[2])
+    return bound
+
+
 _IDS = [str(d.relative_to(_CORPORA)) for d in _abi_dirs()]
 
 
 @pytest.mark.parametrize("dir", _abi_dirs(), ids=_IDS)
 def test_inputs_lists_every_parameterized_param(dir: Path):
     query = (dir / "query.flatppl").read_text()
+    model = _model_path(dir).read_text()
     source = json.loads((dir / "test.json").read_text()).get("source", {})
 
     params = set(_ELEMENTOF.findall(query))
     if not isinstance(source, dict) or "sha256" not in source:
-        params.update(_ELEMENTOF.findall(_model_path(dir).read_text()))
+        params.update(_ELEMENTOF.findall(model))
     listed = set(_declared_inputs(query))
 
     # A param pinned to a load_data column (`x_data = data.x` at the density
     # point, with `data = load_data(...)` in `inputs`) is fed and substituted
-    # away, not dead -- the one accounted-for route besides `inputs` itself.
+    # away, not dead.
     # Scoped to load_data sources so an ordinary shadowing slip still fails.
     load_data_names = set(_LOAD_DATA.findall(query))
     pinned = {
@@ -106,15 +149,34 @@ def test_inputs_lists_every_parameterized_param(dir: Path):
         if src in load_data_names
     }
 
-    unlisted = sorted(params - listed - pinned)
+    bound = _reified_parameters(model + "\n" + query)
+    unlisted = sorted(params - listed - pinned - bound)
     assert not unlisted, (
         f"{dir.name}: parameterized elementof binding(s) {unlisted} are not listed "
-        f"in `inputs` ({sorted(listed)}). If an output depends on it the module is "
+        f"in `inputs` ({sorted(listed)}), pinned or explicitly reified. "
+        "If an output depends freely on it the module is "
         "ill-formed per the spec; if nothing reaches it the spec would eliminate it, "
         "but this corpus forbids a dead param anyway (see this module's docstring). "
         "Either list it, or have the query reuse the model's own binding instead of "
         "shadowing it with a duplicate."
     )
+
+
+@pytest.mark.parametrize(("source", "expected"), [
+    ("f = functionof(body,\n renamed = original, y = y)", {"original", "y"}),
+    ("k = kernelof(Normal(mu=x, sigma=s), location=x)", {"x"}),
+    ('f = functionof(body, label="x=x", x=x+1, y=model.y)', set()),
+    ('# functionof(body, a=a)\n% kernelof(body, b=b)\n'
+     '###\nAn inline ### is not a fence.\nfunctionof(body, c=c)\n###\n'
+     '%%%md\nAn inline %%% is not a fence.\nkernelof(body, d=d)\n%%%\n'
+     'label="functionof(body, e=e)"\nf=functionof(body, x=x)', {"x"}),
+    ("### a line comment; f=functionof(body, x=x)\r"
+     "% another comment; k=kernelof(body, y=y)", {"x", "y"}),
+    ("f = model.functionof(body, x=x)", set()),
+    ("dead = elementof(reals)\nf = functionof(body, x=x)", {"x"}),
+])
+def test_explicit_reification_boundaries(source: str, expected: set[str]):
+    assert _reified_parameters(source) == expected
 
 
 def test_the_guard_sees_the_corpus():
