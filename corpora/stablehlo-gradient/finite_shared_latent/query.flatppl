@@ -1,0 +1,2 @@
+inputs = (p, px, py)
+outputs = logdensityof(measure, record(x=px, y=py))

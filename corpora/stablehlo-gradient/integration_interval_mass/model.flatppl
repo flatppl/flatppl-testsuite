@@ -1,0 +1,7 @@
+rate = 2.0
+lo = -0.5
+hi = 3.0
+point = 0.7
+measure = normalize(truncate(Gamma(2.0, rate), interval(lo, hi)))
+inputs = (rate, lo, hi, point)
+outputs = logdensityof(measure, point)

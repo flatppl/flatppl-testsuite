@@ -1,0 +1,2 @@
+inputs = (p, observed)
+outputs = score

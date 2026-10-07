@@ -1,0 +1,7 @@
+p = 0.25
+atom = 0.4
+scale = 1.2
+point = 0.5
+prior = normalize(superpose(weighted(p, Dirac(atom)), weighted(1-p, Normal(0.0, scale))))
+z ~ prior
+y ~ Normal(z, 1.0)

@@ -1,0 +1,5 @@
+lo = 0.26
+hi = 0.27
+point = 0.8
+weight(x) = 1.0 + 100.0*ifelse(in(x, interval(lo, hi)), 1.0, 0.0)
+measure = normalize(weighted(weight, Lebesgue(interval(0.0, 1.0))))

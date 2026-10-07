@@ -1,0 +1,69 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "numerical_integrals": true,
+  "inputs": [
+    "rates",
+    "lows",
+    "highs",
+    "points"
+  ],
+  "points": [
+    {
+      "rates": [
+        0.7,
+        2.0,
+        5.0
+      ],
+      "lows": [
+        -0.2,
+        0.0,
+        0.5
+      ],
+      "highs": [
+        1.3,
+        0.9,
+        1.2
+      ],
+      "points": [
+        0.4,
+        0.3,
+        0.9
+      ]
+    },
+    {
+      "rates": [
+        1.1,
+        3.0,
+        4.2
+      ],
+      "lows": [
+        0.0,
+        -0.3,
+        0.2
+      ],
+      "highs": [
+        0.8,
+        0.7,
+        1.1
+      ],
+      "points": [
+        0.25,
+        0.2,
+        0.75
+      ]
+    }
+  ],
+  "expected": [
+    -0.7420584164326497,
+    -0.3360642551216908
+  ],
+  "tolerance": {
+    "value_atol_f32": 1e-05,
+    "value_rtol_f32": 0.0001,
+    "atol": 1e-08,
+    "rtol": 1e-08
+  }
+}

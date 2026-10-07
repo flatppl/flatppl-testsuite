@@ -1,0 +1,51 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "numerical_integrals": true,
+  "inputs": [
+    "p",
+    "atom",
+    "scale",
+    "point"
+  ],
+  "points": [
+    {
+      "p": 0.25,
+      "atom": 0.4,
+      "scale": 1.2,
+      "point": 0.5
+    },
+    {
+      "p": 0.65,
+      "atom": -0.7,
+      "scale": 0.8,
+      "point": 1.3
+    }
+  ],
+  "grad_params": [
+    "p",
+    "atom",
+    "scale",
+    "point"
+  ],
+  "expected_grad": [
+    {
+      "p": 0.5487176086441473,
+      "atom": 0.03528845516207776,
+      "scale": -0.2856455587107963,
+      "point": -0.16789407982995122
+    },
+    {
+      "p": -1.3180108111066273,
+      "atom": 0.7003050809464847,
+      "scale": 0.009664596364169505,
+      "point": -1.2154280671567195
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 1e-05,
+    "grad_rtol": 0.0001
+  }
+}

@@ -1,0 +1,2 @@
+inputs = (p, atom, scale, point)
+outputs = logdensityof(lawof(y), point)

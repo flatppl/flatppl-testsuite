@@ -1,0 +1,2 @@
+A = elementof(cartpow(reals, [3, 3]))
+score = det(A)

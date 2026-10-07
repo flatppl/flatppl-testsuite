@@ -1,0 +1,4 @@
+mu = elementof(cartpow(reals, 5))
+cov = elementof(cartpow(reals, [5, 5]))
+x = elementof(cartpow(reals, 5))
+score = logdensityof(MvNormal(mu, cov), x)

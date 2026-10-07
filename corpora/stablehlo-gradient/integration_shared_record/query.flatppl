@@ -1,0 +1,2 @@
+inputs = (lo, hi, px, py)
+outputs = logdensityof(lawof(record(x=x, y=y)), record(x=px, y=py))

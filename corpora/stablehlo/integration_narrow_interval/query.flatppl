@@ -1,0 +1,2 @@
+inputs = (lo, hi)
+outputs = logdensityof(measure, point)

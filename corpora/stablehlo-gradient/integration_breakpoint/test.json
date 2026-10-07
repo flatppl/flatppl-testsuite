@@ -1,0 +1,10 @@
+{
+  "test_type": "gradient",
+  "engines": ["stablehlo"],
+  "numerical_integrals": true,
+  "inputs": ["cut"],
+  "grad_params": ["cut"],
+  "points": [{"cut": 0.3}, {"cut": 0.75}, {"cut": -0.1}, {"cut": 1.1}],
+  "expected_grad": [{"cut": 0.5882352941176471}, {"cut": 0.8}, {"cut": 0.0}, {"cut": 0.0}],
+  "tolerance": {"grad_atol": 3e-6, "grad_rtol": 3e-5}
+}

@@ -1,0 +1,3 @@
+A = elementof(cartpow(reals, [2, 2]))
+weights = rowstack([[1.0, 0.0], [2.0, 3.0]])
+score = sum(lower_cholesky(A) .* weights)

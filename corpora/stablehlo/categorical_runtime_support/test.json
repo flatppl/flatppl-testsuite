@@ -1,0 +1,62 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "inputs": [
+    "p",
+    "observed"
+  ],
+  "points": [
+    {
+      "p": [
+        0.0,
+        0.25,
+        0.75
+      ],
+      "observed": 0
+    },
+    {
+      "p": [
+        0.0,
+        0.25,
+        0.75
+      ],
+      "observed": 1
+    },
+    {
+      "p": [
+        0.0,
+        0.25,
+        0.75
+      ],
+      "observed": 2
+    },
+    {
+      "p": [
+        0.0,
+        0.25,
+        0.75
+      ],
+      "observed": -1
+    },
+    {
+      "p": [
+        0.0,
+        0.25,
+        0.75
+      ],
+      "observed": 3
+    }
+  ],
+  "expected": [
+    "-inf",
+    -1.3862943611198906,
+    -0.2876820724517809,
+    "-inf",
+    "-inf"
+  ],
+  "tolerance": {
+    "value_atol_f32": 2e-06
+  }
+}
