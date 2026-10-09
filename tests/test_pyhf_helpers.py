@@ -280,6 +280,27 @@ def test_histosys_zero_centered_shift_and_adjoint(tmp_path, dtype, tolerance):
 
 
 @pytest.mark.stablehlo_only
+def test_histosys_preserves_small_shifts_and_negative_zero(tmp_path):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+                     "evaluate(p) = pyhf.histosys_shift(p[1], p[2], p[3], p[4])\n"
+                     "points = elementof(cartpow(cartpow(reals, 4), 2))\n"
+                     "inputs = points\noutputs = evaluate.(points)\n")
+    points = np.array([[.5, 1., 2., -0.], [1e30, 0., 1e30, 1e-30]], dtype=np.float32)
+    jax, _, hlo_call = ex._jax()
+    source = ex.emit(query, "logdensity", dtype="f32")
+    evaluate = jax.jit(lambda xs: hlo_call(xs, source=source)[0])
+    values = np.asarray(evaluate(points))
+    assert values[0] == 0 and np.signbit(values[0])
+    # For equal anchors and zero nominal, the leading term is 15/8 * anchor * alpha**2.
+    # Squaring alpha in f32 first erases this representable shift.
+    np.testing.assert_allclose(values[1], 1.875e-30, rtol=3e-6, atol=0)
+    gradient = jax.jit(jax.grad(lambda xs: evaluate(xs)[1]))(points)
+    np.testing.assert_allclose(gradient[1, 3], 3.75, rtol=3e-6, atol=0)
+
+
+@pytest.mark.stablehlo_only
 def test_fixed_histosys_anchors_preserve_broadcast_shape_and_adjoint(tmp_path):
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"
