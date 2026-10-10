@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generated_at": "2026-09-14T09:23:25.810803+00:00",
-    "determinizer_commit": "f1148ab9847e0bfacfccc7482b2a9f7668f9f725",
-    "engine_commit": "267427dfc3cdf9f01d7faa381b9afcfb3d9a234b",
+    "generated_at": "2026-10-10T10:04:49.686004+00:00",
+    "determinizer_commit": "3b80c3aae9b39e177dbe3ffc3a78ef3349fa584f",
+    "engine_commit": "06ca1d8abe59c8a3e99de7effedb1a2a58086a9c",
     "probe_count": 859,
     "outcome_counts": {
       "LOWERS": 688,
@@ -6649,7 +6649,7 @@
       "outcome": "REFUSES",
       "oracle": -1.0439385332046727,
       "value": null,
-      "marker": "normalize:refuse-normalize-flatppl-normalize-unnormalized-measure",
+      "marker": "NumericalIntegral::refuse-numericalintegral-closed-form-covers-this",
       "spec_justified": false,
       "oracle_unvalidated": false,
       "known_defect": false,
@@ -9465,7 +9465,7 @@
       "outcome": "REFUSES",
       "oracle": -2.147877551448541,
       "value": null,
-      "marker": "normalize:refuse-normalize-flatppl-normalize-unnormalized-measure",
+      "marker": "NumericalIntegral::refuse-numericalintegral-closed-form-covers-this",
       "spec_justified": false,
       "oracle_unvalidated": false,
       "known_defect": false,
