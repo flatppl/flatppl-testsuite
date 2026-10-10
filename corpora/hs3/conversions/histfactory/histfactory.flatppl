@@ -13,26 +13,19 @@ model_channel1_signal_nominal = [20.0, 10.0]
 model_channel1_background1_nominal = [100.0, 0.0]
 % Nominal yields for sample "background2".
 model_channel1_background2_nominal = [0.0, 100.0]
-% Distinct normalization factors.
-model_channel1_normsys_interp_poly6_exp = hepphys.interp_poly6_exp.(
-  [0.95, 0.95, 0.95],
-  1.0,
-  [1.05, 1.05, 1.05],
-  [syst1, syst2, syst3],
-)
 % Expected yields for sample "signal" (nominal x modifiers).
 model_channel1_signal_expected = mul.(
-  model_channel1_signal_nominal .* model_channel1_normsys_interp_poly6_exp[1],
+  model_channel1_signal_nominal .* normsys_interp_poly6_exp_singles[1],
   mu,
 )
 % Expected yields for sample "background1" (nominal x modifiers).
 model_channel1_background1_expected = mul.(
-  model_channel1_background1_nominal .* model_channel1_normsys_interp_poly6_exp[2],
+  model_channel1_background1_nominal .* normsys_interp_poly6_exp_singles[2],
   mcstat,
 )
 % Expected yields for sample "background2" (nominal x modifiers).
 model_channel1_background2_expected = mul.(
-  model_channel1_background2_nominal .* model_channel1_normsys_interp_poly6_exp[3],
+  model_channel1_background2_nominal .* normsys_interp_poly6_exp_singles[3],
   mcstat,
 )
 % Total expected counts per bin (sum over samples).
@@ -59,6 +52,15 @@ mcstat_tau = [400.0, 100.0]
 mcstat_constraint = functionof(hepphys.ContinuedPoisson.(mcstat .* mcstat_tau))
 % staterror constraint likelihood term.
 mcstat_constraint_likelihood = likelihoodof(mcstat_constraint, mcstat_tau)
+% Normalization factors, one padded row per modifier run, then single factors.
+normsys_interp_poly6_exp_lanes = hepphys.interp_poly6_exp.(
+  [0.95, 0.95, 0.95],
+  1.0,
+  [1.05, 1.05, 1.05],
+  [syst1, syst2, syst3],
+)
+% Normalization factors that no run multiplies with another.
+normsys_interp_poly6_exp_singles = normsys_interp_poly6_exp_lanes[[1, 2, 3]]
 % Independent auxiliary measurements evaluated as one tensor block.
 normal_constraints_likelihood = likelihoodof(
   functionof(Normal.(cat([syst1], [syst2], [syst3]), cat([1.0], [1.0], [1.0]))),
