@@ -8,6 +8,30 @@ from tests.test_unified import _gate_engine
 
 
 @pytest.mark.stablehlo_only
+@pytest.mark.parametrize("dtype", ["f32", "f64"])
+@pytest.mark.parametrize(
+    ("domain", "point"),
+    [("ordered", [-1, 0, 1]), ("zerosum", [-1, 0, 1]), ("stdsimplex", [0.1, 0.2, 0.7])],
+)
+def test_vector_set_membership_checks_runtime_size(tmp_path, dtype, domain, point):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "point = external(cartpow(reals, 3))\n"
+        "size = external(posintegers)\n"
+        f"member = point in {domain}(size)\n"
+        "inputs = (point, size)\noutputs = member\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=dtype)
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda x, n: hlo_call(x, n, source=source)[0])
+    real_dtype, int_dtype = (jnp.float32, jnp.int32) if dtype == "f32" else (jnp.float64, jnp.int64)
+    x = jnp.asarray(point, dtype=real_dtype)
+    for size in (2, 3, 4):
+        assert bool(evaluate(x, jnp.asarray(size, dtype=int_dtype))) == (size == len(point))
+
+
+@pytest.mark.stablehlo_only
 @pytest.mark.parametrize("output", ["pick", "totals", "cat_pick", "strided_pick"])
 def test_input_vector_preserves_cells_and_weighted_adjoint(tmp_path, output):
     _gate_engine("stablehlo")
