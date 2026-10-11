@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "L",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -61,9 +61,9 @@
     }
   ],
   "expected": [
-    -47.67177165069225,
-    -134.28049634719375,
-    -67.27785165280528
+    -68.37586364997351,
+    -152.36803434647499,
+    -87.05538965208653
   ],
   "tolerance": {
     "atol": 1e-09,
@@ -78,8 +78,8 @@
   ],
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "1a95716c5ad0684d6cb5e5166bb3ef186f30b9af",
+    "revision": "31b994c0b060ea90d8de2adb7a066b2c4288a15a",
     "path": "examples/ordinal-cheese-tasting.flatppl",
-    "sha256": "763c1855c6b91f51d748f484c39d5e7f2255a393b8260787d57c8ec840481b53"
+    "sha256": "cb5345dac9b9f5f59bb565845b63f929019bad4f160867b1fa90f948bfbcac67"
   }
 }

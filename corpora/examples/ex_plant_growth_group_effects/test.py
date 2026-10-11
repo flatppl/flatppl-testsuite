@@ -1,9 +1,15 @@
 """Independent oracle for ex_plant_growth_group_effects.
 
+Log-posterior ``logdensityof(Pi_post, point)``: the log-likelihood below plus
+the log-prior ``Normal(5, 2)`` on ``mu`` and ``Exponential(1)`` on both scales.
+The zero-sum effects use the normalized Gaussian law in its two free coordinates,
+with covariance ``effect_scale**2 * (I - ones(2, 2) / 3)``.
+
 One-way group effects on R's ``PlantGrowth`` weights: ``weight_i ~
 Normal(mu + effects[g_i], sigma)`` with ten plants in each of three groups.
 """
-from scipy.stats import norm
+import numpy as np
+from scipy.stats import expon, multivariate_normal, norm
 
 _WEIGHTS = [
     4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14,
@@ -14,6 +20,10 @@ _WEIGHTS = [
 
 def oracle(point: dict) -> float:
     mu, effects, sigma = point["mu"], point["effects"], point["sigma"]
-    return float(sum(
-        norm.logpdf(w, mu + effects[i // 10], sigma) for i, w in enumerate(_WEIGHTS)
-    ))
+    lp = sum(norm.logpdf(w, mu + effects[i // 10], sigma) for i, w in enumerate(_WEIGHTS))
+    lp += norm.logpdf(mu, 5.0, 2.0) + expon.logpdf(sigma, scale=1.0)
+    scale = point["effect_scale"]
+    covariance = scale**2 * (np.eye(2) - np.ones((2, 2)) / 3)
+    lp += multivariate_normal.logpdf(effects[:2], mean=np.zeros(2), cov=covariance)
+    lp += expon.logpdf(scale, scale=1.0)
+    return float(lp)

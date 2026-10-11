@@ -18,6 +18,12 @@ are declared on `ordered(8)`, the set of strictly increasing real 8-vectors.
 Additive D is the reference category, $\eta_D = 0$, so `effect` holds
 $\eta_A, \eta_B, \eta_C$. Each additive's counts are one multinomial draw of
 its 52 ratings.
+
+The priors are weakly informative on the logit scale. `tilt` makes the
+product of eight $\mathrm{Normal}(0, 5)$ densities a probability law on
+`ordered(8)`, equivalent to sorting eight independent Normal draws.
+Its density includes the normalization factor $8!$. Each additive location
+has an independent $\mathrm{Normal}(0, 5)$ prior.
 %%%
 flatppl_compat = "0.1"
 
@@ -28,26 +34,23 @@ counts_C = [1, 1, 6, 8, 23, 7, 5, 1, 0]
 counts_D = [0, 0, 0, 1, 3, 7, 14, 16, 11]
 
 % Cut points on the logit scale
-cuts = elementof(ordered(8))
+cuts ~ tilt(iid(Normal(0, 5), 8), Lebesgue(ordered(8)))
 % Locations of additives A, B and C relative to D
-effect = elementof(cartpow(reals, 3))
+effect ~ iid(Normal(0, 5), 3)
+
+Pi_prior = lawof(record(cuts = cuts, effect = effect))
 
 % Locations of additives A, B, C and D
 eta = cat(effect, [0.0])
 
-# Cumulative probabilities of ratings 1 to 8 per additive.
-F_A = invlogit.(cuts .- eta[1])
-F_B = invlogit.(cuts .- eta[2])
-F_C = invlogit.(cuts .- eta[3])
-F_D = invlogit.(cuts .- eta[4])
-
 # Rating probabilities: differences of neighbouring cumulative probabilities.
-y_A ~ Multinomial(n = 52, p = cat(F_A, [1.0]) .- cat([0.0], F_A))
-y_B ~ Multinomial(n = 52, p = cat(F_B, [1.0]) .- cat([0.0], F_B))
-y_C ~ Multinomial(n = 52, p = cat(F_C, [1.0]) .- cat([0.0], F_C))
-y_D ~ Multinomial(n = 52, p = cat(F_D, [1.0]) .- cat([0.0], F_D))
+rating_probs(cuts, location) = cat(invlogit.(cuts .- location), [1.0]) .- cat([0.0], invlogit.(cuts .- location))
+y_A ~ Multinomial(n = 52, p = rating_probs(cuts, eta[1]))
+y_B ~ Multinomial(n = 52, p = rating_probs(cuts, eta[2]))
+y_C ~ Multinomial(n = 52, p = rating_probs(cuts, eta[3]))
+y_D ~ Multinomial(n = 52, p = rating_probs(cuts, eta[4]))
 
-K_model = kernelof(record(y_A = y_A, y_B = y_B, y_C = y_C, y_D = y_D)) % Forward kernel (observation model)
+K_model = kernelof(record(y_A = y_A, y_B = y_B, y_C = y_C, y_D = y_D), cuts = cuts, effect = effect) % Forward kernel (observation model)
 
 L = likelihoodof(K_model, record(y_A = counts_A, y_B = counts_B, y_C = counts_C, y_D = counts_D))
 
@@ -59,3 +62,8 @@ L_input = record(
 
 % Log-likelihood at the preset point
 logL_input = logdensityof(L, L_input)
+
+Pi_post = bayesupdate(L, Pi_prior)
+
+% Unnormalized log-posterior at the preset point
+logpost_input = logdensityof(Pi_post, L_input)
