@@ -1,0 +1,85 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "L",
+  "status": "lowers",
+  "points": [
+    {
+      "cuts": [
+        -7.08,
+        -6.02,
+        -4.93,
+        -3.86,
+        -2.52,
+        -1.57,
+        -0.07,
+        1.49
+      ],
+      "effect": [
+        -1.61,
+        -4.96,
+        -3.32
+      ]
+    },
+    {
+      "cuts": [
+        -4.0,
+        -3.0,
+        -2.0,
+        -1.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0
+      ],
+      "effect": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "cuts": [
+        -6.0,
+        -5.0,
+        -4.5,
+        -3.0,
+        -2.0,
+        -1.0,
+        0.5,
+        2.0
+      ],
+      "effect": [
+        -2.0,
+        -4.0,
+        -3.0
+      ]
+    }
+  ],
+  "expected": [
+    -47.67177165069225,
+    -134.28049634719375,
+    -67.27785165280528
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09,
+    "value_atol_f32": 0.001,
+    "value_rtol_f32": 0.0001
+  },
+  "oracle": "scipy 1.18",
+  "inputs": [
+    "cuts",
+    "effect"
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "1a95716c5ad0684d6cb5e5166bb3ef186f30b9af",
+    "path": "examples/ordinal-cheese-tasting.flatppl",
+    "sha256": "763c1855c6b91f51d748f484c39d5e7f2255a393b8260787d57c8ec840481b53"
+  }
+}

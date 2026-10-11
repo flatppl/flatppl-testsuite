@@ -1,0 +1,62 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "L",
+  "status": "lowers",
+  "points": [
+    {
+      "mu": 5.073,
+      "effects": [
+        -0.041,
+        -0.412,
+        0.453
+      ],
+      "sigma": 0.6
+    },
+    {
+      "mu": 5.0,
+      "effects": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sigma": 1.0
+    },
+    {
+      "mu": 4.8,
+      "effects": [
+        0.2,
+        -0.5,
+        0.3
+      ],
+      "sigma": 0.4
+    }
+  ],
+  "expected": [
+    -26.815734505382686,
+    -34.77730599614018,
+    -42.64287153991555
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09,
+    "value_atol_f32": 0.001,
+    "value_rtol_f32": 0.0001
+  },
+  "oracle": "scipy 1.18",
+  "inputs": [
+    "mu",
+    "effects",
+    "sigma"
+  ],
+  "source": {
+    "repository": "https://github.com/flatppl/flatppl-examples",
+    "revision": "1a95716c5ad0684d6cb5e5166bb3ef186f30b9af",
+    "path": "examples/plant-growth-group-effects.flatppl",
+    "sha256": "3a2167fdee9f0bb058848e86b6e9d9ca808012c6ccf4fed5f9d9f6592353b2ca"
+  }
+}

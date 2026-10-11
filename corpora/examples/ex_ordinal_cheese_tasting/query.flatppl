@@ -1,0 +1,4 @@
+t_cuts = elementof(ordered(8))
+t_effect = elementof(cartpow(reals, 3))
+inputs = (t_cuts, t_effect)
+outputs = logdensityof(L, record(cuts = t_cuts, effect = t_effect))
