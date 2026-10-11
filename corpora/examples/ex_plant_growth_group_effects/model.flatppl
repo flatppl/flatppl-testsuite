@@ -13,6 +13,14 @@ The model $\mu + e_g$ is unchanged if a constant moves from $\mu$ into every
 $e_g$. Declaring the effects on `zerosum(3)`, the real 3-vectors with
 $e_1 + e_2 + e_3 = 0$, removes that freedom: $\mu$ is the grand mean of the
 three group means and $e_g$ is each group's departure from it.
+
+The priors are weakly informative: $\mu \sim \mathrm{Normal}(5, 2)$ and
+$\sigma \sim \mathrm{Exponential}(1)$. The effects have a shared inferred scale
+$\tau \sim \mathrm{Exponential}(1)$. `tilt` makes the product of three
+$\mathrm{Normal}(0, \tau)$ densities a probability law on `zerosum(3)`.
+Its reference measure is the coordinate measure of $e_1, e_2$, with
+$e_3 = -e_1 - e_2$. The normalizer depends on $\tau$: the log prior contains
+$-2\log\tau$, reflecting the two free effects.
 %%%
 flatppl_compat = "0.1"
 
@@ -25,20 +33,29 @@ weight_data = [
 group = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 
 % Shared intercept
-mu = elementof(reals)
+mu ~ Normal(5, 2)
+% Shared scale of the group effects
+effect_scale ~ Exponential(1)
 % Group effects, summing to zero
-effects = elementof(zerosum(3))
+effects ~ tilt(iid(Normal(0, effect_scale), 3), Lebesgue(zerosum(3)))
 % Residual scale
-sigma = elementof(posreals)
+sigma ~ Exponential(1)
+
+Pi_prior = lawof(record(mu = mu, effects = effects, sigma = sigma, effect_scale = effect_scale))
 
 weight ~ Normal.(mu .+ effects[group], sigma)
 
-K_model = kernelof(record(weight = weight), mu = mu, effects = effects, sigma = sigma) % Forward kernel (observation model)
+K_model = kernelof(record(weight = weight), mu = mu, effects = effects, sigma = sigma, effect_scale = effect_scale) % Forward kernel (observation model)
 
 L = likelihoodof(K_model, record(weight = weight_data))
 
 % Point preset at the group means: grand mean 5.073, effects -0.041, -0.412, 0.453
-L_input = record(mu = 5.073, effects = [-0.041, -0.412, 0.453], sigma = 0.6)
+L_input = record(mu = 5.073, effects = [-0.041, -0.412, 0.453], sigma = 0.6, effect_scale = 1.0)
 
 % Log-likelihood at the preset point
 logL_input = logdensityof(L, L_input)
+
+Pi_post = bayesupdate(L, Pi_prior)
+
+% Unnormalized log-posterior at the preset point
+logpost_input = logdensityof(Pi_post, L_input)

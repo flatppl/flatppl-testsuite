@@ -5,7 +5,7 @@
     "stablehlo"
   ],
   "model": "model.flatppl",
-  "binding": "L",
+  "binding": "Pi_post",
   "status": "lowers",
   "points": [
     {
@@ -15,7 +15,8 @@
         -0.412,
         0.453
       ],
-      "sigma": 0.6
+      "sigma": 0.6,
+      "effect_scale": 1.0
     },
     {
       "mu": 5.0,
@@ -24,7 +25,8 @@
         0.0,
         0.0
       ],
-      "sigma": 1.0
+      "sigma": 1.0,
+      "effect_scale": 0.4
     },
     {
       "mu": 4.8,
@@ -33,13 +35,14 @@
         -0.5,
         0.3
       ],
-      "sigma": 0.4
+      "sigma": 0.4,
+      "effect_scale": 2.0
     }
   ],
   "expected": [
-    -26.815734505382686,
-    -34.77730599614018,
-    -42.64287153991555
+    -31.505374266222596,
+    -37.24538116823178,
+    -49.38232253687534
   ],
   "tolerance": {
     "atol": 1e-09,
@@ -51,12 +54,13 @@
   "inputs": [
     "mu",
     "effects",
-    "sigma"
+    "sigma",
+    "effect_scale"
   ],
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "1a95716c5ad0684d6cb5e5166bb3ef186f30b9af",
+    "revision": "31b994c0b060ea90d8de2adb7a066b2c4288a15a",
     "path": "examples/plant-growth-group-effects.flatppl",
-    "sha256": "3a2167fdee9f0bb058848e86b6e9d9ca808012c6ccf4fed5f9d9f6592353b2ca"
+    "sha256": "f9e5aae2ce5a2de6ca9c4e87915b4fbe3b50e31ba80ec68752d8081ca0d36be1"
   }
 }
