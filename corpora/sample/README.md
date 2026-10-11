@@ -2,7 +2,7 @@
 
 The third corpus for `flatppl-testsuite`: a small, hand-written,
 self-contained FlatPPL model that exercises the FlatPDL **sample path** —
-`rand(rng, lawof(record(...)))`, lowered by flatppl-rust's sample
+`rand(lawof(record(...)), rng)`, lowered by flatppl-rust's sample
 determinizer to a rng-threaded `builtin_sample` chain and evaluated by
 flatppl-js. Unlike `corpora/fragment/` (a fixed-point
 `lp = logdensityof(m, <point>)`, one scalar per model), a sample-path model
@@ -17,7 +17,7 @@ One directory per sample-path model (one so far: `hier_normal`), a unified test 
 
 | Path | What |
 |------|------|
-| `<test_id>/<test_id>.flatppl` | The sample-path model, ending in `rand(rng, lawof(record(...)))`. |
+| `<test_id>/<test_id>.flatppl` | The sample-path model, ending in `rand(lawof(record(...)), rng)`. |
 | `<test_id>/<test_id>_density.flatppl` | A companion model with the IDENTICAL joint law, no `rand(...)` wrapper — used only by the sampling<->density secondary check (see below), named by `test.json`'s `density_model`. |
 | `<test_id>/query.flatppl` | The density query as an `inputs`/`outputs` ABI, for the StableHLO row (see below). |
 | `<test_id>/test.json` | `test_type: "sample"`, `engines: ["det-js", "stablehlo"]`, per-check frozen closed-form moments + Monte-Carlo tolerances (`checks[i].expected`/`atol`), or a top-level `stat` recipe (the stablehlo-sample shape) — see `unified/regen.py`'s docstring for which shape applies. |
@@ -33,7 +33,7 @@ s = rnginit([42, 0, 0, 0])
 mu = draw(Normal(mu = 0.0, sigma = 10.0))
 y1 = draw(Normal(mu = mu, sigma = 1.0))
 y2 = draw(Normal(mu = mu, sigma = 1.0))
-draws = rand(s, lawof(record(mu = mu, y1 = y1, y2 = y2)))
+draws = rand(lawof(record(mu = mu, y1 = y1, y2 = y2)), s)
 ```
 
 `y1` and `y2` share the SAME draw of the latent `mu` — they are not two

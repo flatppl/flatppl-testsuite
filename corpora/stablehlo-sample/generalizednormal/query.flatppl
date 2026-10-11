@@ -1,4 +1,4 @@
 rstate = rnginit([0])
-draws = rand(rstate, lawof(x))
+draws = rand(lawof(x), rstate)
 inputs = (mean, alpha, beta)
 outputs = (draws)

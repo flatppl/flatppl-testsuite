@@ -22,9 +22,9 @@ def rand_model(tmp_path):
     model = tmp_path / "rand_states.flatppl"
     model.write_text(
         "s = rnginit([42, 0, 0, 0])\n"
-        "first, s2 = rand(s, Normal(0.0, 1.0))\n"
-        "second, s3 = rand(s2, Normal(0.0, 1.0))\n"
-        "replay, unused = rand(s, Normal(0.0, 1.0))\n"
+        "first, s2 = rand(Normal(0.0, 1.0), s)\n"
+        "second, s3 = rand(Normal(0.0, 1.0), s2)\n"
+        "replay, unused = rand(Normal(0.0, 1.0), s)\n"
     )
     return model
 

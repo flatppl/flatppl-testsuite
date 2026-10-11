@@ -12,7 +12,7 @@ Facts about the wheel that drive the API here:
   otherwise), so both value and gradient are wrapped in ``jax.jit``;
 * the emitter names the entry ``@logdensity`` / ``@sample``, but ``hlo_call``
   binds ``@main`` — so we rename the entry symbol before handing the text over.
-* ``@sample`` is a THREADED-KEY pure function (spec §07's `rand(rstate, m) ->
+* ``@sample`` is a THREADED-KEY pure function (spec §07's `rand(m, rstate) ->
   (value, new_rstate)` contract): it takes a leading ``%key: tensor<2xui64>``
   and returns ``(value, new_key)``. A ``tensor<2xui64>`` argument silently
   truncates to ``uint32`` unless ``jax.config.update("jax_enable_x64", True)``

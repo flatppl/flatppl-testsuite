@@ -28,4 +28,4 @@ y = draw(mix)
 y1 = y[1]
 y2 = y[2]
 
-draws = rand(s, lawof(record(y1 = y1, y2 = y2)))
+draws = rand(lawof(record(y1 = y1, y2 = y2)), s)
