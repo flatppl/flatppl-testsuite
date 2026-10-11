@@ -1,0 +1,5 @@
+t_mu = elementof(reals)
+t_effects = elementof(zerosum(3))
+t_sigma = elementof(posreals)
+inputs = (t_mu, t_effects, t_sigma)
+outputs = logdensityof(L, record(mu = t_mu, effects = t_effects, sigma = t_sigma))

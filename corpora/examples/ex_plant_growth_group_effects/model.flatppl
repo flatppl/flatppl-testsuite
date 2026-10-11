@@ -1,0 +1,44 @@
+%%%
+# One-way group effects: plant growth
+
+Dried weights of thirty plants grown under a control and two treatments, ten
+plants per group, from Dobson, *An Introduction to Statistical Modelling*
+(1983), as distributed in R's `PlantGrowth` data set.
+
+Each weight is normal around a shared intercept $\mu$ plus its group's effect:
+
+$$y_i \sim \mathrm{Normal}(\mu + e_{g_i}, \sigma).$$
+
+The model $\mu + e_g$ is unchanged if a constant moves from $\mu$ into every
+$e_g$. Declaring the effects on `zerosum(3)`, the real 3-vectors with
+$e_1 + e_2 + e_3 = 0$, removes that freedom: $\mu$ is the grand mean of the
+three group means and $e_g$ is each group's departure from it.
+%%%
+flatppl_compat = "0.1"
+
+# Control, then treatment 1, then treatment 2.
+weight_data = [
+    4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14,
+    4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69,
+    6.31, 5.12, 5.54, 5.50, 5.37, 5.29, 4.92, 6.15, 5.80, 5.26
+]
+group = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  2, 2, 2, 2, 2, 2, 2, 2, 2, 2,  3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+
+% Shared intercept
+mu = elementof(reals)
+% Group effects, summing to zero
+effects = elementof(zerosum(3))
+% Residual scale
+sigma = elementof(posreals)
+
+weight ~ Normal.(mu .+ effects[group], sigma)
+
+K_model = kernelof(record(weight = weight), mu = mu, effects = effects, sigma = sigma) % Forward kernel (observation model)
+
+L = likelihoodof(K_model, record(weight = weight_data))
+
+% Point preset at the group means: grand mean 5.073, effects -0.041, -0.412, 0.453
+L_input = record(mu = 5.073, effects = [-0.041, -0.412, 0.453], sigma = 0.6)
+
+% Log-likelihood at the preset point
+logL_input = logdensityof(L, L_input)

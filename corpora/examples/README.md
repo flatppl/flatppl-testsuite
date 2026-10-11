@@ -7,8 +7,8 @@ The query declares its inputs and outputs explicitly. Independent NumPy/SciPy
 oracles supply the frozen values and gradients.
 
 The corpus covers the posterior examples, both HGF recurrences, the Dalitz
-amplitude, the `minimal` predictive law, and the deterministic `aggregates`
-showcase. Bayesian inference variants 3 and 4 include their two imported helper
+amplitude, the `minimal` predictive law, the deterministic `aggregates`
+showcase, and the two likelihoods over the `ordered` and `zerosum` sets. Bayesian inference variants 3 and 4 include their two imported helper
 modules alongside the source. The helper files have no separate case here.
 
 Most cases run through both det-js and StableHLO. Two require StableHLO:
