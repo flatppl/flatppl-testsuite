@@ -55,7 +55,7 @@
   ],
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "9332c32a5346d92f4eb1810d30228e695fe16137",
+    "revision": "1a95716c5ad0684d6cb5e5166bb3ef186f30b9af",
     "path": "examples/plant-growth-group-effects.flatppl",
     "sha256": "3a2167fdee9f0bb058848e86b6e9d9ca808012c6ccf4fed5f9d9f6592353b2ca"
   }

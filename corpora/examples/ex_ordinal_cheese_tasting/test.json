@@ -78,7 +78,7 @@
   ],
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "9332c32a5346d92f4eb1810d30228e695fe16137",
+    "revision": "1a95716c5ad0684d6cb5e5166bb3ef186f30b9af",
     "path": "examples/ordinal-cheese-tasting.flatppl",
     "sha256": "763c1855c6b91f51d748f484c39d5e7f2255a393b8260787d57c8ec840481b53"
   }
