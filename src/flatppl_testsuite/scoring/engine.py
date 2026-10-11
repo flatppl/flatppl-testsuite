@@ -162,7 +162,7 @@ def score_binding(model_path: Path, binding: str) -> float:
 
 def sample_sweep(model_path: Path, n: int, bindings: list[str], base: int = 0) -> list[dict]:
     """Determinize a self-contained FlatPPL model whose last binding is
-    ``rand(rng, lawof(record(...)))`` (the sample-path determinizer's
+    ``rand(lawof(record(...)), rng)`` (the sample-path determinizer's
     target construct), then seed-sweep the resulting FlatPDL over N distinct
     seeds via ``sample_sweep.cjs`` — ONE Node process for the whole sweep,
     not a subprocess per seed (see that script's header comment) — returning

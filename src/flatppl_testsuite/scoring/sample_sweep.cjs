@@ -2,7 +2,7 @@
 'use strict';
 // Seed-sweep a determinized FlatPDL model that ends in a `builtin_sample`
 // chain (the output of `flatppl determinize` on a model using
-// `rand(rng, lawof(...))`) to build an empirical sample set for a numeric
+// `rand(lawof(...), rng)`) to build an empirical sample set for a numeric
 // statistical gate — the sibling of score_flatpdl.cjs, which materialises
 // exactly ONE deterministic binding at the model's single fixed seed.
 //
