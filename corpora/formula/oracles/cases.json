@@ -795,5 +795,147 @@
         ]
       }
     ]
+  },
+  {
+    "name": "family_zero_inflated_beta",
+    "stan_case": "zero_inflated_beta",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "phi",
+      "zi"
+    ],
+    "stan_sha256": "49e62304ab42e316d1463464d4f4556e43bb692f9874e8ca216446ebcaf9f059",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.8,
+          0.65
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_hurdle_poisson",
+    "stan_case": "hurdle_poisson",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "hu"
+    ],
+    "stan_sha256": "325009a602b13f842595fdd4e0f9b4a35ba18aeaf7f1f0ac6052f943b2974848",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.65
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_hurdle_negbinomial",
+    "stan_case": "hurdle_negbinomial",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "shape",
+      "hu"
+    ],
+    "stan_sha256": "8234dc65b809f1e1ac6432bb10311b255be625c26e62acb6adba1b77f7484170",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.8,
+          0.65
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_hurdle_gamma",
+    "stan_case": "hurdle_gamma",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "shape",
+      "hu"
+    ],
+    "stan_sha256": "ee4fae3d4b54e1c852da5c3daded541570b70df0b4f140d4632daee942212d13",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.8,
+          0.65
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_hurdle_lognormal",
+    "stan_case": "hurdle_lognormal",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma",
+      "hu"
+    ],
+    "stan_sha256": "7aaa185247113942103ae7609dc111c533bbc189bdfcf8a8093205fb8c347281",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          1.2,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.75,
+          0.65
+        ]
+      }
+    ]
   }
 ]

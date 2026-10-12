@@ -169,6 +169,59 @@ def evaluate(reference, point):
         gradient[positions["shape"]] += sum_rows(
             special.digamma(y + shape) - special.digamma(shape) + np.log(shape / (shape + mu))
             + 1 - (shape + y) / (shape + mu))
+    elif family == "zero_inflated_beta" or family.startswith("hurdle_"):
+        positive = y > 0
+        observed, mean = y[positive], mu[positive]
+        auxiliary = None
+        if family == "hurdle_poisson":
+            logzero = stats.poisson.logpmf(0, mean)
+            base = stats.poisson.logpmf(observed, mean) - np.log(-np.expm1(logzero))
+            mean_gradient = observed / mean - 1 - np.exp(logzero) / -np.expm1(logzero)
+        elif family == "hurdle_negbinomial":
+            auxiliary, shape = "shape", p["shape"]
+            logzero = stats.nbinom.logpmf(0, shape, shape / (shape + mean))
+            odds = np.exp(logzero) / -np.expm1(logzero)
+            base = stats.nbinom.logpmf(observed, shape, shape / (shape + mean))
+            base -= np.log(-np.expm1(logzero))
+            mean_gradient = observed / mean - (shape + observed + odds * shape) / (shape + mean)
+            auxiliary_gradient = (
+                special.digamma(observed + shape) - special.digamma(shape)
+                + np.log(shape / (shape + mean)) + 1 - (shape + observed) / (shape + mean)
+                + odds * (np.log(shape / (shape + mean)) + 1 - shape / (shape + mean)))
+        elif family == "hurdle_gamma":
+            auxiliary, shape = "shape", p["shape"]
+            base = stats.gamma.logpdf(observed, shape, scale=mean / shape)
+            mean_gradient = shape * (observed - mean) / mean**2
+            auxiliary_gradient = (
+                np.log(shape / mean) + 1 - special.digamma(shape)
+                + np.log(observed) - observed / mean)
+        elif family == "hurdle_lognormal":
+            auxiliary, sigma = "sigma", p["sigma"]
+            residual = np.log(observed) - mean
+            base = stats.lognorm.logpdf(observed, sigma, scale=np.exp(mean))
+            mean_gradient = residual / sigma**2
+            auxiliary_gradient = residual**2 / sigma**3 - 1 / sigma
+        elif family == "zero_inflated_beta":
+            auxiliary, phi = "phi", p["phi"]
+            a, b = mean * phi, (1 - mean) * phi
+            da = np.log(observed) - special.digamma(a)
+            db = np.log1p(-observed) - special.digamma(b)
+            base = stats.beta.logpdf(observed, a, b)
+            mean_gradient = phi * (da - db)
+            auxiliary_gradient = mean * da + (1 - mean) * db + special.digamma(phi)
+        else:
+            raise ValueError(f"unknown oracle family {family}")
+        probability = "zi" if family == "zero_inflated_beta" else "hu"
+        mass = p[probability]
+        rows = np.full_like(y, np.log(mass))
+        rows[positive] = np.log1p(-mass) + base
+        score += sum_rows(rows)
+        dmu = np.zeros_like(mu)
+        dmu[positive] = mean_gradient
+        gradient[positions[probability]] += sum_rows(np.where(positive, -1 / (1 - mass), 1 / mass))
+        if auxiliary:
+            gradient[positions[auxiliary]] += np.sum(
+                np.broadcast_to(weights, y.shape)[positive] * auxiliary_gradient)
     elif family.startswith("zero_inflated_"):
         if family == "zero_inflated_poisson":
             base = stats.poisson.logpmf(y, mu)

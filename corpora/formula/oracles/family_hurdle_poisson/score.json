@@ -1,0 +1,76 @@
+{
+  "name": "family_hurdle_poisson",
+  "model_id": "d59facf4c96ebf7d",
+  "parameter_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "hu"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "hu"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "propto": false,
+  "jacobian": false,
+  "points": [
+    {
+      "point": {
+        "b": [
+          0.3
+        ],
+        "Intercept": 0.4,
+        "hu": 0.3
+      },
+      "theta_unc": [
+        0.3,
+        0.4,
+        -0.8472978603872036
+      ],
+      "lp": -8.856260892182068,
+      "gradient": [
+        0.8352500833193159,
+        1.8812125192530642,
+        0.7999999999999999
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 1.8812125192530642,
+        "b": [
+          0.8352500833193159
+        ],
+        "hu": 3.8095238095238093
+      }
+    },
+    {
+      "point": {
+        "b": [
+          -0.2
+        ],
+        "Intercept": -0.7,
+        "hu": 0.65
+      },
+      "theta_unc": [
+        -0.2,
+        -0.7,
+        0.6190392084062236
+      ],
+      "lp": -12.27064401186583,
+      "gradient": [
+        1.0289736934292895,
+        3.4378649545202475,
+        -0.6000000000000001
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 3.4378649545202475,
+        "b": [
+          1.0289736934292895
+        ],
+        "hu": -2.6373626373626378
+      }
+    }
+  ]
+}

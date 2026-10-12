@@ -161,6 +161,16 @@ for (family in c("gaussian", "student")) {
 
 count_data <- data.frame(y = c(0L, 2L, 4L, 0L), x = 1:4,
                          n = c(3L, 5L, 8L, 9L), w = c(0, .5, 2, 1))
+mixture_responses <- list(zero_inflated_beta = c(0, .2, .8, 0),
+  hurdle_poisson = c(0L, 2L, 4L, 0L), hurdle_negbinomial = c(0L, 2L, 4L, 0L),
+  hurdle_gamma = c(0, .8, 2.3, 0), hurdle_lognormal = c(0, exp(-1), exp(2), 0))
+for (family in names(mixture_responses)) {
+  name <- paste0("family_", family)
+  d <- data.frame(y = mixture_responses[[family]], x = 1:4,
+                  trials = c(3L, 5L, 8L, 9L))
+  captured <- capture(name, y ~ x, brmsfamily(family), d)
+  json(captured, file.path(out, name, "brms.json"))
+}
 for (family in c("zero_inflated_poisson", "zero_inflated_negbinomial",
                  "zero_inflated_binomial")) {
   name <- paste0("weighted_", family)
