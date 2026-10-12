@@ -105,6 +105,9 @@ def evaluate(reference, point):
         softplus = np.logaddexp(0, eta)
         mu = softplus / (1 + softplus)
         derivative = special.expit(eta) / (1 + softplus)**2
+    elif link == "tan_half":
+        mu = 2 * np.arctan(eta)
+        derivative = 2 / (1 + eta**2)
     else:
         raise ValueError(f"unknown oracle link {link}")
 
@@ -112,6 +115,12 @@ def evaluate(reference, point):
         sigma = p["sigma"]
         residual = y - mu
         score += stats.norm.logpdf(y, mu, sigma).sum()
+        dmu = residual / sigma**2
+        gradient[positions["sigma"]] += np.sum(residual**2 / sigma**3 - 1 / sigma)
+    elif family == "lognormal":
+        sigma = p["sigma"]
+        residual = np.log(y) - mu
+        score += stats.lognorm.logpdf(y, sigma, scale=np.exp(mu)).sum()
         dmu = residual / sigma**2
         gradient[positions["sigma"]] += np.sum(residual**2 / sigma**3 - 1 / sigma)
     elif family == "student":
@@ -131,6 +140,9 @@ def evaluate(reference, point):
     elif family == "poisson":
         score += stats.poisson.logpmf(y, mu).sum()
         dmu = y / mu - 1
+    elif family == "geometric":
+        score += stats.geom.logpmf(y + 1, 1 / (1 + mu)).sum()
+        dmu = y / mu - (y + 1) / (1 + mu)
     elif family == "negbinomial":
         shape = p["shape"]
         score += stats.nbinom.logpmf(y, shape, shape / (shape + mu)).sum()
@@ -147,6 +159,29 @@ def evaluate(reference, point):
     elif family == "exponential":
         score += stats.expon.logpdf(y, scale=mu).sum()
         dmu = (y - mu) / mu**2
+    elif family == "weibull":
+        shape = p["shape"]
+        scale = mu / special.gamma(1 + 1 / shape)
+        log_ratio = np.log(y / scale)
+        power = np.exp(shape * log_ratio)
+        score += stats.weibull_min.logpdf(y, shape, scale=scale).sum()
+        dmu = shape * (power - 1) / mu
+        gradient[positions["shape"]] += np.sum(
+            1 / shape + (1 - power) *
+            (log_ratio - special.digamma(1 + 1 / shape) / shape))
+    elif family == "beta":
+        phi = p["phi"]
+        a, b = mu * phi, (1 - mu) * phi
+        da, db = np.log(y) - special.digamma(a), np.log1p(-y) - special.digamma(b)
+        score += stats.beta.logpdf(y, a, b).sum()
+        dmu = phi * (da - db)
+        gradient[positions["phi"]] += np.sum(mu * da + (1 - mu) * db + special.digamma(phi))
+    elif family == "von_mises":
+        kappa = p["kappa"]
+        score += stats.vonmises.logpdf(y, kappa, loc=mu).sum()
+        dmu = kappa * np.sin(y - mu)
+        gradient[positions["kappa"]] += np.sum(
+            np.cos(y - mu) - special.i1e(kappa) / special.i0e(kappa))
     else:
         raise ValueError(f"unknown oracle family {family}")
     gradient += jacobian.T @ (dmu * derivative)

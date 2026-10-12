@@ -14,7 +14,7 @@ scoring uses **`propto=false, jacobian=false`**. Normalizing constants therefore
 remain in every likelihood and prior, including truncated positive priors.
 Each score is an unnormalized posterior target with complete factor constants.
 
-To regenerate the fifteen model sources and data, install the pinned R/brms
+To regenerate the twenty model sources and data, install the pinned R/brms
 versions in an oracle environment and run:
 
 ```sh
@@ -77,3 +77,11 @@ For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
 That independent implementation computes SciPy log densities and closed-form
 derivatives from the captured brms design matrix, offsets, group indices, and
 documented priors. It does not read these Stan scores or FlatPPL output.
+
+The five additional scalar families use SciPy's lognormal, geometric (shifted
+from trials to failures), Weibull, beta and von Mises densities. Their gradients
+are analytic. For Weibull, `scale = mu / Gamma(1 + 1/shape)` is differentiated
+through both arguments, including the digamma term in the shape derivative.
+The lognormal response has a nonzero sum of log values so omitting its density
+Jacobian cannot cancel accidentally. The circular case checks both the Bessel
+normalizer derivative and the `2*atan(eta)` inverse link.

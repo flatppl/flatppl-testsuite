@@ -66,11 +66,17 @@ capture <- function(name, formula, family, data = data, prior = NULL) {
 families <- list(gaussian = gaussian(), student = student(),
                  bernoulli = bernoulli(), binomial = binomial(),
                  poisson = poisson(), negbinomial = negbinomial(),
-                 Gamma = brmsfamily("Gamma"), exponential = exponential())
+                 Gamma = brmsfamily("Gamma"), exponential = exponential(),
+                 lognormal = brmsfamily("lognormal"), geometric = brmsfamily("geometric"),
+                 weibull = brmsfamily("weibull"), beta = brmsfamily("beta"),
+                 von_mises = brmsfamily("von_mises"))
+responses <- list(lognormal = exp(c(-3, -1, 2, 3)), geometric = c(0L, 4L, 8L, 7L),
+                  beta = c(.1, .4, .8, .7), von_mises = c(-2, -.4, .8, 2))
 for (name in names(families)) {
   d <- data
   if (name == "bernoulli") d$y <- c(0L, 1L, 1L, 0L)
   if (name == "binomial") d$y <- c(1L, 2L, 4L, 3L)
+  if (name %in% names(responses)) d$y <- responses[[name]]
   f <- if (name == "binomial") y | trials(trials) ~ x else y ~ x
   directory <- paste0("family_", tolower(name))
   captured <- capture(directory, f, families[[name]], d)

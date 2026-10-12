@@ -1,0 +1,36 @@
+{
+  "name": "lognormal",
+  "model_id": "987df251d32c6ded",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "sigma": 1.2
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.1823215567939546
+  ],
+  "lp": -14.91486109303517,
+  "unconstrained_gradient": [
+    6.250000000000002,
+    -0.40185733678884417,
+    7.596079465541494
+  ],
+  "constrained_gradient": {
+    "b.1": 6.250000000000002,
+    "Intercept": -0.40185733678884417,
+    "sigma": 6.330066221284578
+  },
+  "jacobian": false,
+  "propto": false,
+  "semantic_gradient": {
+    "temp_Intercept": -0.40185733678884417,
+    "b": [
+      6.250000000000002
+    ],
+    "sigma": 6.330066221284578
+  }
+}

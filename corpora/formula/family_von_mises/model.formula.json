@@ -1,0 +1,36 @@
+{
+  "formula": "y ~ x",
+  "family": "von_mises",
+  "options": {
+    "data_placement": "inline"
+  },
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            -2,
+            -0.4,
+            0.8,
+            2
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    ]
+  }
+}

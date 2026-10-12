@@ -355,5 +355,98 @@
       }
     ],
     "stan_sha256": "d76fde5ed9d2487349466212622752f7852c5cfa66252282e63bc84dc24a0c92"
+  },
+  {
+    "name": "family_lognormal",
+    "stan_case": "lognormal",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "2ddd4592e8d0b63484c56e47e642681dff1fe34449324427b78273ee6c9c42e8",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          1.2
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_geometric",
+    "stan_case": "geometric",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "d131bbd3404061b628ff083abacf994df83ff0812394b3ff5cc566dcc7e26657",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_weibull",
+    "stan_case": "weibull",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "shape"
+    ],
+    "stan_sha256": "d521cc04c5944c14bd63b901ff798e00bd4d84ac9065a2ebdcff8bb123e1a0c0",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_beta",
+    "stan_case": "beta",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "phi"
+    ],
+    "stan_sha256": "1fbb5dec24dd06752fe94035136bc2df8cc8891b6062b3dfeb4daa2533a0d735",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_von_mises",
+    "stan_case": "von_mises",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "kappa"
+    ],
+    "stan_sha256": "b9605f85013406ff77dbcc72e8acb718c404baa7e5a44b210edd24416ad2a9dd",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3
+        ]
+      }
+    ]
   }
 ]

@@ -1,0 +1,36 @@
+{
+  "name": "von_mises",
+  "model_id": "489d9da5e8e515e4",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "kappa": 2.3
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.8329091229351039
+  ],
+  "lp": -16.340275822821457,
+  "unconstrained_gradient": [
+    10.06646447177712,
+    -7.629082038240121,
+    -0.9782908858115347
+  ],
+  "constrained_gradient": {
+    "b.1": 10.06646447177712,
+    "Intercept": -7.629082038240121,
+    "kappa": -0.42534386339631947
+  },
+  "jacobian": false,
+  "propto": false,
+  "semantic_gradient": {
+    "temp_Intercept": -7.629082038240121,
+    "b": [
+      10.06646447177712
+    ],
+    "kappa": -0.42534386339631947
+  }
+}
