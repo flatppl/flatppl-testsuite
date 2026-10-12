@@ -62,11 +62,18 @@ def test_record_prior_keeps_runtime_bounds_and_normalizers(tmp_path, precision, 
 
 @pytest.mark.stablehlo_only
 @pytest.mark.parametrize("precision,tolerance", [("f32", 2e-5), ("f64", 1e-11)])
-def test_formula_affine_prior_bounds_preserve_scale_gradients(
-    tmp_path, precision, tolerance,
+@pytest.mark.parametrize("prior", ["cauchy", "student_t", "locscale"])
+def test_formula_scaled_priors_preserve_domains_and_endpoint_gradients(
+    tmp_path, precision, tolerance, prior,
 ):
     _gate_engine("stablehlo")
-    coefficient = {"class": "b", "prior": "locscale(Cauchy(0, 1), 0.7, temp_Intercept)", "lb": 0}
+    # Cauchy also exercises a nonconstant truncation mass; Student-t exercises
+    # the other alias. Explicit locscale retains its general reflection law.
+    coefficient = {"class": "b", "prior": "student_t(4, 0, temp_Intercept)"}
+    if prior == "cauchy":
+        coefficient.update(prior="cauchy(0.7, temp_Intercept)", lb=0)
+    elif prior == "locscale":
+        coefficient.update(prior="locscale(Cauchy(0, 1), 0.7, temp_Intercept)", lb=0)
     specification = tmp_path / "model.formula.json"
     specification.write_text(json.dumps({
         "formula": "y ~ x",
@@ -104,19 +111,26 @@ outputs = (
 
     values = jax.jit(scores)
     gradients = jax.jit(jax.jacrev(scores))
-    points = [[2, .4], [.3, 1.1], [-2, .4]]
+    points = [[2, .4], [.3, 1.1]] + ([[-2, .4]] if prior == "locscale" else [])
     for point in np.array(points, dtype=dtype):
         scale, b = point.astype(np.float64)
-        delta = b - .7
-        denominator = scale**2 + delta**2
-        mass = .5 + math.atan(.7 / abs(scale)) / math.pi
-        score = -math.log(math.pi * abs(scale)) - math.log1p((delta / scale)**2)
-        score -= math.log(mass)
-        derivative = np.array([
-            (delta**2 - scale**2) / (scale * denominator)
-            + math.copysign(.7, scale) / (math.pi * (scale**2 + .7**2) * mass),
-            -2 * delta / denominator,
-        ])
+        if prior != "student_t":
+            delta = b - .7
+            denominator = scale**2 + delta**2
+            mass = .5 + math.atan(.7 / abs(scale)) / math.pi
+            score = -math.log(math.pi * abs(scale)) - math.log1p((delta / scale)**2)
+            score -= math.log(mass)
+            derivative = np.array([
+                (delta**2 - scale**2) / (scale * denominator)
+                + math.copysign(.7, scale) / (math.pi * (scale**2 + .7**2) * mass),
+                -2 * delta / denominator,
+            ])
+        else:
+            score = math.log(3 / 8) - math.log(scale) - 2.5 * math.log1p(b**2 / (4 * scale**2))
+            derivative = np.array([
+                -1 / scale + 5 * b**2 / (scale * (4 * scale**2 + b**2)),
+                -5 * b / (4 * scale**2 + b**2),
+            ])
         residual = np.array([1, 2, 3]) - scale - np.array([-1, 0, 1]) * b
         posterior = score - math.log(2) - 2 * math.log(2 * math.pi)
         posterior -= scale**2 / 8 + .5 * sum(residual**2)
@@ -128,6 +142,10 @@ outputs = (
                                    rtol=tolerance, atol=tolerance)
         np.testing.assert_allclose(actual_gradients[:2], [derivative, posterior_gradient],
                                    rtol=tolerance, atol=tolerance)
+    invalid_scales = [] if prior == "locscale" else [-1, 0, np.inf, -np.inf, np.nan]
+    for scale in invalid_scales:
+        actual = values(jnp.asarray([scale, .4], dtype=dtype))
+        assert np.all(np.isnan(actual[:2]))  # Invalid parameters are undefined.
     reflected = values(jnp.asarray([-1, .4], dtype=dtype))
     np.testing.assert_allclose(reflected[2], -math.log(math.pi) - math.log1p(.4**2),
                                rtol=tolerance, atol=tolerance)
