@@ -1,0 +1,54 @@
+{
+  "name": "weighted_gaussian_se",
+  "model_id": "f2c41d8971310803",
+  "propto": false,
+  "jacobian": false,
+  "points": [
+    {
+      "point": {
+        "b": [
+          0.3
+        ],
+        "Intercept": 0.4
+      },
+      "theta_unc": [
+        0.3,
+        0.4
+      ],
+      "lp": -20.083387519548204,
+      "gradient": [
+        -15.073662551440332,
+        22.369135802469135
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 22.369135802469135,
+        "b": [
+          -15.073662551440332
+        ]
+      }
+    },
+    {
+      "point": {
+        "b": [
+          -0.2
+        ],
+        "Intercept": -0.7
+      },
+      "theta_unc": [
+        -0.2,
+        -0.7
+      ],
+      "lp": -42.04545370610513,
+      "gradient": [
+        -20.732784636488336,
+        33.837551440329214
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 33.837551440329214,
+        "b": [
+          -20.732784636488336
+        ]
+      }
+    }
+  ]
+}

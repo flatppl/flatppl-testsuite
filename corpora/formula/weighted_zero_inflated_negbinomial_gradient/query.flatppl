@@ -1,0 +1,9 @@
+theta = elementof(cartpow(reals, 4))
+inputs = theta
+formula_point = record(
+  temp_Intercept = theta[1],
+  b = theta[[2]],
+  shape = theta[3],
+  zi = theta[4]
+)
+outputs = logdensityof(Pi_post, formula_point)

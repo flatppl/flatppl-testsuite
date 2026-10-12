@@ -1,0 +1,65 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "default",
+    "stan_sha256": "27c26cffcb17c813aa032b8f9b11d9a3853e9d878135e56631f5e0dcb6112e2d",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y ~ x",
+  "family": "cumulative",
+  "link": "logit",
+  "coordinates": [
+    "cuts[1]",
+    "cuts[2]",
+    "b[1]"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      2,
+      1,
+      3,
+      2
+    ],
+    "nthres": 2,
+    "K": 1,
+    "Kc": 1,
+    "X": [
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        4
+      ],
+      [
+        5
+      ]
+    ],
+    "disc": 1,
+    "prior_only": 0
+  },
+  "priors": {
+    "cuts[1]": {
+      "kind": "student",
+      "args": [
+        3,
+        0,
+        2.5
+      ]
+    },
+    "cuts[2]": {
+      "kind": "student",
+      "args": [
+        3,
+        0,
+        2.5
+      ]
+    }
+  },
+  "score_offset": 0.6931471805599453
+}

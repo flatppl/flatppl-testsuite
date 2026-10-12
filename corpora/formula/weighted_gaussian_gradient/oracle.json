@@ -1,0 +1,78 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "weighted_gaussian",
+    "stan_sha256": "6695286fa72258355aa94e8a3d12780b99ed9545760a5c63ebd69caaea748732",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y | weights(w) ~ x",
+  "family": "gaussian",
+  "link": "identity",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]",
+    "sigma"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      1,
+      2,
+      4,
+      7
+    ],
+    "weights": [
+      0,
+      0.5,
+      2,
+      3
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        -1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "normal",
+      "args": [
+        0,
+        3
+      ]
+    },
+    "b[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ]
+    },
+    "sigma": {
+      "kind": "gamma",
+      "args": [
+        1,
+        1.2
+      ],
+      "lower": 0
+    }
+  }
+}

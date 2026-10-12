@@ -1,0 +1,36 @@
+{
+  "name": "weibull",
+  "model_id": "e0899d3ccdd9e09e",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "shape": 2.3
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.8329091229351039
+  ],
+  "lp": -50.5417683378476,
+  "unconstrained_gradient": [
+    35.5059971682865,
+    104.74870799015913,
+    -122.79223533627462
+  ],
+  "constrained_gradient": {
+    "b.1": 35.5059971682865,
+    "Intercept": 104.74870799015913,
+    "shape": -53.387928407075925
+  },
+  "jacobian": false,
+  "propto": false,
+  "semantic_gradient": {
+    "temp_Intercept": 104.74870799015913,
+    "b": [
+      35.5059971682865
+    ],
+    "shape": -53.387928407075925
+  }
+}

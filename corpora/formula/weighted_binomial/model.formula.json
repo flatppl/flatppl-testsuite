@@ -1,0 +1,68 @@
+{
+  "formula": "y | trials(n) + weights(w) ~ x",
+  "family": "binomial",
+  "options": {},
+  "priors": [
+    {
+      "class": "b",
+      "prior": "normal(0, 2)"
+    },
+    {
+      "class": "Intercept",
+      "prior": "normal(0, 3)"
+    }
+  ],
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "int",
+          "values": [
+            1,
+            2,
+            4,
+            7
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            -1,
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "name": "w",
+        "values": {
+          "kind": "real32",
+          "values": [
+            0,
+            0.5,
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "name": "n",
+        "values": {
+          "kind": "int",
+          "values": [
+            2,
+            3,
+            5,
+            8
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -66,11 +66,17 @@ capture <- function(name, formula, family, data = data, prior = NULL) {
 families <- list(gaussian = gaussian(), student = student(),
                  bernoulli = bernoulli(), binomial = binomial(),
                  poisson = poisson(), negbinomial = negbinomial(),
-                 Gamma = brmsfamily("Gamma"), exponential = exponential())
+                 Gamma = brmsfamily("Gamma"), exponential = exponential(),
+                 lognormal = brmsfamily("lognormal"), geometric = brmsfamily("geometric"),
+                 weibull = brmsfamily("weibull"), beta = brmsfamily("beta"),
+                 von_mises = brmsfamily("von_mises"))
+responses <- list(lognormal = exp(c(-3, -1, 2, 3)), geometric = c(0L, 4L, 8L, 7L),
+                  beta = c(.1, .4, .8, .7), von_mises = c(-2, -.4, .8, 2))
 for (name in names(families)) {
   d <- data
   if (name == "bernoulli") d$y <- c(0L, 1L, 1L, 0L)
   if (name == "binomial") d$y <- c(1L, 2L, 4L, 3L)
+  if (name %in% names(responses)) d$y <- responses[[name]]
   f <- if (name == "binomial") y | trials(trials) ~ x else y ~ x
   directory <- paste0("family_", tolower(name))
   captured <- capture(directory, f, families[[name]], d)
@@ -114,3 +120,67 @@ dependent <- capture("dependent_locscale_prior", y ~ x, gaussian(), data,
   c(set_prior("normal(1, 3)", class = "Intercept"),
     set_prior("cauchy(Intercept, 1.7)", class = "sigma")))
 json(dependent, file.path(out, "dependent_locscale_prior", "brms.json"))
+
+ordinal_data <- data.frame(y = ordered(c("medium", "low", "high", "medium"),
+  levels = c("low", "medium", "high")), x = c(1, 2, 4, 5))
+ordinal <- capture("cumulative_logit", y ~ x, cumulative("logit"), ordinal_data,
+  c(set_prior("normal(0, 2)", class = "Intercept"),
+    set_prior("normal(0, 1.5)", class = "b")))
+json(ordinal, file.path(out, "cumulative_logit", "brms.json"))
+ordinal_default <- capture("cumulative_logit_default", y ~ x,
+  cumulative("logit"), ordinal_data)
+json(ordinal_default, file.path(out, "cumulative_logit_default", "brms.json"))
+
+weighted_data <- data.frame(y = c(1, 2, 4, 7), x = c(-1, 0, 1, 2),
+                            w = c(0, 0.5, 2, 3), n = c(2L, 3L, 5L, 8L))
+weighted_priors <- c(set_prior("normal(0, 2)", class = "b"),
+                     set_prior("normal(0, 3)", class = "Intercept"))
+for (family_name in c("gaussian", "binomial")) {
+  f <- if (family_name == "binomial") y | trials(n) + weights(w) ~ x else y | weights(w) ~ x
+  prior <- weighted_priors
+  if (family_name == "gaussian") prior <- c(prior, set_prior("exponential(1.2)", class = "sigma"))
+  directory <- paste0("weighted_", family_name)
+  captured <- capture(directory, f, brmsfamily(family_name), weighted_data, prior)
+  json(captured, file.path(out, directory, "brms.json"))
+}
+
+se_data <- data.frame(y = c(1, 2, 4), x = c(0, 1, 3), s = c(.3, .6, .9))
+for (family in c("gaussian", "student")) {
+  for (residual in c(FALSE, TRUE)) {
+    name <- paste0("se_", family, if (residual) "_residual" else "")
+    formula <- as.formula(paste0("y | se(s, sigma=", residual, ") ~ x"))
+    priors <- c(set_prior("normal(0, 2)", class = "Intercept"),
+                set_prior("normal(0, 1)", class = "b"))
+    if (residual) priors <- c(priors, set_prior("normal(0, 1)", class = "sigma"))
+    if (family == "student") priors <- c(priors, set_prior("constant(5)", class = "nu"))
+    law <- if (family == "student") student() else gaussian()
+    captured <- capture(name, formula, law, se_data, priors)
+    json(captured, file.path(out, name, "brms.json"))
+  }
+}
+
+count_data <- data.frame(y = c(0L, 2L, 4L, 0L), x = 1:4,
+                         n = c(3L, 5L, 8L, 9L), w = c(0, .5, 2, 1))
+for (family in c("zero_inflated_poisson", "zero_inflated_negbinomial",
+                 "zero_inflated_binomial")) {
+  name <- paste0("weighted_", family)
+  formula <- if (family == "zero_inflated_binomial") {
+    y | trials(n) + weights(w) ~ x
+  } else y | weights(w) ~ x
+  captured <- capture(name, formula, brmsfamily(family), count_data)
+  json(captured, file.path(out, name, "brms.json"))
+}
+
+se_data$w <- c(1, 2, .5)
+for (family in c("gaussian", "student")) {
+  for (residual in c(FALSE, TRUE)) {
+    name <- paste0("weighted_", family, "_se", if (residual) "_residual" else "")
+    formula <- as.formula(paste0("y | se(s, sigma=", residual, ") + weights(w) ~ x"))
+    priors <- c(set_prior("normal(0, 2)", class = "Intercept"),
+                set_prior("normal(0, 1)", class = "b"))
+    if (residual) priors <- c(priors, set_prior("normal(0, 1)", class = "sigma"))
+    if (family == "student") priors <- c(priors, set_prior("constant(5)", class = "nu"))
+    captured <- capture(name, formula, brmsfamily(family), se_data, priors)
+    json(captured, file.path(out, name, "brms.json"))
+  }
+}

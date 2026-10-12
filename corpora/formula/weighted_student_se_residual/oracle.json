@@ -1,0 +1,80 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "weighted_student_se_residual",
+    "stan_sha256": "6f88eaade11aef7c568e4acdf82a5c14e8f79e392394e3244840334f9c519ec9",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y | se(s, sigma = TRUE) + weights(w) ~ x",
+  "family": "student",
+  "link": "identity",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]",
+    "sigma"
+  ],
+  "standata": {
+    "N": 3,
+    "Y": [
+      1,
+      2,
+      4
+    ],
+    "se": [
+      0.3,
+      0.6,
+      0.9
+    ],
+    "weights": [
+      1,
+      2,
+      0.5
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        3
+      ]
+    ],
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ]
+    },
+    "b[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sigma": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ],
+      "lower": 0
+    }
+  },
+  "constants": {
+    "nu": 5
+  }
+}

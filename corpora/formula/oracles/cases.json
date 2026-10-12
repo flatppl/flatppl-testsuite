@@ -355,5 +355,445 @@
       }
     ],
     "stan_sha256": "d76fde5ed9d2487349466212622752f7852c5cfa66252282e63bc84dc24a0c92"
+  },
+  {
+    "name": "family_lognormal",
+    "stan_case": "lognormal",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "2ddd4592e8d0b63484c56e47e642681dff1fe34449324427b78273ee6c9c42e8",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          1.2
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_geometric",
+    "stan_case": "geometric",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "d131bbd3404061b628ff083abacf994df83ff0812394b3ff5cc566dcc7e26657",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_weibull",
+    "stan_case": "weibull",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "shape"
+    ],
+    "stan_sha256": "d521cc04c5944c14bd63b901ff798e00bd4d84ac9065a2ebdcff8bb123e1a0c0",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_beta",
+    "stan_case": "beta",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "phi"
+    ],
+    "stan_sha256": "1fbb5dec24dd06752fe94035136bc2df8cc8891b6062b3dfeb4daa2533a0d735",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "family_von_mises",
+    "stan_case": "von_mises",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "kappa"
+    ],
+    "stan_sha256": "b9605f85013406ff77dbcc72e8acb718c404baa7e5a44b210edd24416ad2a9dd",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "cumulative_logit",
+    "stan_case": "normal",
+    "coordinates": [
+      "cuts[1]",
+      "cuts[2]",
+      "b[1]"
+    ],
+    "stan_sha256": "42d526c803273ed25cb3488e77464d35b85c15723c66c2364541caeb9caf63f1",
+    "score_offset": 0.6931471805599453,
+    "points": [
+      {
+        "theta": [
+          -0.6,
+          0.8,
+          0.4
+        ]
+      },
+      {
+        "theta": [
+          -0.6,
+          0.8,
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "name": "cumulative_logit_default",
+    "stan_case": "default",
+    "coordinates": [
+      "cuts[1]",
+      "cuts[2]",
+      "b[1]"
+    ],
+    "stan_sha256": "27c26cffcb17c813aa032b8f9b11d9a3853e9d878135e56631f5e0dcb6112e2d",
+    "score_offset": 0.6931471805599453,
+    "points": [
+      {
+        "theta": [
+          -0.6,
+          0.8,
+          0.4
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_gaussian",
+    "stan_case": "weighted_gaussian",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "6695286fa72258355aa94e8a3d12780b99ed9545760a5c63ebd69caaea748732",
+    "points": [
+      {
+        "theta": [
+          0.2,
+          0.3,
+          1.4
+        ]
+      },
+      {
+        "theta": [
+          1.1,
+          -0.4,
+          0.8
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_binomial",
+    "stan_case": "weighted_binomial",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "9b449763438394b2b340d0e51bbcf88c03c5827b64e8810497794f587fa8c7a9",
+    "points": [
+      {
+        "theta": [
+          0.2,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          1.1,
+          -0.4
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_gaussian",
+    "stan_case": "se_gaussian",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "d23b10561f0c3065b3f6edcae225db915a4cbd888a4c3b911f7c9d2b1121afb4",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_gaussian_residual",
+    "stan_case": "se_gaussian_residual",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "cb4e8b676a7c5fc5a396f62417e690c7b27735037bc52946975d25cb8d5a5471",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7,
+          0.5
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_student",
+    "stan_case": "se_student",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "dc6c2917db700bf23c41a27813e568c06a016fd73978dcff5e9d6f8659af843b",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_student_residual",
+    "stan_case": "se_student_residual",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "b27dc29631befc4020b57b66b2daa58e46c2a73e7dc38168c7f8ad2f91715a63",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7,
+          0.5
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_zero_inflated_poisson",
+    "stan_case": "weighted_zero_inflated_poisson",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "zi"
+    ],
+    "stan_sha256": "60495b77b02dd053506a670a131d21794f2b32a3063d17032b9ce588a37c9bef",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.6
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_zero_inflated_negbinomial",
+    "stan_case": "weighted_zero_inflated_negbinomial",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "shape",
+      "zi"
+    ],
+    "stan_sha256": "042abfd7e58b8479b1ab70408d3131e50634c7ceb2d319a836693891a679646b",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          2.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          1.7,
+          0.6
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_zero_inflated_binomial",
+    "stan_case": "weighted_zero_inflated_binomial",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "zi"
+    ],
+    "stan_sha256": "44ba604199f19f8e1433a5eb8523038e68c50b7c28e29e5580b946cb28577dc8",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.6
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_gaussian_se",
+    "stan_case": "weighted_gaussian_se",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "5a87b1c80cfcd238ef975157876af9a98e548919a91276837cdd798475d6a736",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_gaussian_se_residual",
+    "stan_case": "weighted_gaussian_se_residual",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "e3a8b22c653868f2ceb7bb3e0e324eb94593b300c290c3435501cadf51608592",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          1.2
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.7
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_student_se",
+    "stan_case": "weighted_student_se",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "82b24f3dfe8f6174cb6b1280e18cb6c3cb0e99f34f255dc69f0602fbec294ee2",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_student_se_residual",
+    "stan_case": "weighted_student_se_residual",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "6f88eaade11aef7c568e4acdf82a5c14e8f79e392394e3244840334f9c519ec9",
+    "points": [
+      {
+        "theta": [
+          0.4,
+          0.3,
+          1.2
+        ]
+      },
+      {
+        "theta": [
+          -0.7,
+          -0.2,
+          0.7
+        ]
+      }
+    ]
   }
 ]

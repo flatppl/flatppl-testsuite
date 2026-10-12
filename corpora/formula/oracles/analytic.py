@@ -34,6 +34,10 @@ def _prior(prior, value, parameters):
         shape, scale = args
         distribution = stats.invgamma(shape, scale=scale)
         derivative = -(shape + 1) / value + scale / value**2
+    elif kind == "beta":
+        a, b = args
+        distribution = stats.beta(a, b)
+        derivative = (a - 1) / value - (b - 1) / (1 - value)
     else:
         raise ValueError(f"unknown oracle prior {kind}")
     score = distribution.logpdf(value)
@@ -47,10 +51,13 @@ def _prior(prior, value, parameters):
 
 
 def evaluate(reference, point):
+    if reference["family"] == "cumulative":
+        return _cumulative(reference, point)
     names = reference["coordinates"]
     positions = {name: i for i, name in enumerate(names)}
     values = np.asarray(point["theta"], dtype=float)
     p = dict(zip(names, values))
+    p.update(reference.get("constants", {}))
     data = reference["standata"]
     x = np.asarray(data["X"], dtype=float)[:, 1:]
     x -= x.mean(axis=0)
@@ -92,6 +99,11 @@ def evaluate(reference, point):
                 jacobian[i, positions[rho_name]] = b * sd1 * (z0 - rho * z1 / root)
 
     y = np.asarray(data["Y"], dtype=float)
+    weights = np.asarray(data.get("weights", 1), dtype=float)
+
+    def sum_rows(values):
+        return np.sum(weights * values)
+
     family, link = reference["family"], reference["link"]
     if link == "identity":
         mu, derivative = eta, np.ones_like(eta)
@@ -105,49 +117,157 @@ def evaluate(reference, point):
         softplus = np.logaddexp(0, eta)
         mu = softplus / (1 + softplus)
         derivative = special.expit(eta) / (1 + softplus)**2
+    elif link == "tan_half":
+        mu = 2 * np.arctan(eta)
+        derivative = 2 / (1 + eta**2)
     else:
         raise ValueError(f"unknown oracle link {link}")
 
+    if family in ("gaussian", "student"):
+        sigma = p.get("sigma", 0.0)
+        scale = np.sqrt(sigma**2 + np.asarray(data.get("se", 0))**2)
     if family == "gaussian":
-        sigma = p["sigma"]
         residual = y - mu
-        score += stats.norm.logpdf(y, mu, sigma).sum()
+        score += sum_rows(stats.norm.logpdf(y, mu, scale))
+        dmu = residual / scale**2
+        if "sigma" in positions:
+            gradient[positions["sigma"]] += sum_rows(
+                (residual**2 / scale**3 - 1 / scale) * sigma / scale)
+    elif family == "lognormal":
+        sigma = p["sigma"]
+        residual = np.log(y) - mu
+        score += stats.lognorm.logpdf(y, sigma, scale=np.exp(mu)).sum()
         dmu = residual / sigma**2
         gradient[positions["sigma"]] += np.sum(residual**2 / sigma**3 - 1 / sigma)
     elif family == "student":
-        sigma, nu = p["sigma"], p["nu"]
+        nu = p["nu"]
         residual = y - mu
-        square = (residual / sigma)**2
-        score += stats.t.logpdf(y, nu, mu, sigma).sum()
-        dmu = (nu + 1) * residual / (nu * sigma**2 + residual**2)
-        gradient[positions["sigma"]] += np.sum(((nu + 1) * square / (nu + square) - 1) / sigma)
-        gradient[positions["nu"]] += np.sum(
-            (special.digamma((nu + 1) / 2) - special.digamma(nu / 2) - 1 / nu
-             - np.log1p(square / nu) + (nu + 1) * square / (nu * (nu + square))) / 2)
+        square = (residual / scale)**2
+        score += sum_rows(stats.t.logpdf(y, nu, mu, scale))
+        dmu = (nu + 1) * residual / (nu * scale**2 + residual**2)
+        if "sigma" in positions:
+            gradient[positions["sigma"]] += sum_rows(
+                ((nu + 1) * square / (nu + square) - 1) * sigma / scale**2)
+        if "nu" in positions:
+            gradient[positions["nu"]] += sum_rows(
+                (special.digamma((nu + 1) / 2) - special.digamma(nu / 2) - 1 / nu
+                 - np.log1p(square / nu) + (nu + 1) * square / (nu * (nu + square))) / 2)
     elif family in ("bernoulli", "binomial"):
         trials = np.asarray(data["trials"]) if family == "binomial" else 1
-        score += stats.binom.logpmf(y, trials, mu).sum()
+        score += sum_rows(stats.binom.logpmf(y, trials, mu))
         dmu = (y - trials * mu) / (mu * (1 - mu))
     elif family == "poisson":
-        score += stats.poisson.logpmf(y, mu).sum()
+        score += sum_rows(stats.poisson.logpmf(y, mu))
         dmu = y / mu - 1
+    elif family == "geometric":
+        score += stats.geom.logpmf(y + 1, 1 / (1 + mu)).sum()
+        dmu = y / mu - (y + 1) / (1 + mu)
     elif family == "negbinomial":
         shape = p["shape"]
-        score += stats.nbinom.logpmf(y, shape, shape / (shape + mu)).sum()
+        score += sum_rows(stats.nbinom.logpmf(y, shape, shape / (shape + mu)))
         dmu = y / mu - (shape + y) / (shape + mu)
-        gradient[positions["shape"]] += np.sum(
+        gradient[positions["shape"]] += sum_rows(
             special.digamma(y + shape) - special.digamma(shape) + np.log(shape / (shape + mu))
             + 1 - (shape + y) / (shape + mu))
+    elif family.startswith("zero_inflated_"):
+        if family == "zero_inflated_poisson":
+            base = stats.poisson.logpmf(y, mu)
+            dmu = y / mu - 1
+        elif family == "zero_inflated_binomial":
+            trials = np.asarray(data["trials"])
+            base = stats.binom.logpmf(y, trials, mu)
+            dmu = (y - trials * mu) / (mu * (1 - mu))
+        elif family == "zero_inflated_negbinomial":
+            shape = p["shape"]
+            base = stats.nbinom.logpmf(y, shape, shape / (shape + mu))
+            dmu = y / mu - (shape + y) / (shape + mu)
+        else:
+            raise ValueError(f"unknown oracle family {family}")
+        zi = p["zi"]
+        count = np.log1p(-zi) + base
+        rows = np.where(y == 0, np.logaddexp(np.log(zi), count), count)
+        responsibility = np.exp(count - rows)
+        score += sum_rows(rows)
+        dmu *= responsibility
+        gradient[positions["zi"]] += sum_rows(np.where(
+            y == 0, -np.expm1(base) * np.exp(-rows), -1 / (1 - zi)))
+        if family == "zero_inflated_negbinomial":
+            gradient[positions["shape"]] += sum_rows(responsibility * (
+                special.digamma(y + shape) - special.digamma(shape)
+                + np.log(shape / (shape + mu)) + 1 - (shape + y) / (shape + mu)))
     elif family == "gamma":
         shape = p["shape"]
-        score += stats.gamma.logpdf(y, shape, scale=mu / shape).sum()
+        score += sum_rows(stats.gamma.logpdf(y, shape, scale=mu / shape))
         dmu = shape * (y - mu) / mu**2
-        gradient[positions["shape"]] += np.sum(
+        gradient[positions["shape"]] += sum_rows(
             np.log(shape / mu) + 1 - special.digamma(shape) + np.log(y) - y / mu)
     elif family == "exponential":
-        score += stats.expon.logpdf(y, scale=mu).sum()
+        score += sum_rows(stats.expon.logpdf(y, scale=mu))
         dmu = (y - mu) / mu**2
+    elif family == "weibull":
+        shape = p["shape"]
+        scale = mu / special.gamma(1 + 1 / shape)
+        log_ratio = np.log(y / scale)
+        power = np.exp(shape * log_ratio)
+        score += stats.weibull_min.logpdf(y, shape, scale=scale).sum()
+        dmu = shape * (power - 1) / mu
+        gradient[positions["shape"]] += np.sum(
+            1 / shape + (1 - power) *
+            (log_ratio - special.digamma(1 + 1 / shape) / shape))
+    elif family == "beta":
+        phi = p["phi"]
+        a, b = mu * phi, (1 - mu) * phi
+        da, db = np.log(y) - special.digamma(a), np.log1p(-y) - special.digamma(b)
+        score += stats.beta.logpdf(y, a, b).sum()
+        dmu = phi * (da - db)
+        gradient[positions["phi"]] += np.sum(mu * da + (1 - mu) * db + special.digamma(phi))
+    elif family == "von_mises":
+        kappa = p["kappa"]
+        score += stats.vonmises.logpdf(y, kappa, loc=mu).sum()
+        dmu = kappa * np.sin(y - mu)
+        gradient[positions["kappa"]] += np.sum(
+            np.cos(y - mu) - special.i1e(kappa) / special.i0e(kappa))
     else:
         raise ValueError(f"unknown oracle family {family}")
-    gradient += jacobian.T @ (dmu * derivative)
+    gradient += jacobian.T @ (weights * dmu * derivative)
+    return float(score), {"theta": gradient.tolist()}
+
+
+def _cumulative(reference, point):
+    names = reference["coordinates"]
+    positions = {name: i for i, name in enumerate(names)}
+    p = dict(zip(names, point["theta"]))
+    data = reference["standata"]
+    x = np.asarray(data["X"], dtype=float)
+    x -= x.mean(axis=0)
+    beta = np.array([p[f"b[{i + 1}]"] for i in range(x.shape[1])])
+    cuts = np.array([p[f"cuts[{i + 1}]"] for i in range(data["nthres"])])
+    score, gradient = math.lgamma(len(cuts) + 1), np.zeros(len(names))
+    for name, prior in reference["priors"].items():
+        contribution, derivative, _ = _prior(prior, p[name], p)
+        score += contribution
+        gradient[positions[name]] += derivative
+    for row, eta, category in zip(x, x @ beta, data["Y"], strict=True):
+        if category == 1:
+            upper = cuts[0] - eta
+            score += special.log_expit(upper)
+            upper_derivative = special.expit(-upper)
+            gradient[positions["cuts[1]"]] += upper_derivative
+            eta_derivative = -upper_derivative
+        elif category == len(cuts) + 1:
+            lower = cuts[-1] - eta
+            score += special.log_expit(-lower)
+            lower_derivative = -special.expit(lower)
+            gradient[positions[f"cuts[{len(cuts)}]"]] += lower_derivative
+            eta_derivative = -lower_derivative
+        else:
+            lower, upper = cuts[category - 2:category] - eta
+            score += (special.log_expit(upper) + special.log_expit(-lower)
+                      + math.log(-math.expm1(lower - upper)))
+            gap_ratio = 1 / math.expm1(upper - lower)
+            gradient[positions[f"cuts[{category - 1}]"]] -= special.expit(lower) + gap_ratio
+            gradient[positions[f"cuts[{category}]"]] += special.expit(-upper) + gap_ratio
+            eta_derivative = special.expit(lower) - special.expit(-upper)
+        for i, value in enumerate(row):
+            gradient[positions[f"b[{i + 1}]"]] += value * eta_derivative
     return float(score), {"theta": gradient.tolist()}

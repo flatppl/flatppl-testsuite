@@ -59,8 +59,9 @@ freezes the oracle's value into `test.json`.
 
 Formula cases add `"convert": {"source": "model.formula.json", "from": "formula"}`
 to an ordinary log-density case. The harness converts into `model.flatppl` in a
-temporary copy before scoring on either engine. Use inline data in the formula
-specification; keep the query and independent oracle beside it.
+temporary copy before scoring on either engine. Keep typed data in the formula
+specification; the harness loads the converter's prepared data sidecar. Keep the
+query and independent oracle beside it.
 
 **A new `test_type` or engine** gets its own runner under
 `src/flatppl_testsuite/unified/runners/`, wired into `unified/harness.py`'s dispatch.

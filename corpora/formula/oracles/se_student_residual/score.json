@@ -1,0 +1,37 @@
+{
+  "name": "se_student_residual",
+  "model_id": "f1a69d9bf5c3dba4",
+  "point": {
+    "b": [
+      0.7
+    ],
+    "Intercept": 1.2,
+    "sigma": 0.5
+  },
+  "theta_unc": [
+    0.7,
+    1.2,
+    -0.6931471805599453
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -8.403433594628488,
+  "gradient": [
+    -1.773613987511269,
+    4.401856813672755,
+    0.540694911336238
+  ],
+  "constrained_gradient": {
+    "b.1": -1.773613987511269,
+    "Intercept": 4.401856813672755,
+    "sigma": 1.081389822672476
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 4.401856813672755,
+    "b": [
+      -1.773613987511269
+    ],
+    "sigma": 1.081389822672476
+  },
+  "mapping": "Stan order is b, Intercept, then log(sigma) when estimated. Divide the raw sigma gradient by 0.5; no density Jacobian is added."
+}

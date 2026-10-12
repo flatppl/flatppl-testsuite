@@ -14,7 +14,7 @@ scoring uses **`propto=false, jacobian=false`**. Normalizing constants therefore
 remain in every likelihood and prior, including truncated positive priors.
 Each score is an unnormalized posterior target with complete factor constants.
 
-To regenerate the fifteen model sources and data, install the pinned R/brms
+To regenerate the model sources and data, install the pinned R/brms
 versions in an oracle environment and run:
 
 ```sh
@@ -73,7 +73,48 @@ positive `sigma` prior; the corresponding FlatPPL binding is `temp_Intercept`.
 Its analytic gradient includes the derivative of the positive truncation mass
 with respect to that location, as well as the ordinary Cauchy density derivative.
 
+The cumulative-logit cases use centred predictors and ordered thresholds. The
+query's `cuts[i]` are Stan's constrained `Intercept[i]`. FlatPPL normalizes the
+shared iid threshold law on `ordered(m)`, adding `log(m!)` to Stan's restricted
+product target; `score_offset` records this analytic difference. It changes no
+gradient. Stan's first ordered coordinate is unconstrained and later ones are
+log gaps. For the two thresholds here, convert raw derivatives `(g1, g2)` to
+`(g1 - g2/gap, g2/gap)`. No ordered-chart Jacobian belongs in either score.
+The explicit-Normal case includes predictors reaching ±20; the default case
+uses Student-t(3, 0, 2.5) thresholds and a Flat coefficient prior.
+
+The weighted Gaussian and Binomial cases retain weights `[0, 0.5, 2, 3]`
+without rescaling. Their two points score normalized row likelihoods with those
+weights and ordinary unweighted priors. The Gaussian exponential scale prior
+is independently evaluated as Gamma(shape=1, rate=1.2); the binomial case also
+retains each row's trials. Raw Stan gradients use `[b, Intercept, sigma?]`,
+while the query and semantic gradients use `[temp_Intercept, b, sigma?]`.
+
+The combined weighted cases add Gaussian/Student known scales and zero-inflated
+Poisson, negative-binomial and binomial responses at two points each. Each zero
+count has probability `zi + (1-zi) * p_count(0)`; positive counts have probability
+`(1-zi) * p_count(y)`. The analytic oracle uses SciPy PMFs and the posterior
+responsibility of the count component for its derivatives. Row weights multiply
+the complete mixture log probability once, and priors remain unweighted. The
+`zi` prior is Beta(1,1); negative-binomial shape retains InverseGamma(0.4,0.3).
+Divide the raw Stan derivative for `zi` by `zi*(1-zi)` to obtain its constrained
+derivative. `score.json` preserves both forms. These targets were also checked
+independently with base-R densities and analytic derivatives before freezing.
+
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
+The `se_*` cases use Normal(0,2) intercept and Normal(0,1) coefficient priors,
+with Student degrees of freedom fixed at five. Residual-scale variants add a
+half-Normal(0,1) sigma prior. The known scale is `se` when residual sigma is
+absent and `sqrt(se^2 + sigma^2)` otherwise; its sigma derivative is
+`sigma / sqrt(se^2 + sigma^2)`. The Student likelihood uses that scale directly.
 That independent implementation computes SciPy log densities and closed-form
 derivatives from the captured brms design matrix, offsets, group indices, and
 documented priors. It does not read these Stan scores or FlatPPL output.
+
+The five additional scalar families use SciPy's lognormal, geometric (shifted
+from trials to failures), Weibull, beta and von Mises densities. Their gradients
+are analytic. For Weibull, `scale = mu / Gamma(1 + 1/shape)` is differentiated
+through both arguments, including the digamma term in the shape derivative.
+The lognormal response has a nonzero sum of log values so omitting its density
+Jacobian cannot cancel accidentally. The circular case checks both the Bessel
+normalizer derivative and the `2*atan(eta)` inverse link.

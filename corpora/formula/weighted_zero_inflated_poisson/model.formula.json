@@ -1,0 +1,58 @@
+{
+  "formula": "y | weights(w) ~ x",
+  "family": "zero_inflated_poisson",
+  "priors": [],
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "int",
+          "values": [
+            0,
+            2,
+            4,
+            0
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "int",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "name": "n",
+        "values": {
+          "kind": "int",
+          "values": [
+            3,
+            5,
+            8,
+            9
+          ]
+        }
+      },
+      {
+        "name": "w",
+        "values": {
+          "kind": "real64",
+          "values": [
+            0,
+            0.5,
+            2,
+            1
+          ]
+        }
+      }
+    ]
+  }
+}

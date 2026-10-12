@@ -1,0 +1,57 @@
+{
+  "name": "cumulative_logit_default",
+  "jacobian": false,
+  "propto": false,
+  "parameter_order": [
+    "b.1",
+    "Intercept.1",
+    "Intercept.2"
+  ],
+  "unconstrained_coordinate_meaning": [
+    "b[1]",
+    "Intercept[1]",
+    "log(Intercept[2]-Intercept[1])"
+  ],
+  "score_offset": 0.6931471805599453,
+  "points": [
+    {
+      "name": "default",
+      "model_id": "5e766f6a76a42f02",
+      "point": {
+        "b": [
+          0.4
+        ],
+        "Intercept": [
+          -0.6,
+          0.8
+        ]
+      },
+      "theta_unc": [
+        0.4,
+        -0.6,
+        0.3364722366212129
+      ],
+      "lp": -8.11259083871886,
+      "gradient": [
+        -0.21955088458503824,
+        -0.1679669821047708,
+        0.7824348953708118
+      ],
+      "constrained_gradient": {
+        "b.1": -0.21955088458503824,
+        "Intercept.1": -0.7268490502267793,
+        "Intercept.2": 0.5588820681220085
+      },
+      "semantic_gradient": {
+        "b": [
+          -0.21955088458503824
+        ],
+        "cuts": [
+          -0.7268490502267793,
+          0.5588820681220085
+        ]
+      },
+      "flatppl_lp": -7.419443658158915
+    }
+  ]
+}

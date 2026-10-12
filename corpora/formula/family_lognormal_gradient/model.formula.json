@@ -1,0 +1,34 @@
+{
+  "formula": "y ~ x",
+  "family": "lognormal",
+  "options": {},
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            0.049787068367863944,
+            0.36787944117144233,
+            7.38905609893065,
+            20.085536923187668
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    ]
+  }
+}

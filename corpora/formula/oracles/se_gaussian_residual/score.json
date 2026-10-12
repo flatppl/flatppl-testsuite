@@ -1,0 +1,37 @@
+{
+  "name": "se_gaussian_residual",
+  "model_id": "a7c8bdebcede67dc",
+  "point": {
+    "b": [
+      0.7
+    ],
+    "Intercept": 1.2,
+    "sigma": 0.5
+  },
+  "theta_unc": [
+    0.7,
+    1.2,
+    -0.6931471805599453
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -8.23067576583718,
+  "gradient": [
+    -1.5723458452357126,
+    5.091732319280945,
+    0.8430129099154495
+  ],
+  "constrained_gradient": {
+    "b.1": -1.5723458452357126,
+    "Intercept": 5.091732319280945,
+    "sigma": 1.686025819830899
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 5.091732319280945,
+    "b": [
+      -1.5723458452357126
+    ],
+    "sigma": 1.686025819830899
+  },
+  "mapping": "Stan order is b, Intercept, then log(sigma) when estimated. Divide the raw sigma gradient by 0.5; no density Jacobian is added."
+}

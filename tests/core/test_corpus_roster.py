@@ -28,7 +28,7 @@ EXPECTED_COUNTS = {
     "bayesian_inference": 5,
     "coverage": 25,
     "examples": 24,
-    "formula": 32,
+    "formula": 72,
     "fragment": 21,
     "hs3": 12,
     "pyhf": 173,
@@ -38,7 +38,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 37,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 424
+EXPECTED_TOTAL = 464
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -70,6 +70,26 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    "formula/cumulative_logit_default_gradient": {"stablehlo"},
+    "formula/cumulative_logit_gradient": {"stablehlo"},
+    "formula/family_beta_gradient": {"stablehlo"},
+    "formula/family_geometric_gradient": {"stablehlo"},
+    "formula/family_lognormal_gradient": {"stablehlo"},
+    "formula/family_von_mises_gradient": {"stablehlo"},
+    "formula/family_weibull_gradient": {"stablehlo"},
+    "formula/se_gaussian_gradient": {"stablehlo"},
+    "formula/se_gaussian_residual_gradient": {"stablehlo"},
+    "formula/se_student_gradient": {"stablehlo"},
+    "formula/se_student_residual_gradient": {"stablehlo"},
+    "formula/weighted_binomial_gradient": {"stablehlo"},
+    "formula/weighted_gaussian_gradient": {"stablehlo"},
+    "formula/weighted_gaussian_se_gradient": {"stablehlo"},
+    "formula/weighted_gaussian_se_residual_gradient": {"stablehlo"},
+    "formula/weighted_student_se_gradient": {"stablehlo"},
+    "formula/weighted_student_se_residual_gradient": {"stablehlo"},
+    "formula/weighted_zero_inflated_poisson_gradient": {"stablehlo"},
+    "formula/weighted_zero_inflated_negbinomial_gradient": {"stablehlo"},
+    "formula/weighted_zero_inflated_binomial_gradient": {"stablehlo"},
     "formula/family_gaussian_gradient": {"stablehlo"},
     "formula/family_student_gradient": {"stablehlo"},
     "formula/family_bernoulli_gradient": {"stablehlo"},
@@ -131,7 +151,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 508
+EXPECTED_CASES = 568
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

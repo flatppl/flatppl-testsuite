@@ -1,0 +1,54 @@
+{
+  "name": "weighted_student_se",
+  "model_id": "bd86d521229724a7",
+  "propto": false,
+  "jacobian": false,
+  "points": [
+    {
+      "point": {
+        "b": [
+          0.3
+        ],
+        "Intercept": 0.4
+      },
+      "theta_unc": [
+        0.3,
+        0.4
+      ],
+      "lp": -14.787610221797467,
+      "gradient": [
+        -6.132434915915128,
+        9.068431117210723
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 9.068431117210723,
+        "b": [
+          -6.132434915915128
+        ]
+      }
+    },
+    {
+      "point": {
+        "b": [
+          -0.2
+        ],
+        "Intercept": -0.7
+      },
+      "theta_unc": [
+        -0.2,
+        -0.7
+      ],
+      "lp": -21.323411263868522,
+      "gradient": [
+        -4.728018279126008,
+        7.740632955310126
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 7.740632955310126,
+        "b": [
+          -4.728018279126008
+        ]
+      }
+    }
+  ]
+}

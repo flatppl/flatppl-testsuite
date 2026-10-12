@@ -1,0 +1,59 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "grad_params": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.4,
+        0.3,
+        2.3,
+        0.3
+      ]
+    },
+    {
+      "theta": [
+        -0.7,
+        -0.2,
+        1.7,
+        0.6
+      ]
+    }
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        2.2093644016219094,
+        0.625924702249821,
+        -0.49664089973838554,
+        -1.7485614868177124
+      ]
+    },
+    {
+      "theta": [
+        6.046174978116944,
+        2.3874448591762336,
+        -1.5985339557508484,
+        -5.930562576178126
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.0002,
+    "grad_rtol": 0
+  },
+  "oracle": "Actual normalized brms-generated Stan, propto=false and jacobian=false; independently checked against SciPy/base-R row likelihoods and analytic mixture or known-scale derivatives. Row weights act once on the likelihood and priors remain unweighted."
+}
