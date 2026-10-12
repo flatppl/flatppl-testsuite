@@ -143,3 +143,18 @@ for (family_name in c("gaussian", "binomial")) {
   captured <- capture(directory, f, brmsfamily(family_name), weighted_data, prior)
   json(captured, file.path(out, directory, "brms.json"))
 }
+
+se_data <- data.frame(y = c(1, 2, 4), x = c(0, 1, 3), s = c(.3, .6, .9))
+for (family in c("gaussian", "student")) {
+  for (residual in c(FALSE, TRUE)) {
+    name <- paste0("se_", family, if (residual) "_residual" else "")
+    formula <- as.formula(paste0("y | se(s, sigma=", residual, ") ~ x"))
+    priors <- c(set_prior("normal(0, 2)", class = "Intercept"),
+                set_prior("normal(0, 1)", class = "b"))
+    if (residual) priors <- c(priors, set_prior("normal(0, 1)", class = "sigma"))
+    if (family == "student") priors <- c(priors, set_prior("constant(5)", class = "nu"))
+    law <- if (family == "student") student() else gaussian()
+    captured <- capture(name, formula, law, se_data, priors)
+    json(captured, file.path(out, name, "brms.json"))
+  }
+}

@@ -20,8 +20,8 @@ Enzyme. Both use the same `theta` order recorded in `oracle.json`.
 | `group_priors` | Two correlated groups, group/coefficient prior selectors, nonzero-location truncated Student-t scales, and distinct LKJ shapes |
 | `dependent_locscale_prior` | Cauchy scale prior whose location depends on the intercept; real affine bound division and the derivative of its truncation mass |
 | `cumulative_logit`, `cumulative_logit_default` | Ordered thresholds, category coding, centred predictors, normalized ordering offset, and stable middle-category values and gradients at predictors reaching ±20 |
-
 | `weighted_gaussian`, `weighted_binomial` | Zero, fractional and non-unit response weights; normalized row scores weighted once, priors unweighted, and binomial trials retained |
+| `se_*` | Gaussian/Student known observation scales, removed residual sigma by default, and quadrature scale with `sigma=TRUE` |
 
 The earlier interaction cases retain their R `model.matrix` oracles. The brms
 cases additionally preserve actual normalized Stan sources, data, scores,

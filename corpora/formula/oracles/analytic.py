@@ -53,6 +53,7 @@ def evaluate(reference, point):
     positions = {name: i for i, name in enumerate(names)}
     values = np.asarray(point["theta"], dtype=float)
     p = dict(zip(names, values))
+    p.update(reference.get("constants", {}))
     data = reference["standata"]
     x = np.asarray(data["X"], dtype=float)[:, 1:]
     x -= x.mean(axis=0)
@@ -118,12 +119,16 @@ def evaluate(reference, point):
     else:
         raise ValueError(f"unknown oracle link {link}")
 
+    if family in ("gaussian", "student"):
+        sigma = p.get("sigma", 0.0)
+        scale = np.sqrt(sigma**2 + np.asarray(data.get("se", 0))**2)
     if family == "gaussian":
-        sigma = p["sigma"]
         residual = y - mu
-        score += sum_rows(stats.norm.logpdf(y, mu, sigma))
-        dmu = residual / sigma**2
-        gradient[positions["sigma"]] += sum_rows(residual**2 / sigma**3 - 1 / sigma)
+        score += sum_rows(stats.norm.logpdf(y, mu, scale))
+        dmu = residual / scale**2
+        if "sigma" in positions:
+            gradient[positions["sigma"]] += sum_rows(
+                (residual**2 / scale**3 - 1 / scale) * sigma / scale)
     elif family == "lognormal":
         sigma = p["sigma"]
         residual = np.log(y) - mu
@@ -131,15 +136,18 @@ def evaluate(reference, point):
         dmu = residual / sigma**2
         gradient[positions["sigma"]] += np.sum(residual**2 / sigma**3 - 1 / sigma)
     elif family == "student":
-        sigma, nu = p["sigma"], p["nu"]
+        nu = p["nu"]
         residual = y - mu
-        square = (residual / sigma)**2
-        score += sum_rows(stats.t.logpdf(y, nu, mu, sigma))
-        dmu = (nu + 1) * residual / (nu * sigma**2 + residual**2)
-        gradient[positions["sigma"]] += sum_rows(((nu + 1) * square / (nu + square) - 1) / sigma)
-        gradient[positions["nu"]] += sum_rows(
-            (special.digamma((nu + 1) / 2) - special.digamma(nu / 2) - 1 / nu
-             - np.log1p(square / nu) + (nu + 1) * square / (nu * (nu + square))) / 2)
+        square = (residual / scale)**2
+        score += sum_rows(stats.t.logpdf(y, nu, mu, scale))
+        dmu = (nu + 1) * residual / (nu * scale**2 + residual**2)
+        if "sigma" in positions:
+            gradient[positions["sigma"]] += sum_rows(
+                ((nu + 1) * square / (nu + square) - 1) * sigma / scale**2)
+        if "nu" in positions:
+            gradient[positions["nu"]] += sum_rows(
+                (special.digamma((nu + 1) / 2) - special.digamma(nu / 2) - 1 / nu
+                 - np.log1p(square / nu) + (nu + 1) * square / (nu * (nu + square))) / 2)
     elif family in ("bernoulli", "binomial"):
         trials = np.asarray(data["trials"]) if family == "binomial" else 1
         score += sum_rows(stats.binom.logpmf(y, trials, mu))

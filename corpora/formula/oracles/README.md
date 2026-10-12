@@ -91,6 +91,11 @@ retains each row's trials. Raw Stan gradients use `[b, Intercept, sigma?]`,
 while the query and semantic gradients use `[temp_Intercept, b, sigma?]`.
 
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
+The `se_*` cases use Normal(0,2) intercept and Normal(0,1) coefficient priors,
+with Student degrees of freedom fixed at five. Residual-scale variants add a
+half-Normal(0,1) sigma prior. The known scale is `se` when residual sigma is
+absent and `sqrt(se^2 + sigma^2)` otherwise; its sigma derivative is
+`sigma / sqrt(se^2 + sigma^2)`. The Student likelihood uses that scale directly.
 That independent implementation computes SciPy log densities and closed-form
 derivatives from the captured brms design matrix, offsets, group indices, and
 documented priors. It does not read these Stan scores or FlatPPL output.

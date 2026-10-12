@@ -1,0 +1,41 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "grad_params": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        1.2,
+        0.7,
+        0.5
+      ]
+    }
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        5.091732319280945,
+        -1.5723458452357126,
+        1.686025819830899
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.0002,
+    "grad_rtol": 0
+  },
+  "oracle": "Actual normalized brms-generated Stan, propto=false and jacobian=false. Independent SciPy likelihoods and analytic chain-rule derivatives use the captured design and supplied observation scales; Student se is scale, not standard deviation."
+}

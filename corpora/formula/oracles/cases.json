@@ -544,5 +544,77 @@
         ]
       }
     ]
+  },
+  {
+    "name": "se_gaussian",
+    "stan_case": "se_gaussian",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "d23b10561f0c3065b3f6edcae225db915a4cbd888a4c3b911f7c9d2b1121afb4",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_gaussian_residual",
+    "stan_case": "se_gaussian_residual",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "cb4e8b676a7c5fc5a396f62417e690c7b27735037bc52946975d25cb8d5a5471",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7,
+          0.5
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_student",
+    "stan_case": "se_student",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "dc6c2917db700bf23c41a27813e568c06a016fd73978dcff5e9d6f8659af843b",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7
+        ]
+      }
+    ]
+  },
+  {
+    "name": "se_student_residual",
+    "stan_case": "se_student_residual",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "b27dc29631befc4020b57b66b2daa58e46c2a73e7dc38168c7f8ad2f91715a63",
+    "points": [
+      {
+        "theta": [
+          1.2,
+          0.7,
+          0.5
+        ]
+      }
+    ]
   }
 ]

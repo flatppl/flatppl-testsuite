@@ -1,0 +1,32 @@
+{
+  "name": "se_student",
+  "model_id": "b1a5f63ba0e6eac1",
+  "point": {
+    "b": [
+      0.7
+    ],
+    "Intercept": 1.2
+  },
+  "theta_unc": [
+    0.7,
+    1.2
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -9.315728482772291,
+  "gradient": [
+    -4.92854892672115,
+    7.775211672047827
+  ],
+  "constrained_gradient": {
+    "b.1": -4.92854892672115,
+    "Intercept": 7.775211672047827
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 7.775211672047827,
+    "b": [
+      -4.92854892672115
+    ]
+  },
+  "mapping": "Stan order is b, Intercept, then log(sigma) when estimated. Divide the raw sigma gradient by 0.5; no density Jacobian is added."
+}

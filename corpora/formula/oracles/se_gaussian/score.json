@@ -1,0 +1,32 @@
+{
+  "name": "se_gaussian",
+  "model_id": "61ea888556818dc8",
+  "point": {
+    "b": [
+      0.7
+    ],
+    "Intercept": 1.2
+  },
+  "theta_unc": [
+    0.7,
+    1.2
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -10.0101363212149,
+  "gradient": [
+    -9.160219478737993,
+    12.73497942386831
+  ],
+  "constrained_gradient": {
+    "b.1": -9.160219478737993,
+    "Intercept": 12.73497942386831
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 12.73497942386831,
+    "b": [
+      -9.160219478737993
+    ]
+  },
+  "mapping": "Stan order is b, Intercept, then log(sigma) when estimated. Divide the raw sigma gradient by 0.5; no density Jacobian is added."
+}
