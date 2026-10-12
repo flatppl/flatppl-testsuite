@@ -1,0 +1,33 @@
+{
+  "formula": "y ~ x",
+  "family": "hurdle_gamma",
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            0,
+            0.8,
+            2.3,
+            0
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    ]
+  }
+}

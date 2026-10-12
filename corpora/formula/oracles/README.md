@@ -101,6 +101,18 @@ Divide the raw Stan derivative for `zi` by `zi*(1-zi)` to obtain its constrained
 derivative. `score.json` preserves both forms. These targets were also checked
 independently with base-R densities and analytic derivatives before freezing.
 
+The unweighted zero-inflated beta and four hurdle families preserve their
+base-R values and analytic derivatives in `base-r.json` beside each Stan model.
+Run `Rscript --vanilla remaining-mixtures.R OUTPUT_DIRECTORY` to regenerate
+those files using base R alone. The SciPy oracle independently evaluates the
+same targets. At zero, the continuous mixtures contribute only the fixed atom,
+even when the beta or Gamma density diverges there. Positive Poisson and
+negative-binomial counts include `-log(1 - P(Y=0))` and its derivatives.
+The second beta/Gamma points have shape or precision below one. The `hu` and
+`zi` prior is Beta(1,1); raw Stan probability derivatives are divided by
+`p*(1-p)`, and positive auxiliary derivatives by their parameter value.
+These cases test density and derivatives, not zero-truncated count sampling.
+
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
 The `se_*` cases use Normal(0,2) intercept and Normal(0,1) coefficient priors,
 with Student degrees of freedom fixed at five. Residual-scale variants add a

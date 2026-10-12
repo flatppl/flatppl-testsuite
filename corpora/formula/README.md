@@ -10,7 +10,7 @@ Enzyme. Both use the same `theta` order recorded in `oracle.json`.
 
 | Cases | Contract |
 | --- | --- |
-| `family_*` | Thirteen family defaults, centered predictors, link functions, normalized auxiliary priors, binomial trials |
+| `family_*` | Scalar family defaults, centered predictors, link functions, normalized auxiliary priors, binomial trials |
 | `family_lognormal`, `family_geometric`, `family_weibull`, `family_beta`, `family_von_mises` | Log-response scale defaults, mean-parameterized counts and Weibull scale, beta mean/precision, circular normalization and tan-half link |
 | `family_gaussian_softit` | Softit inverse link at zero, positive, and mixed linear predictors; real division and its derivatives |
 | `expressions_offset` | `I(x^2)`, `log(z)`, and `offset(log(z))` with explicit Normal priors |
@@ -25,6 +25,7 @@ Enzyme. Both use the same `theta` order recorded in `oracle.json`.
 | `se_*` | Gaussian/Student known observation scales, removed residual sigma by default, and quadrature scale with `sigma=TRUE` |
 | `weighted_gaussian_se*`, `weighted_student_se*` | Row weights composed with known and residual observation scales; active parameters and normalized priors retained |
 | `weighted_zero_inflated_*` | Poisson, negative-binomial and binomial zero mixtures with zero/fractional row weights, zero-probability derivatives, count shape and trials |
+| `family_zero_inflated_beta`, `family_hurdle_*` | Fixed zero atoms, positive-count conditioning, beta/Gamma shape below one, and derivatives of mixture probabilities and normalized priors |
 
 The earlier interaction cases retain their R `model.matrix` oracles. The brms
 cases additionally preserve actual normalized Stan sources, data, scores,

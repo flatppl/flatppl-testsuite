@@ -1,0 +1,59 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.4,
+        0.3,
+        1.2,
+        0.3
+      ]
+    },
+    {
+      "theta": [
+        -0.7,
+        -0.2,
+        0.75,
+        0.65
+      ]
+    }
+  ],
+  "oracle": "Normalized actual brms-generated Stan, propto=false and jacobian=false; constrained coordinates in oracle.json. Independent SciPy densities and analytic derivatives in ../oracles/analytic.py reproduce the frozen values.",
+  "grad_params": [
+    "theta"
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        -0.22380541162924572,
+        0.9375000000000002,
+        0.21654095124098874,
+        3.8095238095238093
+      ]
+    },
+    {
+      "theta": [
+        4.064135021097045,
+        2.844444444444444,
+        16.140956490471048,
+        -2.6373626373626378
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.0002,
+    "grad_rtol": 0
+  }
+}
