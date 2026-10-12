@@ -40,8 +40,5 @@
       "class": "sigma",
       "prior": "cauchy(temp_Intercept,1.7)"
     }
-  ],
-  "options": {
-    "data_placement": "inline"
-  }
+  ]
 }

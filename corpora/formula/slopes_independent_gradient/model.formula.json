@@ -1,8 +1,5 @@
 {
   "formula": "y ~ x + (1+x || g)",
-  "options": {
-    "data_placement": "inline"
-  },
   "priors": [
     {
       "class": "b",

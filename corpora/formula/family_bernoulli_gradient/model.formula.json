@@ -1,9 +1,6 @@
 {
   "formula": "y ~ x",
   "family": "bernoulli",
-  "options": {
-    "data_placement": "inline"
-  },
   "data": {
     "nrows": 4,
     "columns": [

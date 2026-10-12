@@ -2,9 +2,6 @@
   "formula": "y ~ x + offset(log(z))",
   "family": "gaussian",
   "link": "log",
-  "options": {
-    "data_placement": "inline"
-  },
   "data": {
     "nrows": 4,
     "columns": [
