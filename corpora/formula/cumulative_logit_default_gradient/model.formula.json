@@ -38,7 +38,5 @@
       }
     ]
   },
-  "options": {
-    "data_placement": "inline"
-  }
+  "options": {}
 }

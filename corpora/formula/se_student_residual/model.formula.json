@@ -57,7 +57,5 @@
     ]
   },
   "family": "student",
-  "options": {
-    "data_placement": "inline"
-  }
+  "options": {}
 }

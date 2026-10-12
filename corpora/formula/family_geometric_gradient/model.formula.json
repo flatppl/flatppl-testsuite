@@ -1,9 +1,7 @@
 {
   "formula": "y ~ x",
   "family": "geometric",
-  "options": {
-    "data_placement": "inline"
-  },
+  "options": {},
   "data": {
     "nrows": 4,
     "columns": [

@@ -49,7 +49,5 @@
     ]
   },
   "family": "gaussian",
-  "options": {
-    "data_placement": "inline"
-  }
+  "options": {}
 }

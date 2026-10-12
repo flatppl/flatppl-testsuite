@@ -1,9 +1,7 @@
 {
   "formula": "y | weights(w) ~ x",
   "family": "gaussian",
-  "options": {
-    "data_placement": "inline"
-  },
+  "options": {},
   "priors": [
     {
       "class": "b",

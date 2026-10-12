@@ -1,9 +1,7 @@
 {
   "formula": "y | trials(n) + weights(w) ~ x",
   "family": "binomial",
-  "options": {
-    "data_placement": "inline"
-  },
+  "options": {},
   "priors": [
     {
       "class": "b",
