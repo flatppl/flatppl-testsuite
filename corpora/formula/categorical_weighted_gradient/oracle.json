@@ -1,0 +1,138 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "categorical/weighted",
+    "stan_sha256": "c7585b960f380537ab38a4d79f94a752714f4d92a29e65e2da8332b739591219",
+    "data_sha256": "eac18daaef753e8a50650bc5c1244f84908eb98d3227bb2db3bc42d086bfe893",
+    "propto": false,
+    "jacobian": false
+  },
+  "family": "categorical",
+  "coordinates": [
+    "b_mublue[1]",
+    "temp_Intercept_mugreen",
+    "b_mugreen[1]"
+  ],
+  "standata": {
+    "N": 6,
+    "Y": [
+      1,
+      2,
+      3,
+      1,
+      3,
+      2
+    ],
+    "ncat": 3,
+    "weights": [
+      1,
+      0.5,
+      2,
+      0,
+      1.25,
+      1
+    ],
+    "K_mublue": 1,
+    "X_mublue": [
+      [
+        0
+      ],
+      [
+        1
+      ],
+      [
+        0
+      ],
+      [
+        2
+      ],
+      [
+        1
+      ],
+      [
+        0
+      ]
+    ],
+    "K_mugreen": 2,
+    "Kc_mugreen": 1,
+    "X_mugreen": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        6
+      ]
+    ],
+    "offsets_mugreen": [
+      0,
+      1,
+      0,
+      2,
+      1,
+      0
+    ],
+    "prior_only": 0
+  },
+  "predictors": [
+    {
+      "name": "mublue",
+      "intercept": false,
+      "positions": [
+        0
+      ]
+    },
+    {
+      "name": "mugreen",
+      "intercept": true,
+      "positions": [
+        1,
+        2
+      ]
+    }
+  ],
+  "priors": [
+    {
+      "position": 0,
+      "kind": "normal",
+      "args": [
+        0,
+        1.1
+      ]
+    },
+    {
+      "position": 1,
+      "kind": "normal",
+      "args": [
+        0.2,
+        1.3
+      ]
+    },
+    {
+      "position": 2,
+      "kind": "normal",
+      "args": [
+        0,
+        0.7
+      ]
+    }
+  ]
+}

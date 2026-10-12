@@ -1,0 +1,55 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.4,
+        -0.2,
+        0.6
+      ]
+    },
+    {
+      "theta": [
+        -0.7,
+        0.9,
+        -0.4
+      ]
+    }
+  ],
+  "oracle": "Normalized actual brms-generated Stan, propto=false and jacobian=false. Independent log-softmax probabilities and analytic derivatives in ../oracles/categorical/analytic.py reproduce both points; raw Stan ordering is retained in the capture.",
+  "grad_params": [
+    "theta"
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        -0.28427928676548125,
+        1.2981995066773986,
+        -2.614284248911472
+      ]
+    },
+    {
+      "theta": [
+        0.9402012721513413,
+        -0.7792665928478492,
+        2.773423286777614
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.0002,
+    "grad_rtol": 0
+  }
+}

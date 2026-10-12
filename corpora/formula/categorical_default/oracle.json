@@ -1,0 +1,125 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "categorical/default",
+    "stan_sha256": "03a6db55b005dc691082ebab794010a036208ac27209208ce51d506d972b7a16",
+    "data_sha256": "1f74fcd5f4460113bd9bb2ab6a2da3a7e51a1b6c762acfedcc6fea73554c18fa",
+    "propto": false,
+    "jacobian": false
+  },
+  "family": "categorical",
+  "coordinates": [
+    "temp_Intercept_mublue",
+    "b_mublue[1]",
+    "temp_Intercept_mugreen",
+    "b_mugreen[1]"
+  ],
+  "standata": {
+    "N": 6,
+    "Y": [
+      1,
+      2,
+      3,
+      1,
+      3,
+      2
+    ],
+    "ncat": 3,
+    "K_mublue": 2,
+    "Kc_mublue": 1,
+    "X_mublue": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        6
+      ]
+    ],
+    "K_mugreen": 2,
+    "Kc_mugreen": 1,
+    "X_mugreen": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        6
+      ]
+    ],
+    "prior_only": 0
+  },
+  "predictors": [
+    {
+      "name": "mublue",
+      "intercept": true,
+      "positions": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "mugreen",
+      "intercept": true,
+      "positions": [
+        2,
+        3
+      ]
+    }
+  ],
+  "priors": [
+    {
+      "position": 0,
+      "kind": "student",
+      "args": [
+        3,
+        0,
+        2.5
+      ]
+    },
+    {
+      "position": 2,
+      "kind": "student",
+      "args": [
+        3,
+        0,
+        2.5
+      ]
+    }
+  ]
+}

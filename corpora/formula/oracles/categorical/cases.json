@@ -1,0 +1,37 @@
+[
+  {
+    "name": "categorical_default",
+    "capture": "default",
+    "coordinates": [
+      "temp_Intercept_mublue",
+      "b_mublue[1]",
+      "temp_Intercept_mugreen",
+      "b_mugreen[1]"
+    ],
+    "stan_sha256": "03a6db55b005dc691082ebab794010a036208ac27209208ce51d506d972b7a16",
+    "data_sha256": "1f74fcd5f4460113bd9bb2ab6a2da3a7e51a1b6c762acfedcc6fea73554c18fa"
+  },
+  {
+    "name": "categorical_weighted",
+    "capture": "weighted",
+    "coordinates": [
+      "b_mublue[1]",
+      "temp_Intercept_mugreen",
+      "b_mugreen[1]"
+    ],
+    "stan_sha256": "c7585b960f380537ab38a4d79f94a752714f4d92a29e65e2da8332b739591219",
+    "data_sha256": "eac18daaef753e8a50650bc5c1244f84908eb98d3227bb2db3bc42d086bfe893"
+  },
+  {
+    "name": "categorical_reordered",
+    "capture": "reordered",
+    "coordinates": [
+      "temp_Intercept_muzeta",
+      "b_muzeta[1]",
+      "temp_Intercept_mualpha",
+      "b_mualpha[1]"
+    ],
+    "stan_sha256": "ab4b33935955ded22efec1afc2c98f41cba6f6adb99b6918503056379c376bb0",
+    "data_sha256": "937570f558030b43b0cebadd71a7c5da88512a7255ae4c56f72778e6c287d882"
+  }
+]
