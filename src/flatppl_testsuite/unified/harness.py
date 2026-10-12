@@ -1,11 +1,15 @@
 """Dispatch a test directory to its (test_type, engine) runner(s)."""
 from __future__ import annotations
 
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 from dataclasses import replace
 
-from flatppl_testsuite.scoring.result import CheckResult
+from flatppl_testsuite.config import CONFIG
+from flatppl_testsuite.scoring.result import CheckResult, UNSCOREABLE
 from flatppl_testsuite.unified.loader import TestSpec, load_test, merged_body
 from flatppl_testsuite.unified.runners import (
     convert_detjs, gradient_stablehlo, logdensity_detjs, logdensity_stablehlo,
@@ -28,6 +32,32 @@ def run_test_dir(dir: Path, engines: list[str] | None = None) -> list[CheckResul
     the dir's `test.json` engines) -- lets a caller gate/dispatch one engine
     at a time without one engine's skip suppressing another's checks."""
     spec: TestSpec = load_test(dir)
+    conversion = spec.body.get("convert")
+    if conversion is None:
+        return _run_engines(spec, dir, engines)
+    if conversion["from"] != "formula":
+        raise ValueError(f"{dir}: convert preparation supports only formula input")
+    # Preserve relative support paths and case IDs without changing the corpus.
+    with tempfile.TemporaryDirectory(prefix="flatppl-formula-") as tmp:
+        converted = Path(tmp) / Path(dir).name
+        shutil.copytree(dir, converted)
+        try:
+            subprocess.run(
+                [str(CONFIG.flatppl_bin), "convert", "--from", "formula",
+                 str(converted / conversion["source"]),
+                 str(converted / spec.body.get("model", "model.flatppl")),
+                 "--no-header"],
+                check=True, capture_output=True, text=True,
+            )
+        except (OSError, subprocess.CalledProcessError) as error:
+            detail = str(error)
+            if isinstance(error, subprocess.CalledProcessError):
+                detail = error.stderr or detail
+            return [CheckResult(Path(dir).name, "convert", "failed", UNSCOREABLE, detail)]
+        return _run_engines(replace(spec, dir=converted), converted, engines)
+
+
+def _run_engines(spec: TestSpec, dir: Path, engines: list[str] | None) -> list[CheckResult]:
     out: list[CheckResult] = []
     for engine in (spec.engines if engines is None else engines):
         # test_type comes off the MERGED body, so an engine override may also

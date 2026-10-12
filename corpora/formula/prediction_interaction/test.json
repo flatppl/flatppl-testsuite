@@ -1,0 +1,57 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.8,
+        -0.6,
+        -0.41428571428571426,
+        -0.22857142857142854,
+        -0.042857142857142816,
+        0.1428571428571429,
+        0.3285714285714286,
+        0.5142857142857143,
+        0.7000000000000001,
+        1.5
+      ]
+    },
+    {
+      "theta": [
+        1,
+        -0.39999999999999997,
+        -0.21428571428571425,
+        -0.028571428571428525,
+        0.1571428571428572,
+        0.3428571428571429,
+        0.5285714285714287,
+        0.7142857142857144,
+        0.9000000000000001,
+        1.7
+      ]
+    }
+  ],
+  "expected": [
+    -79.85154917393096,
+    -63.31592448867613
+  ],
+  "tolerance": {
+    "atol": 1e-9,
+    "rtol": 0,
+    "value_atol_f32": 0.0001,
+    "value_rtol_f32": 0
+  },
+  "oracle": "R 4.6.1 model.matrix; normalized Gaussian likelihood and Normal(0,2) priors, sigma restricted and normalized on positive reals; constrained coordinates without Jacobian."
+}

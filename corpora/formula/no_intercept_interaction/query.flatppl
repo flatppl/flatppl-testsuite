@@ -1,0 +1,3 @@
+theta = elementof(cartpow(reals, 7))
+inputs = theta
+outputs = logdensityof(Pi_post, record(b = theta[[1, 2, 3, 4, 5, 6]], sigma = theta[7]))

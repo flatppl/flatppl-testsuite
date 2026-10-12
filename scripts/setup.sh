@@ -36,8 +36,8 @@ else
   REF_FLAG=(--branch "$FLATPPL_RUST_REF")
 fi
 
-echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + stablehlo + default verbs incl. determinize)"
-# `--features hs3,stablehlo` ADDS to the default feature set (no --no-default-features),
+echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + formula + stablehlo + default verbs incl. determinize)"
+# `--features hs3,formula,stablehlo` ADDS to the default feature set (no --no-default-features),
 # so the installed binary carries the default verbs — including `determinize` (which
 # the det-js scoring engine shells out to) and `stablehlo` (which the StableHLO
 # numeric-execution gate emits with). The `determinize` verb landed in flatppl-rust
@@ -45,7 +45,7 @@ echo ">> installing flatppl CLI from flatppl-rust@${FLATPPL_RUST_REF} (hs3 + sta
 cargo install \
   --git https://github.com/flatppl/flatppl-rust \
   "${REF_FLAG[@]}" \
-  --features hs3,stablehlo \
+  --features hs3,formula,stablehlo \
   --root .pixi-bin \
   --locked \
   flatppl-cli

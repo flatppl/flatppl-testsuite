@@ -28,6 +28,7 @@ EXPECTED_COUNTS = {
     "bayesian_inference": 5,
     "coverage": 23,
     "examples": 24,
+    "formula": 2,
     "fragment": 21,
     "hs3": 12,
     "pyhf": 173,
@@ -37,7 +38,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 37,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 390
+EXPECTED_TOTAL = 392
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -51,6 +52,7 @@ EXPECTED_ENGINES = {
     "bayesian_inference": {"det-js", "stablehlo"},
     "coverage": {"det-js"},
     "examples": {"det-js", "stablehlo"},
+    "formula": {"det-js", "stablehlo"},
     "fragment": {"det-js", "stablehlo"},
     "hs3": {"det-js"},
     "pyhf": {"det-js"},
@@ -112,7 +114,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 455
+EXPECTED_CASES = 459
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

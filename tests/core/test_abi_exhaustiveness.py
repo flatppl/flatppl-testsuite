@@ -130,8 +130,10 @@ _IDS = [str(d.relative_to(_CORPORA)) for d in _abi_dirs()]
 @pytest.mark.parametrize("dir", _abi_dirs(), ids=_IDS)
 def test_inputs_lists_every_parameterized_param(dir: Path):
     query = (dir / "query.flatppl").read_text()
-    model = _model_path(dir).read_text()
-    source = json.loads((dir / "test.json").read_text()).get("source", {})
+    body = json.loads((dir / "test.json").read_text())
+    # Converted models are generated at runtime, so only their query is handwritten.
+    model = "" if "convert" in body else _model_path(dir).read_text()
+    source = body.get("source", {})
 
     params = set(_ELEMENTOF.findall(query))
     if not isinstance(source, dict) or "sha256" not in source:

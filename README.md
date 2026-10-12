@@ -57,6 +57,11 @@ independent oracle. `tests/test_unified.py` discovers it automatically — no
 registration step. `pixi run regen <dir>` (`-e stablehlo` for stablehlo-only dirs)
 freezes the oracle's value into `test.json`.
 
+Formula cases add `"convert": {"source": "model.formula.json", "from": "formula"}`
+to an ordinary log-density case. The harness converts into `model.flatppl` in a
+temporary copy before scoring on either engine. Use inline data in the formula
+specification; keep the query and independent oracle beside it.
+
 **A new `test_type` or engine** gets its own runner under
 `src/flatppl_testsuite/unified/runners/`, wired into `unified/harness.py`'s dispatch.
 
@@ -71,7 +76,7 @@ engine-agnostic: `scoring/flatppl_engine.py` takes the scorer as an argument.
 Everything runs through pixi.
 
 `pixi run setup` provisions both. The **converter** (`flatppl-rust`) is installed
-via `cargo install --git …/flatppl-rust --features hs3,stablehlo flatppl-cli` at
+via `cargo install --git …/flatppl-rust --features hs3,formula,stablehlo flatppl-cli` at
 `FLATPPL_RUST_REF` (a branch or a 40-hex commit); bump the ref and re-run to pull
 changes. The default **engine**
 (`flatppl-js`) is resolved at scoring time from `FLATPPL_JS_DIR` (default: sibling
