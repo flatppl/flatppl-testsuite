@@ -130,3 +130,68 @@ def test_special_function_packets_preserve_lanes_and_shared_adjoint(tmp_path, dt
         actual_points, actual_scales = gradient(points, scales)
         np.testing.assert_allclose(actual_points, point_gradient, rtol=tolerance, atol=tolerance)
         np.testing.assert_allclose(actual_scales, scale_gradient, rtol=tolerance, atol=tolerance)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,tolerance", [("f32", 2e-5), ("f64", 2e-11)])
+def test_matrix_products_keep_callback_axes_and_adjoint(tmp_path, precision, tolerance):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "points = external(cartpow(reals, 4))\n"
+        "basis(t) = [t,t*t,1.]\n"
+        "left(t) = rowstack([[t,1.,2.],[3.,-1.,t*t]])\n"
+        "right(t) = colstack([[1.,t,2.],[t*t,0.,-1.]])\n"
+        "inner(t) = transpose([1.,-2.,3.]) * basis(t)\n"
+        "outer(t) = [t,1.] * transpose([2.,t*t,-1.])\n"
+        "row_matrix(t) = transpose([1.,t,2.]) * right(t)\n"
+        "matrix_vector(t) = left(t) * basis(t)\n"
+        "matrix_matrix(t) = left(t) * right(t)\n"
+        "transposed(t) = transpose(left(t))\n"
+        "inputs = points\n"
+        "outputs = (inner.(points),outer.(points),row_matrix.(points),"
+        "matrix_vector.(points),matrix_matrix.(points),transposed.(points))\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    jax, jnp, hlo_call = ex._jax()
+    dtype = np.float32 if precision == "f32" else np.float64
+    point = jnp.asarray([-2, -.5, 0, 1.25], dtype=dtype)
+    t = np.asarray(point).astype(np.float64)
+    one, zero = np.ones_like(t), np.zeros_like(t)
+
+    def vector(*items):
+        return np.stack(items, axis=-1)
+
+    def matrix(*rows):
+        return np.stack(rows, axis=-2)
+
+    # Expand every matrix entry into a scalar polynomial for an independent oracle.
+    expected = [
+        t - 2*t*t + 3,
+        matrix(vector(2*t, t**3, -t), vector(2*one, t*t, -one)),
+        vector(t*t + 5, t*t - 2),
+        vector(2*t*t + 2, 3*t),
+        matrix(vector(2*t + 4, t**3 - 2), vector(3 - t + 2*t*t, 2*t*t)),
+        matrix(vector(t, 3*one), vector(one, -one), vector(2*one, t*t)),
+    ]
+    derivatives = [
+        1 - 4*t,
+        matrix(vector(2*one, 3*t*t, -one), vector(zero, 2*t, zero)),
+        vector(2*t, 2*t),
+        vector(4*t, 3*one),
+        matrix(vector(2*one, 3*t*t), vector(-1 + 4*t, 4*t)),
+        matrix(vector(one, zero), vector(zero, zero), vector(zero, 2*t)),
+    ]
+    weights = [np.asarray(i + 1 + np.arange(v.size).reshape(v.shape) / (v.size + 1), dtype=dtype)
+               for i, v in enumerate(expected)]
+    evaluate = jax.jit(lambda p: hlo_call(p, source=source))
+    for got, wanted in zip(evaluate(point), expected, strict=True):
+        assert got.devices() == {jax.devices()[0]}
+        np.testing.assert_allclose(got, wanted, rtol=tolerance, atol=tolerance)
+    gradient = jax.jit(jax.grad(lambda p: sum(
+        jnp.sum(v * w) for v, w in zip(evaluate(p), weights, strict=True)
+    )))(point)
+    wanted = sum(np.sum(w.astype(np.float64) * d, axis=tuple(range(1, d.ndim)))
+                 for w, d in zip(weights, derivatives, strict=True))
+    assert gradient.devices() == {jax.devices()[0]}
+    np.testing.assert_allclose(gradient, wanted, rtol=tolerance, atol=tolerance)
