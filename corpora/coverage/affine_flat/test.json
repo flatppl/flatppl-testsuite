@@ -1,0 +1,25 @@
+{
+  "test_type": "logdensity",
+  "engines": ["det-js", "stablehlo"],
+  "model": "model.flatppl",
+  "binding": "prior",
+  "status": "lowers",
+  "inputs": ["effects_v", "weights_v"],
+  "points": [
+    {"effects_v": [-1.0, 0.0, 1.0], "weights_v": [0.25, 0.25, 0.5]},
+    {"effects_v": [0.0, 0.0, 0.0], "weights_v": [0.0, 1.0, 0.0]},
+    {"effects_v": [0.1, 0.2, -0.3], "weights_v": [0.1, 0.2, 0.7]},
+    {"effects_v": [-1.0, 0.0, 2.0], "weights_v": [0.25, 0.25, 0.5]},
+    {"effects_v": [1e-8, 1e-8, 1e-8], "weights_v": [0.25, 0.25, 0.5]},
+    {"effects_v": [-1.0, 0.0, 1.0], "weights_v": [0.2, 0.3, 0.6]},
+    {"effects_v": [-1.0, 0.0, 1.0], "weights_v": [-0.1, 0.6, 0.5]}
+  ],
+  "expected": [0.0, 0.0, 0.0, "-inf", "-inf", "-inf", "-inf"],
+  "tolerance": {
+    "atol": 0,
+    "rtol": 0,
+    "value_atol_f32": 0,
+    "value_rtol_f32": 0
+  },
+  "oracle": "exact rational affine constraints and nonnegative simplex coordinates"
+}

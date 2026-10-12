@@ -1,0 +1,5 @@
+effects_v = elementof(cartpow(reals, 3))
+weights_v = elementof(cartpow(reals, 3))
+lp = logdensityof(prior, record(effects = effects_v, weights = weights_v))
+inputs = (effects_v, weights_v)
+outputs = lp
