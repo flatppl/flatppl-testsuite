@@ -1,0 +1,57 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "exponential",
+    "stan_sha256": "87a1c01677d04294a915b00c31ba03f1cc64fb4ad3632c3ab47ab068c9b9b626",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y ~ x",
+  "family": "exponential",
+  "link": "log",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      2,
+      4,
+      8,
+      7
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "student",
+      "args": [
+        3,
+        1.7,
+        2.5
+      ]
+    }
+  }
+}

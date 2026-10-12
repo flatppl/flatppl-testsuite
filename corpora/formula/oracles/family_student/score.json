@@ -1,0 +1,57 @@
+{
+  "name": "student",
+  "model_id": "c5010e03fdc40cba",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "sigma": 1.2,
+    "nu": 4
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "sigma",
+      "nu"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "sigma",
+      "nu"
+    ],
+    "param_num": 4,
+    "param_unc_num": 4
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.1823215567939546,
+    1.0986122886681098
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -28.65514974907186,
+  "gradient": [
+    -0.6538775123681859,
+    3.673183684540618,
+    10.32280942827681,
+    -3.178342372007608
+  ],
+  "constrained_gradient": {
+    "b.1": -0.6538775123681859,
+    "Intercept": 3.673183684540618,
+    "sigma": 8.602341190230677,
+    "nu": -1.0594474573358694
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 3.673183684540618,
+    "b": [
+      -0.6538775123681859
+    ],
+    "sigma": 8.602341190230677,
+    "nu": -1.0594474573358694
+  }
+}

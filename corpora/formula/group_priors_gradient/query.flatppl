@@ -1,0 +1,15 @@
+theta = elementof(cartpow(reals, 17))
+inputs = theta
+formula_point = record(
+  temp_Intercept = theta[1],
+  b = theta[[2]],
+  sd_g_1 = theta[3],
+  sd_g_2 = theta[4],
+  z_g = rowstack([theta[[5, 6]], theta[[7, 8]]]),
+  L_g = rowstack([[1.0, 0.0], [theta[9], sqrt(1.0 - theta[9]^2)]]),
+  sd_h = theta[[10, 11]],
+  z_h = rowstack([theta[[12, 13]], theta[[14, 15]]]),
+  L_h = rowstack([[1.0, 0.0], [theta[16], sqrt(1.0 - theta[16]^2)]]),
+  sigma = theta[17]
+)
+outputs = logdensityof(Pi_post, formula_point)

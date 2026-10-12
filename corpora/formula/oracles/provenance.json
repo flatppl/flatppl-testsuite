@@ -1,0 +1,26 @@
+{
+  "recorded": "2026-10-12",
+  "platform": "osx-arm64",
+  "R": "4.5.3 (2026-03-11)",
+  "brms_version": "2.23.2",
+  "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+  "brms_source": "https://github.com/paul-buerkner/brms/tree/c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+  "cmdstan": "2.39.0",
+  "cmdstanpy": "1.3.0",
+  "bridgestan": "2.9.0",
+  "bridgestan_bundled_stan": "2.39.0",
+  "stan_generation": "brms::make_stancode(normalize = TRUE)",
+  "stan_repairs": {
+    "family_gaussian_softit": "Preserve raw brms-generated.stan; model.stan changes only vector softit and inv_softit divisions from / to ./ so Stan 2.39.0 can compile them."
+  },
+  "stan_data": "brms::make_standata",
+  "score_options": {
+    "jacobian": false,
+    "propto": false
+  },
+  "gradient_contract": "BridgeStan returns unconstrained-coordinate derivatives even with jacobian=false. Saved constrained_gradient and semantic_gradient entries explicitly undo the relevant coordinate transform; group records also account for matrix versus array traversal.",
+  "generation_script": "generate.R",
+  "sources": "*/model.stan",
+  "data": "*/data.json",
+  "source_checksums": "cases.json"
+}

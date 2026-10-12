@@ -1,0 +1,69 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "grad_params": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0,
+        0,
+        1.2
+      ]
+    },
+    {
+      "theta": [
+        0.5,
+        0,
+        1.2
+      ]
+    },
+    {
+      "theta": [
+        -0.4,
+        0.3,
+        1.2
+      ]
+    }
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        2.3451937160263974,
+        1.1506458991934303,
+        63.903131767948956
+      ]
+    },
+    {
+      "theta": [
+        2.0051808043977837,
+        1.0537653762706687,
+        62.03589667376402
+      ]
+    },
+    {
+      "theta": [
+        2.4512123243536004,
+        1.1412707644062956,
+        64.91296503563078
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.0002,
+    "grad_rtol": 0
+  },
+  "oracle": "Independent SciPy softit formula and analytic derivatives; actual brms-generated Stan after exactly two vector / to ./ repairs (raw source retained), propto=false, jacobian=false."
+}

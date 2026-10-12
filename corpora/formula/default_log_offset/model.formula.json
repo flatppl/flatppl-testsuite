@@ -1,0 +1,49 @@
+{
+  "formula": "y ~ x + offset(log(z))",
+  "family": "gaussian",
+  "link": "log",
+  "options": {
+    "data_placement": "inline"
+  },
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            -2,
+            4,
+            8,
+            7
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real64",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "name": "z",
+        "values": {
+          "kind": "real64",
+          "values": [
+            2,
+            3,
+            5,
+            7
+          ]
+        }
+      }
+    ]
+  }
+}

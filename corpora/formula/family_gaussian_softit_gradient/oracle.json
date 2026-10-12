@@ -1,0 +1,69 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "gaussian_softit",
+    "stan_sha256": "2802a9643cdc99dae69f3f001efa9081bec96d757c99a16424e592ad57dc958e",
+    "generated_stan_sha256": "af9d277bfbf78fff3b5be3a204cd0742b0445ec9068d3a9aa720b4a92d9ab59a",
+    "oracle_patch": "Two vector-overload divisions changed from / to ./; unmodified brms source retained.",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y ~ x",
+  "family": "gaussian",
+  "link": "softit",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]",
+    "sigma"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      2,
+      4,
+      8,
+      7
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "student",
+      "args": [
+        3,
+        0,
+        2.5
+      ]
+    },
+    "sigma": {
+      "kind": "student",
+      "args": [
+        3,
+        0,
+        3
+      ],
+      "lower": 0
+    }
+  }
+}

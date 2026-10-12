@@ -1,0 +1,78 @@
+{
+  "name": "gaussian_log_offset",
+  "formula": "y ~ x + offset(log(z))",
+  "family": "gaussian",
+  "link": "log",
+  "data": {
+    "y": [
+      -2,
+      4,
+      8,
+      7
+    ],
+    "x": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "z": [
+      2,
+      3,
+      5,
+      7
+    ]
+  },
+  "default_priors": {
+    "b": "Flat()",
+    "Intercept": "student_t(3, -1.33677688267937, 2.5)",
+    "sigma": "student_t(3, 0, 3), normalized above0"
+  },
+  "model_id": "6e758b5977054667",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "sigma": 1.2
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "sigma"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "sigma"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.1823215567939546
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -44.1145230787522,
+  "gradient": [
+    -154.44903496119937,
+    -115.74222927021988,
+    67.76483389547188
+  ],
+  "constrained_gradient": {
+    "b.1": -154.44903496119937,
+    "Intercept": -115.74222927021988,
+    "sigma": 56.47069491289324
+  },
+  "semantic_gradient": {
+    "temp_Intercept": -115.74222927021988,
+    "b": [
+      -154.44903496119937
+    ],
+    "sigma": 56.47069491289324
+  }
+}

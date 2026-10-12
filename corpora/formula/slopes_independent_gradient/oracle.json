@@ -1,0 +1,149 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "slopes_independent_score",
+    "stan_sha256": "6dd5f11845a23ba5538466156573e656bb87bab41ee26e9203174eba39d42db6",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y ~ x + (1 + x || g)",
+  "family": "gaussian",
+  "link": "identity",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]",
+    "sd_g[1]",
+    "sd_g[2]",
+    "z_g[1,1]",
+    "z_g[1,2]",
+    "z_g[2,1]",
+    "z_g[2,2]",
+    "sigma"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      2,
+      4,
+      8,
+      7
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "Z_1_1": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "Z_1_2": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "J_1": [
+      2,
+      1,
+      2,
+      1
+    ],
+    "N_1": 2,
+    "M_1": 2,
+    "NC_1": 1,
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "normal",
+      "args": [
+        1,
+        3
+      ]
+    },
+    "b[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ]
+    },
+    "sd_g[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ],
+      "lower": 0
+    },
+    "z_g[1,1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "z_g[1,2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sd_g[2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ],
+      "lower": 0
+    },
+    "z_g[2,1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "z_g[2,2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sigma": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ],
+      "lower": 0
+    }
+  },
+  "groups": [
+    {
+      "name": "g",
+      "index": 1
+    }
+  ]
+}

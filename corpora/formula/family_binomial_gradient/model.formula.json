@@ -1,0 +1,48 @@
+{
+  "formula": "y | trials(trials) ~ x",
+  "family": "binomial",
+  "options": {
+    "data_placement": "inline"
+  },
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "int",
+          "values": [
+            1,
+            2,
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "name": "trials",
+        "values": {
+          "kind": "int",
+          "values": [
+            3,
+            5,
+            8,
+            9
+          ]
+        }
+      }
+    ]
+  }
+}

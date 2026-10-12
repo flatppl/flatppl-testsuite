@@ -1,0 +1,43 @@
+{
+  "name": "binomial",
+  "model_id": "8a3c2df14a1d42ea",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept"
+    ],
+    "param_num": 2,
+    "param_unc_num": 2
+  },
+  "theta_unc": [
+    0.3,
+    0.4
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -9.68546593057127,
+  "gradient": [
+    -4.39499581940629,
+    -5.73619064209214
+  ],
+  "constrained_gradient": {
+    "b.1": -4.39499581940629,
+    "Intercept": -5.73619064209214
+  },
+  "semantic_gradient": {
+    "temp_Intercept": -5.73619064209214,
+    "b": [
+      -4.39499581940629
+    ]
+  }
+}

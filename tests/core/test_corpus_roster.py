@@ -28,7 +28,7 @@ EXPECTED_COUNTS = {
     "bayesian_inference": 5,
     "coverage": 25,
     "examples": 24,
-    "formula": 2,
+    "formula": 32,
     "fragment": 21,
     "hs3": 12,
     "pyhf": 173,
@@ -38,7 +38,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 37,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 394
+EXPECTED_TOTAL = 424
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -70,6 +70,21 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    "formula/family_gaussian_gradient": {"stablehlo"},
+    "formula/family_student_gradient": {"stablehlo"},
+    "formula/family_bernoulli_gradient": {"stablehlo"},
+    "formula/family_binomial_gradient": {"stablehlo"},
+    "formula/family_poisson_gradient": {"stablehlo"},
+    "formula/family_negbinomial_gradient": {"stablehlo"},
+    "formula/family_gamma_gradient": {"stablehlo"},
+    "formula/family_exponential_gradient": {"stablehlo"},
+    "formula/expressions_offset_gradient": {"stablehlo"},
+    "formula/slopes_correlated_gradient": {"stablehlo"},
+    "formula/slopes_independent_gradient": {"stablehlo"},
+    "formula/default_log_offset_gradient": {"stablehlo"},
+    "formula/group_priors_gradient": {"stablehlo"},
+    "formula/family_gaussian_softit_gradient": {"stablehlo"},
+    "formula/dependent_locscale_prior_gradient": {"stablehlo"},
     # JS cannot evaluate nested metricsum or positional cartprod membership.
     "examples/ex_dminus_to_3pi_amplitude": {"stablehlo"},
     "examples/ex_minimal": {"stablehlo"},
@@ -116,7 +131,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 463
+EXPECTED_CASES = 508
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

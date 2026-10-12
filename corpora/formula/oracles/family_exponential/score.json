@@ -1,0 +1,43 @@
+{
+  "name": "exponential",
+  "model_id": "4c284e2bbd71837c",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept"
+    ],
+    "param_num": 2,
+    "param_unc_num": 2
+  },
+  "theta_unc": [
+    0.3,
+    0.4
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -16.51502793905848,
+  "gradient": [
+    2.084241171712695,
+    9.079651462838108
+  ],
+  "constrained_gradient": {
+    "b.1": 2.084241171712695,
+    "Intercept": 9.079651462838108
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 9.079651462838108,
+    "b": [
+      2.084241171712695
+    ]
+  }
+}
