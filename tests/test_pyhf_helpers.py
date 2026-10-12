@@ -20,7 +20,7 @@ def test_composed_pyhf_helpers_preserve_scopes_and_dependencies(tmp_path, dtype,
     jax, _, _ = ex._jax()
     device = jax.devices()[0]
     query = tmp_path / "query.flatppl"
-    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+    query.write_text('pyhf = standard_module("pyhf-helpers", "0.1")\n'
                      "f(x) = cat(pyhf.normsys_factor.([0.8, 0.9], 1.2, x[[1, 1]]), "
                      "pyhf.normsys_factor.([0.7, 0.95, 1.1], [1.1], x[[3, 2, 3]]), "
                      "pyhf.normsys_factor.([0.8, 0.9], 1.3, "
@@ -62,7 +62,7 @@ def test_integer_helper_anchors_keep_reference_promotions(tmp_path):
         ("normsys_factor(lo, hi, alpha)", (9000000000000000000, 9000000000000000000, .5),
          oracle.interp_poly6_exp(9e18, 1., 9e18, .5)),
     ]:
-        query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+        query.write_text('pyhf = standard_module("pyhf-helpers", "0.1")\n'
                          "lo = elementof(integers)\nhi = elementof(integers)\n"
                          "alpha = elementof(reals)\ninputs = (lo, hi, alpha)\n"
                          f"outputs = pyhf.{call}\n")
@@ -84,7 +84,7 @@ def test_integer_nuisance_keeps_exponential_tail(tmp_path, dtype, integer):
     jax, _, _ = ex._jax()
     device = jax.devices()[0]
     query = tmp_path / "query.flatppl"
-    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+    query.write_text('pyhf = standard_module("pyhf-helpers", "0.1")\n'
                      "alpha = elementof(integers)\ninputs = alpha\n"
                      "outputs = pyhf.normsys_factor(2.0, 1.0, alpha)\n")
     fallback = tmp_path / "fallback.flatppl"
@@ -114,7 +114,7 @@ def test_shared_pyhf_nuisances_preserve_selection_and_adjoint(tmp_path):
         anchors = f"{lo.tolist()}, {hi.tolist()}" if member == "normsys_factor" else (
             f"{lo.tolist()}, 1.0, {hi.tolist()}")
         query.write_text(
-            'pyhf = standard_module("pyhf_helpers", "0.1")\n'
+            'pyhf = standard_module("pyhf-helpers", "0.1")\n'
             f"evaluate(p) = pyhf.{member}.({anchors}, p[{(selected + 1).tolist()}])\n"
             "points = elementof(cartpow(cartpow(reals, 4), 2))\n"
             "inputs = points\noutputs = evaluate.(points)\n"
@@ -157,7 +157,7 @@ def test_normsys_reference_call_forms(tmp_path, dtype, tolerance):
                      dtype=np.float64 if dtype == "f64" else np.float32)
     query = tmp_path / "query.flatppl"
     query.write_text(
-        'pyhf = standard_module("pyhf_helpers", "0.1")\n'
+        'pyhf = standard_module("pyhf-helpers", "0.1")\n'
         'reference = load_module("reference.flatppl")\n'
         "evaluate(p) = [pyhf.normsys_factor(p[1], p[2], p[3]),\n"
         "  pyhf.normsys_factor(p[2], alpha = -p[3], hi = p[1]),\n"
@@ -202,7 +202,7 @@ def test_normsys_adjoint_and_serialized_fallback(tmp_path, dtype, tolerance):
                      dtype=np.float64 if dtype == "f64" else np.float32)
     query = tmp_path / "query.flatppl"
     query.write_text(
-        'pyhf = standard_module("pyhf_helpers", "0.1")\n'
+        'pyhf = standard_module("pyhf-helpers", "0.1")\n'
         "evaluate(p) = pyhf.normsys_factor(p[1], p[2], p[3])\n"
         f"points = elementof(cartpow(cartpow(reals, 3), {len(points)}))\n"
         "inputs = points\noutputs = evaluate.(points)\n"
@@ -229,7 +229,7 @@ def test_normsys_inactive_tiny_anchor_tail_keeps_finite_adjoint(tmp_path):
     _gate_engine("stablehlo")
     jax, jnp, hlo_call = ex._jax()
     query = tmp_path / "query.flatppl"
-    for module, call in [("pyhf_helpers", "normsys_factor(1e-320, 1.1, alpha)"),
+    for module, call in [("pyhf-helpers", "normsys_factor(1e-320, 1.1, alpha)"),
                          ("particle-physics", "interp_poly6_exp(1e-320, 1.0, 1.1, alpha)")]:
         query.write_text(f'helper = standard_module("{module}", "0.1")\n'
                          "alpha = elementof(reals)\ninputs = alpha\n"
@@ -260,7 +260,7 @@ def test_histosys_zero_centered_shift_and_adjoint(tmp_path, dtype, tolerance):
                  else np.sum(powers * coefficients * a ** (powers - 1)))
         derivatives.append([*anchors, slope])
     query = tmp_path / "query.flatppl"
-    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+    query.write_text('pyhf = standard_module("pyhf-helpers", "0.1")\n'
                      "evaluate(p) = pyhf.histosys_shift(p[1], p[2], p[3], p[4])\n"
                      f"points = elementof(cartpow(cartpow(reals, 4), {len(points)}))\n"
                      "inputs = points\noutputs = evaluate.(points)\n")
@@ -283,7 +283,7 @@ def test_histosys_zero_centered_shift_and_adjoint(tmp_path, dtype, tolerance):
 def test_histosys_preserves_small_shifts_and_negative_zero(tmp_path):
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"
-    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+    query.write_text('pyhf = standard_module("pyhf-helpers", "0.1")\n'
                      "evaluate(p) = pyhf.histosys_shift(p[1], p[2], p[3], p[4])\n"
                      "points = elementof(cartpow(cartpow(reals, 4), 2))\n"
                      "inputs = points\noutputs = evaluate.(points)\n")
@@ -304,7 +304,7 @@ def test_histosys_preserves_small_shifts_and_negative_zero(tmp_path):
 def test_fixed_histosys_anchors_preserve_broadcast_shape_and_adjoint(tmp_path):
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"
-    query.write_text('pyhf = standard_module("pyhf_helpers", "0.1")\n'
+    query.write_text('pyhf = standard_module("pyhf-helpers", "0.1")\n'
                      "zero(a) = pyhf.histosys_shift.([3., 5.], [3., 5.], [3., 5.], a)\n"
                      "mixed(a) = pyhf.histosys_shift.([3., 4.], [3., 5.], [3., 6.], a)\n"
                      "points = elementof(cartpow(reals, 8))\n"
