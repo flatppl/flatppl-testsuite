@@ -1,0 +1,36 @@
+{
+  "formula": "y ~ x",
+  "family": "bernoulli",
+  "options": {
+    "data_placement": "inline"
+  },
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "int",
+          "values": [
+            0,
+            1,
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    ]
+  }
+}

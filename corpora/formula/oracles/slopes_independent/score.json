@@ -1,0 +1,126 @@
+{
+  "name": "slopes_independent_score",
+  "point": {
+    "b": [
+      0.2
+    ],
+    "Intercept": 0.5,
+    "sigma": 0.75,
+    "sd_1": [
+      0.7,
+      1.1
+    ],
+    "z_1": [
+      [
+        0.1,
+        -0.3
+      ],
+      [
+        0.4,
+        0.2
+      ]
+    ]
+  },
+  "model_id": "2c87c55343503951",
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "sigma",
+      "sd_1.1",
+      "sd_1.2",
+      "z_1.1.1",
+      "z_1.2.1",
+      "z_1.1.2",
+      "z_1.2.2"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "sigma",
+      "sd_1.1",
+      "sd_1.2",
+      "z_1.1.1",
+      "z_1.2.1",
+      "z_1.1.2",
+      "z_1.2.2"
+    ],
+    "param_num": 9,
+    "param_unc_num": 9
+  },
+  "theta_unc": [
+    0.2,
+    0.5,
+    -0.2876820724517809,
+    -0.35667494393873245,
+    0.09531017980432493,
+    0.1,
+    -0.3,
+    0.4,
+    0.2
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -80.80881834717958,
+  "gradient": [
+    10.652222222222223,
+    28.07333333333333,
+    133.4392777777777,
+    -2.8793333333333324,
+    25.463777777777775,
+    8.635999999999997,
+    11.176444444444444,
+    44.147555555555556,
+    44.07377777777778
+  ],
+  "constrained_gradient": {
+    "b.1": 10.652222222222223,
+    "Intercept": 28.07333333333333,
+    "sigma": 177.91903703703693,
+    "sd_1.1": -4.113333333333332,
+    "sd_1.2": 23.148888888888884,
+    "z_1.1.1": 8.635999999999997,
+    "z_1.2.1": 44.147555555555556,
+    "z_1.1.2": 11.176444444444444,
+    "z_1.2.2": 44.07377777777778
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 28.07333333333333,
+    "b": [
+      10.652222222222223
+    ],
+    "sigma": 177.91903703703693,
+    "sd_g": [
+      -4.113333333333332,
+      23.148888888888884
+    ],
+    "z_g": [
+      [
+        8.635999999999997,
+        11.176444444444444
+      ],
+      [
+        44.147555555555556,
+        44.07377777777778
+      ]
+    ]
+  },
+  "constrained_roundtrip_z": {
+    "z_1.1.1": 0.1,
+    "z_1.2.1": 0.4,
+    "z_1.1.2": -0.3,
+    "z_1.2.2": 0.2
+  },
+  "unconstrained_coordinate_order": [
+    "b[1]",
+    "Intercept",
+    "log(sigma)",
+    "log(sd_1[1])",
+    "log(sd_1[2])",
+    "z_1[1,1]",
+    "z_1[1,2]",
+    "z_1[2,1]",
+    "z_1[2,2]"
+  ],
+  "coordinate_note": "z_g and constrained z names are coefficients x levels. Independent Stan z is an array of vectors: its unconstrained traversal is coefficient-major, unlike its constrained output traversal. Do not zip param_unc_names directly to the constrained gradient. The explicit coordinate order and param_constrain roundtrip establish the map."
+}

@@ -1,0 +1,50 @@
+{
+  "name": "negbinomial",
+  "model_id": "134c14968e18a220",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "shape": 2.3
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "shape"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "shape"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.8329091229351039
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -18.8950386977143,
+  "gradient": [
+    3.2678730037346,
+    8.623204778427478,
+    -2.504243770354044
+  ],
+  "constrained_gradient": {
+    "b.1": 3.2678730037346,
+    "Intercept": 8.623204778427478,
+    "shape": -1.088801639284367
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 8.623204778427478,
+    "b": [
+      3.2678730037346
+    ],
+    "shape": -1.088801639284367
+  }
+}

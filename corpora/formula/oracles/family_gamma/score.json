@@ -1,0 +1,50 @@
+{
+  "name": "Gamma",
+  "model_id": "b416647bd78f662c",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "shape": 2.3
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "shape"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "shape"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.8329091229351039
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -25.778725068601663,
+  "gradient": [
+    4.793754694939201,
+    20.552474294077548,
+    -8.807649696753188
+  ],
+  "constrained_gradient": {
+    "b.1": 4.793754694939201,
+    "Intercept": 20.552474294077548,
+    "shape": -3.829412911631821
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 20.552474294077548,
+    "b": [
+      4.793754694939201
+    ],
+    "shape": -3.829412911631821
+  }
+}

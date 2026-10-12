@@ -1,0 +1,50 @@
+{
+  "name": "gaussian",
+  "model_id": "809f243d1198e5d1",
+  "point": {
+    "b": [
+      0.3
+    ],
+    "Intercept": 0.4,
+    "sigma": 1.2
+  },
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "sigma"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "sigma"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "theta_unc": [
+    0.3,
+    0.4,
+    0.1823215567939546
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -48.11063012964777,
+  "gradient": [
+    5.555555555555556,
+    13.857055272590078,
+    73.29052390998592
+  ],
+  "constrained_gradient": {
+    "b.1": 5.555555555555556,
+    "Intercept": 13.857055272590078,
+    "sigma": 61.075436591654935
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 13.857055272590078,
+    "b": [
+      5.555555555555556
+    ],
+    "sigma": 61.075436591654935
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "expressions_score",
+  "point": {
+    "b": [
+      0.1,
+      -0.3
+    ],
+    "Intercept": 0.5,
+    "sigma": 0.75
+  },
+  "model_id": "f3fa8060c4c37eda",
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "b.2",
+      "Intercept",
+      "sigma"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "b.2",
+      "Intercept",
+      "sigma"
+    ],
+    "param_num": 4,
+    "param_unc_num": 4
+  },
+  "theta_unc": [
+    0.1,
+    -0.3,
+    0.5,
+    -0.2876820724517809
+  ],
+  "jacobian": false,
+  "propto": false,
+  "lp": -59.66595202928363,
+  "gradient": [
+    42.95694592684391,
+    4.525605722259111,
+    24.327364389835612,
+    98.16904739067284
+  ],
+  "constrained_gradient": {
+    "b.1": 42.95694592684391,
+    "b.2": 4.525605722259111,
+    "Intercept": 24.327364389835612,
+    "sigma": 130.8920631875638
+  },
+  "semantic_gradient": {
+    "temp_Intercept": 24.327364389835612,
+    "b": [
+      42.95694592684391,
+      4.525605722259111
+    ],
+    "sigma": 130.8920631875638
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "group_priors",
+    "stan_sha256": "79a647523c1d7b8ce618938f6c7bdd9f00ea046e70049ae43ce7d6ad0f742c98",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y ~ x + (1 + x | g) + (1 + x | h)",
+  "family": "gaussian",
+  "link": "identity",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]",
+    "sd_g[1]",
+    "sd_g[2]",
+    "z_g[1,1]",
+    "z_g[1,2]",
+    "z_g[2,1]",
+    "z_g[2,2]",
+    "rho_g",
+    "sd_h[1]",
+    "sd_h[2]",
+    "z_h[1,1]",
+    "z_h[1,2]",
+    "z_h[2,1]",
+    "z_h[2,2]",
+    "rho_h",
+    "sigma"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      2,
+      4,
+      8,
+      7
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "Z_1_1": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "Z_1_2": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "Z_2_1": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "Z_2_2": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "J_1": [
+      2,
+      1,
+      2,
+      1
+    ],
+    "J_2": [
+      1,
+      2,
+      2,
+      1
+    ],
+    "N_1": 2,
+    "M_1": 2,
+    "NC_1": 1,
+    "N_2": 2,
+    "M_2": 2,
+    "NC_2": 1,
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "normal",
+      "args": [
+        1,
+        3
+      ]
+    },
+    "b[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ]
+    },
+    "sd_g[1]": {
+      "kind": "cauchy",
+      "args": [
+        0,
+        1
+      ],
+      "lower": 0
+    },
+    "z_g[1,1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "z_g[1,2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sd_g[2]": {
+      "kind": "student",
+      "args": [
+        4,
+        1,
+        3
+      ],
+      "lower": 0
+    },
+    "z_g[2,1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "z_g[2,2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sd_h[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ],
+      "lower": 0
+    },
+    "z_h[1,1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "z_h[1,2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sd_h[2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ],
+      "lower": 0
+    },
+    "z_h[2,1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "z_h[2,2]": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ]
+    },
+    "sigma": {
+      "kind": "normal",
+      "args": [
+        0,
+        1
+      ],
+      "lower": 0
+    }
+  },
+  "groups": [
+    {
+      "name": "g",
+      "index": 1,
+      "rho": "rho_g",
+      "lkj_shape": 3
+    },
+    {
+      "name": "h",
+      "index": 2,
+      "rho": "rho_h",
+      "lkj_shape": 2
+    }
+  ]
+}
