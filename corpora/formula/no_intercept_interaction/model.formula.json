@@ -1,0 +1,86 @@
+{
+  "formula": "y ~ 0 + f:g",
+  "priors": [
+    {
+      "class": "b",
+      "prior": "Normal(0, 2)"
+    },
+    {
+      "class": "sigma",
+      "prior": "Normal(0, 2)"
+    }
+  ],
+  "options": {
+    "data_placement": "inline",
+    "contrasts": {}
+  },
+  "data": {
+    "nrows": 8,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            2,
+            4,
+            8,
+            3,
+            6,
+            7,
+            5,
+            9
+          ]
+        }
+      },
+      {
+        "name": "f",
+        "values": {
+          "kind": "factor",
+          "values": {
+            "levels": [
+              "B",
+              "C",
+              "A",
+              "unused"
+            ],
+            "codes": [
+              1,
+              2,
+              0,
+              2,
+              1,
+              0,
+              2,
+              0
+            ],
+            "ordered": false
+          }
+        }
+      },
+      {
+        "name": "g",
+        "values": {
+          "kind": "factor",
+          "values": {
+            "levels": [
+              "u",
+              "v"
+            ],
+            "codes": [
+              1,
+              0,
+              0,
+              1,
+              0,
+              1,
+              1,
+              0
+            ],
+            "ordered": false
+          }
+        }
+      }
+    ]
+  }
+}

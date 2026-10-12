@@ -1,0 +1,110 @@
+{
+  "formula": "y ~ x * f + o",
+  "priors": [
+    {
+      "class": "Intercept",
+      "prior": "Normal(0, 2)"
+    },
+    {
+      "class": "b",
+      "prior": "Normal(0, 2)"
+    },
+    {
+      "class": "sigma",
+      "prior": "Normal(0, 2)"
+    }
+  ],
+  "options": {
+    "data_placement": "inline",
+    "contrasts": {
+      "f": "sum"
+    }
+  },
+  "data": {
+    "nrows": 8,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            2,
+            4,
+            8,
+            3,
+            6,
+            7,
+            5,
+            9
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real64",
+          "values": [
+            -2,
+            0,
+            1,
+            3,
+            4,
+            2,
+            -1,
+            5
+          ]
+        }
+      },
+      {
+        "name": "f",
+        "values": {
+          "kind": "factor",
+          "values": {
+            "levels": [
+              "B",
+              "C",
+              "A",
+              "unused"
+            ],
+            "codes": [
+              1,
+              2,
+              0,
+              2,
+              1,
+              0,
+              2,
+              0
+            ],
+            "ordered": false
+          }
+        }
+      },
+      {
+        "name": "o",
+        "values": {
+          "kind": "factor",
+          "values": {
+            "levels": [
+              "low",
+              "mid",
+              "high",
+              "top"
+            ],
+            "codes": [
+              0,
+              1,
+              2,
+              3,
+              1,
+              3,
+              0,
+              2
+            ],
+            "ordered": true
+          }
+        }
+      }
+    ]
+  }
+}
