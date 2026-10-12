@@ -1,0 +1,33 @@
+{
+  "test_type": "logdensity",
+  "engines": ["det-js", "stablehlo"],
+  "model": "model.flatppl",
+  "binding": "posterior",
+  "status": "lowers",
+  "inputs": ["bound_v", "x_v"],
+  "points": [
+    {"bound_v": 0.75, "x_v": 0.25},
+    {"bound_v": 1.5, "x_v": 0.25},
+    {"bound_v": 2.0, "x_v": 1.25},
+    {"bound_v": 1.0, "x_v": 0.0},
+    {"bound_v": 1.0, "x_v": 1.0},
+    {"bound_v": 1.0, "x_v": -0.1},
+    {"bound_v": 1.0, "x_v": 1.1}
+  ],
+  "expected": [
+    -1.151998644971191,
+    -2.126998644971191,
+    -3.7492208671934133,
+    -1.6679708671934133,
+    -1.945748644971191,
+    "-inf",
+    "-inf"
+  ],
+  "tolerance": {
+    "atol": 1e-10,
+    "rtol": 0,
+    "value_atol_f32": 2e-6,
+    "value_rtol_f32": 0
+  },
+  "oracle": "closed form; cross-checked with R 4.6.1 dexp + dnorm"
+}

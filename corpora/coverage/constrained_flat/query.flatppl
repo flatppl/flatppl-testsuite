@@ -1,0 +1,5 @@
+bound_v = elementof(posreals)
+x_v = elementof(reals)
+lp = logdensityof(posterior, record(bound = bound_v, x = x_v))
+inputs = (bound_v, x_v)
+outputs = lp
