@@ -1,0 +1,55 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "grad_params": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        -0.6,
+        0.8,
+        0.4
+      ]
+    },
+    {
+      "theta": [
+        -0.6,
+        0.8,
+        10
+      ]
+    }
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        -0.7024377472440476,
+        0.5239155905562529,
+        -0.397328662362816
+      ]
+    },
+    {
+      "theta": [
+        -1.5045389159552962,
+        1.454520602947676,
+        -8.444260677227344
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.00002,
+    "grad_rtol": 0.00002
+  },
+  "oracle": "Normalized actual brms-generated Stan, propto=false and jacobian=false, plus log(2!) for the normalized ordered threshold prior. Constrained threshold gradients have no chart Jacobian. Independent logistic masses and analytic derivatives in ../oracles/analytic.py reproduce the frozen values."
+}

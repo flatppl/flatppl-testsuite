@@ -14,7 +14,7 @@ scoring uses **`propto=false, jacobian=false`**. Normalizing constants therefore
 remain in every likelihood and prior, including truncated positive priors.
 Each score is an unnormalized posterior target with complete factor constants.
 
-To regenerate the twenty model sources and data, install the pinned R/brms
+To regenerate the model sources and data, install the pinned R/brms
 versions in an oracle environment and run:
 
 ```sh
@@ -72,6 +72,16 @@ The dependent Cauchy case uses Stan's `Intercept` as the location of the
 positive `sigma` prior; the corresponding FlatPPL binding is `temp_Intercept`.
 Its analytic gradient includes the derivative of the positive truncation mass
 with respect to that location, as well as the ordinary Cauchy density derivative.
+
+The cumulative-logit cases use centred predictors and ordered thresholds. The
+query's `cuts[i]` are Stan's constrained `Intercept[i]`. FlatPPL normalizes the
+shared iid threshold law on `ordered(m)`, adding `log(m!)` to Stan's restricted
+product target; `score_offset` records this analytic difference. It changes no
+gradient. Stan's first ordered coordinate is unconstrained and later ones are
+log gaps. For the two thresholds here, convert raw derivatives `(g1, g2)` to
+`(g1 - g2/gap, g2/gap)`. No ordered-chart Jacobian belongs in either score.
+The explicit-Normal case includes predictors reaching ±20; the default case
+uses Student-t(3, 0, 2.5) thresholds and a Flat coefficient prior.
 
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
 That independent implementation computes SciPy log densities and closed-form

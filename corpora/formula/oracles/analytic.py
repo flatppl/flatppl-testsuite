@@ -47,6 +47,8 @@ def _prior(prior, value, parameters):
 
 
 def evaluate(reference, point):
+    if reference["family"] == "cumulative":
+        return _cumulative(reference, point)
     names = reference["coordinates"]
     positions = {name: i for i, name in enumerate(names)}
     values = np.asarray(point["theta"], dtype=float)
@@ -185,4 +187,44 @@ def evaluate(reference, point):
     else:
         raise ValueError(f"unknown oracle family {family}")
     gradient += jacobian.T @ (dmu * derivative)
+    return float(score), {"theta": gradient.tolist()}
+
+
+def _cumulative(reference, point):
+    names = reference["coordinates"]
+    positions = {name: i for i, name in enumerate(names)}
+    p = dict(zip(names, point["theta"]))
+    data = reference["standata"]
+    x = np.asarray(data["X"], dtype=float)
+    x -= x.mean(axis=0)
+    beta = np.array([p[f"b[{i + 1}]"] for i in range(x.shape[1])])
+    cuts = np.array([p[f"cuts[{i + 1}]"] for i in range(data["nthres"])])
+    score, gradient = math.lgamma(len(cuts) + 1), np.zeros(len(names))
+    for name, prior in reference["priors"].items():
+        contribution, derivative, _ = _prior(prior, p[name], p)
+        score += contribution
+        gradient[positions[name]] += derivative
+    for row, eta, category in zip(x, x @ beta, data["Y"], strict=True):
+        if category == 1:
+            upper = cuts[0] - eta
+            score += special.log_expit(upper)
+            upper_derivative = special.expit(-upper)
+            gradient[positions["cuts[1]"]] += upper_derivative
+            eta_derivative = -upper_derivative
+        elif category == len(cuts) + 1:
+            lower = cuts[-1] - eta
+            score += special.log_expit(-lower)
+            lower_derivative = -special.expit(lower)
+            gradient[positions[f"cuts[{len(cuts)}]"]] += lower_derivative
+            eta_derivative = -lower_derivative
+        else:
+            lower, upper = cuts[category - 2:category] - eta
+            score += (special.log_expit(upper) + special.log_expit(-lower)
+                      + math.log(-math.expm1(lower - upper)))
+            gap_ratio = 1 / math.expm1(upper - lower)
+            gradient[positions[f"cuts[{category - 1}]"]] -= special.expit(lower) + gap_ratio
+            gradient[positions[f"cuts[{category}]"]] += special.expit(-upper) + gap_ratio
+            eta_derivative = special.expit(lower) - special.expit(-upper)
+        for i, value in enumerate(row):
+            gradient[positions[f"b[{i + 1}]"]] += value * eta_derivative
     return float(score), {"theta": gradient.tolist()}

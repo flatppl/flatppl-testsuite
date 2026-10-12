@@ -448,5 +448,52 @@
         ]
       }
     ]
+  },
+  {
+    "name": "cumulative_logit",
+    "stan_case": "normal",
+    "coordinates": [
+      "cuts[1]",
+      "cuts[2]",
+      "b[1]"
+    ],
+    "stan_sha256": "42d526c803273ed25cb3488e77464d35b85c15723c66c2364541caeb9caf63f1",
+    "score_offset": 0.6931471805599453,
+    "points": [
+      {
+        "theta": [
+          -0.6,
+          0.8,
+          0.4
+        ]
+      },
+      {
+        "theta": [
+          -0.6,
+          0.8,
+          10
+        ]
+      }
+    ]
+  },
+  {
+    "name": "cumulative_logit_default",
+    "stan_case": "default",
+    "coordinates": [
+      "cuts[1]",
+      "cuts[2]",
+      "b[1]"
+    ],
+    "stan_sha256": "27c26cffcb17c813aa032b8f9b11d9a3853e9d878135e56631f5e0dcb6112e2d",
+    "score_offset": 0.6931471805599453,
+    "points": [
+      {
+        "theta": [
+          -0.6,
+          0.8,
+          0.4
+        ]
+      }
+    ]
   }
 ]

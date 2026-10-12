@@ -1,0 +1,96 @@
+{
+  "name": "cumulative_logit",
+  "jacobian": false,
+  "propto": false,
+  "parameter_order": [
+    "b.1",
+    "Intercept.1",
+    "Intercept.2"
+  ],
+  "unconstrained_coordinate_meaning": [
+    "b[1]",
+    "Intercept[1]",
+    "log(Intercept[2]-Intercept[1])"
+  ],
+  "score_offset": 0.6931471805599453,
+  "points": [
+    {
+      "name": "normal",
+      "model_id": "73f54df5fbbef86e",
+      "point": {
+        "b": [
+          0.4
+        ],
+        "Intercept": [
+          -0.6,
+          0.8
+        ]
+      },
+      "theta_unc": [
+        0.4,
+        -0.6,
+        0.3364722366212129
+      ],
+      "lp": -8.882198854773355,
+      "gradient": [
+        -0.397328662362816,
+        -0.1785221566877947,
+        0.7334818267787541
+      ],
+      "constrained_gradient": {
+        "b.1": -0.397328662362816,
+        "Intercept.1": -0.7024377472440476,
+        "Intercept.2": 0.5239155905562529
+      },
+      "semantic_gradient": {
+        "b": [
+          -0.397328662362816
+        ],
+        "cuts": [
+          -0.7024377472440476,
+          0.5239155905562529
+        ]
+      },
+      "flatppl_lp": -8.18905167421341
+    },
+    {
+      "name": "tail",
+      "model_id": "73f54df5fbbef86e",
+      "point": {
+        "b": [
+          10
+        ],
+        "Intercept": [
+          -0.6,
+          0.8
+        ]
+      },
+      "theta_unc": [
+        10,
+        -0.6,
+        0.3364722366212129
+      ],
+      "lp": -66.06229096425213,
+      "gradient": [
+        -8.444260677227344,
+        -0.05001831300762016,
+        2.0363288441267464
+      ],
+      "constrained_gradient": {
+        "b.1": -8.444260677227344,
+        "Intercept.1": -1.5045389159552962,
+        "Intercept.2": 1.454520602947676
+      },
+      "semantic_gradient": {
+        "b": [
+          -8.444260677227344
+        ],
+        "cuts": [
+          -1.5045389159552962,
+          1.454520602947676
+        ]
+      },
+      "flatppl_lp": -65.36914378369218
+    }
+  ]
+}

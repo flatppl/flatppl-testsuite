@@ -120,3 +120,13 @@ dependent <- capture("dependent_locscale_prior", y ~ x, gaussian(), data,
   c(set_prior("normal(1, 3)", class = "Intercept"),
     set_prior("cauchy(Intercept, 1.7)", class = "sigma")))
 json(dependent, file.path(out, "dependent_locscale_prior", "brms.json"))
+
+ordinal_data <- data.frame(y = ordered(c("medium", "low", "high", "medium"),
+  levels = c("low", "medium", "high")), x = c(1, 2, 4, 5))
+ordinal <- capture("cumulative_logit", y ~ x, cumulative("logit"), ordinal_data,
+  c(set_prior("normal(0, 2)", class = "Intercept"),
+    set_prior("normal(0, 1.5)", class = "b")))
+json(ordinal, file.path(out, "cumulative_logit", "brms.json"))
+ordinal_default <- capture("cumulative_logit_default", y ~ x,
+  cumulative("logit"), ordinal_data)
+json(ordinal_default, file.path(out, "cumulative_logit_default", "brms.json"))

@@ -1,0 +1,4 @@
+theta = elementof(cartpow(reals, 3))
+inputs = theta
+formula_point = record(cuts = theta[[1, 2]], b = theta[[3]])
+outputs = logdensityof(Pi_post, formula_point)
