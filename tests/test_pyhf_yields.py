@@ -18,7 +18,7 @@ def yield_query(tmp_path):
         "expected_counts(samples) = aggregate(sum, [.b], samples[.s, .b] / 1.0)\n"
     )
     def write(body, reference=False):
-        module = 'load_module("reference.flatppl")' if reference else 'standard_module("pyhf_helpers", "0.1")'
+        module = 'load_module("reference.flatppl")' if reference else 'standard_module("pyhf-helpers", "0.1")'
         path = tmp_path / "query.flatppl"
         path.write_text(f'flatppl_compat = "0.1"\npyhf = {module}\n{body}')
         return path
