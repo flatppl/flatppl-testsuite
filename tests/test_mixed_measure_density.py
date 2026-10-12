@@ -114,3 +114,94 @@ def test_zero_weight_on_other_atom_has_finite_gradient(tmp_path, precision):
         score, gradient = jax.block_until_ready(compiled(jnp.array(point, dtype=dtype)))
         np.testing.assert_array_equal(score, 0)
         np.testing.assert_array_equal(gradient, expected)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,tolerance", [("f32", 3e-5), ("f64", 2e-11)])
+@pytest.mark.parametrize("model,mass,slope", [
+    ("superpose(weighted(p, A), weighted(1 - p, A))", 1, 0),
+    ("superpose(weighted(2 * p, A), superpose(weighted(3 * (1 - p), A), "
+     "weighted(0.4, Dirac(1.0))))", 3, -1),
+    ("K(p)", 3, -1),
+])
+def test_coincident_atoms_keep_endpoint_weight_gradients(
+    tmp_path, precision, tolerance, model, mass, slope,
+):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "p = external(unitinterval)\nx = external(reals)\n"
+        "D = Dirac(0.0)\nA = D\n"
+        "K(p) = superpose(weighted(2 * p, A), weighted(3 * (1 - p), A))\n"
+        f"M = {model}\ninputs = (p, x)\noutputs = logdensityof(M, x)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    jax, jnp, hlo_call = ex._jax()
+    dtype = np.float32 if precision == "f32" else np.float64
+
+    def score(p):
+        return hlo_call(p, jnp.array(0, dtype=dtype), source=source)[0]
+
+    points = jnp.array([0, .25, .5, 1], dtype=dtype)
+    values, gradients = jax.jit(jax.vmap(jax.value_and_grad(score)))(points)
+    expected_mass = mass + slope * np.asarray(points)
+    np.testing.assert_allclose(values, np.log(expected_mass), rtol=tolerance, atol=tolerance)
+    np.testing.assert_allclose(gradients, slope / expected_mass, rtol=tolerance, atol=tolerance)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,weight", [("f32", 3e38), ("f64", 1e308)])
+def test_coincident_atom_log_mass_survives_linear_sum_overflow(tmp_path, precision, weight):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "w = external(nonnegreals)\n"
+        "M = superpose(weighted(w, Dirac(0.0)), weighted(w, Dirac(0.0)))\n"
+        "inputs = (w)\noutputs = logdensityof(M, 0.0)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    np.testing.assert_allclose(ex.value(source, [weight]), math.log(weight) + math.log(2), rtol=1e-6)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision", ["f32", "f64"])
+def test_coincident_atom_mass_guards(tmp_path, precision):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "p = external(reals)\nx = external(reals)\n"
+        "M = superpose(weighted(p, Dirac(0.0)), weighted(2 * p, Dirac(0.0)), Dirac(1.0))\n"
+        "inputs = (p, x)\noutputs = logdensityof(M, x)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    assert ex.value(source, [0, 1]) == 0
+    np.testing.assert_array_equal(ex.gradient(source, [0, 1], argnums=(0, 1)), [0, 0])
+    assert ex.value(source, [0, 0]) == -math.inf
+    assert ex.value(source, [math.inf, 0]) == math.inf
+    assert np.isnan(ex.value(source, [-1, 0]))
+    assert np.isnan(ex.value(source, [math.nan, 0]))
+
+    query.write_text(
+        "p = external(unitinterval)\nx = external(reals)\n"
+        "M = superpose(superpose(weighted(p, Dirac(0.0)), Dirac(1.0)), "
+        "superpose(weighted(1 - p, Dirac(0.0)), Dirac(2.0)))\n"
+        "inputs = (p, x)\noutputs = logdensityof(M, x)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    assert ex.value(source, [0, 3]) == -math.inf
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,atom", [("f32", 16777217), ("f64", 9007199254740992)])
+def test_coincident_atoms_keep_integer_support(tmp_path, precision, atom):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "p = external(unitinterval)\nx = external(integers)\n"
+        f"M = superpose(weighted(p, Dirac({atom})), weighted(1 - p, Dirac({atom})), "
+        f"Dirac({atom + 1}))\ninputs = (p, x)\noutputs = logdensityof(M, x)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    for point in [[0, atom], [1, atom], [.5, atom + 1]]:
+        assert ex.value(source, point) == 0
+        np.testing.assert_array_equal(ex.gradient(source, point, argnums=(0,)), [0])
