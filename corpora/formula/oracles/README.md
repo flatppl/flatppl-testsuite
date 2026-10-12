@@ -90,6 +90,17 @@ is independently evaluated as Gamma(shape=1, rate=1.2); the binomial case also
 retains each row's trials. Raw Stan gradients use `[b, Intercept, sigma?]`,
 while the query and semantic gradients use `[temp_Intercept, b, sigma?]`.
 
+The combined weighted cases add Gaussian/Student known scales and zero-inflated
+Poisson, negative-binomial and binomial responses at two points each. Each zero
+count has probability `zi + (1-zi) * p_count(0)`; positive counts have probability
+`(1-zi) * p_count(y)`. The analytic oracle uses SciPy PMFs and the posterior
+responsibility of the count component for its derivatives. Row weights multiply
+the complete mixture log probability once, and priors remain unweighted. The
+`zi` prior is Beta(1,1); negative-binomial shape retains InverseGamma(0.4,0.3).
+Divide the raw Stan derivative for `zi` by `zi*(1-zi)` to obtain its constrained
+derivative. `score.json` preserves both forms. These targets were also checked
+independently with base-R densities and analytic derivatives before freezing.
+
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
 The `se_*` cases use Normal(0,2) intercept and Normal(0,1) coefficient priors,
 with Student degrees of freedom fixed at five. Residual-scale variants add a

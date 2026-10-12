@@ -22,6 +22,8 @@ Enzyme. Both use the same `theta` order recorded in `oracle.json`.
 | `cumulative_logit`, `cumulative_logit_default` | Ordered thresholds, category coding, centred predictors, normalized ordering offset, and stable middle-category values and gradients at predictors reaching ±20 |
 | `weighted_gaussian`, `weighted_binomial` | Zero, fractional and non-unit response weights; normalized row scores weighted once, priors unweighted, and binomial trials retained |
 | `se_*` | Gaussian/Student known observation scales, removed residual sigma by default, and quadrature scale with `sigma=TRUE` |
+| `weighted_gaussian_se*`, `weighted_student_se*` | Row weights composed with known and residual observation scales; active parameters and normalized priors retained |
+| `weighted_zero_inflated_*` | Poisson, negative-binomial and binomial zero mixtures with zero/fractional row weights, zero-probability derivatives, count shape and trials |
 
 The earlier interaction cases retain their R `model.matrix` oracles. The brms
 cases additionally preserve actual normalized Stan sources, data, scores,

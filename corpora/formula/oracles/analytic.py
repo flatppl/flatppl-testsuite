@@ -34,6 +34,10 @@ def _prior(prior, value, parameters):
         shape, scale = args
         distribution = stats.invgamma(shape, scale=scale)
         derivative = -(shape + 1) / value + scale / value**2
+    elif kind == "beta":
+        a, b = args
+        distribution = stats.beta(a, b)
+        derivative = (a - 1) / value - (b - 1) / (1 - value)
     else:
         raise ValueError(f"unknown oracle prior {kind}")
     score = distribution.logpdf(value)
@@ -165,6 +169,32 @@ def evaluate(reference, point):
         gradient[positions["shape"]] += sum_rows(
             special.digamma(y + shape) - special.digamma(shape) + np.log(shape / (shape + mu))
             + 1 - (shape + y) / (shape + mu))
+    elif family.startswith("zero_inflated_"):
+        if family == "zero_inflated_poisson":
+            base = stats.poisson.logpmf(y, mu)
+            dmu = y / mu - 1
+        elif family == "zero_inflated_binomial":
+            trials = np.asarray(data["trials"])
+            base = stats.binom.logpmf(y, trials, mu)
+            dmu = (y - trials * mu) / (mu * (1 - mu))
+        elif family == "zero_inflated_negbinomial":
+            shape = p["shape"]
+            base = stats.nbinom.logpmf(y, shape, shape / (shape + mu))
+            dmu = y / mu - (shape + y) / (shape + mu)
+        else:
+            raise ValueError(f"unknown oracle family {family}")
+        zi = p["zi"]
+        count = np.log1p(-zi) + base
+        rows = np.where(y == 0, np.logaddexp(np.log(zi), count), count)
+        responsibility = np.exp(count - rows)
+        score += sum_rows(rows)
+        dmu *= responsibility
+        gradient[positions["zi"]] += sum_rows(np.where(
+            y == 0, -np.expm1(base) * np.exp(-rows), -1 / (1 - zi)))
+        if family == "zero_inflated_negbinomial":
+            gradient[positions["shape"]] += sum_rows(responsibility * (
+                special.digamma(y + shape) - special.digamma(shape)
+                + np.log(shape / (shape + mu)) + 1 - (shape + y) / (shape + mu)))
     elif family == "gamma":
         shape = p["shape"]
         score += sum_rows(stats.gamma.logpdf(y, shape, scale=mu / shape))

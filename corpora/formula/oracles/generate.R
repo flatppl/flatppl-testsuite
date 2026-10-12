@@ -158,3 +158,29 @@ for (family in c("gaussian", "student")) {
     json(captured, file.path(out, name, "brms.json"))
   }
 }
+
+count_data <- data.frame(y = c(0L, 2L, 4L, 0L), x = 1:4,
+                         n = c(3L, 5L, 8L, 9L), w = c(0, .5, 2, 1))
+for (family in c("zero_inflated_poisson", "zero_inflated_negbinomial",
+                 "zero_inflated_binomial")) {
+  name <- paste0("weighted_", family)
+  formula <- if (family == "zero_inflated_binomial") {
+    y | trials(n) + weights(w) ~ x
+  } else y | weights(w) ~ x
+  captured <- capture(name, formula, brmsfamily(family), count_data)
+  json(captured, file.path(out, name, "brms.json"))
+}
+
+se_data$w <- c(1, 2, .5)
+for (family in c("gaussian", "student")) {
+  for (residual in c(FALSE, TRUE)) {
+    name <- paste0("weighted_", family, "_se", if (residual) "_residual" else "")
+    formula <- as.formula(paste0("y | se(s, sigma=", residual, ") + weights(w) ~ x"))
+    priors <- c(set_prior("normal(0, 2)", class = "Intercept"),
+                set_prior("normal(0, 1)", class = "b"))
+    if (residual) priors <- c(priors, set_prior("normal(0, 1)", class = "sigma"))
+    if (family == "student") priors <- c(priors, set_prior("constant(5)", class = "nu"))
+    captured <- capture(name, formula, brmsfamily(family), se_data, priors)
+    json(captured, file.path(out, name, "brms.json"))
+  }
+}
