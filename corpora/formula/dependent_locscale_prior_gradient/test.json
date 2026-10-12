@@ -1,0 +1,55 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "grad_params": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.4,
+        0.3,
+        0.75
+      ]
+    },
+    {
+      "theta": [
+        0.7,
+        0.6,
+        1.2
+      ]
+    }
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        34.478591064108905,
+        14.222222222222221,
+        258.943931151068
+      ]
+    },
+    {
+      "theta": [
+        12.734265643215084,
+        4.513888888888889,
+        51.88060273649447
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.0002,
+    "grad_rtol": 0
+  },
+  "oracle": "Independent normalized Cauchy density and analytic derivatives, including the parameter-dependent truncation mass; unmodified actual brms-generated Stan, propto=false, jacobian=false."
+}

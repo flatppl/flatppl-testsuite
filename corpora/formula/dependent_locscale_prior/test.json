@@ -1,0 +1,43 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.4,
+        0.3,
+        0.75
+      ]
+    },
+    {
+      "theta": [
+        0.7,
+        0.6,
+        1.2
+      ]
+    }
+  ],
+  "expected": [
+    -104.91466426953289,
+    -41.03429039755598
+  ],
+  "tolerance": {
+    "atol": 1e-9,
+    "rtol": 0,
+    "value_atol_f32": 0.0001,
+    "value_rtol_f32": 0
+  },
+  "oracle": "Independent normalized Cauchy density and analytic derivatives, including the parameter-dependent truncation mass; unmodified actual brms-generated Stan, propto=false, jacobian=false."
+}

@@ -1,0 +1,37 @@
+{
+  "formula": "y ~ x",
+  "family": "gaussian",
+  "link": "softit",
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "x",
+        "values": {
+          "kind": "real64",
+          "values": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            2,
+            4,
+            8,
+            7
+          ]
+        }
+      }
+    ]
+  },
+  "options": {
+    "data_placement": "inline"
+  }
+}

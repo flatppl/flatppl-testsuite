@@ -9,8 +9,11 @@ import numpy as np
 from scipy import special, stats
 
 
-def _prior(prior, value):
-    kind, args = prior["kind"], prior["args"]
+def _prior(prior, value, parameters):
+    kind, args = prior["kind"], list(prior["args"])
+    location = prior.get("location_parameter")
+    if location:
+        args[1 if kind == "student" else 0] = parameters[location]
     if kind == "normal":
         mean, scale = args
         distribution = stats.norm(mean, scale)
@@ -34,9 +37,13 @@ def _prior(prior, value):
     else:
         raise ValueError(f"unknown oracle prior {kind}")
     score = distribution.logpdf(value)
+    location_derivative = -derivative if location else 0.0
     if "lower" in prior:
-        score -= distribution.logsf(prior["lower"])
-    return score, derivative
+        logmass = distribution.logsf(prior["lower"])
+        score -= logmass
+        if location:
+            location_derivative -= math.exp(distribution.logpdf(prior["lower"]) - logmass)
+    return score, derivative, location_derivative
 
 
 def evaluate(reference, point):
@@ -56,9 +63,11 @@ def evaluate(reference, point):
 
     score, gradient = 0.0, np.zeros(len(names))
     for name, prior in reference["priors"].items():
-        contribution, derivative = _prior(prior, p[name])
+        contribution, derivative, location_derivative = _prior(prior, p[name], p)
         score += contribution
         gradient[positions[name]] += derivative
+        if "location_parameter" in prior:
+            gradient[positions[prior["location_parameter"]]] += location_derivative
 
     for group in reference.get("groups", []):
         # Both Stan representations have public z[coefficient, level] semantics.
@@ -92,6 +101,10 @@ def evaluate(reference, point):
     elif link == "logit":
         mu = special.expit(eta)
         derivative = mu * (1 - mu)
+    elif link == "softit":
+        softplus = np.logaddexp(0, eta)
+        mu = softplus / (1 + softplus)
+        derivative = special.expit(eta) / (1 + softplus)**2
     else:
         raise ValueError(f"unknown oracle link {link}")
 

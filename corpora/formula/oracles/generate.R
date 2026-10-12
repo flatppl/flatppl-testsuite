@@ -44,6 +44,14 @@ capture <- function(name, formula, family, data = data, prior = NULL) {
   code <- do.call(make_stancode, c(args, list(normalize = TRUE)))
   directory <- file.path(out, name)
   dir.create(directory, recursive = TRUE, showWarnings = FALSE)
+  if (name == "family_gaussian_softit") {
+    # brms 2.23.2 emits invalid vector/vector division in both vector overloads.
+    writeLines(code, file.path(directory, "brms-generated.stan"))
+    code <- sub("vector softit(vector p) {\n     return log(expm1(-p /",
+                "vector softit(vector p) {\n     return log(expm1(-p ./", code, fixed = TRUE)
+    code <- sub("vector inv_softit(vector y) {\n     return log1p_exp(y) /",
+                "vector inv_softit(vector y) {\n     return log1p_exp(y) ./", code, fixed = TRUE)
+  }
   writeLines(code, file.path(directory, "model.stan"))
   json(standata, file.path(directory, "data.json"))
   list(name = name, formula = paste(deparse(formula), collapse = " "),
@@ -99,3 +107,10 @@ group_priors <- c(priors,
 selected <- capture("group_priors", y ~ x + (1 + x | g) + (1 + x | h),
   gaussian(), data, group_priors)
 json(selected, file.path(out, "group_priors", "brms.json"))
+
+softit <- capture("family_gaussian_softit", y ~ x, brmsfamily("gaussian", link = "softit"), data)
+json(softit, file.path(out, "family_gaussian_softit", "brms.json"))
+dependent <- capture("dependent_locscale_prior", y ~ x, gaussian(), data,
+  c(set_prior("normal(1, 3)", class = "Intercept"),
+    set_prior("cauchy(Intercept, 1.7)", class = "sigma")))
+json(dependent, file.path(out, "dependent_locscale_prior", "brms.json"))

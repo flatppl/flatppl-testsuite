@@ -6,15 +6,15 @@ The scores came from **BridgeStan 2.9.0 / Stan 2.39.0**; CmdStan 2.39.0 and
 CmdStanPy 1.3.0 were present in the scoring environment. See `provenance.json`.
 The ordinary testsuite needs none of these optional oracle tools.
 
-Each case preserves `model.stan`, `data.json`, the actual `brms.json` capture, and
-`score.json` with the constrained point, unconstrained point, raw gradient, and
+Each case preserves executable `model.stan`, `data.json`, the actual `brms.json`
+capture, and `score.json` with the constrained point, unconstrained point, raw gradient, and
 explicit semantic gradient. `cases.json` records the source SHA-256 and query
 coordinate order. All Stan sources use `make_stancode(normalize = TRUE)`;
 scoring uses **`propto=false, jacobian=false`**. Normalizing constants therefore
 remain in every likelihood and prior, including truncated positive priors.
 Each score is an unnormalized posterior target with complete factor constants.
 
-To regenerate the thirteen model sources and data, install the pinned R/brms
+To regenerate the fifteen model sources and data, install the pinned R/brms
 versions in an oracle environment and run:
 
 ```sh
@@ -27,12 +27,24 @@ against the captured files before accepting new oracle scores. The generated
 `brms.json` case names use the corpus names; historical captures retain the
 names of the original oracle run.
 
+The softit case also preserves the unmodified `brms-generated.stan`. Its two
+vector overloads contain vector/vector `/`, which Stan 2.39.0 rejects. The
+executable `model.stan` changes exactly those two operators to elementwise `./`:
+`-p / (p - 1)` in `vector softit` and
+`log1p_exp(y) / (1 + log1p_exp(y))` in `vector inv_softit`.
+Scalar overloads are unchanged. Both files have separate SHA-256 records;
+`generate.R` reproduces this repair explicitly. Its scores verify the intended
+softit formula against executable repaired Stan and the independent analytic
+oracle.
+
 To reproduce a score through Stan MCP, use these operations with the contents of
 that case's files:
 
 1. `compile_model(stan = model.stan)` gives a new model ID.
-2. `param_unconstrain(stan = ID, data = data.json, constrained = score.json.point)`
-   gives the unconstrained vector. Compare it to `score.json.theta_unc`.
+2. Pass the constrained `point` in `score.json` to
+   `param_unconstrain(stan = ID, data = data.json, constrained = point)`.
+   Compare it to `theta_unc`. For multi-point cases, repeat for each entry in
+   `score.json.points`.
 3. `log_density_gradient(stan = ID, data = data.json, theta_unc = vector,
    propto = false, jacobian = false)` gives the absolute score and raw gradient.
 4. `param_constrain` verifies the coordinate mapping before converting the
@@ -52,6 +64,14 @@ unconstrained traversal orders differ, so matching the printed unconstrained
 names to constrained entries positionally is incorrect. The independent score
 record includes the verified `param_constrain` roundtrip and explicit traversal.
 The semantic maps in both score files and `oracle.json` remove this ambiguity.
+For `group_priors`, the semantic scale coordinates `sd_g[1]` and `sd_g[2]` map
+to the separate FlatPPL draws `sd_g_1` and `sd_g_2`: their selected priors differ.
+The query records that mapping without changing the Stan scale coordinates.
+
+The dependent Cauchy case uses Stan's `Intercept` as the location of the
+positive `sigma` prior; the corresponding FlatPPL binding is `temp_Intercept`.
+Its analytic gradient includes the derivative of the positive truncation mass
+with respect to that location, as well as the ordinary Cauchy density derivative.
 
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
 That independent implementation computes SciPy log densities and closed-form

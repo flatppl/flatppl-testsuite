@@ -1,0 +1,108 @@
+{
+  "name": "gaussian_softit",
+  "model_id": "ccb77b9f366f6af7",
+  "param_info": {
+    "param_names": [
+      "b.1",
+      "Intercept",
+      "sigma"
+    ],
+    "param_unc_names": [
+      "b.1",
+      "Intercept",
+      "sigma"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "points": [
+    {
+      "point": {
+        "Intercept": 0,
+        "b": [
+          0
+        ],
+        "sigma": 1.2
+      },
+      "theta_unc": [
+        0,
+        0,
+        0.1823215567939546
+      ],
+      "lp": -48.275638260639454,
+      "gradient": [
+        1.1506458991934303,
+        2.3451937160263974,
+        76.68375812153874
+      ],
+      "jacobian": false,
+      "propto": false,
+      "semantic_gradient": {
+        "temp_Intercept": 2.3451937160263974,
+        "b": [
+          1.1506458991934303
+        ],
+        "sigma": 63.903131767948956
+      }
+    },
+    {
+      "point": {
+        "Intercept": 0.5,
+        "b": [
+          0
+        ],
+        "sigma": 1.2
+      },
+      "theta_unc": [
+        0,
+        0.5,
+        0.1823215567939546
+      ],
+      "lp": -47.18178765762853,
+      "gradient": [
+        1.0537653762706687,
+        2.0051808043977837,
+        74.44307600851683
+      ],
+      "jacobian": false,
+      "propto": false,
+      "semantic_gradient": {
+        "temp_Intercept": 2.0051808043977837,
+        "b": [
+          1.0537653762706687
+        ],
+        "sigma": 62.03589667376402
+      }
+    },
+    {
+      "point": {
+        "Intercept": -0.4,
+        "b": [
+          0.3
+        ],
+        "sigma": 1.2
+      },
+      "theta_unc": [
+        0.3,
+        -0.4,
+        0.1823215567939546
+      ],
+      "lp": -48.89853248175644,
+      "gradient": [
+        1.1412707644062956,
+        2.4512123243536004,
+        77.89555804275693
+      ],
+      "jacobian": false,
+      "propto": false,
+      "semantic_gradient": {
+        "temp_Intercept": 2.4512123243536004,
+        "b": [
+          1.1412707644062956
+        ],
+        "sigma": 64.91296503563078
+      }
+    }
+  ],
+  "oracle_patch": "Two vector-overload divisions changed from / to ./; unmodified brms source retained."
+}

@@ -10,6 +10,9 @@
   "bridgestan": "2.9.0",
   "bridgestan_bundled_stan": "2.39.0",
   "stan_generation": "brms::make_stancode(normalize = TRUE)",
+  "stan_repairs": {
+    "family_gaussian_softit": "Preserve raw brms-generated.stan; model.stan changes only vector softit and inv_softit divisions from / to ./ so Stan 2.39.0 can compile them."
+  },
   "stan_data": "brms::make_standata",
   "score_options": {
     "jacobian": false,
