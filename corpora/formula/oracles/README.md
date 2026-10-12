@@ -83,6 +83,13 @@ log gaps. For the two thresholds here, convert raw derivatives `(g1, g2)` to
 The explicit-Normal case includes predictors reaching ±20; the default case
 uses Student-t(3, 0, 2.5) thresholds and a Flat coefficient prior.
 
+The weighted Gaussian and Binomial cases retain weights `[0, 0.5, 2, 3]`
+without rescaling. Their two points score normalized row likelihoods with those
+weights and ordinary unweighted priors. The Gaussian exponential scale prior
+is independently evaluated as Gamma(shape=1, rate=1.2); the binomial case also
+retains each row's trials. Raw Stan gradients use `[b, Intercept, sigma?]`,
+while the query and semantic gradients use `[temp_Intercept, b, sigma?]`.
+
 For ordinary offline regeneration, each case's `test.py` uses `analytic.py`.
 That independent implementation computes SciPy log densities and closed-form
 derivatives from the captured brms design matrix, offsets, group indices, and

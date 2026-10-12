@@ -1,0 +1,62 @@
+{
+  "formula": "y | weights(w) ~ x",
+  "family": "gaussian",
+  "options": {
+    "data_placement": "inline"
+  },
+  "priors": [
+    {
+      "class": "b",
+      "prior": "normal(0, 2)"
+    },
+    {
+      "class": "Intercept",
+      "prior": "normal(0, 3)"
+    },
+    {
+      "class": "sigma",
+      "prior": "exponential(1.2)"
+    }
+  ],
+  "data": {
+    "nrows": 4,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "real64",
+          "values": [
+            1,
+            2,
+            4,
+            7
+          ]
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real32",
+          "values": [
+            -1,
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "name": "w",
+        "values": {
+          "kind": "real32",
+          "values": [
+            0,
+            0.5,
+            2,
+            3
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "source": {
+    "tool": "brms 2.23.2 / R 4.5.3 / BridgeStan 2.9.0 (Stan 2.39.0)",
+    "brms_sha": "c89c4c05ef52fefb4b78d5fb80df0cf6352f48b4",
+    "capture": "weighted_binomial",
+    "stan_sha256": "9b449763438394b2b340d0e51bbcf88c03c5827b64e8810497794f587fa8c7a9",
+    "jacobian": false,
+    "propto": false
+  },
+  "formula": "y | trials(n) + weights(w) ~ x",
+  "family": "binomial",
+  "link": "logit",
+  "coordinates": [
+    "temp_Intercept",
+    "b[1]"
+  ],
+  "standata": {
+    "N": 4,
+    "Y": [
+      1,
+      2,
+      4,
+      7
+    ],
+    "trials": [
+      2,
+      3,
+      5,
+      8
+    ],
+    "weights": [
+      0,
+      0.5,
+      2,
+      3
+    ],
+    "K": 2,
+    "Kc": 1,
+    "X": [
+      [
+        1,
+        -1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "prior_only": 0
+  },
+  "priors": {
+    "temp_Intercept": {
+      "kind": "normal",
+      "args": [
+        0,
+        3
+      ]
+    },
+    "b[1]": {
+      "kind": "normal",
+      "args": [
+        0,
+        2
+      ]
+    }
+  }
+}

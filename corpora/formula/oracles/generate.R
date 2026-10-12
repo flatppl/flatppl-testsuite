@@ -130,3 +130,16 @@ json(ordinal, file.path(out, "cumulative_logit", "brms.json"))
 ordinal_default <- capture("cumulative_logit_default", y ~ x,
   cumulative("logit"), ordinal_data)
 json(ordinal_default, file.path(out, "cumulative_logit_default", "brms.json"))
+
+weighted_data <- data.frame(y = c(1, 2, 4, 7), x = c(-1, 0, 1, 2),
+                            w = c(0, 0.5, 2, 3), n = c(2L, 3L, 5L, 8L))
+weighted_priors <- c(set_prior("normal(0, 2)", class = "b"),
+                     set_prior("normal(0, 3)", class = "Intercept"))
+for (family_name in c("gaussian", "binomial")) {
+  f <- if (family_name == "binomial") y | trials(n) + weights(w) ~ x else y | weights(w) ~ x
+  prior <- weighted_priors
+  if (family_name == "gaussian") prior <- c(prior, set_prior("exponential(1.2)", class = "sigma"))
+  directory <- paste0("weighted_", family_name)
+  captured <- capture(directory, f, brmsfamily(family_name), weighted_data, prior)
+  json(captured, file.path(out, directory, "brms.json"))
+}

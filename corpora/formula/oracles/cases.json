@@ -495,5 +495,54 @@
         ]
       }
     ]
+  },
+  {
+    "name": "weighted_gaussian",
+    "stan_case": "weighted_gaussian",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]",
+      "sigma"
+    ],
+    "stan_sha256": "6695286fa72258355aa94e8a3d12780b99ed9545760a5c63ebd69caaea748732",
+    "points": [
+      {
+        "theta": [
+          0.2,
+          0.3,
+          1.4
+        ]
+      },
+      {
+        "theta": [
+          1.1,
+          -0.4,
+          0.8
+        ]
+      }
+    ]
+  },
+  {
+    "name": "weighted_binomial",
+    "stan_case": "weighted_binomial",
+    "coordinates": [
+      "temp_Intercept",
+      "b[1]"
+    ],
+    "stan_sha256": "9b449763438394b2b340d0e51bbcf88c03c5827b64e8810497794f587fa8c7a9",
+    "points": [
+      {
+        "theta": [
+          0.2,
+          0.3
+        ]
+      },
+      {
+        "theta": [
+          1.1,
+          -0.4
+        ]
+      }
+    ]
   }
 ]

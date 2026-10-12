@@ -1,0 +1,54 @@
+{
+  "name": "weighted_binomial",
+  "model_id": "44d6904e5c77e2fd",
+  "propto": false,
+  "jacobian": false,
+  "points": [
+    {
+      "point": {
+        "b": [
+          0.3
+        ],
+        "Intercept": 0.2
+      },
+      "theta_unc": [
+        0.3,
+        0.2
+      ],
+      "lp": -12.729441246690723,
+      "gradient": [
+        8.72390849653055,
+        7.57460478971419
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 7.57460478971419,
+        "b": [
+          8.72390849653055
+        ]
+      }
+    },
+    {
+      "point": {
+        "b": [
+          -0.4
+        ],
+        "Intercept": 1.1
+      },
+      "theta_unc": [
+        -0.4,
+        1.1
+      ],
+      "lp": -12.811251212010786,
+      "gradient": [
+        9.726092800890134,
+        6.6505063281193895
+      ],
+      "semantic_gradient": {
+        "temp_Intercept": 6.6505063281193895,
+        "b": [
+          9.726092800890134
+        ]
+      }
+    }
+  ]
+}

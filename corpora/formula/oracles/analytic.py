@@ -94,6 +94,11 @@ def evaluate(reference, point):
                 jacobian[i, positions[rho_name]] = b * sd1 * (z0 - rho * z1 / root)
 
     y = np.asarray(data["Y"], dtype=float)
+    weights = np.asarray(data.get("weights", 1), dtype=float)
+
+    def sum_rows(values):
+        return np.sum(weights * values)
+
     family, link = reference["family"], reference["link"]
     if link == "identity":
         mu, derivative = eta, np.ones_like(eta)
@@ -116,9 +121,9 @@ def evaluate(reference, point):
     if family == "gaussian":
         sigma = p["sigma"]
         residual = y - mu
-        score += stats.norm.logpdf(y, mu, sigma).sum()
+        score += sum_rows(stats.norm.logpdf(y, mu, sigma))
         dmu = residual / sigma**2
-        gradient[positions["sigma"]] += np.sum(residual**2 / sigma**3 - 1 / sigma)
+        gradient[positions["sigma"]] += sum_rows(residual**2 / sigma**3 - 1 / sigma)
     elif family == "lognormal":
         sigma = p["sigma"]
         residual = np.log(y) - mu
@@ -129,37 +134,37 @@ def evaluate(reference, point):
         sigma, nu = p["sigma"], p["nu"]
         residual = y - mu
         square = (residual / sigma)**2
-        score += stats.t.logpdf(y, nu, mu, sigma).sum()
+        score += sum_rows(stats.t.logpdf(y, nu, mu, sigma))
         dmu = (nu + 1) * residual / (nu * sigma**2 + residual**2)
-        gradient[positions["sigma"]] += np.sum(((nu + 1) * square / (nu + square) - 1) / sigma)
-        gradient[positions["nu"]] += np.sum(
+        gradient[positions["sigma"]] += sum_rows(((nu + 1) * square / (nu + square) - 1) / sigma)
+        gradient[positions["nu"]] += sum_rows(
             (special.digamma((nu + 1) / 2) - special.digamma(nu / 2) - 1 / nu
              - np.log1p(square / nu) + (nu + 1) * square / (nu * (nu + square))) / 2)
     elif family in ("bernoulli", "binomial"):
         trials = np.asarray(data["trials"]) if family == "binomial" else 1
-        score += stats.binom.logpmf(y, trials, mu).sum()
+        score += sum_rows(stats.binom.logpmf(y, trials, mu))
         dmu = (y - trials * mu) / (mu * (1 - mu))
     elif family == "poisson":
-        score += stats.poisson.logpmf(y, mu).sum()
+        score += sum_rows(stats.poisson.logpmf(y, mu))
         dmu = y / mu - 1
     elif family == "geometric":
         score += stats.geom.logpmf(y + 1, 1 / (1 + mu)).sum()
         dmu = y / mu - (y + 1) / (1 + mu)
     elif family == "negbinomial":
         shape = p["shape"]
-        score += stats.nbinom.logpmf(y, shape, shape / (shape + mu)).sum()
+        score += sum_rows(stats.nbinom.logpmf(y, shape, shape / (shape + mu)))
         dmu = y / mu - (shape + y) / (shape + mu)
-        gradient[positions["shape"]] += np.sum(
+        gradient[positions["shape"]] += sum_rows(
             special.digamma(y + shape) - special.digamma(shape) + np.log(shape / (shape + mu))
             + 1 - (shape + y) / (shape + mu))
     elif family == "gamma":
         shape = p["shape"]
-        score += stats.gamma.logpdf(y, shape, scale=mu / shape).sum()
+        score += sum_rows(stats.gamma.logpdf(y, shape, scale=mu / shape))
         dmu = shape * (y - mu) / mu**2
-        gradient[positions["shape"]] += np.sum(
+        gradient[positions["shape"]] += sum_rows(
             np.log(shape / mu) + 1 - special.digamma(shape) + np.log(y) - y / mu)
     elif family == "exponential":
-        score += stats.expon.logpdf(y, scale=mu).sum()
+        score += sum_rows(stats.expon.logpdf(y, scale=mu))
         dmu = (y - mu) / mu**2
     elif family == "weibull":
         shape = p["shape"]
@@ -186,7 +191,7 @@ def evaluate(reference, point):
             np.cos(y - mu) - special.i1e(kappa) / special.i0e(kappa))
     else:
         raise ValueError(f"unknown oracle family {family}")
-    gradient += jacobian.T @ (dmu * derivative)
+    gradient += jacobian.T @ (weights * dmu * derivative)
     return float(score), {"theta": gradient.tolist()}
 
 
