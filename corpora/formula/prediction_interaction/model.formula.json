@@ -15,7 +15,6 @@
     }
   ],
   "options": {
-    "data_placement": "inline",
     "contrasts": {
       "f": "sum"
     }

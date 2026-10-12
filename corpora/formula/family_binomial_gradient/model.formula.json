@@ -1,9 +1,6 @@
 {
   "formula": "y | trials(trials) ~ x",
   "family": "binomial",
-  "options": {
-    "data_placement": "inline"
-  },
   "data": {
     "nrows": 4,
     "columns": [

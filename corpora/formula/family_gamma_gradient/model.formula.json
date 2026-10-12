@@ -1,9 +1,6 @@
 {
   "formula": "y ~ x",
   "family": "gamma",
-  "options": {
-    "data_placement": "inline"
-  },
   "data": {
     "nrows": 4,
     "columns": [

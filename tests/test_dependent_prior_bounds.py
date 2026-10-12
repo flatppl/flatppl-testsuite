@@ -82,7 +82,6 @@ def test_formula_scaled_priors_preserve_domains_and_endpoint_gradients(
             coefficient,
             {"class": "sigma", "prior": "constant(1)"},
         ],
-        "options": {"data_placement": "inline"},
         "data": {"nrows": 3, "columns": [
             {"name": "x", "values": {"kind": "real64", "values": [0, 1, 2]}},
             {"name": "y", "values": {"kind": "real64", "values": [1, 2, 3]}},

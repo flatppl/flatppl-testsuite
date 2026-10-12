@@ -30,8 +30,5 @@
         }
       }
     ]
-  },
-  "options": {
-    "data_placement": "inline"
   }
 }

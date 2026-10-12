@@ -1,8 +1,5 @@
 {
   "formula": "y ~ I(x^2) + log(z) + offset(log(z))",
-  "options": {
-    "data_placement": "inline"
-  },
   "priors": [
     {
       "class": "b",
