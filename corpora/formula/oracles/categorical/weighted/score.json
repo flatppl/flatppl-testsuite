@@ -1,0 +1,90 @@
+{
+  "model_id": "ef31c56ea6f79950",
+  "parameter_info": {
+    "param_names": [
+      "b_mublue.1",
+      "b_mugreen.1",
+      "Intercept_mugreen"
+    ],
+    "param_unc_names": [
+      "b_mublue.1",
+      "b_mugreen.1",
+      "Intercept_mugreen"
+    ],
+    "param_num": 3,
+    "param_unc_num": 3
+  },
+  "propto": false,
+  "jacobian": false,
+  "query_from_stan": [
+    0,
+    2,
+    1
+  ],
+  "points": [
+    {
+      "point": {
+        "b_mublue": [
+          0.4
+        ],
+        "Intercept_mugreen": -0.2,
+        "b_mugreen": [
+          0.6
+        ]
+      },
+      "theta_unc": [
+        0.4,
+        0.6,
+        -0.2
+      ],
+      "query_point": [
+        0.4,
+        -0.2,
+        0.6
+      ],
+      "lp": -9.550614306617366,
+      "gradient": [
+        -0.28427928676548125,
+        -2.614284248911472,
+        1.2981995066773986
+      ],
+      "semantic_gradient": [
+        -0.28427928676548125,
+        1.2981995066773986,
+        -2.614284248911472
+      ]
+    },
+    {
+      "point": {
+        "b_mublue": [
+          -0.7
+        ],
+        "Intercept_mugreen": 0.9,
+        "b_mugreen": [
+          -0.4
+        ]
+      },
+      "theta_unc": [
+        -0.7,
+        -0.4,
+        0.9
+      ],
+      "query_point": [
+        -0.7,
+        0.9,
+        -0.4
+      ],
+      "lp": -9.602678114990223,
+      "gradient": [
+        0.9402012721513413,
+        2.773423286777614,
+        -0.7792665928478492
+      ],
+      "semantic_gradient": [
+        0.9402012721513413,
+        -0.7792665928478492,
+        2.773423286777614
+      ]
+    }
+  ]
+}

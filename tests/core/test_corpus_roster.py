@@ -28,7 +28,7 @@ EXPECTED_COUNTS = {
     "bayesian_inference": 5,
     "coverage": 25,
     "examples": 24,
-    "formula": 72,
+    "formula": 80,
     "fragment": 21,
     "hs3": 12,
     "pyhf": 173,
@@ -38,7 +38,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 37,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 464
+EXPECTED_TOTAL = 472
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -70,6 +70,10 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    "formula/thinplate_gaussian_gradient": {"stablehlo"},
+    "formula/categorical_default_gradient": {"stablehlo"},
+    "formula/categorical_reordered_gradient": {"stablehlo"},
+    "formula/categorical_weighted_gradient": {"stablehlo"},
     "formula/cumulative_logit_default_gradient": {"stablehlo"},
     "formula/cumulative_logit_gradient": {"stablehlo"},
     "formula/family_beta_gradient": {"stablehlo"},
@@ -151,7 +155,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 568
+EXPECTED_CASES = 580
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

@@ -1,0 +1,51 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "convert": {
+    "source": "model.formula.json",
+    "from": "formula"
+  },
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "theta"
+  ],
+  "points": [
+    {
+      "theta": [
+        0.3,
+        0.4,
+        -0.2,
+        0.15,
+        -0.35,
+        -0.1,
+        0.7,
+        1.2
+      ]
+    }
+  ],
+  "oracle": "Actual normalized brms 2.23.2 Stan with mgcv 1.9.4 basis; propto=false, jacobian=false. Exact signed-permutation coordinate map and independent analytic regeneration in ../oracles/splines.",
+  "grad_params": [
+    "theta"
+  ],
+  "expected_grad": [
+    {
+      "theta": [
+        -3.0378272995159863,
+        0.2521710745058352,
+        0.1299027919832403,
+        0.23589657070456546,
+        -0.21429917589380088,
+        -0.2676124605200715,
+        -0.5626144502516082,
+        -8.706782414658479
+      ]
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.00003,
+    "grad_rtol": 0
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "formula": "y | weights(w) ~ x",
+  "family": "categorical",
+  "data": {
+    "nrows": 6,
+    "columns": [
+      {
+        "name": "y",
+        "values": {
+          "kind": "factor",
+          "values": {
+            "levels": [
+              "unused",
+              "red",
+              "blue",
+              "green"
+            ],
+            "codes": [
+              1,
+              2,
+              3,
+              1,
+              3,
+              2
+            ]
+          }
+        }
+      },
+      {
+        "name": "x",
+        "values": {
+          "kind": "real64",
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      },
+      {
+        "name": "z",
+        "values": {
+          "kind": "real64",
+          "values": [
+            0,
+            1,
+            0,
+            2,
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "name": "w",
+        "values": {
+          "kind": "real64",
+          "values": [
+            1,
+            0.5,
+            2,
+            0,
+            1.25,
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "dpars": {
+    "mublue": {
+      "formula": "mublue ~ 0 + z"
+    },
+    "mugreen": {
+      "formula": "mugreen ~ x + offset(z)"
+    }
+  },
+  "priors": [
+    {
+      "class": "b",
+      "dpar": "mublue",
+      "prior": "normal(0,1.1)"
+    },
+    {
+      "class": "b",
+      "dpar": "mugreen",
+      "prior": "normal(0,.7)"
+    },
+    {
+      "class": "Intercept",
+      "dpar": "mugreen",
+      "prior": "normal(.2,1.3)"
+    }
+  ]
+}
