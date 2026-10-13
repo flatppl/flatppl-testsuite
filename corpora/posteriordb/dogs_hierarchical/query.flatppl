@@ -1,0 +1,4 @@
+p_a = elementof(unitinterval)
+p_b = elementof(unitinterval)
+inputs = (p_a, p_b)
+outputs = logdensityof(Pi_post, record(a = p_a, b = p_b))

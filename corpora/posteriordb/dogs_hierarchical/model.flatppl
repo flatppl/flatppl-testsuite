@@ -1,0 +1,33 @@
+%%%
+# Learning from shocks and avoidances
+
+PosteriorDB's `dogs-dogs_hierarchical`. Two shared probabilities describe
+learning across 25 trials for 30 dogs. Each shock probability depends on the
+numbers of shocks and avoidances strictly before that trial.
+The likelihood conditions on observed histories. Simulating new trajectories
+requires updating those histories from the simulated outcomes.
+%%%
+flatppl_compat = "0.1"
+
+J = 30
+T = 25
+data = load_data("data/dogs.json", cartprod(y = cartpow(nonnegintegers, [J, T])))
+dogs = indicesof(zeros(J))
+previous_trials = indicesof(zeros(T - 1))
+shock_history(j) = cat([0], scan((total, shock) -> total + shock,
+    0, data.y[j, previous_trials]))
+avoid_history(j) = (indicesof(zeros(T)) .- 1) .- shock_history(j)
+previous_shocks = rowstack(shock_history.(dogs))
+previous_avoidances = rowstack(avoid_history.(dogs))
+
+a ~ Uniform(unitinterval)
+b ~ Uniform(unitinterval)
+shock_probability = (a .^ previous_shocks) .* (b .^ previous_avoidances)
+y ~ Bernoulli.(shock_probability)
+
+Pi_prior = lawof(record(a = a, b = b))
+K_model = kernelof(record(y = y), a = a, b = b)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(a = unitinterval, b = unitinterval)
+Pi_post_input = record(a = 0.8, b = 0.8)

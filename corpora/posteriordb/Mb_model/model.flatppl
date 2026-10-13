@@ -1,0 +1,31 @@
+%%%
+# Capture-recapture with a response to the previous capture
+
+PosteriorDB's `Mb_data-Mb_model`. Present animals have capture probability c
+after a capture on the immediately preceding occasion, and p otherwise.
+The first occasion uses p. A mixture with an all-zero history marginalizes
+population membership separately for each animal.
+%%%
+flatppl_compat = "0.1"
+
+M = 318
+T = 5
+data = load_data("data/Mb_data.json", cartprod(y = cartpow(nonnegintegers, [M, T])))
+history(i) = data.y[i, :]
+histories = history.(indicesof(zeros(M)))
+
+omega ~ Uniform(unitinterval)
+p ~ Uniform(unitinterval)
+c ~ Uniform(unitinterval)
+capture_step(previous) = Bernoulli(ifelse(previous == 1, c, p))
+capture_history = normalize(superpose(
+    weighted(omega, markovchain(capture_step, 0, T)),
+    weighted(1 - omega, Dirac(fill(0, T)))))
+y ~ iid(capture_history, M)
+
+Pi_prior = lawof(record(omega = omega, p = p, c = c))
+K_model = kernelof(record(y = y), omega = omega, p = p, c = c)
+L = likelihoodof(K_model, record(y = histories))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(omega = unitinterval, p = unitinterval, c = unitinterval)
+Pi_post_input = record(omega = 0.5, p = 0.5, c = 0.5)

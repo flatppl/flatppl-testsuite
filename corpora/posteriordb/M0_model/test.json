@@ -1,0 +1,70 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_omega",
+    "p_p"
+  ],
+  "points": [
+    {
+      "p_omega": 0.423415,
+      "p_p": 0.497449
+    },
+    {
+      "p_omega": 0.38,
+      "p_p": 0.54
+    },
+    {
+      "p_omega": 0.47,
+      "p_p": 0.45
+    }
+  ],
+  "expected": [
+    -242.7033749151676,
+    -243.58034971908754,
+    -243.81508442708176
+  ],
+  "expected_grad": [
+    {
+      "p_omega": -2.2957476144871474,
+      "p_p": 0.3214461128324375
+    },
+    {
+      "p_omega": 22.855832579771814,
+      "p_p": -22.627340307514448
+    },
+    {
+      "p_omega": -20.49131677690761,
+      "p_p": 22.280494797260413
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "M0_model",
+    "dataset": "M0_data",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -242.7033749151676,
+      -243.58034971908754,
+      -243.81508442708176
+    ],
+    "log_density_offset": 0
+  }
+}
