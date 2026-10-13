@@ -1,0 +1,19 @@
+%%%
+# Binomial rate
+
+PosteriorDB's `Rate_1_data-Rate_1_model`: a uniform Beta prior for the
+success probability. The observations remain in the adjacent data file.
+%%%
+flatppl_compat = "0.1"
+
+data = load_data("data/Rate_1_data.json", cartprod(n = posintegers, k = nonnegintegers))
+
+theta ~ Beta(1, 1)
+y ~ Binomial(data.n, theta)
+
+Pi_prior = lawof(record(theta = theta))
+K_model = kernelof(record(y = y), theta = theta)
+L = likelihoodof(K_model, record(y = data.k))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = unitinterval)
+Pi_post_input = record(theta = 0.5)

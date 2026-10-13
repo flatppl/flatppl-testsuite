@@ -82,13 +82,15 @@ function resolveEngine(explicit) {
 async function main() {
   const { model, binding, theta, engineDir, count } = parseArgs(process.argv.slice(2));
   const engine = resolveEngine(engineDir);
-  const { processSource, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
+  const { processSource, resolveBundle, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
   const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
 
   const base = fs.readFileSync(model, 'utf8');
   const src = base + `\n__score__ = logdensityof(${binding}, ${theta})\n`;
 
-  const proc = processSource(src);
+  const sourcePath = path.resolve(model);
+  const bundle = await resolveBundle(sourcePath, src, (file) => fs.promises.readFile(file, 'utf8'));
+  const proc = processSource(src, { path: sourcePath, bundle });
   // Surface diagnostics, but do NOT abort on them: a diagnostic on a binding
   // off the scored measure's dependency path (e.g. a single-factor `cartprod`
   // domain the engine flags) does not affect the density. If a diagnostic does
@@ -97,7 +99,9 @@ async function main() {
     if (d.severity === 'error') process.stderr.write('diagnostic: ' + d.message + '\n');
   }
 
-  const built = orchestrator.buildDerivations(proc.bindings);
+  const built = orchestrator.buildDerivations(proc.linkedBindings, {
+    moduleRegistry: proc.linkedModuleRegistry,
+  });
   const w = createWorkerHandler();
   w.handle({ type: 'init', seed: 3 });
   const cache = new Map();
@@ -111,7 +115,7 @@ async function main() {
     marginalizationCount: 32,
     // The standard-module registry (e.g. `hepphys`) must be threaded into the
     // worker session env, or cross-module refs in the body fail to resolve.
-    moduleRegistry: proc.loweredModule && proc.loweredModule.moduleRegistry,
+    moduleRegistry: proc.linkedModuleRegistry,
     getMeasure: (n) => {
       if (cache.has(n)) return cache.get(n);
       const m = materialiser.materialiseMeasure(n, ctx);

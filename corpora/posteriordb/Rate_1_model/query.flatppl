@@ -1,0 +1,3 @@
+p_theta = elementof(interval(0, 1))
+inputs = p_theta
+outputs = logdensityof(Pi_post, record(theta = p_theta))

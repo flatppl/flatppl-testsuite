@@ -1,0 +1,113 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_alpha",
+    "p_beta",
+    "p_sigma"
+  ],
+  "points": [
+    {
+      "p_alpha": 0.2,
+      "p_beta": [
+        0.1,
+        0.2,
+        0.3,
+        -0.1,
+        0.05
+      ],
+      "p_sigma": 1
+    },
+    {
+      "p_alpha": 0.5,
+      "p_beta": [
+        0.3,
+        0.15,
+        -0.05,
+        0.1,
+        0.02
+      ],
+      "p_sigma": 0.5
+    },
+    {
+      "p_alpha": -0.1,
+      "p_beta": [
+        -0.1,
+        0.05,
+        0.1,
+        0.2,
+        0.1
+      ],
+      "p_sigma": 2
+    }
+  ],
+  "expected": [
+    -212.0674840755437,
+    -196.88334906994385,
+    -339.48003232910384
+  ],
+  "expected_grad": [
+    {
+      "p_alpha": -40.68321158922625,
+      "p_beta": [
+        21.278914291975045,
+        18.809785349220736,
+        15.483458993269297,
+        13.240398795056723,
+        9.319721708379975
+      ],
+      "p_sigma": -171.21971726664927
+    },
+    {
+      "p_alpha": -396.77603557325983,
+      "p_beta": [
+        92.83365393157132,
+        85.72110638843213,
+        75.96069033416519,
+        62.85710448578504,
+        49.29579854670349
+      ],
+      "p_sigma": 138.309843433005
+    },
+    {
+      "p_alpha": 4.256166848242551,
+      "p_beta": [
+        7.898072251778942,
+        7.094966703579403,
+        6.048320946750469,
+        4.923093109816267,
+        3.748612288180646
+      ],
+      "p_sigma": -93.95904969362763
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "arK",
+    "dataset": "arK",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -212.76063125610364,
+      -197.5764962505038,
+      -340.1731795096638
+    ],
+    "log_density_offset": 0.6931471805599453
+  }
+}
