@@ -1,0 +1,77 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_alpha",
+    "p_beta1",
+    "p_beta2"
+  ],
+  "points": [
+    {
+      "p_alpha": 0.2,
+      "p_beta1": -0.4,
+      "p_beta2": 0.1
+    },
+    {
+      "p_alpha": -0.7,
+      "p_beta1": 1.2,
+      "p_beta2": -0.5
+    },
+    {
+      "p_alpha": -14,
+      "p_beta1": 25,
+      "p_beta2": -4
+    }
+  ],
+  "expected": [
+    -226.06657590421176,
+    -1053.9943157972127,
+    -27381.300091697125
+  ],
+  "expected_grad": [
+    {
+      "p_alpha": 297.47524965709454,
+      "p_beta1": 47.42148062891368,
+      "p_beta2": 45.32364671939614
+    },
+    {
+      "p_alpha": 919.6678523909674,
+      "p_beta1": -221.0121532044577,
+      "p_beta2": 254.8411003999668
+    },
+    {
+      "p_alpha": 1294.0005270227368,
+      "p_beta1": -386.43016109648437,
+      "p_beta2": 216.75399843837735
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "GLM_Binomial_model",
+    "dataset": "GLM_Binomial_data",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -226.06657590421176,
+      -1053.9943157972127,
+      -27381.300091697125
+    ],
+    "log_density_offset": 0
+  }
+}

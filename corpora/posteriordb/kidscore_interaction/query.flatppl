@@ -1,0 +1,4 @@
+p_beta = elementof(cartpow(reals, 4))
+p_sigma = elementof(posreals)
+inputs = (p_beta, p_sigma)
+outputs = logdensityof(Pi_post, record(beta = p_beta, sigma = p_sigma))

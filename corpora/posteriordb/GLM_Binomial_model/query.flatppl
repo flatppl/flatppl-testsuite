@@ -1,0 +1,5 @@
+p_alpha = elementof(reals)
+p_beta1 = elementof(reals)
+p_beta2 = elementof(reals)
+inputs = (p_alpha, p_beta1, p_beta2)
+outputs = logdensityof(Pi_post, record(alpha = p_alpha, beta1 = p_beta1, beta2 = p_beta2))

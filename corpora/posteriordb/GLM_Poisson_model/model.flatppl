@@ -1,0 +1,28 @@
+%%%
+# Poisson regression
+
+PosteriorDB's `GLM_Poisson_Data-GLM_Poisson_model`. A cubic year trend
+determines the log rate. Bounded flat priors match the original Stan target.
+These priors admit density evaluation and MCMC, but no prior sampling.
+%%%
+flatppl_compat = "0.1"
+regression = standard_module("regression", "0.1")
+
+N = 40
+data = load_data("data/GLM_Poisson_Data.json", cartprod(
+    C = cartpow(nonnegintegers, N), year = cartpow(reals, N)))
+
+alpha ~ regression.Flat(interval(-20, 20))
+beta1 ~ regression.Flat(interval(-10, 10))
+beta2 ~ regression.Flat(interval(-10, 10))
+beta3 ~ regression.Flat(interval(-10, 10))
+eta = alpha .+ beta1 .* data.year .+ beta2 .* data.year.^2 .+ beta3 .* data.year.^3
+y ~ Poisson.(exp.(eta))
+
+Pi_prior = lawof(record(alpha = alpha, beta1 = beta1, beta2 = beta2, beta3 = beta3))
+K_model = kernelof(record(y = y), alpha = alpha, beta1 = beta1, beta2 = beta2, beta3 = beta3)
+L = likelihoodof(K_model, record(y = data.C))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = interval(-20, 20), beta1 = interval(-10, 10),
+                          beta2 = interval(-10, 10), beta3 = interval(-10, 10))
+Pi_post_input = record(alpha = 1.0, beta1 = 0.0, beta2 = 0.0, beta3 = 0.0)

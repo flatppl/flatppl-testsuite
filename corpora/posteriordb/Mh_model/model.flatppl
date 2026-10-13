@@ -1,0 +1,30 @@
+%%%
+# Capture-recapture with heterogeneity
+
+PosteriorDB's `Mh_data-Mh_model`. Individual detection rates vary through
+Normal effects. A mixture marginalizes presence indicators, including the
+never-detected animals. Bounded flat priors match the original Stan target.
+%%%
+flatppl_compat = "0.1"
+regression = standard_module("regression", "0.1")
+
+M = 385
+data = load_data("data/Mh_data.json", cartprod(
+    T = posintegers, y = cartpow(nonnegintegers, M)))
+
+omega ~ regression.Flat(unitinterval)
+mean_p ~ regression.Flat(unitinterval)
+sigma ~ regression.Flat(interval(0, 5))
+eps_raw ~ iid(Normal(0, 1), M)
+p = invlogit.(logit(mean_p) .+ sigma .* eps_raw)
+capture(p, omega) = normalize(superpose(weighted(omega, Binomial(data.T, p)),
+                                         weighted(1 - omega, Dirac(0))))
+y ~ capture.(p, omega)
+
+Pi_prior = lawof(record(omega = omega, mean_p = mean_p, sigma = sigma, eps_raw = eps_raw))
+K_model = kernelof(record(y = y), omega = omega, mean_p = mean_p, sigma = sigma, eps_raw = eps_raw)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(omega = unitinterval, mean_p = unitinterval,
+                          sigma = interval(0, 5), eps_raw = cartpow(reals, M))
+Pi_post_input = record(omega = 0.5, mean_p = 0.3, sigma = 1.0, eps_raw = zeros(M))

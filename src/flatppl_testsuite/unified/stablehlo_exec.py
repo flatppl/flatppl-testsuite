@@ -87,7 +87,7 @@ def emit_concat(
     mode: str,
     query_name: str = "query.flatppl",
     model_name: str = "model.flatppl",
-    *, restrict_enzyme_compatible: bool = True,
+    *, dtype: str | None = None, restrict_enzyme_compatible: bool = True,
     numerical_integrals: bool = False,
 ) -> str:
     """Emit ``model_name`` + ``query_name`` concatenated into one module.
@@ -111,7 +111,7 @@ def emit_concat(
         f.write(src_text)
         tmp = Path(f.name)
     try:
-        return emit(tmp, mode, restrict_enzyme_compatible=restrict_enzyme_compatible,
+        return emit(tmp, mode, dtype=dtype, restrict_enzyme_compatible=restrict_enzyme_compatible,
                     numerical_integrals=numerical_integrals)
     finally:
         tmp.unlink(missing_ok=True)

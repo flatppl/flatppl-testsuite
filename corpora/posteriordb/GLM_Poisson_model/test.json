@@ -1,0 +1,84 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_alpha",
+    "p_beta1",
+    "p_beta2",
+    "p_beta3"
+  ],
+  "points": [
+    {
+      "p_alpha": 4.5,
+      "p_beta1": 0.7,
+      "p_beta2": 0.05,
+      "p_beta3": -0.1
+    },
+    {
+      "p_alpha": 4,
+      "p_beta1": 1,
+      "p_beta2": -0.2,
+      "p_beta3": 0.1
+    },
+    {
+      "p_alpha": 5,
+      "p_beta1": 0.3,
+      "p_beta2": 0.1,
+      "p_beta3": 0.03
+    }
+  ],
+  "expected": [
+    -302.65810605552906,
+    -530.161450276355,
+    -1123.6686320563422
+  ],
+  "expected_grad": [
+    {
+      "p_alpha": 42.51380992965547,
+      "p_beta1": 1019.8864687858816,
+      "p_beta2": 390.0515264587953,
+      "p_beta3": 1624.1242926900852
+    },
+    {
+      "p_alpha": 1279.5870412997156,
+      "p_beta1": 552.4406123566191,
+      "p_beta2": 1254.2447400388382,
+      "p_beta3": 449.3245388698001
+    },
+    {
+      "p_alpha": -2637.1841423906803,
+      "p_beta1": 610.4277075240782,
+      "p_beta2": -2679.470253178903,
+      "p_beta3": 454.32588725200407
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "GLM_Poisson_model",
+    "dataset": "GLM_Poisson_Data",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -302.65810605552906,
+      -530.161450276355,
+      -1123.6686320563422
+    ],
+    "log_density_offset": 0
+  }
+}

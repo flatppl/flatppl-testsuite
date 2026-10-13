@@ -1,0 +1,6 @@
+p_alpha = elementof(interval(-20, 20))
+p_beta1 = elementof(interval(-10, 10))
+p_beta2 = elementof(interval(-10, 10))
+p_beta3 = elementof(interval(-10, 10))
+inputs = (p_alpha, p_beta1, p_beta2, p_beta3)
+outputs = logdensityof(Pi_post, record(alpha = p_alpha, beta1 = p_beta1, beta2 = p_beta2, beta3 = p_beta3))

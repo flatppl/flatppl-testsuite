@@ -1,0 +1,106 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_beta",
+    "p_sigma"
+  ],
+  "points": [
+    {
+      "p_beta": [
+        0.8,
+        -0.3,
+        0.5,
+        1.1,
+        -0.7
+      ],
+      "p_sigma": 30
+    },
+    {
+      "p_beta": [
+        1,
+        0.5,
+        -0.2,
+        0.8,
+        0.3
+      ],
+      "p_sigma": 10
+    },
+    {
+      "p_beta": [
+        1.1,
+        0.7,
+        0.4,
+        -0.2,
+        0.6
+      ],
+      "p_sigma": 50
+    }
+  ],
+  "expected": [
+    -2744.0930107831286,
+    -11784.938219972084,
+    -921.590184868268
+  ],
+  "expected_grad": [
+    {
+      "p_beta": [
+        465.52952784894165,
+        1153.7095506082376,
+        635.8051299867944,
+        -247.2647327050614,
+        1552.8259810864974
+      ],
+      "p_sigma": 148.96200164798756
+    },
+    {
+      "p_beta": [
+        2581.7362003753456,
+        4414.949061180586,
+        13761.227426726364,
+        3090.9921230895206,
+        5043.296462348515
+      ],
+      "p_sigma": 2278.6279525551163
+    },
+    {
+      "p_beta": [
+        -28.91256818324426,
+        35.73043421840554,
+        343.4735497438803,
+        456.79562207429063,
+        114.83351403655104
+      ],
+      "p_sigma": 13.793869457134145
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "blr",
+    "dataset": "sblri",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -2744.7861579636888,
+      -11785.631367152644,
+      -922.2833320488279
+    ],
+    "log_density_offset": 0.6931471805599453
+  }
+}
