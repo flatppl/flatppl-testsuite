@@ -13,9 +13,12 @@ and `(x-lower)*(upper-x)/(upper-lower)` for a finite interval.
 
 FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 `log(2)` to Stan's score for `arK`, `blr`, `eight_schools_centered`, and
-`kidscore_interaction`, and `2*log(2)` for `gp_regr`. These constants leave
-the gradients and posterior laws unchanged. Each manifest records the raw
-Stan scores and its offset. Flat priors retain zero density contribution.
+`kidscore_interaction`, and `2*log(2)` for `gp_regr`. Proper Uniform priors on
+fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
+`-log(5)` for `Mh_model`. These constants leave the gradients and posterior
+laws unchanged. Each manifest records the raw Stan scores and its offset.
+Only Kidscore's unbounded coefficient priors retain `Flat` and its zero
+density contribution.
 
 All 30 oracle points passed an independent unconstraining check. A constrained
 directional finite difference checked each model, with maximum scaled error
