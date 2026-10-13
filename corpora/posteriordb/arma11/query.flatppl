@@ -1,0 +1,6 @@
+p_mu = elementof(reals)
+p_phi = elementof(reals)
+p_theta = elementof(reals)
+p_sigma = elementof(posreals)
+inputs = (p_mu, p_phi, p_theta, p_sigma)
+outputs = logdensityof(Pi_post, record(mu = p_mu, phi = p_phi, theta = p_theta, sigma = p_sigma))

@@ -1,0 +1,84 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_mu",
+    "p_phi",
+    "p_theta",
+    "p_sigma"
+  ],
+  "points": [
+    {
+      "p_mu": 0.00691486351224137,
+      "p_phi": 0.957012888586847,
+      "p_theta": -0.0336960218471,
+      "p_sigma": 0.166481622433993
+    },
+    {
+      "p_mu": 0.02,
+      "p_phi": 0.92,
+      "p_theta": 0.08,
+      "p_sigma": 0.18
+    },
+    {
+      "p_mu": -0.01,
+      "p_phi": 0.98,
+      "p_theta": -0.12,
+      "p_sigma": 0.15
+    }
+  ],
+  "expected": [
+    69.46953158852745,
+    65.3750089108443,
+    64.8485701945839
+  ],
+  "expected_grad": [
+    {
+      "p_mu": -0.9788517152565804,
+      "p_phi": 0.5722801047515009,
+      "p_theta": -2.74272223425296,
+      "p_sigma": -31.47737932561902
+    },
+    {
+      "p_mu": -65.19154960288343,
+      "p_phi": 35.389417695634634,
+      "p_theta": -20.840914543705072,
+      "p_sigma": -157.0392033150547
+    },
+    {
+      "p_mu": 186.76402518806233,
+      "p_phi": -46.95955571279055,
+      "p_theta": 27.545463036521348,
+      "p_sigma": 304.6016070502334
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "arma11",
+    "dataset": "arma",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      68.7763844079675,
+      64.68186173028435,
+      64.15542301402395
+    ],
+    "log_density_offset": 0.6931471805599453
+  }
+}

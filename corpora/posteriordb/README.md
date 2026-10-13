@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Ten models from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Sixteen models from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The models also live in
 [`flatppl-examples/posteriordb`](https://github.com/flatppl/flatppl-examples/tree/main/posteriordb).
@@ -10,19 +10,21 @@ BridgeStan 2.9.0 evaluated the original Stan models with `propto=false` and
 flag. Divide each derivative by the scalar forward-chart derivative to obtain
 the saved constrained gradient: one for reals, `x-lower` for a lower bound,
 and `(x-lower)*(upper-x)/(upper-lower)` for a finite interval.
+For ordered means, solve the coupled chart: `g2=h2/(mu2-mu1)` and
+`g1=h1-g2`, where `h` is Stan's free-coordinate gradient.
 
 FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 `log(2)` to Stan's score for `arK`, `blr`, `eight_schools_centered`, and
-`kidscore_interaction`, and `2*log(2)` for `gp_regr`. Proper Uniform priors on
+`kidscore_interaction`, and `arma11`, and `2*log(2)` for `gp_regr`. Proper Uniform priors on
 fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `-log(5)` for `Mh_model`. These constants leave the gradients and posterior
-laws unchanged. Each manifest records the raw Stan scores and its offset.
+laws unchanged. The ordered mixture adds `3*log(2)`. Each manifest records the raw Stan scores and its offset.
 Only Kidscore's unbounded coefficient priors retain `Flat` and its zero
 density contribution.
 
-All 30 oracle points passed an independent unconstraining check. A constrained
+All 48 oracle points passed an independent unconstraining check. A constrained
 directional finite difference checked each model, with maximum scaled error
-`5.37e-9`. The rate model also matched an analytic Beta-Binomial calculation.
+`1.68e-7`. The rate model also matched an analytic Beta-Binomial calculation.
 These are density and differentiation checks, not convergence claims.
 
 The unified tests check densities through Rust-to-JS and StableHLO.

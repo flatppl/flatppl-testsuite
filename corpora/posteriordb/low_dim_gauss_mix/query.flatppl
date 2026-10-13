@@ -1,0 +1,5 @@
+p_mu = elementof(ordered(2))
+p_sigma = elementof(cartpow(posreals, 2))
+p_theta = elementof(unitinterval)
+inputs = (p_mu, p_sigma, p_theta)
+outputs = logdensityof(Pi_post, record(mu = p_mu, sigma = p_sigma, theta = p_theta))

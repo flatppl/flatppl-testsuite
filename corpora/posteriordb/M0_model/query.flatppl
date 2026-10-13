@@ -1,0 +1,4 @@
+p_omega = elementof(unitinterval)
+p_p = elementof(unitinterval)
+inputs = (p_omega, p_p)
+outputs = logdensityof(Pi_post, record(omega = p_omega, p = p_p))
