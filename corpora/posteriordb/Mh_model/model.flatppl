@@ -3,18 +3,18 @@
 
 PosteriorDB's `Mh_data-Mh_model`. Individual detection rates vary through
 Normal effects. A mixture marginalizes presence indicators, including the
-never-detected animals. Bounded flat priors match the original Stan target.
+never-detected animals. Uniform priors on Stan's bounds preserve the
+original posterior law and support prior sampling.
 %%%
 flatppl_compat = "0.1"
-regression = standard_module("regression", "0.1")
 
 M = 385
 data = load_data("data/Mh_data.json", cartprod(
     T = posintegers, y = cartpow(nonnegintegers, M)))
 
-omega ~ regression.Flat(unitinterval)
-mean_p ~ regression.Flat(unitinterval)
-sigma ~ regression.Flat(interval(0, 5))
+omega ~ Uniform(unitinterval)
+mean_p ~ Uniform(unitinterval)
+sigma ~ Uniform(interval(0, 5))
 eps_raw ~ iid(Normal(0, 1), M)
 p = invlogit.(logit(mean_p) .+ sigma .* eps_raw)
 capture(p, omega) = normalize(superpose(weighted(omega, Binomial(data.T, p)),

@@ -2,20 +2,19 @@
 # Poisson regression
 
 PosteriorDB's `GLM_Poisson_Data-GLM_Poisson_model`. A cubic year trend
-determines the log rate. Bounded flat priors match the original Stan target.
-These priors admit density evaluation and MCMC, but no prior sampling.
+determines the log rate. Uniform priors on Stan's bounds preserve the
+original posterior law and support prior sampling.
 %%%
 flatppl_compat = "0.1"
-regression = standard_module("regression", "0.1")
 
 N = 40
 data = load_data("data/GLM_Poisson_Data.json", cartprod(
     C = cartpow(nonnegintegers, N), year = cartpow(reals, N)))
 
-alpha ~ regression.Flat(interval(-20, 20))
-beta1 ~ regression.Flat(interval(-10, 10))
-beta2 ~ regression.Flat(interval(-10, 10))
-beta3 ~ regression.Flat(interval(-10, 10))
+alpha ~ Uniform(interval(-20, 20))
+beta1 ~ Uniform(interval(-10, 10))
+beta2 ~ Uniform(interval(-10, 10))
+beta3 ~ Uniform(interval(-10, 10))
 eta = alpha .+ beta1 .* data.year .+ beta2 .* data.year.^2 .+ beta3 .* data.year.^3
 y ~ Poisson.(exp.(eta))
 
