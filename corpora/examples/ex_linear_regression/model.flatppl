@@ -16,20 +16,20 @@ sigma = sqrt(sigma_sq)
 alpha ~ Normal(0, sigma * 3)
 beta ~ Normal(0, sigma * 3)
 
-Pi_prior = lawof(record(alpha = alpha, beta = beta, sigma = sigma))
+Pi_prior = lawof((alpha = alpha, beta = beta, sigma = sigma))
 
 means = alpha .+ beta .* x_data
 
 y ~ Normal.(means, sigma)
 
-K_model = kernelof(record(y = y), alpha = alpha, beta = beta, sigma = sigma) % Forward kernel (observation model)
+K_model = kernelof((y = y), alpha, beta, sigma) % Forward kernel (observation model)
 
-L = likelihoodof(K_model, record(y = y_data))
+L = likelihoodof(K_model, (y = y_data))
 
 Pi_post = bayesupdate(L, Pi_prior)
 
 % Point preset for likelihood
-L_input = record(alpha = 0.55, beta = 2.34, sigma = 0.11)
+L_input = (alpha = 0.55, beta = 2.34, sigma = 0.11)
 
 % Domain preset for likelihood
 L_domain = cartprod(

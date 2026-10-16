@@ -38,8 +38,8 @@
   "oracle": "Independent scalar recurrence and Gaussian/Uniform log densities",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "revision": "d4e68b5848e7cade1d31d4a4b74c0b891633dfec",
     "path": "examples/hgf-binary-2level.flatppl",
-    "sha256": "1f6c8b19a15b4b2eac047a7db08e669543cc058bdcb42a5ebf8364ea7b1a1b58"
+    "sha256": "f0a88ca8bdfff8666dc9094447e0e6e91758601808428f8d3e96b42322e202ab"
   }
 }

@@ -1,0 +1,3 @@
+lp = logdensityof(L, (a = a, b = b))
+inputs = (a, b)
+outputs = lp

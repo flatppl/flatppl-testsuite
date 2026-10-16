@@ -1,0 +1,8 @@
+flatppl_compat = "0.1"
+
+a = elementof(reals)
+b = elementof(reals)
+parameters = (location = a + 2 * b, scale = (sd = 2))
+y ~ Normal(parameters.location, parameters.scale.sd)
+K = kernelof((y = y), a = a, b)
+L = likelihoodof(K, (y = 15))
