@@ -6,18 +6,19 @@ and IQ enter a Normal regression with an interaction. Coefficients have flat
 priors. The normalized half-Cauchy adds the constant log(2) to Stan's target.
 %%%
 flatppl_compat = "0.1"
-regression = standard_module("regression", "0.1")
 
 N = 434
 data = load_data("data/kidiq.json", cartprod(kid_score = cartpow(reals, N),
     mom_hs = cartpow(reals, N), mom_iq = cartpow(reals, N)))
 X = colstack([ones(N), data.mom_hs, data.mom_iq, data.mom_hs .* data.mom_iq])
 
-beta ~ iid(regression.Flat(), 4)
+beta = elementof(cartpow(reals, 4))
 sigma ~ normalize(truncate(Cauchy(0, 2.5), interval(0, inf)))
 y ~ Normal.(X * beta, sigma)
 
-Pi_prior = lawof(record(beta = beta, sigma = sigma))
+Pi_proper = lawof((sigma = sigma))
+Pi_improper = Lebesgue(cartprod(beta = cartpow(reals, 4)))
+Pi_prior = joint(Pi_improper, Pi_proper)
 K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
 L = likelihoodof(K_model, record(y = data.kid_score))
 Pi_post = bayesupdate(L, Pi_prior)
