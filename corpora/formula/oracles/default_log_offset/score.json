@@ -24,7 +24,7 @@
     ]
   },
   "default_priors": {
-    "b": "Flat()",
+    "b": "Lebesgue(reals)",
     "Intercept": "student_t(3, -1.33677688267937, 2.5)",
     "sigma": "student_t(3, 0, 3), normalized above0"
   },

@@ -8,7 +8,7 @@ real values. Each `score.json` retains the raw Stan order, the query order,
 parameter points and mapped gradients; `cases.json` records source/data hashes.
 
 The first retained factor level is the reference category. `default` uses
-centred category predictors and brms's Student-t intercept/Flat coefficient
+centred category predictors and brms's Student-t intercept/improper Lebesgue coefficient
 priors. `weighted` combines a no-intercept category, a category-specific offset,
 proper Normal priors and zero/fractional weights. `reordered` relabels categories
 so their lexical predictor order differs from their response-level order.

@@ -19,7 +19,7 @@ FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `-log(5)` for `Mh_model`. These constants leave the gradients and posterior
 laws unchanged. The ordered mixture adds `3*log(2)`. Each manifest records the raw Stan scores and its offset.
-Only Kidscore's unbounded coefficient priors retain `Flat` and its zero
+Kidscore's unbounded coefficient priors use explicit Lebesgue measure and its zero
 density contribution.
 
 All 48 oracle points passed an independent unconstraining check. A constrained

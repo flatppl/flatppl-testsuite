@@ -1,0 +1,9 @@
+%%%
+# Reference priors on affine supports
+
+Both priors have unit density relative to their coordinate reference measures.
+The score is zero only when the zero-sum and simplex constraints hold.
+%%%
+flatppl_compat = "0.1"
+
+prior = joint(effects = Lebesgue(zerosum(3)), weights = Lebesgue(stdsimplex(3)))

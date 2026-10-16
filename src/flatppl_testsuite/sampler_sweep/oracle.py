@@ -217,7 +217,6 @@ FAMILIES: tuple[Family, ...] = (
 # nothing for this sweep to draw. Recorded so the roster is auditable as
 # COMPLETE against `sampler-registry.ts` rather than merely long.
 DENSITY_ONLY: tuple[tuple[str, str], ...] = (
-    ("Flat", "improper prior per §09; infinite mass, so no random sampler"),
     ("ContinuedPoisson", "density-only per §09; sampler stub throws (not generative)"),
     ("CrystalBall", "density-only HEP shape; `_hepDensityOnly` stub throws"),
     ("DoubleSidedCrystalBall", "density-only HEP shape; `_hepDensityOnly` stub throws"),

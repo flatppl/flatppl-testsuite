@@ -1,4 +1,4 @@
-"""Flat prior composition against an exact Gaussian posterior."""
+"""Reference prior composition against an exact Gaussian posterior."""
 
 import math
 
@@ -11,22 +11,21 @@ from tests.test_unified import _gate_engine
 
 @pytest.mark.stablehlo_only
 @pytest.mark.parametrize("precision,tolerance", [("f32", 2e-5), ("f64", 1e-11)])
-def test_flat_prior_scores_and_gradients_preserve_a_gaussian_posterior(
+def test_reference_prior_scores_and_gradients_preserve_a_gaussian_posterior(
     tmp_path, precision, tolerance,
 ):
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"
     query.write_text(
-        'reg = standard_module("regression", "0.1")\n'
-        "b ~ reg.Flat()\nz ~ Normal(0, 1)\n"
-        "prior = lawof(record(b = b, z = z))\n"
+        "b = elementof(reals)\nz ~ Normal(0, 1)\n"
+        "prior = joint(joint(b = Lebesgue(reals)), lawof(record(z = z)))\n"
         "y ~ Normal(b + z, 1)\n"
         "model = kernelof(y, b = b, z = z)\n"
         "posterior = bayesupdate(likelihoodof(model, 2), prior)\n"
         "point = elementof(cartpow(reals, 2))\n"
         "parameters = record(b = point[1], z = point[2])\n"
         "inputs = point\n"
-        "outputs = (logdensityof(iid(reg.Flat(), 2), point), "
+        "outputs = (logdensityof(iid(Lebesgue(reals), 2), point), "
         "logdensityof(prior, parameters), logdensityof(posterior, parameters))\n"
     )
     source = ex.emit(query, "logdensity", dtype=precision)
