@@ -21,12 +21,12 @@ action_noise = exp(log_noise)
 # The probability node uses ClassicUpdate: precision updates before the mean.
 prediction_variance(precision) = 1 / precision + exp(omega)
 posterior_precision(mean, precision) = 1 / prediction_variance(precision) + invlogit(mean) * (1 - invlogit(mean))
-step(mean, precision, input) = record(
+step(mean, precision, input) = (
     mean = mean + (input - invlogit(mean)) / posterior_precision(mean, precision),
     precision = posterior_precision(mean, precision)
 )
 
-s0 = record(mean = 0, precision = 1)
+s0 = (mean = 0, precision = 1)
 update(state, input) = step(state.mean, state.precision, input)
 states = scan(update, s0, u_data)
 state_mean(state) = state.mean
@@ -36,12 +36,12 @@ precisions = state_precision.(states)
 choice_probability = invlogit.(means ./ action_noise)
 choice ~ Bernoulli.(choice_probability)
 
-prior = lawof(record(omega = omega, log_noise = log_noise))
-forward_kernel = kernelof(record(choice = choice), omega = omega, log_noise = log_noise)
-L = likelihoodof(forward_kernel, record(choice = choice_data))
+prior = lawof((omega = omega, log_noise = log_noise))
+forward_kernel = kernelof((choice = choice), omega, log_noise)
+L = likelihoodof(forward_kernel, (choice = choice_data))
 posterior = bayesupdate(L, prior)
 
-mean_trajectory = functionof(means, omega = omega)
-precision_trajectory = functionof(precisions, omega = omega)
-choice_probabilities = functionof(choice_probability, omega = omega, log_noise = log_noise)
-default_pars = record(omega = -2, log_noise = 0)
+mean_trajectory = functionof(means, omega)
+precision_trajectory = functionof(precisions, omega)
+choice_probabilities = functionof(choice_probability, omega, log_noise)
+default_pars = (omega = -2, log_noise = 0)
