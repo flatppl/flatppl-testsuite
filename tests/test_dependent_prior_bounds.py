@@ -17,28 +17,27 @@ def test_record_prior_keeps_runtime_bounds_and_normalizers(tmp_path, precision, 
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"
     query.write_text(
-        'reg = standard_module("regression", "0.1")\n'
         "sigma ~ Exponential(2)\n"
-        "b_flat ~ iid(reg.Flat(interval(0, sigma)), 1)\n"
+        "reference = joint(b = iid(Lebesgue(interval(0, sigma)), 1))\n"
         "b_normal ~ iid(normalize(truncate(Normal(0, 1), interval(0, sigma))), 1)\n"
-        "flat_prior = lawof(record(b = b_flat, sigma = sigma))\n"
-        "normal_prior = lawof(record(b = b_normal, sigma = sigma))\n"
-        "point = elementof(cartprod(b = cartpow(reals, 1), sigma = posreals))\n"
+        "reference_prior = jointchain(lawof(record(sigma = sigma)), functionof(reference, sigma = sigma))\n"
+        "normal_prior = lawof(record(sigma = sigma, b = b_normal))\n"
+        "point = elementof(cartprod(sigma = posreals, b = cartpow(reals, 1)))\n"
         "inputs = point\n"
-        "outputs = (logdensityof(flat_prior, point), logdensityof(normal_prior, point))\n"
+        "outputs = (logdensityof(reference_prior, point), logdensityof(normal_prior, point))\n"
     )
     source = ex.emit(query, "logdensity", dtype=precision)
     jax, jnp, hlo_call = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
 
     def scores(point):
-        return jnp.stack(hlo_call(point[:1], point[1], source=source))
+        return jnp.stack(hlo_call(point[1], point[:1], source=source))
 
     values = jax.jit(scores)
     gradients = jax.jit(jax.jacrev(scores))
     for point in np.array([[.5, 2], [.15, .3], [2, 3]], dtype=dtype):
         b, sigma = point.astype(np.float64)
-        flat_score = math.log(2) - 2 * sigma
+        reference_score = math.log(2) - 2 * sigma
         mass = .5 * math.erf(sigma / math.sqrt(2))
         log_phi_b = -.5 * (math.log(2 * math.pi) + b**2)
         phi_sigma = math.exp(-.5 * sigma**2) / math.sqrt(2 * math.pi)
@@ -46,7 +45,7 @@ def test_record_prior_keeps_runtime_bounds_and_normalizers(tmp_path, precision, 
         assert actual_values.devices() == {jax.devices()[0]}
         assert actual_gradients.devices() == {jax.devices()[0]}
         np.testing.assert_allclose(
-            actual_values, [flat_score, flat_score + log_phi_b - math.log(mass)],
+            actual_values, [reference_score, reference_score + log_phi_b - math.log(mass)],
             rtol=tolerance, atol=tolerance,
         )
         np.testing.assert_array_equal(actual_gradients[0], [0, -2])
@@ -55,7 +54,7 @@ def test_record_prior_keeps_runtime_bounds_and_normalizers(tmp_path, precision, 
             rtol=tolerance, atol=tolerance,
         )
     # The same compiled query must observe the new upper bound, not a captured
-    # value from the earlier calls. Flat receives no finite-volume normalizer.
+    # value from the earlier calls. Lebesgue receives no finite-volume normalizer.
     outside = values(jnp.asarray([.5, .25], dtype=dtype))
     assert np.all(np.isneginf(outside))
 

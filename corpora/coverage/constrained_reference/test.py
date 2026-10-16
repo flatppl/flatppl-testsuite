@@ -1,6 +1,6 @@
-"""Closed-form score for a Gaussian observation with a constrained Flat prior.
+"""Closed-form score for a Gaussian observation with a constrained Lebesgue prior.
 
-The Flat factor contributes only its support indicator. In particular, the
+The Lebesgue factor contributes only its support indicator. In particular, the
 equal-x points at widths 0.75 and 1.5 must differ only by the Exponential
 prior contribution, not by an additional -log(2).
 """

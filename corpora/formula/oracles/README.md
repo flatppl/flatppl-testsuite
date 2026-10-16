@@ -81,7 +81,7 @@ gradient. Stan's first ordered coordinate is unconstrained and later ones are
 log gaps. For the two thresholds here, convert raw derivatives `(g1, g2)` to
 `(g1 - g2/gap, g2/gap)`. No ordered-chart Jacobian belongs in either score.
 The explicit-Normal case includes predictors reaching ±20; the default case
-uses Student-t(3, 0, 2.5) thresholds and a Flat coefficient prior.
+uses Student-t(3, 0, 2.5) thresholds and a improper Lebesgue coefficient prior.
 
 The weighted Gaussian and Binomial cases retain weights `[0, 0.5, 2, 3]`
 without rescaling. Their two points score normalized row likelihoods with those
