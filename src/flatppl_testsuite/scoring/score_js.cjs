@@ -82,15 +82,14 @@ function resolveEngine(explicit) {
 async function main() {
   const { model, binding, theta, engineDir, count } = parseArgs(process.argv.slice(2));
   const engine = resolveEngine(engineDir);
-  const { processSource, resolveBundle, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
+  const { processSource, resolveBundleBytes, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
   const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
 
-  const base = fs.readFileSync(model, 'utf8');
-  const src = base + `\n__score__ = logdensityof(${binding}, ${theta})\n`;
-
   const sourcePath = path.resolve(model);
-  const bundle = await resolveBundle(sourcePath, src, (file) => fs.promises.readFile(file, 'utf8'));
-  const proc = processSource(src, { path: sourcePath, bundle });
+  const bundle = await resolveBundleBytes(sourcePath, fs.readFileSync(model),
+    (file) => file.startsWith('flatppl-zip:') ? null : fs.promises.readFile(file), { strict: false });
+  const src = bundle.primarySource + `\n__score__ = logdensityof(${binding}, ${theta})\n`;
+  const proc = processSource(src, { path: bundle.primaryPath, bundle });
   // Surface diagnostics, but do NOT abort on them: a diagnostic on a binding
   // off the scored measure's dependency path (e.g. a single-factor `cartprod`
   // domain the engine flags) does not affect the density. If a diagnostic does

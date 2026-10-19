@@ -59,17 +59,19 @@ function resolveEngine(explicit) {
 async function main() {
   const { model, binding, engineDir } = parseArgs(process.argv.slice(2));
   const engine = resolveEngine(engineDir);
-  const { processSource, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
+  const { processSource, resolveBundleBytes, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
   const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
 
-  const src = fs.readFileSync(model, 'utf8');
-
-  const proc = processSource(src);
+  const bundle = await resolveBundleBytes(path.resolve(model), fs.readFileSync(model),
+    (file) => file.startsWith('flatppl-zip:') ? null : fs.promises.readFile(file), { strict: false });
+  const proc = processSource(bundle.primarySource, { path: bundle.primaryPath, bundle });
   for (const d of proc.diagnostics || []) {
     if (d.severity === 'error') process.stderr.write('diagnostic: ' + d.message + '\n');
   }
 
-  const built = orchestrator.buildDerivations(proc.bindings);
+  const built = orchestrator.buildDerivations(proc.linkedBindings, {
+    moduleRegistry: proc.linkedModuleRegistry,
+  });
   const w = createWorkerHandler();
   w.handle({ type: 'init', seed: 3 });
   const cache = new Map();
@@ -81,7 +83,7 @@ async function main() {
     rootKey: 3,
     rootSeed: 3,
     marginalizationCount: 32,
-    moduleRegistry: proc.loweredModule && proc.loweredModule.moduleRegistry,
+    moduleRegistry: proc.linkedModuleRegistry,
     getMeasure: (n) => {
       if (cache.has(n)) return cache.get(n);
       const m = materialiser.materialiseMeasure(n, ctx);
