@@ -1,18 +1,16 @@
 """Independent oracle for frag_shared_latent_joint.
 
-The `joint` spelling of `shared_latent_record`: `joint(y1 = lawof(y1), y2 =
-lawof(y2))` over `z ~ Normal(mu=0.0, sigma=1.0)`; `y1, y2 | z ~ Normal(mu=z,
-sigma=1.0)`. §06 "Equivalent record law" makes this joint
-equivalent to `lawof(record(y1 = y1, y2 = y2))` -- the shared ancestor `z` is
-traced once, so the two named components stay correlated rather than becoming
-independent copies. The joint law of `record(y1 = y1, y2 = y2)` is
+The shared ancestor in `z ~ Normal(mu=0.0, sigma=1.0)` and
+`y1, y2 | z ~ Normal(mu=z, sigma=1.0)` is retained inside one
+`lawof(record(y1 = y1, y2 = y2))`. Separate law components in `joint` would
+instead be independent. The law of `record(y1 = y1, y2 = y2)` is
 `MvNormal(mu0 * 1, s0**2 * J + diag(sigma**2))` with `J` all-ones, scored at
 `(y1, y2) = (0.5, 0.7)` -- the identical model and point as
 `shared_latent_record`, so it freezes the SAME expected value.
 
 scipy's `multivariate_normal` shares no algebra with the emitted expression:
-the determiniser lowers the `joint` rewrite through the same Sherman-Morrison
-and matrix-determinant-lemma path as the plain record spelling.
+the determiniser lowers the record law through Sherman-Morrison and the
+matrix determinant lemma.
 """
 from scipy.stats import multivariate_normal
 

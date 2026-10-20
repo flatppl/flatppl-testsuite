@@ -20,19 +20,21 @@ action_noise = exp(log_noise)
 # Unit couplings and time steps, zero drifts, unit autoconnections.
 predict(state) = record(
     mean = state.mean,
-    precision = 1 / (1 / state.precision + exp(omega + state.volatility_mean)),
+    precision = 1 / (1 / state.precision + exp(state.omega + state.volatility_mean)),
     volatility_mean = state.volatility_mean,
-    volatility_precision = 1 / (1 / state.volatility_precision + exp(omega_vol))
+    volatility_precision = 1 / (1 / state.volatility_precision + exp(state.omega_vol)),
+    omega = state.omega, omega_vol = state.omega_vol
 )
 update_volatility(pred, mean, precision, surprise, weight) = record(
     mean = mean,
     precision = precision,
     volatility_mean = pred.volatility_mean + weight * surprise / (2 * pred.volatility_precision),
-    volatility_precision = pred.volatility_precision + weight^2 * (0.5 + surprise) - 0.5 * weight * surprise
+    volatility_precision = pred.volatility_precision + weight^2 * (0.5 + surprise) - 0.5 * weight * surprise,
+    omega = pred.omega, omega_vol = pred.omega_vol
 )
 finish(pred, mean, precision) = update_volatility(pred, mean, precision,
     pred.precision / precision + pred.precision * (mean - pred.mean)^2 - 1,
-    exp(omega + pred.volatility_mean) * pred.precision)
+    exp(pred.omega + pred.volatility_mean) * pred.precision)
 update_mean(pred, input, probability, precision) = finish(pred,
     pred.mean + (input - probability) / precision, precision)
 update_probability(pred, input, probability) = update_mean(pred, input, probability,
@@ -40,7 +42,7 @@ update_probability(pred, input, probability) = update_mean(pred, input, probabil
 correct(pred, input) = update_probability(pred, input, invlogit(pred.mean))
 update(state, input) = correct(predict(state = state), input)
 
-s0 = record(mean = 0, precision = 1, volatility_mean = 0, volatility_precision = 1)
+s0 = record(mean = 0, precision = 1, volatility_mean = 0, volatility_precision = 1, omega = omega, omega_vol = omega_vol)
 states = scan(update, s0, u_data)
 state_mean(state) = state.mean
 state_precision(state) = state.precision

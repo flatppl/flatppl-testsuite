@@ -262,8 +262,8 @@
   ],
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "revision": "841022cd8f852b0a0fb2d24303c20d5186afca24",
     "path": "examples/signal-background-counting.flatppl",
-    "sha256": "20eafba39a84a727d83f0fe7fb0ad9b44888742fd207022115ffc3ecde66fb56"
+    "sha256": "aa76c1268861459ceb0d1ce90e9430bce9d87f1e3fc33235247b598e314a1ac2"
   }
 }

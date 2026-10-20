@@ -19,15 +19,15 @@ action_noise = exp(log_noise)
 
 # Unit coupling, zero drift, unit autoconnection, and unit time steps.
 # The probability node uses ClassicUpdate: precision updates before the mean.
-prediction_variance(precision) = 1 / precision + exp(omega)
-posterior_precision(mean, precision) = 1 / prediction_variance(precision) + invlogit(mean) * (1 - invlogit(mean))
-step(mean, precision, input) = (
-    mean = mean + (input - invlogit(mean)) / posterior_precision(mean, precision),
-    precision = posterior_precision(mean, precision)
+prediction_variance(precision, omega) = 1 / precision + exp(omega)
+posterior_precision(mean, precision, omega) = 1 / prediction_variance(precision, omega) + invlogit(mean) * (1 - invlogit(mean))
+step(mean, precision, input, omega) = (
+    mean = mean + (input - invlogit(mean)) / posterior_precision(mean, precision, omega),
+    precision = posterior_precision(mean, precision, omega), omega = omega
 )
 
-s0 = (mean = 0, precision = 1)
-update(state, input) = step(state.mean, state.precision, input)
+s0 = (mean = 0, precision = 1, omega = omega)
+update(state, input) = step(state.mean, state.precision, input, state.omega)
 states = scan(update, s0, u_data)
 state_mean(state) = state.mean
 state_precision(state) = state.precision
