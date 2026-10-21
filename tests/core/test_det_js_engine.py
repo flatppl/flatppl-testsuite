@@ -20,7 +20,12 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.config import CONFIG
-from flatppl_testsuite.scoring.engine import DeterminizeRefused, get_engine, sample_sweep
+from flatppl_testsuite.scoring.engine import (
+    DeterminizeRefused,
+    get_engine,
+    sample_sweep,
+    score_binding,
+)
 from flatppl_testsuite.unified.detjs_exec import log_density_points, score_abi_points
 
 def _flatppl_bin_available() -> bool:
@@ -125,17 +130,41 @@ def test_det_js_scores_nested_relative_module(tmp_path, scorer):
     assert values == pytest.approx([oracle], rel=0, abs=1e-9)
 
 
-def test_det_js_refuses_continuous_kchain(tmp_path):
-    # theta must be non-empty: an empty record renders as `record()`, which spec
-    # §04 forbids ("Nullary calls (`f()`) are not allowed"), so inference refused
-    # at exit 1 before the kchain refusal under test could fire at exit 3.
+def test_det_js_scores_a_conjugate_continuous_kchain(tmp_path):
+    # mu ~ N(0, 1) and y | mu ~ N(mu, 1), so the kchain marginal is N(0, sqrt(2)).
+    # The lambda has one input, so §04 auto-splatting hands it the record whole.
+    model = tmp_path / "k.flatppl"
+    model.write_text(
+        "mu = draw(Normal(mu = 0.0, sigma = 1.0))\n"
+        "pp = kchain(lawof(record(mu = mu)), x -> Normal(mu = get(x, \"mu\"), sigma = 1.0))\n"
+        "lp = logdensityof(pp, 0.3)\n"
+    )
+    want = -0.5 * math.log(2 * math.pi * 2.0) - 0.3 ** 2 / (2 * 2.0)
+    assert math.isclose(score_binding(model, "lp"), want, rel_tol=1e-12, abs_tol=1e-12)
+
+
+def test_det_js_refuses_a_kchain_point_outside_its_domain(tmp_path):
+    # The marginal is over reals, so a record point is not in its domain.
     model = tmp_path / "k.flatppl"
     model.write_text(
         "mu = draw(Normal(mu = 0.0, sigma = 1.0))\n"
         "pp = kchain(lawof(record(mu = mu)), x -> Normal(mu = get(x, \"mu\"), sigma = 1.0))\n"
     )
-    with pytest.raises(DeterminizeRefused):
+    with pytest.raises(DeterminizeRefused, match="does not match the measure's domain"):
         get_engine("det-js").log_density(model, "pp", {"mu": 0.0})
+
+
+def test_det_js_refuses_a_continuous_kchain_without_a_closed_form(tmp_path):
+    # An exp-linked mean has no conjugate row, and §13 refuses rather than integrates.
+    model = tmp_path / "k.flatppl"
+    model.write_text(
+        "mu = draw(Normal(mu = 0.0, sigma = 1.0))\n"
+        "pp = kchain(lawof(record(mu = mu)), "
+        "x -> Normal(mu = exp(get(x, \"mu\")), sigma = 1.0))\n"
+        "lp = logdensityof(pp, 0.3)\n"
+    )
+    with pytest.raises(DeterminizeRefused):
+        score_binding(model, "lp")
 
 
 @pytest.fixture
