@@ -237,21 +237,25 @@ def _shared(shape, spelling="record_law", n=2):
                              point=(0.5, 0.7))
 
 
-def test_a_singular_joints_refusal_is_spec_justified():
-    """§06 "Singular joints": the joint law "has no density w.r.t. the product
-    reference measure ... a density query is a static error where statically
-    detectable, and is otherwise refused by the engine." Refusing is conformance."""
+def test_a_singular_record_law_refusal_is_spec_justified():
+    """§04 calls `lawof([x, x])` "the diagonal law", and §06 "Singular laws": "When
+    no density exists, a density query is a static error where detectable, and
+    otherwise refused by the engine." Refusing the record law is conformance.
+
+    The `joint` spellings over the same draw are NOT singular: §04 makes
+    `joint(lawof(x), lawof(x))` "the same product of two standard Normal laws", so
+    refusing them is an over-refusal."""
     assert table._spec_justified(_shared("singular"), "REFUSES") is True
-    assert table._spec_justified(_shared("singular", "joint_pos"), "REFUSES") is True
+    assert table._spec_justified(_shared("singular", "joint_pos"), "REFUSES") is False
+    assert table._spec_justified(_shared("singular", "joint_kw"), "REFUSES") is False
 
 
 @pytest.mark.parametrize("shape", ["fan", "chain", "disjoint"])
 def test_every_other_shared_latent_refusal_is_an_over_refusal(shape):
-    """Not a default falling through. §06 "Equivalent record law" gives all three
-    equivalent spellings a density, §06 `iid` gives the product measure, and §06's
-    contrast sentence gives the constructor joint the product of its marginals —
-    every one closed-form, with the oracle carrying the value. So a refusal is a
-    tracked capability gap.
+    """Not a default falling through. A record law over distinct draws has a
+    full-rank covariance, §06 `joint` and `iid` give product measures, and the
+    constructor joint is the product of its marginals — every one closed-form, with
+    the oracle carrying the value. So a refusal is a tracked capability gap.
 
     `chain` is the expected occupant if any: #131 lowered the FAN arm.
     """

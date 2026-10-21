@@ -328,18 +328,18 @@ def test_a_child_is_listed_before_its_parent_without_changing_the_moments():
 
 @pytest.mark.parametrize("shape", ["fan", "chain", "disjoint"])
 @pytest.mark.parametrize("n", [2, 3])
-def test_the_three_equivalent_spellings_share_one_oracle_value(shape, n):
-    """§06 "Equivalent record law", verbatim: "`joint(a = lawof(a), b = lawof(b))`
-    is equivalent to `lawof(record(a = a, b = b))`; the positional form is the
-    corresponding `cat` law".
+def test_the_three_product_spellings_share_one_oracle_value(shape, n):
+    """§06 `joint`: "independent product measure". `joint_kw` and `joint_pos` join
+    one `lawof` per field, so each is the product of the field marginals — the same
+    measure as `joint_ctor`, whose constructors carry those marginals. §04 states
+    the case: `joint(lawof(x), lawof(x))` is "the same product of two standard
+    Normal laws".
 
-    One measure, three spellings — so one oracle value. The determiniser is judged
-    against that equivalence too, which is a correctness signal needing no oracle at
-    all: three spellings that lower to three different densities are wrong whichever
-    of them the oracle happens to agree with.
+    One measure, three spellings — so one oracle value. Three spellings that lower
+    to three different densities are wrong whichever of them the oracle agrees with.
     """
     values = {s: true_logpdf(_probe(shape, s, n))
-              for s in ("record_law", "joint_kw", "joint_pos")}
+              for s in ("joint_kw", "joint_pos", "joint_ctor")}
     assert len(set(values.values())) == 1, values
 
 
@@ -449,13 +449,14 @@ def test_iid_does_not_pick_up_the_shared_ancestor(n):
 
 
 def test_the_singular_shapes_are_withheld_and_nothing_else_is():
-    """§06 "Singular joints": "the joint law has no density w.r.t. the product
-    reference measure ... a density query is a static error where statically
-    detectable, and is otherwise refused by the engine."
+    """§04 calls `lawof([x, x])` "the diagonal law", and §06 "Singular laws": "When
+    no density exists, a density query is a static error where detectable, and
+    otherwise refused by the engine." That is the `singular` record law.
 
-    So the oracle must WITHHOLD, and the trap is that a number IS available — the
-    product of the two marginals is finite and plausible and is the density of
-    nothing. Per `flatppl-dev/density-sweep-notes.md`, supplying it would make this
+    So the oracle must WITHHOLD there, and the trap is that a number IS available —
+    the product of the two marginals is finite and plausible and is the density of
+    nothing. The `joint` spellings over the same draw are different measures:
+    products of separate laws, which do have a density. Per `flatppl-dev/density-sweep-notes.md`, supplying it would make this
     module the authority for semantics nobody wrote down.
 
     Both directions asserted: no non-singular member may be withheld either, or the
@@ -468,12 +469,20 @@ def test_the_singular_shapes_are_withheld_and_nothing_else_is():
             valued.append(p)
         except OracleUnsupported:
             withheld.append(p)
-    assert {p.shape for p in withheld} == {"singular"}, (
-        f"withheld shapes: {sorted({p.shape for p in withheld})}")
-    assert all(p.shape == "singular" for p in withheld)
-    assert not [p for p in valued if p.shape == "singular"], (
-        "a singular probe was given a value")
-    assert len(withheld) == 6, f"expected 6 singular probes, got {len(withheld)}"
+    assert {(p.shape, p.spelling) for p in withheld} == {("singular", "record_law")}, (
+        f"withheld: {sorted({(p.shape, p.spelling) for p in withheld})}")
+    assert len(withheld) == 2, f"expected 2 singular record laws, got {len(withheld)}"
+    # The `joint` spellings over one draw are products of separate laws (§04:
+    # `joint(lawof(x), lawof(x))` is "the same product of two standard Normal
+    # laws"), so they carry n copies of f1's marginal at the point.
+    for p in valued:
+        if p.shape != "singular":
+            continue
+        assert p.spelling in ("joint_kw", "joint_pos"), p.id
+        want = math.fsum(
+            stats.norm(loc=SHARED_LATENT_MU, scale=math.sqrt(1.25)).logpdf(x)
+            for x in p.point)
+        compare_scalar(true_logpdf(p), want, TOL)
 
 
 def test_the_singularity_threshold_is_nowhere_near_an_admissible_probe():
@@ -610,21 +619,22 @@ def _determinize(probe) -> tuple[int, str, str]:
 
 @pytestmark_binary
 def test_the_singular_shapes_refuse_rather_than_emitting_a_density():
-    """§06 "Singular joints" makes the refusal the conformant answer, and
-    `table._spec_justified` reports it as one. Asserted against the determiniser's
-    own exit code, because a row that merely SAYS `spec_justified` proves nothing
-    about what the binary did — the same reason `test_vector_arms.py` asserts each
-    vector arm actually fires.
+    """§06 "Singular laws" makes the refusal the conformant answer for the diagonal
+    record law, and `table._spec_justified` reports it as one. The `joint`
+    spellings over the same draw are products of separate laws and lower.
+
+    Asserted against the determiniser's own exit code, because a row that merely
+    SAYS `spec_justified` proves nothing about what the binary did — the same
+    reason `test_vector_arms.py` asserts each vector arm actually fires.
     """
-    for spelling in ("record_law", "joint_kw", "joint_pos"):
-        for n in (2, 3):
-            code, emitted, stderr = _determinize(_probe("singular", spelling, n))
-            assert code == 3, (
-                f"singular/{spelling} n={n}: exit {code}, not the refusal §06 "
-                f"requires\nemitted:\n{emitted}")
-            assert "draw" in stderr.lower() or "field" in stderr.lower(), (
-                f"singular/{spelling} n={n}: refusal does not name the shape: "
-                f"{stderr.strip()}")
+    for n in (2, 3):
+        code, emitted, stderr = _determinize(_probe("singular", "record_law", n))
+        assert code == 3, (
+            f"singular/record_law n={n}: exit {code}, not the refusal §06 "
+            f"requires\nemitted:\n{emitted}")
+        assert "draw" in stderr.lower() or "field" in stderr.lower(), (
+            f"singular/record_law n={n}: refusal does not name the shape: "
+            f"{stderr.strip()}")
 
 
 @pytestmark_binary
@@ -688,8 +698,8 @@ def test_every_shared_latent_holdout_is_excluded_and_carries_a_category():
 
 
 # Every (shape, spelling) pair that HAS a latent query to survive. `singular` is
-# excluded because the family's own query refuses there (§06 "Singular joints"), so
-# determinize exits 3 and there is no emitted module to inspect.
+# excluded because the family runs it at `latent_query = "none"` only, and its
+# record law refuses (§06 "Singular laws").
 _QUERYABLE_PAIRS = [(sh, sp) for sh, sp in shared_latent_shapes() if sh != "singular"]
 
 

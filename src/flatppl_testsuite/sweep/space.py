@@ -56,16 +56,18 @@ The axes, and what each one buys:
   CONTROL: nothing is shared, so the traced law and the product of the marginals
   must coincide, and a lowering that manufactures correlation is caught by the
   same rows that would otherwise prove nothing. `singular` references ONE draw
-  from every field, which §06 "Singular joints" says has no density.
-* **spelling** — §06 "Equivalent record law" declares `record_law`, `joint_kw`
-  and `joint_pos` three spellings of ONE measure, which is the same
-  oracle-independent correctness signal the scalar `SPELLINGS` axis gives: three
-  spellings that lower to different densities are wrong even before a value is
-  compared. `joint_ctor` is §06's own contrast in the sentence right after —
-  "a `joint` of two constructor measures with the same marginals has
-  cross-covariance 0" — so it is the product-of-marginals arm, and it must
-  DIFFER from `record_law` wherever a node is shared and AGREE with it on
-  `disjoint`. `ctor_shared_kw` / `ctor_shared_pos` are the OTHER constructor
+  from every field. Its `record_law` is the diagonal law, which §06 "Singular
+  laws" says has no density. Its `joint_kw` and `joint_pos` are products of
+  separate laws and do have one.
+* **spelling** — `record_law` is ONE `lawof` over all fields, so it keeps the
+  shared ancestor (§04 "Reification to measures": "`lawof` preserves dependence
+  within its argument"). `joint_kw` and `joint_pos` join one `lawof` per field,
+  and §06 makes `joint` an "independent product measure", so they are the
+  product of the marginals — the same measure as `joint_ctor`, whose components
+  are constructors with the matched marginals. Three spellings of one product
+  that lower to different densities are wrong even before a value is compared.
+  The product spellings must DIFFER from `record_law` wherever a node is shared
+  and AGREE with it on `disjoint`. `ctor_shared_kw` / `ctor_shared_pos` are the OTHER constructor
   case: components sharing the latent through a stochastic PARAMETER rather
   than through a reified law, which §06 keeps as one node of the composed
   trace — so they must agree with `record_law`, not with `joint_ctor`. That
@@ -88,8 +90,8 @@ crossed only at `n = 2`, and `n = 3` runs at `latent_query = "none"`: the
 ordering hazard is a property of the two-query lowering and does not interact
 with how many fields the record has. `iid` runs on `fan` alone, because its
 independence is a property of the construct rather than of the ancestry graph.
-`singular` runs at `latent_query = "none"`, because a shape that has no density
-has no ordering behaviour to probe.
+`singular` runs at `latent_query = "none"`, because its record law has no
+density and so no ordering behaviour to probe.
 """
 from __future__ import annotations
 
@@ -383,20 +385,22 @@ SHARED_LATENT_NS = [2, 3]
 # How each spelling composes its components, which is what decides the oracle's
 # covariance and is NOT derivable from the spelling's syntax alone:
 #
-# * "traced"  — §06 "Equivalent record law": the shared stochastic node stays a
-#   single node of the composed trace, so the covariance is the graph's own. All
-#   three of `record_law`, `joint_kw` and `joint_pos` are this, which is exactly
-#   what makes them an equivalence check.
+# * "traced"  — one `lawof` over every field. §04 "Reification to measures":
+#   "`lawof` preserves dependence within its argument", so the covariance is the
+#   graph's own. Only `record_law` is this.
 #   `joint_ctor` is ALSO "traced" and needs no product-measure special case: its
 #   graph (see `shared_latent_graph`) is n ancestor-free priors, so the traced
-#   covariance of that graph is already diagonal. One code path, no branch that
-#   could disagree with the branch beside it.
+#   covariance of that graph is already diagonal.
+# * "product" — §06 `joint`: "independent product measure". `joint_kw` and
+#   `joint_pos` join one `lawof` per field, so each field keeps its own marginal and
+#   no cross-term survives. §04 states the case: `joint(lawof(x), lawof(x))` is "the
+#   same product of two standard Normal laws".
 # * "iid" — §06 `iid`: the product measure M^{(x)N}, so N independent copies of ONE
 #   marginal whatever ancestry that marginal has.
 SHARED_LATENT_COMPOSITION = {
     "record_law": "traced",
-    "joint_kw": "traced",
-    "joint_pos": "traced",
+    "joint_kw": "product",
+    "joint_pos": "product",
     "joint_ctor": "traced",
     # The CONSTRUCTOR components that share a node through their PARAMETERS -- §06's
     # "a stochastic node shared between component traces (through a reified component
@@ -490,9 +494,10 @@ def shared_latent_graph(shape: str, n: int, spelling: str,
         return nodes, fields
 
     if shape == "singular":
-        # ONE draw, bound to every field. §06 "Singular joints": "the same draw
-        # referenced twice" — the law is carried by the diagonal {f1 = f2 = ...},
-        # so it has no density w.r.t. the product reference measure.
+        # ONE draw, bound to every field. Its record law is "the diagonal law"
+        # (§04 "Reification to measures"), carried by {f1 = f2 = ...}, so it has no
+        # density w.r.t. the product reference measure. The `joint` spellings join
+        # separate laws and are products, which the "product" composition handles.
         nodes = {
             "z": NormalNode("z", None, SHARED_LATENT_MU, SHARED_LATENT_SIGMA_Z),
             "f1": NormalNode("f1", "z", 0.0, sig[0]),
