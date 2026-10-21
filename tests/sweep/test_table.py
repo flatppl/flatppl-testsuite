@@ -250,6 +250,15 @@ def test_a_singular_record_law_refusal_is_spec_justified():
     assert table._spec_justified(_shared("singular", "joint_kw"), "REFUSES") is False
 
 
+@pytest.mark.parametrize("shape", ["fan", "disjoint"])
+@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
+def test_a_free_draw_constructor_refusal_is_spec_justified(shape, spelling):
+    """§13 "Output reduction": draws "take their values from the explicit `point`,
+    unless marginalized out". A constructor whose `mu` reads a drawn latent outside
+    every `lawof` gives the query no value, so refusing is conformance."""
+    assert table._spec_justified(_shared(shape, spelling), "REFUSES") is True
+
+
 @pytest.mark.parametrize("shape", ["fan", "chain", "disjoint"])
 def test_every_other_shared_latent_refusal_is_an_over_refusal(shape):
     """Not a default falling through. A record law over distinct draws has a

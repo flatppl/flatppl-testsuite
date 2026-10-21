@@ -579,6 +579,8 @@ def linear_gaussian_logpdf(nodes: dict[str, NormalNode], fields: tuple[str, ...]
     * `"iid"` — §06 `iid(M, size)`: "the product measure M^(x)N". N independent
       copies of ONE marginal, so the covariance is diagonal with that marginal's
       variance repeated, whatever ancestry the marginal itself has.
+    * `"free_draw"` — a measure parameter reads a draw outside the point and every
+      `lawof`. §13 "Output reduction" gives no value, so the oracle withholds.
 
     The reference measure is the product Lebesgue measure over the fields (§06
     "Reference measure for product measures": "the reference for the product is the
@@ -598,6 +600,10 @@ def linear_gaussian_logpdf(nodes: dict[str, NormalNode], fields: tuple[str, ...]
         v = cov[0][0]
         cov = [[v if i == j else 0.0 for j in range(len(fields))]
                for i in range(len(fields))]
+    elif composition == "free_draw":
+        raise OracleUnsupported(
+            "a constructor parameter reads a draw outside the point and every lawof, so "
+            "§13 'Output reduction' gives the query no value")
     elif composition == "product":
         cov = [[cov[i][i] if i == j else 0.0 for j in range(len(fields))]
                for i in range(len(fields))]
