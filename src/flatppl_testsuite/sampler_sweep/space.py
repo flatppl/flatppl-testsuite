@@ -1049,12 +1049,12 @@ TARGETED: tuple[Probe, ...] = (
     # the previous state alone, the keyword form or `relabel` for named joint
     # components.
     Probe("normal.kchain_3step_scalar_step_refuses",
-          "base = Normal(mu = 0.0, sigma = 1.0)\n"
+          "m0 = Normal(mu = 0.0, sigma = 1.0)\n"
           "mu1 = elementof(reals)\n"
           "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
           "mu2 = elementof(reals)\n"
           "K2 = functionof(Normal(mu = mu2, sigma = 1.0), mu2 = mu2)\n"
-          "y = kchain(base, K1, K2)\n",
+          "y = kchain(m0, K1, K2)\n",
           "y", 1, None,
           None, None, None, None, None, None,
           "normal", "kchain_3step_scalar_step_refuses",
@@ -1069,10 +1069,10 @@ TARGETED: tuple[Probe, ...] = (
                               "oracle, and the pre-fix engine gives MALFORMED / "
                               "nonfinite-draws instead"),
     Probe("normal.kchain_joint_base_scalar_step_refuses",
-          "base = Normal(mu = 0.0, sigma = 1.0)\n"
+          "m0 = Normal(mu = 0.0, sigma = 1.0)\n"
           "mu1 = elementof(reals)\n"
           "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
-          "jp = joint(base)\n"
+          "jp = joint(m0)\n"
           "y = kchain(jp, K1)\n",
           "y", 1, None,
           None, None, None, None, None, None,
