@@ -41,7 +41,7 @@
   "oracle": "Analytic radial density after integrating one shared Exponential variance",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "bfed2388fa08bca4f3b4b8c7802bb5f80c1cf197",
+    "revision": "4e3fa5570e6ce095c58817c1174cb60a9789eb30",
     "path": "examples/minimal.flatppl",
     "sha256": "3f36509eca2e41b07a9298c24918ed3db4e62face3a2b9166576dc7d29ef7320"
   },

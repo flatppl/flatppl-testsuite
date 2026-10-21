@@ -63,7 +63,7 @@
   ],
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "bfed2388fa08bca4f3b4b8c7802bb5f80c1cf197",
+    "revision": "4e3fa5570e6ce095c58817c1174cb60a9789eb30",
     "path": "examples/capture-recapture.flatppl",
     "sha256": "3bab25f491db68f0cc6849e2766c3f1d5e7963a967eafeeeeba3a7d760a58a10"
   }
