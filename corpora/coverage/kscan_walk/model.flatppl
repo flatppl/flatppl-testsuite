@@ -19,5 +19,5 @@ traj ~ kscan(f_step, 0.0, dts, D)
 
 prior = joint(D = Gamma(shape = 2.0, rate = 0.5))
 forward_kernel = kernelof(record(traj = traj), D = D)
-L = likelihoodof(forward_kernel, record(traj = traj_obs))
+L = likelihoodof(pars -> forward_kernel(D = pars.D), record(traj = traj_obs))
 posterior = bayesupdate(L, prior)

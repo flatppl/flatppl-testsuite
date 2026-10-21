@@ -19,5 +19,5 @@ R ~ Binomial(C_obs, rcp)
 
 Pi_prior = lawof(record(rcp = rcp))
 K_model = kernelof(record(R = R), rcp = rcp) % Forward kernel (observation model)
-L = likelihoodof(K_model, record(R = R_obs))
+L = likelihoodof(pars -> K_model(rcp = pars.rcp), record(R = R_obs))
 Pi_post = bayesupdate(L, Pi_prior)
