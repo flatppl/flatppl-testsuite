@@ -1,0 +1,9 @@
+flatppl_compat = "0.1"
+scale = elementof(posreals)
+shift = elementof(reals)
+f(x, p) = p.scale*x+p.shift
+inverse(y, p) = (y-p.shift)/p.scale
+volume(x, p) = log(p.scale)
+transform = bijection(f, inverse, volume)
+measure = pushfwd(transform, Normal(0.0, 1.0), record(scale=scale, shift=shift))
+value = logdensityof(measure, 2.0)

@@ -1,4 +1,4 @@
 a = 2.0
 reference = Lebesgue(interval(0.0, 1.0))
-inner = normalize(logweighted(t -> a*t, reference))
-outer = normalize(weighted(x -> 1.0 + exp(logdensityof(inner, x)), reference))
+inner = normalize(logweighted((t, a) -> a*t, reference, a))
+outer = normalize(weighted((x, m) -> 1.0 + exp(logdensityof(m, x)), reference, inner))

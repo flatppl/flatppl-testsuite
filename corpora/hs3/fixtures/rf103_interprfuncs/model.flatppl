@@ -1,3 +1,5 @@
+# AUTOMATICALLY GENERATED - do not edit
+
 flatppl_compat = "0.1"
 sigma = elementof(posreals)
 alpha = elementof(interval(0.1, 10.0))
@@ -9,7 +11,11 @@ g2 = Normal(mu = mean, sigma = sigma)
 % HS3 generic_dist → normalize(weighted(functionof(<expr>), Lebesgue(reals)))
 genpdf = normalize(
   truncate(
-    weighted(x -> 1.0 + 0.1 * abs(x) + sin(sqrt(abs(x * alpha + 0.1))), Lebesgue(reals)),
+    weighted(
+      (x, parameters) -> 1.0 + 0.1 * abs(x) + sin(sqrt(abs(x * parameters + 0.1))),
+      Lebesgue(reals),
+      alpha,
+    ),
     interval(-20.0, 20.0),
   ),
 )

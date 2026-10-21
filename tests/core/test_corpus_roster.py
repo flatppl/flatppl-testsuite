@@ -29,7 +29,7 @@ EXPECTED_COUNTS = {
     "coverage": 25,
     "examples": 24,
     "formula": 90,
-    "fragment": 22,
+    "fragment": 25,
     "hs3": 12,
     "posteriordb": 16,
     "pyhf": 173,
@@ -39,7 +39,7 @@ EXPECTED_COUNTS = {
     "stablehlo-gradient": 37,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 499
+EXPECTED_TOTAL = 502
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -162,7 +162,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 629
+EXPECTED_CASES = 635
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

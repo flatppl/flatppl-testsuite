@@ -23,12 +23,12 @@ prediction_variance(precision, omega) = 1 / precision + exp(omega)
 posterior_precision(mean, precision, omega) = 1 / prediction_variance(precision, omega) + invlogit(mean) * (1 - invlogit(mean))
 step(mean, precision, input, omega) = (
     mean = mean + (input - invlogit(mean)) / posterior_precision(mean, precision, omega),
-    precision = posterior_precision(mean, precision, omega), omega = omega
+    precision = posterior_precision(mean, precision, omega)
 )
 
-s0 = (mean = 0, precision = 1, omega = omega)
-update(state, input) = step(state.mean, state.precision, input, state.omega)
-states = scan(update, s0, u_data)
+s0 = (mean = 0, precision = 1)
+update(state, input, omega) = step(state.mean, state.precision, input, omega)
+states = scan(update, s0, u_data, omega)
 state_mean(state) = state.mean
 state_precision(state) = state.precision
 means = state_mean.(states)

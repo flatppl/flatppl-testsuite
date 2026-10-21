@@ -5,7 +5,7 @@ sigma = elementof(posreals)
 a0 = elementof(interval(-5.0, 5.0))
 a1 = elementof(interval(-1.0, 1.0))
 % HS3 polynomial function → polynomial(coefficients, x)
-fy = y -> polynomial([a0, a1], y)
+fy = (y, parameters) -> polynomial([parameters[1], parameters[2]], y)
 % HS3 product_dist → joint over factor distributions
 model = joint(y = gaussy, x = gaussx)
 % observable: y
@@ -13,8 +13,9 @@ gaussy = Normal(mu = 0.0, sigma = 3.0)
 % HS3 conditional dist → normalize(logweighted …): joint-normalized density over the observable record
 gaussx = normalize(
   logweighted(
-    (y, x) -> logdensityof(Normal(mu = fy(y), sigma = sigma), x),
+    (point, parameters) -> logdensityof(Normal(mu = fy(point.y, (parameters[1], parameters[2])), sigma = parameters[3]), point.x),
     Lebesgue(support = cartprod(y = interval(-5.0, 5.0), x = interval(-5.0, 5.0))),
+    (a0, a1, sigma),
   ),
 )
 default_domain = cartprod(

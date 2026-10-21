@@ -1,0 +1,6 @@
+flatppl_compat = "0.1"
+a = elementof(reals)
+b = elementof(reals)
+step(state, x, p) = p[1]*state+x+p[2]
+states = scan(step, 0.0, [1.0, 2.0, 3.0], (a, b))
+value = states[3]

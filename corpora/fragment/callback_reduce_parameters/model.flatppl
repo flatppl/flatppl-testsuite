@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+p = elementof(reals)
+combine(a, x, offset) = a+x+offset
+value = reduce(combine, [1.0, 2.0, 3.0], p)
