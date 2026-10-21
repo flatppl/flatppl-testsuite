@@ -33,7 +33,7 @@
   "oracle": "Complex-step derivative (h=1e-20) of independent scalar recurrence",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "788e985212cadf8d0a6b1c8db5b9c90308131eef",
+    "revision": "223c431c66a9c1503b3ab4d6a5bee57ef99e6c0f",
     "path": "examples/hgf-binary-3level.flatppl",
     "sha256": "edf5d56501bb1d788c61fb67c1d9b1810c8e82b483f9a269782782d819c1e655"
   },
