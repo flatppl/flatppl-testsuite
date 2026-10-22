@@ -14,8 +14,8 @@ def test_runtime_metric_pivots_batches_and_gradients(tmp_path):
     query.write_text(
         "gs = elementof(cartpow(cartpow(reals, [2,2]), 2))\n"
         "v = elementof(cartpow(reals, 2))\n"
-        "f(g) = metricsum(g, [], v[.i^]*v[.i_])\n"
-        "inputs = (gs, v)\noutputs = f.(gs)\n"
+        "f(g, w) = metricsum(g, [], w[.i^]*w[.i_])\n"
+        "inputs = (gs, v)\noutputs = f.(gs, [v])\n"
     )
     source = ex.emit(query, "logdensity", dtype="f64")
     jax, jnp, hlo_call = ex._jax()
@@ -67,9 +67,9 @@ def test_metric_callback_reuse_and_promoted_fixed_input(tmp_path):
         "g = rowstack([[2.,0.],[0.,-4.]])\n"
         "h = rowstack([[3.,0.],[0.,5.]])\n"
         "v = elementof(cartpow(reals,2))\n"
-        "f(m) = metricsum(m, [.i_], 2*v[.i_])\n"
+        "f(m, w) = metricsum(m, [.i_], 2*w[.i_])\n"
         "g: norm[] := v[.i^]*v[.i_]\n"
-        "inputs = (g, v)\noutputs = sum(f(g)) + 3*sum(f(h)) + norm\n"
+        "inputs = (g, v)\noutputs = sum(f(g, v)) + 3*sum(f(h, v)) + norm\n"
     )
     source = ex.emit(query, "logdensity", dtype="f64")
     metric = np.array([[0., 2.], [2., 3.]])

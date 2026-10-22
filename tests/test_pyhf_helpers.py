@@ -160,9 +160,9 @@ def test_normsys_reference_call_forms(tmp_path, dtype, tolerance):
         'pyhf = standard_module("pyhf-helpers", "0.1")\n'
         'reference = load_module("reference.flatppl")\n'
         "evaluate(p) = [pyhf.normsys_factor(p[1], p[2], p[3]),\n"
-        "  pyhf.normsys_factor(p[2], alpha = -p[3], hi = p[1]),\n"
+        "  pyhf.normsys_factor(lo = p[2], alpha = -p[3], hi = p[1]),\n"
         "  pyhf.normsys_factor(record(hi = p[2], lo = p[1], alpha = p[3])),\n"
-        "  reference.normsys_factor(p[1], hi = p[2], alpha = p[3])]\n"
+        "  reference.normsys_factor(lo = p[1], hi = p[2], alpha = p[3])]\n"
         f"points = elementof(cartpow(cartpow(reals, 3), {len(points)}))\n"
         "inputs = points\noutputs = evaluate.(points)\n"
     )

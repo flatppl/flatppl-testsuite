@@ -18,9 +18,9 @@ def test_record_prior_keeps_runtime_bounds_and_normalizers(tmp_path, precision, 
     query = tmp_path / "query.flatppl"
     query.write_text(
         "sigma ~ Exponential(2)\n"
-        "reference = joint(b = iid(Lebesgue(interval(0, sigma)), 1))\n"
+        "reference(r) = joint(b = iid(Lebesgue(interval(0, r.sigma)), 1))\n"
         "b_normal ~ iid(normalize(truncate(Normal(0, 1), interval(0, sigma))), 1)\n"
-        "reference_prior = jointchain(lawof(record(sigma = sigma)), functionof(reference, sigma = sigma))\n"
+        "reference_prior = jointchain(lawof(record(sigma = sigma)), reference)\n"
         "normal_prior = lawof(record(sigma = sigma, b = b_normal))\n"
         "point = elementof(cartprod(sigma = posreals, b = cartpow(reals, 1)))\n"
         "inputs = point\n"
