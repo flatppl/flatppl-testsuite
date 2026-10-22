@@ -1,0 +1,4 @@
+m = normalize(superpose(
+  weighted(0.3, truncate(Poisson(rate = 3.0), posreals)),
+  weighted(0.7, truncate(Geometric(p = 0.4), nonnegintegers))))
+lp = logdensityof(m, 0)

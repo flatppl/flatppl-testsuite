@@ -1,0 +1,2 @@
+m = normalize(truncate(Binomial(n = 10, p = 0.3), posreals))
+lp = logdensityof(m, 1)
