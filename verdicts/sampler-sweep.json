@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-10-22T17:23:45+00:00",
-  "engine_commit": "30459580b61780407de35716840bd96774dd7351",
+  "generated_at": "2026-10-22T18:32:41+00:00",
+  "engine_commit": "9507f97afa61a2f25debdf43fd7321d005c09254",
   "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 91,
+  "probe_count": 94,
   "outcome_counts": {
-   "DRAWS": 88,
+   "DRAWS": 91,
    "REFUSES": 3
   },
   "failing_rows": []
@@ -7184,6 +7184,195 @@
    "error": "static diagnostic: kchain-marginal step boundary 0 \u2192 1: cannot unify previous step's result type array of real (length 1) with next step's input \"mu1\" of type real (from step 0 (`jp`) to step 1 (`K1`)) \u2014 a positional `joint`'s variate is the `cat` of its components (spec \u00a706 `joint`), and \u00a706 dependent composition binds that whole value to a lone kernel input. Name the components (`joint(name1 = M1, ...)` or `relabel`) to splat them by field name, or give the step an input of the fed shape",
    "checks": [],
    "note": "a positional-joint base feeds a LENGTH-1 vector (\u00a706 joint: all scalars yield a vector), which a step declaring a real cannot take. Sampled NaN for every atom until the boundary was checked against the declared type"
+  },
+  {
+   "probe_id": "poisson.truncate_posintegers",
+   "family": "poisson",
+   "wrap": "truncate_posintegers",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "4.074100 vs 4.074629 (|d|=0.000529, band 0.0217 = 5 SE, 0.12 sigma)",
+     "got": 4.0741,
+     "want": 4.074629441455096,
+     "band": 0.021709854105056797,
+     "sigma": 0.12193574690430119,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.765959 vs 3.770542 (|d|=0.00458, band 0.0638 = 5 SE, 0.36 sigma)",
+     "got": 3.7659591900000002,
+     "want": 3.7705421221028117,
+     "band": 0.06376735485803792,
+     "sigma": 0.3593478287608306,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass -0.0184854468258866 vs -0.0184854468258866 (|d|=4.16e-17, band 1.95e-11)",
+     "got": -0.0184854468258866,
+     "want": -0.01848544682588656,
+     "band": 1.948544682588656e-11,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "posintegers drops the atom 0: every draw is a whole number at least 1"
+  },
+  {
+   "probe_id": "poisson.truncate_nonnegintegers",
+   "family": "poisson",
+   "wrap": "truncate_nonnegintegers",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "4.000505 vs 4.000000 (|d|=0.000505, band 0.0224 = 5 SE, 0.11 sigma)",
+     "got": 4.000505,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.11292143286383369,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.989115 vs 4.000000 (|d|=0.0109, band 0.0671 = 5 SE, 0.81 sigma)",
+     "got": 3.989114744974998,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.8113390062775243,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "nonnegintegers keeps the atom 0 and every other atom: mass 1"
+  },
+  {
+   "probe_id": "poisson.truncate_integers",
+   "family": "poisson",
+   "wrap": "truncate_integers",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "4.000505 vs 4.000000 (|d|=0.000505, band 0.0224 = 5 SE, 0.11 sigma)",
+     "got": 4.000505,
+     "want": 4.0,
+     "band": 0.0223606797749979,
+     "sigma": 0.11292143286383369,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "3.989115 vs 4.000000 (|d|=0.0109, band 0.0671 = 5 SE, 0.81 sigma)",
+     "got": 3.989114744974998,
+     "want": 4.0,
+     "band": 0.0670820393249937,
+     "sigma": 0.8113390062775243,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "skipped",
+     "detail": "no continuous cdf reference for this row",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "support",
+     "status": "passed",
+     "detail": "0 values outside the distribution's support",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 0.0,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "integers is unbounded below, so the lower CDF end is 0: mass 1"
   }
  ]
 }
