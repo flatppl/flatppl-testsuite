@@ -16,11 +16,12 @@ mu ~ Normal(0, 10)
 phi ~ Normal(0, 2)
 theta ~ Normal(0, 2)
 sigma ~ normalize(truncate(Cauchy(0, 2.5), interval(0, inf)))
-prediction(state) = mu + phi * state.previous + theta * state.error
-step(state, observation) = record(
-    previous = observation, error = observation - prediction(state),
-    mean = prediction(state))
-states = scan(step, record(previous = mu, error = 0.0, mean = 0.0), data.y)
+prediction(state, p) = p.mu + p.phi * state.previous + p.theta * state.error
+step(state, observation, p) = record(
+    previous = observation, error = observation - prediction(state, p),
+    mean = prediction(state, p))
+states = scan(step, record(previous = mu, error = 0.0, mean = 0.0), data.y,
+    record(mu = mu, phi = phi, theta = theta))
 state_mean(state) = state.mean
 y ~ Normal.(state_mean.(states), sigma)
 

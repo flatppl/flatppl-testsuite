@@ -49,9 +49,9 @@
   "oracle": "NumPy Lorentz contractions and native complex amplitudes",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "8df22d4574b00527fb24666f35755aba18e1d07f",
+    "revision": "223c431c66a9c1503b3ab4d6a5bee57ef99e6c0f",
     "path": "examples/dminus-to-3pi-amplitude.flatppl",
-    "sha256": "46143fcc05977f4e659f50bc7e05807a5804651a2dbd3104445f606d0504a41f"
+    "sha256": "00425deb353e20b7a45c9729d24d3a44263b0621308044f78cd26db1dfe7296a"
   },
   "engine_limits": {
     "det-js": "Nested metric tensor expressions and positional Cartesian support membership do not evaluate in current JS."

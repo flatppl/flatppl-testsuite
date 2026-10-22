@@ -1,13 +1,12 @@
 """Independent oracle for frag_shared_latent_joint_positional.
 
-The POSITIONAL spelling of `shared_latent_joint`: §06 "Joint composition"
-makes the positional form of `joint` "the corresponding `cat` law", so
-`joint(lawof(y1), lawof(y2))` reaches the same shared-latent record-law
-machinery as the keyword spelling, via synthetic field names and a value
-record sliced from the flat `cat` variate `[0.5, 0.7]`. Same model, same
-point, so the same frozen value as `shared_latent_joint` and
-`shared_latent_record`: `MvNormal(mu0 * 1, s0**2 * J + diag(sigma**2))` with
-`J` all-ones, at `(y1, y2) = (0.5, 0.7)`.
+The vector-input spelling of `shared_latent_joint`: the query maps the
+coordinates of `[0.5, 0.7]` into the named fields of one record law.
+Both outputs retain their shared latent inside that law. Separate law
+components in `joint` would instead be independent. The model and point
+retain the frozen value from `shared_latent_record`:
+`MvNormal(mu0 * 1, s0**2 * J + diag(sigma**2))` with `J` all-ones,
+at `(y1, y2) = (0.5, 0.7)`.
 """
 from scipy.stats import multivariate_normal
 

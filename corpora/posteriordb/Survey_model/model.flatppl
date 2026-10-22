@@ -12,10 +12,10 @@ data = load_data("data/Survey_data.json", cartprod(
     nmax = posintegers, m = posintegers, k = cartpow(nonnegintegers, 5)))
 
 theta ~ Uniform(unitinterval)
-counts(n) = iid(Binomial(n, theta), 5)
+counts(n, theta) = iid(Binomial(n, theta), 5)
 possible_sizes = indicesof(zeros(500))
 population_weights = ones(500)
-y ~ normalize(ksuperpose(counts, population_weights)(possible_sizes))
+y ~ normalize(ksuperpose(counts, population_weights)(possible_sizes, theta))
 
 Pi_prior = lawof(record(theta = theta))
 K_model = kernelof(record(y = y), theta = theta)

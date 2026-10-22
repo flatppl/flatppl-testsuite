@@ -4,7 +4,7 @@ sigma1 = elementof(posreals)
 mu2 = elementof(reals)
 sigma2 = elementof(posreals)
 % HS3 product_dist (shared variate) → normalize(logweighted …): pointwise density product
-prod = normalize(logweighted(x -> logdensityof(g2, x), g1))
+prod = normalize(logweighted((x, parameters) -> logdensityof(parameters, x), g1, g2))
 % observable: x
 g1 = Normal(mu = mu1, sigma = sigma1)
 % observable: x

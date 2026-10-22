@@ -1,3 +1,5 @@
+# AUTOMATICALLY GENERATED - do not edit
+
 flatppl_compat = "0.1"
 bkgfrac = elementof(reals)
 bkg1frac = elementof(reals)
@@ -22,8 +24,9 @@ observable: x
 bkg1 = normalize(
   truncate(
     weighted(
-      x -> 1.0 + a0 * poly.chebyshev(1, (2.0 * x - 10.0) / 10.0) + a1 * poly.chebyshev(2, (2.0 * x - 10.0) / 10.0),
+      (x, parameters) -> 1.0 + parameters[1] * poly.chebyshev(1, (2.0 * x - 10.0) / 10.0) + parameters[2] * poly.chebyshev(2, (2.0 * x - 10.0) / 10.0),
       Lebesgue(reals),
+      (a0, a1),
     ),
     interval(0.0, 10.0),
   ),

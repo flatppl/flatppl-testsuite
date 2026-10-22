@@ -5,39 +5,43 @@ sigma = elementof(posreals)
 a0 = elementof(interval(-5.0, 5.0))
 a1 = elementof(interval(-1.0, 1.0))
 % HS3 generic_function → lowered expression
-fy_1 = y -> a0 - a1 * sqrt(10.0 * abs(y))
+fy_1 = (y, parameters) -> parameters[1] - parameters[2] * sqrt(10.0 * abs(y))
 % HS3 polynomial function → polynomial(coefficients, x)
-fy_2 = y -> polynomial([a0, a1], y)
+fy_2 = (y, parameters) -> polynomial([parameters[1], parameters[2]], y)
 % HS3 sum function → fold of add
-fy_3 = y -> a0 + y
+fy_3 = (y, parameters) -> parameters + y
 % HS3 product function → fold of mul
-fy_4 = y -> a1 * y
+fy_4 = (y, parameters) -> parameters * y
 % HS3 conditional dist → normalize(logweighted …): joint-normalized density over the observable record
 model_1 = normalize(
   logweighted(
-    (y, x) -> logdensityof(Normal(mu = fy_1(y), sigma = sigma), x),
+    (point, parameters) -> logdensityof(Normal(mu = fy_1(point.y, (parameters[1], parameters[2])), sigma = parameters[3]), point.x),
     Lebesgue(support = cartprod(y = interval(-5.0, 5.0), x = interval(-5.0, 5.0))),
+    (a0, a1, sigma),
   ),
 )
 % HS3 conditional dist → normalize(logweighted …): joint-normalized density over the observable record
 model_2 = normalize(
   logweighted(
-    (y, x) -> logdensityof(Normal(mu = fy_2(y), sigma = sigma), x),
+    (point, parameters) -> logdensityof(Normal(mu = fy_2(point.y, (parameters[1], parameters[2])), sigma = parameters[3]), point.x),
     Lebesgue(support = cartprod(y = interval(-5.0, 5.0), x = interval(-5.0, 5.0))),
+    (a0, a1, sigma),
   ),
 )
 % HS3 conditional dist → normalize(logweighted …): joint-normalized density over the observable record
 model_3 = normalize(
   logweighted(
-    (y, x) -> logdensityof(Normal(mu = fy_3(y), sigma = sigma), x),
+    (point, parameters) -> logdensityof(Normal(mu = fy_3(point.y, parameters[1]), sigma = parameters[2]), point.x),
     Lebesgue(support = cartprod(y = interval(-5.0, 5.0), x = interval(-5.0, 5.0))),
+    (a0, sigma),
   ),
 )
 % HS3 conditional dist → normalize(logweighted …): joint-normalized density over the observable record
 model_4 = normalize(
   logweighted(
-    (y, x) -> logdensityof(Normal(mu = fy_4(y), sigma = sigma), x),
+    (point, parameters) -> logdensityof(Normal(mu = fy_4(point.y, parameters[1]), sigma = parameters[2]), point.x),
     Lebesgue(support = cartprod(y = interval(-5.0, 5.0), x = interval(-5.0, 5.0))),
+    (a1, sigma),
   ),
 )
 default_domain = cartprod(

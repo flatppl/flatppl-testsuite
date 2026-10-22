@@ -33,19 +33,12 @@ in `test.json` carries only that ABI shape (`inputs`, `points`, an f32
 `tolerance`) — `expected` deliberately stays at the top level, so ONE frozen
 oracle value gates both paths and `regen` keeps owning it.
 
-4 dirs pin a StableHLO REFUSAL instead (`"stablehlo": {"status": "refuses",
+`joint_singular_refusal` pins a StableHLO refusal instead (`"stablehlo": {"status": "refuses",
 "allow_skip": true, "refusal": "<verbatim exit-3 message>"}`):
-`joint_singular_refusal`, `shared_latent_joint`,
-`shared_latent_joint_positional`, `shared_latent_record`. `allow_skip` sits
-INSIDE the block, so the det-js case in the same dir stays strict about its own
-skips. The frozen `expected` is a real oracle value, so the row starts
-comparing numbers the moment the lowering lands.
-
-Three of those four refuse only in the CONCATENATED module: the model alone
-determinizes, and `model + query` alone determinizes once the model's own
-literal-point `lp` line is dropped. Scoring one record law twice — once at
-literal fields, once at ABI-symbolic ones — is what trips the refusal. See
-`flatppl-dev/TODO-flatppl-rust.md`.
+the repeated draw lies on a diagonal and has no product-reference density.
+Its det-js case also allows the refusal, with a NaN expected value to prevent
+an arbitrary emitted scalar from passing. The three shared-latent fixtures
+score their frozen densities on both paths.
 
 ## Oracle
 
@@ -62,15 +55,15 @@ record fields drawn over one shared latent are correlated, so the joint is
 per-field marginals. The product is 0.199 nats away at the frozen point, which is
 what the case discriminates against.
 
-`shared_latent_joint` and `shared_latent_joint_positional` are the `joint`
-spellings of the same shared-latent shape (keyword `joint(y1 = lawof(y1), y2 =
-lawof(y2))` and positional `joint(lawof(y1), lawof(y2))`): §06 "Equivalent record law" makes a `joint` over two reified components
-equivalent to the plain record law, so both freeze the SAME expected value as
-`shared_latent_record`.
+`shared_latent_joint` and `shared_latent_joint_positional` retain their
+correlated oracles using one `lawof(record(y1 = y1, y2 = y2))`.
+Their queries expose separate scalar inputs and one vector input, respectively.
+Separate law components in `joint` are independent, so they would not preserve
+these fixtures' shared latent.
 
-`joint_singular_refusal` gates the degenerate case: `joint(a = lawof(y), b =
-lawof(y))` reifies the SAME draw into both components, which has no density
-w.r.t. the product reference measure. There is no closed-form value to
+`joint_singular_refusal` gates the degenerate case:
+`lawof(record(a = y, b = y))` retains the same draw in both fields, which has
+no density w.r.t. the product reference measure. There is no closed-form value to
 freeze, so this dir has no `oracle()`; it sets `"allow_skip": true` and
 relies on the determiniser's exit-3 refusal producing a tolerated
 `skipped`/`DETERMINIZE_SKIP` result instead.

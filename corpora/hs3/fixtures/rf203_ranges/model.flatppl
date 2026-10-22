@@ -1,3 +1,5 @@
+# AUTOMATICALLY GENERATED - do not edit
+
 flatppl_compat = "0.1"
 f = elementof(reals)
 mx = elementof(reals)
@@ -11,7 +13,10 @@ HS3 polynomial_dist → normalize(weighted(functionof(polynomial(coefficients)),
 observable: x
 %%%
 px = normalize(
-  truncate(weighted(x -> polynomial([1.0, a], x), Lebesgue(reals)), interval(-10.0, 10.0)),
+  truncate(
+    weighted((x, parameters) -> polynomial([1.0, parameters], x), Lebesgue(reals), a),
+    interval(-10.0, 10.0),
+  ),
 )
 default_domain = cartprod(
   a = interval(-0.1, 0.1),
