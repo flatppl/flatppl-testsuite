@@ -19,7 +19,7 @@ y ~ normalize(ksuperpose(counts, population_weights)(possible_sizes, theta))
 
 Pi_prior = lawof(record(theta = theta))
 K_model = kernelof(record(y = y), theta = theta)
-L = likelihoodof(K_model, record(y = data.k))
+L = likelihoodof(pars -> K_model(theta = pars.theta), record(y = data.k))
 Pi_post = bayesupdate(L, Pi_prior)
 Pi_post_domain = cartprod(theta = unitinterval)
 Pi_post_input = record(theta = 0.1)

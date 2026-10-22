@@ -32,5 +32,5 @@ m ~ iid(mix, N)
 
 prior = lawof(record(f = f))
 forward_kernel = kernelof(record(m = m), f = f)
-L = likelihoodof(forward_kernel, record(m = m_obs))
+L = likelihoodof(pars -> forward_kernel(f = pars.f), record(m = m_obs))
 posterior = bayesupdate(L, prior)

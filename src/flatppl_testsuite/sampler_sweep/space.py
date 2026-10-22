@@ -292,9 +292,11 @@ _KS_MIX_ASYM = ("mix", (0.3, 0.7), (("norm", (-3.0, 1.0), {}), ("norm", (3.0, 1.
 # z ~ N(0,1); y | z ~ N(z, 1). §06 "Dependent composition": kchain "Keeps only
 # the last kernel's variates, marginalizing out all intermediate variates", so
 # the materialised measure is the MARGINAL of y, which is N(0, 1 + 1) = N(0, 2).
+# The base is the scalar `lawof(z)`: `k` has one explicit boundary input, so §04
+# auto-splatting hands a record base to it whole, which does not type as `z`.
 _KCHAIN = ("z ~ Normal(mu = 0.0, sigma = 1.0)\n"
            "k = kernelof(record(y = draw(Normal(mu = z, sigma = 1.0))), z = z)\n"
-           "C = kchain(lawof(record(z = z)), k)\n")
+           "C = kchain(lawof(z), k)\n")
 
 # truncate(Normal(0,1), interval(-1,1)). Total mass is 2*Phi(1) - 1; the
 # truncated moments are scipy.stats.truncnorm(-1, 1)'s, cross-checked against
@@ -483,7 +485,9 @@ TARGETED: tuple[Probe, ...] = (
     #   int_0^4 (e^theta - 1) dtheta / int_0^4 (e^theta - 1)/theta dtheta
     #     = 2.8073315740022866
     # (mpmath quadrature at 40 dps, cross-checked against the theta-marginal
-    # form). The prior mean is 2.0.
+    # form). The prior mean is 2.0. theta reaches the weight as the explicit
+    # callback parameter (§04 "Explicit callback parameters"), because a reified
+    # callable may not capture the draw.
     #
     # THE VARIATE CHECKS ARE OFF HERE, and that is the point of
     # `variate_skip_reason`: unlike the two rows above, the weights do NOT come
@@ -492,8 +496,8 @@ TARGETED: tuple[Probe, ...] = (
     # an implementation detail as if it were spec.
     Probe("normal.normalize_theta_weighted_box",
           "theta ~ Uniform(interval(0.0, 4.0))\n"
-          "m = normalize(weighted(fn(exp(theta * _)), "
-          "Lebesgue(support = interval(0.0, 1.0))))\n"
+          "m = normalize(weighted((x, t) -> exp(t * x), "
+          "Lebesgue(support = interval(0.0, 1.0)), theta))\n"
           "y ~ m\n",
           "y", 1, None,
           None, None, None, None, 0.0, None,
@@ -804,8 +808,10 @@ TARGETED: tuple[Probe, ...] = (
           latent_mean_estimator_var=2.0),
     # 5. The NESTED-BROADCAST COMPOSITE, whose outer kernel body is itself a
     #    `broadcast`: 2 outer x 2 inner = 4 positions folded in one batch. theta
-    #    arrives as a closed-over per-atom ref inside the INNER mu, which is the
-    #    route that leaves both axis-ladder sizes statically resolvable.
+    #    enters the outer kernel as the scalar input `m_g`, broadcast to every
+    #    outer position, and shifts the INNER mu. A reified callable may not
+    #    capture the draw (§04 "Reification to functions and kernels"), so theta
+    #    is an input rather than a closed-over ref.
     Probe("normal.broadcast_nested_body_at_weighted_parameter",
           "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
           "theta ~ tm\n"
@@ -813,10 +819,9 @@ TARGETED: tuple[Probe, ...] = (
           "sigmas = [1.0, 1.0]\n"
           "ok = functionof(Normal(mu = _mu_, sigma = _sigma_), "
           "mu = _mu_, sigma = _sigma_)\n"
-          "shifted = inner .+ theta\n"
-          "pk = functionof(broadcast(ok, mu = shifted, sigma = _sigma_g_), "
-          "sigma_g = _sigma_g_)\n"
-          "y = broadcast(pk, sigma_g = sigmas)\n",
+          "pk = functionof(broadcast(ok, mu = inner .+ _m_g_, sigma = _sigma_g_), "
+          "m_g = _m_g_, sigma_g = _sigma_g_)\n"
+          "y = broadcast(pk, m_g = theta, sigma_g = sigmas)\n",
           "y", 4, None,
           1.0, 2.0, 12.0, 1.0, 0.0, None,
           "normal", "broadcast_nested_body_at_weighted_parameter",
@@ -1044,12 +1049,12 @@ TARGETED: tuple[Probe, ...] = (
     # the previous state alone, the keyword form or `relabel` for named joint
     # components.
     Probe("normal.kchain_3step_scalar_step_refuses",
-          "base = Normal(mu = 0.0, sigma = 1.0)\n"
+          "m0 = Normal(mu = 0.0, sigma = 1.0)\n"
           "mu1 = elementof(reals)\n"
           "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
           "mu2 = elementof(reals)\n"
           "K2 = functionof(Normal(mu = mu2, sigma = 1.0), mu2 = mu2)\n"
-          "y = kchain(base, K1, K2)\n",
+          "y = kchain(m0, K1, K2)\n",
           "y", 1, None,
           None, None, None, None, None, None,
           "normal", "kchain_3step_scalar_step_refuses",
@@ -1064,10 +1069,10 @@ TARGETED: tuple[Probe, ...] = (
                               "oracle, and the pre-fix engine gives MALFORMED / "
                               "nonfinite-draws instead"),
     Probe("normal.kchain_joint_base_scalar_step_refuses",
-          "base = Normal(mu = 0.0, sigma = 1.0)\n"
+          "m0 = Normal(mu = 0.0, sigma = 1.0)\n"
           "mu1 = elementof(reals)\n"
           "K1 = functionof(Normal(mu = mu1, sigma = 1.0), mu1 = mu1)\n"
-          "jp = joint(base)\n"
+          "jp = joint(m0)\n"
           "y = kchain(jp, K1)\n",
           "y", 1, None,
           None, None, None, None, None, None,

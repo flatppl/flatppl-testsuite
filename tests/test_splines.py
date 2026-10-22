@@ -20,12 +20,13 @@ def test_thinplate_values_curvature_and_center_gradients(tmp_path, precision, to
         "points = elementof(cartpow(reals, 5))\n"
         "centers = elementof(cartpow(reals, 3))\n"
         "beta = [1.0, -2.0, 1.0, 0.25, -0.5]\n"
-        "basis(t) = sp.thinplate_basis(t, centers)\n"
-        "value(t) = transpose(beta) * basis(t)\n"
+        "basis(t, c) = sp.thinplate_basis(t, c)\n"
+        "value(t, c) = transpose(beta) * basis(t, c)\n"
         "penalty = sp.thinplate_penalty(centers)\n"
         "energy = transpose(beta) * penalty * beta\n"
         "inputs = (x, points, centers)\n"
-        "outputs = (basis(x), basis.(points), penalty, value(x), value.(points), energy)\n"
+        "outputs = (basis(x, centers), basis.(points, [centers]), penalty, "
+        "value(x, centers), value.(points, [centers]), energy)\n"
     )
     source = ex.emit(query, "logdensity", dtype=precision)
     jax, jnp, hlo_call = ex._jax()

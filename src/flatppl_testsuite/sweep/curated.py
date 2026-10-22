@@ -417,12 +417,16 @@ def _joint_measure(expr: str, ctx: _Ctx,
                    ) -> tuple[dict[str, NormalNode], tuple[str, ...], str, bool]:
     """`(nodes, fields, composition, point_is_record)` for a multi-field joint.
 
-    The three spellings §06 "Equivalent record law" declares equivalent, plus `iid`:
+    The record law, the two `joint` spellings, and `iid`:
 
-    * `lawof(record(a = x, b = y))` and `joint(a = lawof(x), b = lawof(y))` — a
-      RECORD variate, so the query point is a record;
-    * `joint(lawof(x), lawof(y))` — §06 combines positional component variates via
-      `cat`, so the variate is a vector and the point is an array;
+    * `lawof(record(a = x, b = y))` — one law over all fields, so `composition` is
+      `"traced"` and the point is a record;
+    * `joint(a = lawof(x), b = lawof(y))` — §06 `joint` is an "independent product
+      measure" of separate laws, so `composition` is `"product"` and the point is a
+      record;
+    * `joint(lawof(x), lawof(y))` — the same product; §06 combines positional
+      component variates via `cat`, so the variate is a vector and the point is an
+      array;
     * `iid(lawof(x), n)` — §06's product measure, so `composition` is `"iid"` and the
       variate is an array.
 
@@ -464,7 +468,7 @@ def _joint_measure(expr: str, ctx: _Ctx,
     names = [_lawof_arg(c) for c in components]
     for n in names:
         _normal_draw(n, ctx, nodes)
-    return nodes, tuple(names), "traced", bool(kw)
+    return nodes, tuple(names), "product", bool(kw)
 
 
 def _name_of(tok: str) -> str:

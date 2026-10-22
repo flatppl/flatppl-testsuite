@@ -567,17 +567,20 @@ def linear_gaussian_logpdf(nodes: dict[str, NormalNode], fields: tuple[str, ...]
     would leave the multivariate oracle ungated, which is the gap
     `flatppl-dev/density-sweep-notes.md` records against `Multinomial`.
 
-    `composition` selects §06's rule:
+    `composition` selects the rule:
 
-    * `"traced"` — §06 "Equivalent record law": `joint(a = lawof(a), b = lawof(b))`
-      "is equivalent to `lawof(record(a = a, b = b))`", and a node shared between
-      component traces "remains a single node of the composed trace". So the
-      covariance is the graph's own, cross-terms included, and §06's worked example
-      is this family's `fan`: "`joint(a = lawof(a), b = lawof(b))` has
-      cross-covariance Var(z) = s^2".
+    * `"traced"` — one `lawof` over all fields, `lawof(record(a = a, b = b))`. §04
+      "Reification to measures": "`lawof` preserves dependence within its
+      argument", so the covariance is the graph's own, cross-terms included.
+    * `"product"` — §06 `joint`: "independent product measure". Each component is
+      its own `lawof`, so the covariance is diagonal with each field's own marginal
+      variance. §04 gives the case verbatim: `joint(lawof(x), lawof(x))` is "the
+      same product of two standard Normal laws".
     * `"iid"` — §06 `iid(M, size)`: "the product measure M^(x)N". N independent
       copies of ONE marginal, so the covariance is diagonal with that marginal's
       variance repeated, whatever ancestry the marginal itself has.
+    * `"free_draw"` — a measure parameter reads a draw outside the point and every
+      `lawof`. §13 "Output reduction" gives no value, so the oracle withholds.
 
     The reference measure is the product Lebesgue measure over the fields (§06
     "Reference measure for product measures": "the reference for the product is the
@@ -596,6 +599,13 @@ def linear_gaussian_logpdf(nodes: dict[str, NormalNode], fields: tuple[str, ...]
         mean = [mean[0]] * len(fields)
         v = cov[0][0]
         cov = [[v if i == j else 0.0 for j in range(len(fields))]
+               for i in range(len(fields))]
+    elif composition == "free_draw":
+        raise OracleUnsupported(
+            "a constructor parameter reads a draw outside the point and every lawof, so "
+            "§13 'Output reduction' gives the query no value")
+    elif composition == "product":
+        cov = [[cov[i][i] if i == j else 0.0 for j in range(len(fields))]
                for i in range(len(fields))]
     elif composition != "traced":
         raise OracleUnsupported(f"composition {composition}")

@@ -39,8 +39,8 @@
   "oracle": "closed form (product of step conditionals) + scipy half-Cauchy",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "223c431c66a9c1503b3ab4d6a5bee57ef99e6c0f",
+    "revision": "4e3fa5570e6ce095c58817c1174cb60a9789eb30",
     "path": "examples/ar1-noise-estimation.flatppl",
-    "sha256": "700c771083dda1cf3a036d33210a97dc1c98ed3bbc6cbcd27de2a1e74f54485f"
+    "sha256": "7426d8acfa976233ac2748b910a2f325a2811357c316587cb3aca667d6426675"
   }
 }

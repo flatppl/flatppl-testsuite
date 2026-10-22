@@ -120,9 +120,7 @@ def _shared_measure_src(probe: SharedLatentProbe, nodes: dict[str, NormalNode],
             f"{lab} = {_normal_src(nodes[lab])}" for lab in labels) + ")"
     if s in ("ctor_shared_kw", "ctor_shared_pos"):
         # Each component is the CONSTRUCTOR of the corresponding field's draw, so its
-        # `mu` names that field's parent -- the latent. §06 keeps a node shared through
-        # a stochastic constructor parameter as one node of the composed trace, which
-        # is what makes this the compound law rather than a product.
+        # `mu` names that field's parent -- the latent, drawn outside every `lawof`.
         ctors = [_normal_src(nodes[node]) for node in field_nodes]
         if s == "ctor_shared_pos":
             return "joint(" + ", ".join(ctors) + ")"

@@ -17,7 +17,7 @@ def test_shared_cell_arrays_use_runtime_points(tmp_path, count):
     (tmp_path / "model.flatppl").write_text(
         "x = elementof(reals)\n"
         "rates = exp.([x, x + 1.0, x + 2.0])\n"
-        "L = likelihoodof(Normal(sum(rates) + sum(rates .* rates), 1.0), 0.2)\n"
+        "L = likelihoodof(functionof(Normal(sum(rates) + sum(rates .* rates), 1.0)), 0.2)\n"
     )
     query = tmp_path / "query.flatppl"
     query.write_text(

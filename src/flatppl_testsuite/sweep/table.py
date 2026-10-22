@@ -33,10 +33,11 @@ second `logdensityof` query against one measure refuses every
 those correctly show up as unjustified over-refusals here, not this guard.)
 
 The shared-latent family classifies on its own axis, `probe.shape`, for the same
-structural reason -- see `_spec_justified`. Exactly one of its shapes has a
-conformant refusal (`singular`, per §06 "Singular joints"); every other shape's
-density is closed-form and carried by the oracle, so a refusal there is a tracked
-capability gap.
+structural reason -- see `_spec_justified`. Two kinds of probe have a
+conformant refusal: the `singular` record law (§06 "Singular laws") and the
+`ctor_shared_*` constructors, which read a draw outside the point and every `lawof`
+(§13 "Output reduction"). Every other probe's density is closed-form and carried by
+the oracle, so a refusal there is a tracked capability gap.
 
 `known_defect` marks a LOWERS row whose value does not match its oracle AND
 whose (base, wrap, spelling) matches a defect this sweep has actually
@@ -121,23 +122,31 @@ def _spec_justified(probe: Probe | SharedLatentProbe | LiteralProbe,
         return probe.refusal_spec_justified
 
     if is_shared_latent(probe):
-        # ONE shared-latent shape has a spec-justified refusal, and it is the
-        # `singular` one. §06 "Singular joints": "the joint law has no density
-        # w.r.t. the product reference measure ... a density query is a static
-        # error where statically detectable, and is otherwise refused by the
-        # engine." Refusing is the conformant answer, and the oracle withholds the
-        # same shape for the same reason (`oracle._refuse_singular_joint`).
+        # Two kinds of shared-latent probe refuse conformantly.
         #
-        # Every OTHER shared-latent refusal is an over-refusal, and that is a
-        # claim about the spec rather than a default falling through. §06
-        # "Equivalent record law" gives `record_law`, `joint_kw` and `joint_pos`
-        # one density; §06 `iid` gives the product measure; §06's contrast
-        # sentence gives `joint_ctor` the product of its marginals. Each is
-        # closed-form, this family is linear-Gaussian throughout, and the oracle
-        # carries the value — so a refusal is a capability gap, tracked, not a
-        # pass. The `chain` shape is the expected occupant (#131 lowered the FAN
-        # arm only), and it must read as a gap rather than as conformance.
-        return probe.shape == "singular"
+        # The `singular` record law is one `lawof` over the same draw twice. §04
+        # "Reification to measures" calls `lawof([x, x])` "the diagonal law", and
+        # §06 "Singular laws": "When no density exists, a density query is a static
+        # error where detectable, and otherwise refused by the engine." The oracle
+        # withholds the same probe for the same reason
+        # (`oracle._refuse_singular_joint`).
+        #
+        # The `ctor_shared_*` constructors' `mu` reads a draw outside the point and
+        # every `lawof`. §13 "Output reduction" takes draws "from the explicit
+        # `point`, unless marginalized out", so the query has no value.
+        #
+        # Every OTHER shared-latent refusal is an over-refusal, and that is a claim
+        # about the spec rather than a default falling through. §06 `joint` is an
+        # "independent product measure", so `joint_kw` and `joint_pos` are the
+        # product of the marginals even over one draw (§04: `joint(lawof(x),
+        # lawof(x))` is "the same product of two standard Normal laws"); §06 `iid`
+        # gives the product measure; `record_law` over distinct draws has a full-
+        # rank covariance. Each is closed-form, this family is linear-Gaussian
+        # throughout, and the oracle carries the value — so a refusal is a
+        # capability gap, tracked, not a pass.
+        if probe.spelling in ("ctor_shared_kw", "ctor_shared_pos"):
+            return True
+        return probe.shape == "singular" and probe.spelling == "record_law"
 
     wrap = probe.wraps[0]
     if probe.spelling == "record" and wrap.kind in _AUTO_SPLAT_REFUSAL_WRAPS:

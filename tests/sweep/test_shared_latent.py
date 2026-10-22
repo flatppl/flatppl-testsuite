@@ -328,18 +328,18 @@ def test_a_child_is_listed_before_its_parent_without_changing_the_moments():
 
 @pytest.mark.parametrize("shape", ["fan", "chain", "disjoint"])
 @pytest.mark.parametrize("n", [2, 3])
-def test_the_three_equivalent_spellings_share_one_oracle_value(shape, n):
-    """§06 "Equivalent record law", verbatim: "`joint(a = lawof(a), b = lawof(b))`
-    is equivalent to `lawof(record(a = a, b = b))`; the positional form is the
-    corresponding `cat` law".
+def test_the_three_product_spellings_share_one_oracle_value(shape, n):
+    """§06 `joint`: "independent product measure". `joint_kw` and `joint_pos` join
+    one `lawof` per field, so each is the product of the field marginals — the same
+    measure as `joint_ctor`, whose constructors carry those marginals. §04 states
+    the case: `joint(lawof(x), lawof(x))` is "the same product of two standard
+    Normal laws".
 
-    One measure, three spellings — so one oracle value. The determiniser is judged
-    against that equivalence too, which is a correctness signal needing no oracle at
-    all: three spellings that lower to three different densities are wrong whichever
-    of them the oracle happens to agree with.
+    One measure, three spellings — so one oracle value. Three spellings that lower
+    to three different densities are wrong whichever of them the oracle agrees with.
     """
     values = {s: true_logpdf(_probe(shape, s, n))
-              for s in ("record_law", "joint_kw", "joint_pos")}
+              for s in ("joint_kw", "joint_pos", "joint_ctor")}
     assert len(set(values.values())) == 1, values
 
 
@@ -361,37 +361,19 @@ def test_the_constructor_joint_is_the_product_of_the_matched_marginals(shape, n)
     compare_scalar(true_logpdf(_probe(shape, "joint_ctor", n)), want, TOL)
 
 
-@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
-@pytest.mark.parametrize("n", [2, 3])
-def test_a_stochastic_parameter_shares_the_node_so_the_law_is_the_compound_one(
-        spelling, n):
-    """flatppl-rust #156's semantics, and §06's own wording for it: a node shared
-    "through a reified component ... OR A STOCHASTIC CONSTRUCTOR PARAMETER remains a
-    single node of the composed trace".
-
-    So `joint(a = Normal(mu = z, s_a), b = Normal(mu = z, s_b))` is the COMPOUND law —
-    the record law of two fresh draws — and must equal `record_law`, NOT `joint_ctor`.
-    Both are asserted: agreeing with the record law is the claim, and differing from
-    the ancestor-free constructor product is what stops the row passing on a lowering
-    that treats every constructor joint as independent.
-    """
-    compound = true_logpdf(_probe("fan", spelling, n))
-    compare_scalar(compound, true_logpdf(_probe("fan", "record_law", n)), TOL)
-    product = true_logpdf(_probe("fan", "joint_ctor", n))
-    assert abs(compound - product) > 1e-3, (
-        f"the compound law {compound} and the ancestor-free product {product} agree, "
-        "so this shape's shared stochastic parameter is not exercised")
-
-
-@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
-@pytest.mark.parametrize("n", [2, 3])
-def test_distinct_stochastic_parameters_stay_independent(spelling, n):
-    """The control for the arm above. `disjoint` gives each component its OWN latent,
-    so no node is shared and §06 hands back the independent product — a lowering that
-    correlates any two stochastic-parameter constructors, rather than only those
-    naming the same node, is caught here and nowhere else."""
-    compare_scalar(true_logpdf(_probe("disjoint", spelling, n)),
-                   true_logpdf(_probe("disjoint", "joint_ctor", n)), TOL)
+def test_a_free_draw_constructor_has_no_oracle_value():
+    """§13 "Output reduction": `draw` nodes "take their values from the explicit
+    `point`, unless marginalized out". A `ctor_shared_*` component's `mu` reads the
+    drawn latent outside the point and every `lawof`, so the query has no value and
+    the oracle must withhold — in every shape, size and latent-query ordering. The
+    old compound law (a `fan` record law) is the implicit marginal the spec rules
+    out."""
+    probes = [p for p in enumerate_shared_latent_probes()
+              if p.spelling in ("ctor_shared_kw", "ctor_shared_pos")]
+    assert {p.shape for p in probes} == {"fan", "disjoint"}
+    for p in probes:
+        with pytest.raises(OracleUnsupported, match="Output reduction"):
+            true_logpdf(p)
 
 
 def test_a_constructor_component_is_never_drawn_as_a_binding():
@@ -449,17 +431,21 @@ def test_iid_does_not_pick_up_the_shared_ancestor(n):
 
 
 def test_the_singular_shapes_are_withheld_and_nothing_else_is():
-    """§06 "Singular joints": "the joint law has no density w.r.t. the product
-    reference measure ... a density query is a static error where statically
-    detectable, and is otherwise refused by the engine."
+    """§04 calls `lawof([x, x])` "the diagonal law", and §06 "Singular laws": "When
+    no density exists, a density query is a static error where detectable, and
+    otherwise refused by the engine." That is the `singular` record law.
 
-    So the oracle must WITHHOLD, and the trap is that a number IS available — the
-    product of the two marginals is finite and plausible and is the density of
-    nothing. Per `flatppl-dev/density-sweep-notes.md`, supplying it would make this
-    module the authority for semantics nobody wrote down.
+    So the oracle must WITHHOLD there, and the trap is that a number IS available —
+    the product of the two marginals is finite and plausible and is the density of
+    nothing. The `joint` spellings over the same draw are different measures:
+    products of separate laws, which do have a density. Per
+    `flatppl-dev/density-sweep-notes.md`, supplying it would make this module the
+    authority for semantics nobody wrote down.
 
-    Both directions asserted: no non-singular member may be withheld either, or the
-    singularity test would be quietly eating rows the family exists to score.
+    Both directions asserted: no other member may be withheld either, or the
+    singularity test would be quietly eating rows the family exists to score. The
+    `ctor_shared_*` probes are withheld for their own reason, which
+    `test_a_free_draw_constructor_has_no_oracle_value` pins.
     """
     withheld, valued = [], []
     for p in enumerate_shared_latent_probes():
@@ -468,12 +454,24 @@ def test_the_singular_shapes_are_withheld_and_nothing_else_is():
             valued.append(p)
         except OracleUnsupported:
             withheld.append(p)
-    assert {p.shape for p in withheld} == {"singular"}, (
-        f"withheld shapes: {sorted({p.shape for p in withheld})}")
-    assert all(p.shape == "singular" for p in withheld)
-    assert not [p for p in valued if p.shape == "singular"], (
-        "a singular probe was given a value")
-    assert len(withheld) == 6, f"expected 6 singular probes, got {len(withheld)}"
+    free_draw = {"ctor_shared_kw", "ctor_shared_pos"}
+    singular = [p for p in withheld if p.spelling not in free_draw]
+    assert {(p.shape, p.spelling) for p in singular} == {("singular", "record_law")}, (
+        f"withheld: {sorted({(p.shape, p.spelling) for p in withheld})}")
+    assert len(singular) == 2, f"expected 2 singular record laws, got {len(singular)}"
+    assert not [p for p in valued if p.spelling in free_draw], (
+        "a free-draw constructor probe was given a value")
+    # The `joint` spellings over one draw are products of separate laws (§04:
+    # `joint(lawof(x), lawof(x))` is "the same product of two standard Normal
+    # laws"), so they carry n copies of f1's marginal at the point.
+    for p in valued:
+        if p.shape != "singular":
+            continue
+        assert p.spelling in ("joint_kw", "joint_pos"), p.id
+        want = math.fsum(
+            stats.norm(loc=SHARED_LATENT_MU, scale=math.sqrt(1.25)).logpdf(x)
+            for x in p.point)
+        compare_scalar(true_logpdf(p), want, TOL)
 
 
 def test_the_singularity_threshold_is_nowhere_near_an_admissible_probe():
@@ -510,7 +508,7 @@ def test_the_latent_query_axis_does_not_move_the_oracle():
     carry one oracle value — and a determiniser that answers them differently is
     caught by the rows disagreeing with each other, before the oracle matters."""
     for shape, spelling in shared_latent_shapes():
-        if shape == "singular":
+        if shape == "singular" or spelling.startswith("ctor_shared"):
             continue
         values = {q: true_logpdf(_probe(shape, spelling, 2, q))
                   for q in ("none", "before", "after")}
@@ -610,21 +608,22 @@ def _determinize(probe) -> tuple[int, str, str]:
 
 @pytestmark_binary
 def test_the_singular_shapes_refuse_rather_than_emitting_a_density():
-    """§06 "Singular joints" makes the refusal the conformant answer, and
-    `table._spec_justified` reports it as one. Asserted against the determiniser's
-    own exit code, because a row that merely SAYS `spec_justified` proves nothing
-    about what the binary did — the same reason `test_vector_arms.py` asserts each
-    vector arm actually fires.
+    """§06 "Singular laws" makes the refusal the conformant answer for the diagonal
+    record law, and `table._spec_justified` reports it as one. The `joint`
+    spellings over the same draw are products of separate laws and lower.
+
+    Asserted against the determiniser's own exit code, because a row that merely
+    SAYS `spec_justified` proves nothing about what the binary did — the same
+    reason `test_vector_arms.py` asserts each vector arm actually fires.
     """
-    for spelling in ("record_law", "joint_kw", "joint_pos"):
-        for n in (2, 3):
-            code, emitted, stderr = _determinize(_probe("singular", spelling, n))
-            assert code == 3, (
-                f"singular/{spelling} n={n}: exit {code}, not the refusal §06 "
-                f"requires\nemitted:\n{emitted}")
-            assert "draw" in stderr.lower() or "field" in stderr.lower(), (
-                f"singular/{spelling} n={n}: refusal does not name the shape: "
-                f"{stderr.strip()}")
+    for n in (2, 3):
+        code, emitted, stderr = _determinize(_probe("singular", "record_law", n))
+        assert code == 3, (
+            f"singular/record_law n={n}: exit {code}, not the refusal §06 "
+            f"requires\nemitted:\n{emitted}")
+        assert "draw" in stderr.lower() or "field" in stderr.lower(), (
+            f"singular/record_law n={n}: refusal does not name the shape: "
+            f"{stderr.strip()}")
 
 
 @pytestmark_binary
@@ -688,9 +687,28 @@ def test_every_shared_latent_holdout_is_excluded_and_carries_a_category():
 
 
 # Every (shape, spelling) pair that HAS a latent query to survive. `singular` is
-# excluded because the family's own query refuses there (§06 "Singular joints"), so
-# determinize exits 3 and there is no emitted module to inspect.
-_QUERYABLE_PAIRS = [(sh, sp) for sh, sp in shared_latent_shapes() if sh != "singular"]
+# excluded because the family runs it at `latent_query = "none"` only, and its
+# record law refuses (§06 "Singular laws"). The `ctor_shared_*` pairs refuse in
+# every ordering (§13 "Output reduction"), which
+# `test_a_free_draw_constructor_refuses_in_every_ordering` pins.
+_QUERYABLE_PAIRS = [(sh, sp) for sh, sp in shared_latent_shapes()
+                    if sh != "singular" and not sp.startswith("ctor_shared")]
+
+
+@pytestmark_binary
+@pytest.mark.parametrize("shape", ["fan", "disjoint"])
+@pytest.mark.parametrize("spelling", ["ctor_shared_kw", "ctor_shared_pos"])
+@pytest.mark.parametrize("latent_query", ["none", "before", "after"])
+def test_a_free_draw_constructor_refuses_in_every_ordering(shape, spelling, latent_query):
+    """§13 "Output reduction" reduces per output: the latent query's point is not a
+    value for the family's own query. So `lp` refuses with or without a second
+    query on the latent, in either order, and the refusal names the draw."""
+    code, emitted, stderr = _determinize(
+        _probe(shape, spelling, latent_query=latent_query))
+    assert code == 3, (
+        f"{shape}/{spelling}/{latent_query}: exit {code}, not a refusal\n{emitted}")
+    assert "density query in `lp` reads draw `z" in stderr, stderr
+    assert "lawof(...)" in stderr, stderr
 
 
 @pytestmark_binary

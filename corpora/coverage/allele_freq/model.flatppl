@@ -18,5 +18,5 @@ y ~ iid(Categorical(p = p), lengthof(counts_data))
 
 prior = lawof(record(p = p))
 forward_kernel = kernelof(record(y = y), p = p)
-L = likelihoodof(forward_kernel, record(y = counts_data))
+L = likelihoodof(pars -> forward_kernel(p = pars.p), record(y = counts_data))
 posterior = bayesupdate(L, prior)

@@ -12,7 +12,7 @@ y_data = 0.4
 bound ~ Exponential(1.3)
 x = elementof(reals)
 prior = jointchain(lawof(record(bound = bound)),
-    functionof(joint(x = Lebesgue(interval(0, bound))), bound = bound))
+    pars -> joint(x = Lebesgue(interval(0, pars.bound))))
 
 y ~ Normal(x, 0.6)
 forward_kernel = kernelof(y, bound = bound, x = x)
