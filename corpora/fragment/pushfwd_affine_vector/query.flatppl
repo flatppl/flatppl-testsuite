@@ -1,0 +1,4 @@
+# ABI form of the model's own `lp`: the observation vector becomes the argument.
+t_y = elementof(cartpow(reals, 3))
+inputs = (t_y)
+outputs = logdensityof(m, t_y)
