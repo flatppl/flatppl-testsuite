@@ -110,7 +110,11 @@ async function scoreOne(src, binding, processSource, orchestrator, materialiser,
     sendWorker: (m) => Promise.resolve(w.handle(m)),
   };
 
-  const measure = await ctx.getMeasure(binding);
+  // A fixed binding that fails to evaluate gets no derivation. Its real cause is
+  // a build diagnostic, so name it instead of the materialiser's "no derivation".
+  const measure = await ctx.getMeasure(binding).catch((e) => {
+    throw withBuildDiagnostics(e, built);
+  });
   if (vectorSize !== null) {
     const value = measure && measure.value;
     if (!value || !value.shape || value.shape.length !== 1
@@ -122,6 +126,13 @@ async function scoreOne(src, binding, processSource, orchestrator, materialiser,
   if (measure && measure.value && measure.value.data) return measure.value.data[0];
   if (measure && measure.samples && measure.samples.length) return measure.samples[0];
   throw new Error('no value for binding ' + binding);
+}
+
+function withBuildDiagnostics(e, built) {
+  const errors = (built.diagnostics || []).filter((d) => d.severity === 'error');
+  const message = e && e.message ? e.message : String(e);
+  if (!errors.length) return e;
+  return new Error(message + ' (' + errors.map((d) => 'diagnostic: ' + d.message).join('; ') + ')');
 }
 
 async function main() {
