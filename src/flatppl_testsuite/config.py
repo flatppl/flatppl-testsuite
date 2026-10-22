@@ -28,17 +28,21 @@ class Config:
     node_bin: str = os.environ.get("NODE_BIN", "node")
     # Generic JS scorer for any FlatPPL model; used by scoring/flatppl_engine.py.
     scorer: Path = _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_js.cjs"
-    # Scorer for a deterministic binding in a determinized FlatPDL model; used
-    # by scoring/engine.py's DetJsScoreEngine.
+    # One-shot scorer for a deterministic binding in a determinized FlatPDL model;
+    # the worker runs the same core (tests that drive Node directly use this).
     flatpdl_scorer: Path = _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_flatpdl.cjs"
-    # Seed-sweep scorer for a determinized FlatPDL sample-path model (one
-    # `rnginit([...])` byte-vector substituted per seed, all in one Node
-    # process); used by scoring/engine.py's sample_sweep().
+    # One-shot seed-sweep scorer for a determinized FlatPDL sample-path model
+    # (one `rnginit([...])` byte-vector substituted per seed); the worker runs the
+    # same core for scoring/engine.py's sample_sweep().
     sample_sweep_scorer: Path = (
         _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "sample_sweep.cjs"
     )
-    # Batch scorer for an ABI query's `outputs` binding across many already-
-    # bound FlatPDL sources (one point each), all in ONE Node process; used by
+    # The persistent worker every det-js scoring request goes through: it loads the
+    # engine once and runs the scorers above as in-process requests, so a run starts
+    # one Node process instead of one per case (scoring/worker.py).
+    score_worker: Path = _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_worker.cjs"
+    # One-shot batch scorer for an ABI query's `outputs` binding across many
+    # already-bound FlatPDL sources; the worker runs the same core for
     # unified/detjs_exec.py's score_abi_points().
     flatpdl_batch_scorer: Path = (
         _REPO_ROOT / "src" / "flatppl_testsuite" / "scoring" / "score_flatpdl_batch.cjs"

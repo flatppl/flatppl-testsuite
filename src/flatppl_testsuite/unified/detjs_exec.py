@@ -2,13 +2,14 @@
 
 The unified counterpart of `stablehlo_exec`: the ONLY place the unified
 runners touch the det-js engine. Everything here delegates to
-`scoring/engine.py`, which owns the `flatppl determinize` -> `score_flatpdl.cjs`
-subprocess pair; this module exists so runners import one stable surface
-rather than reaching into the legacy scoring package directly.
+`scoring/engine.py`, which owns the `flatppl determinize` subprocess; every
+scoring request then goes to the persistent Node worker in `scoring/worker.py`
+(one Node process per pytest process, not one per case). This module exists so
+runners import one stable surface rather than reaching into the legacy scoring
+package directly.
 """
 from __future__ import annotations
 
-import json
 import re
 import subprocess
 import tempfile
@@ -25,6 +26,8 @@ from flatppl_testsuite.scoring.engine import (  # noqa: F401  (re-exported)
     score_binding,
     temporary_source_dir,
 )
+from flatppl_testsuite.scoring import worker
+from flatppl_testsuite.scoring.worker import ScoreWorkerFailed  # noqa: F401  (re-exported)
 
 _ENGINE = DetJsScoreEngine()
 
@@ -254,105 +257,44 @@ def score_abi_points(
 
 def _score_flatpdl_binding(flatpdl_path: Path, binding: str) -> float:
     """Evaluate one deterministic binding of an already-determinized module."""
-    proc = subprocess.run(
-        [
-            CONFIG.node_bin, str(CONFIG.flatpdl_scorer), str(flatpdl_path), binding,
-            "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
-        ],
-        capture_output=True, text=True,
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
-    return float(proc.stdout.strip())
+    return worker.score_binding_file(flatpdl_path, binding)
 
 
 def _score_flatpdl_batch(
     sources: list[str], binding: str, *, vector_size: int | None = None,
 ) -> list[PointScore]:
-    """Evaluate `binding` in each of `sources`, in ONE Node process -- the
-    `sample_sweep.cjs` pattern applied to the ABI-point path (see
-    `scoring/score_flatpdl_batch.cjs`'s header). Pays the ~0.3s engine-load
-    cost once for the whole batch instead of once per point.
+    """Evaluate `binding` in each of `sources`, in ONE request to the score
+    worker (`scoring/score_flatpdl_batch.cjs` documents the request). The worker
+    already holds the loaded engine, so a batch costs no engine load.
 
     A source that fails to evaluate comes back as `{"ok": false, "error":
-    ...}` from the batch script rather than a nonzero exit, so one bad point
+    ...}` from the worker rather than a failed request, so one bad point
     surfaces as that source's `PointScore.error`. With `vector_size`, evaluate
     one source and return one row per vector element; a source-level error
     fails the entire vector, while nonfinite scores remain individual values.
     """
-    with tempfile.TemporaryDirectory() as tmp:
-        sources_path = Path(tmp) / "sources.json"
-        sources_path.write_text(json.dumps(sources))
-        proc = subprocess.run(
-            [
-                CONFIG.node_bin, str(CONFIG.flatpdl_batch_scorer), str(sources_path), binding,
-                "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
-                *(["--vector-size", str(vector_size)] if vector_size is not None else []),
-            ],
-            capture_output=True, text=True,
-        )
-        if proc.returncode != 0:
-            # The batch process itself failed (bad args, engine unresolvable,
-            # etc.) -- distinct from a per-point failure, which the script
-            # reports as an {"ok": false, ...} row instead of a nonzero exit.
-            raise RuntimeError(f"score_flatpdl_batch failed: {proc.stderr.strip()}")
-        rows = json.loads(proc.stdout)
-
+    rows = worker.score_batch_rows(sources, binding, vector_size)
     return _point_scores(rows, vector_size if vector_size is not None else len(sources))
-
-
-class ScoreWorkerFailed(RuntimeError):
-    """The scoring process or its reply stream failed, not an individual model."""
 
 
 @contextmanager
 def batch_score_worker():
-    """Reuse one Node engine while keeping every source's graph/cache separate.
+    """Score through a private worker instead of the process-wide one.
 
-    The caller owns the lifetime and timeout of this context. The child stays
-    in the caller's process group so a corpus-worker timeout also stops Node.
+    The caller owns the lifetime of this context. Every source still gets its
+    own graph and cache, so reuse never carries state between models. The child
+    stays in the caller's process group, so a corpus-worker timeout also stops
+    Node.
     """
-    with tempfile.TemporaryFile(mode="w+") as errors:
-        process = subprocess.Popen(
-            [CONFIG.node_bin, str(CONFIG.flatpdl_batch_scorer), "--worker",
-             "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine")],
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=errors,
-            text=True, bufsize=1,
-        )
-
+    private = worker.ScoreWorker()
+    try:
         def score(sources, binding, *, vector_size=None):
-            request = dict(sources=sources, binding=binding, vectorSize=vector_size)
-            try:
-                process.stdin.write(json.dumps(request) + "\n")
-                process.stdin.flush()
-                reply = process.stdout.readline()
-            except OSError as error:
-                raise ScoreWorkerFailed(f"score worker connection failed: {error}") from error
-            if not reply:
-                errors.seek(0)
-                raise ScoreWorkerFailed(f"score worker exited: {errors.read().strip()}")
-            try:
-                rows = json.loads(reply)
-            except ValueError as error:
-                raise ScoreWorkerFailed(f"invalid score worker reply: {reply[:200]}") from error
-            if isinstance(rows, dict) and "error" in rows:
-                raise RuntimeError(rows["error"])
+            rows = worker.score_batch_rows(sources, binding, vector_size, worker=private)
             return _point_scores(rows, vector_size if vector_size is not None else len(sources))
 
-        try:
-            yield score
-        finally:
-            try:
-                process.stdin.close()
-            except BrokenPipeError:
-                pass
-            try:
-                process.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-            finally:
-                process.stdout.close()
+        yield score
+    finally:
+        private.close()
 
 
 def _point_scores(rows, expected_rows):
@@ -377,4 +319,5 @@ def _point_scores(rows, expected_rows):
 @lru_cache(maxsize=1)
 def engine_available() -> bool:
     """True if both subprocess halves of the det-js path are resolvable."""
-    return Path(CONFIG.flatppl_bin).exists() and Path(CONFIG.flatpdl_scorer).exists()
+    return (Path(CONFIG.flatppl_bin).exists() and Path(CONFIG.flatpdl_scorer).exists()
+            and Path(CONFIG.score_worker).exists())

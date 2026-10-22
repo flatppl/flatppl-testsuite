@@ -21,7 +21,11 @@ src/flatppl_testsuite/
   config.py                      generic config (binaries, scorer path)
   scoring/                       engine seam + 2DeltaNLL + compare
     engine.py                    FlatpplEngine ABC + registry + selector
-    score_js.cjs                 the flatppl-js single-point scorer
+    worker.py                    the one persistent Node score worker per pytest process
+    score_worker.cjs             the worker: loads flatppl-js once, answers JSON-line requests
+    score_core.cjs               the scoring cores the worker and the scripts below share
+    score_js.cjs, score_flatpdl.cjs, score_flatpdl_batch.cjs, sample_sweep.cjs
+                                 one-shot command-line forms of the same cores
   formats/                       Importer / Exporter / ForeignEngine ABCs
     hs3/                         HS3 importer + oracles
   suites/
@@ -86,6 +90,16 @@ changes. The default **engine**
 co-development checkout with your own engine changes is never clobbered. The **oracles**, ROOT (conda-forge `root`) and
 pyHS3 (pip `pyhs3`), live in their own pixi environments (`-e root`, `-e pyhs3`) and
 subprocess the upstream HS3TestSuite checkout named by `HS3SUITE`.
+
+A run starts **one Node scoring worker per Python process** (so one per pytest-xdist
+worker), not one Node process per scored case: the worker loads the engine once and
+every det-js score goes to it as a JSON-line request. Each request builds its own
+derivation graph, RNG seed and cache, so nothing carries over between cases. A request
+that exceeds `FLATPPL_SCORE_TIMEOUT` seconds (default 300) or a worker that dies fails
+that request only; the next one starts a fresh worker. The worker restarts once its
+resident set passes `FLATPPL_SCORE_RSS_LIMIT` bytes (default 3 GiB). The one-shot
+scripts run the same cores, so `node score_flatpdl.cjs <model> <binding>` reproduces any
+worker score by hand.
 
 ## Use
 
