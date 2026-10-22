@@ -29,7 +29,7 @@ def _families():
     return [
         ("normal", "Normal(-0.7, 1.3)", "reals", .45, .8,
          stats.norm.logpdf(.8, -.7, 1.3), -.7*.45 + .5*1.3**2*.45**2, -.7 + 1.3**2*.45),
-        ("mvnormal", "MvNormal([-0.3, 0.8], [[1.4, 0.3], [0.3, 0.9]])",
+        ("mvnormal", "MvNormal([-0.3, 0.8], rowstack([[1.4, 0.3], [0.3, 0.9]]))",
          "cartpow(reals, 2)", theta, x, stats.multivariate_normal.logpdf(x, mu, cov),
          mu @ theta + .5*theta @ cov @ theta, mu + cov @ theta),
         ("exponential", "Exponential(2.1)", "reals", .6, .7,
@@ -125,7 +125,7 @@ def test_scalar_and_singleton_coefficients_broadcast_over_mvnormal(tmp_path, coe
     call = _call(tmp_path,
         "theta = external(reals)\nx = external(cartpow(reals, 2))\n"
         f"Q = normalize(logweighted(fn(sum({coefficient} .* _)), "
-        "MvNormal([1, -1], [[2, 0.5], [0.5, 3]])))\n"
+        "MvNormal([1, -1], rowstack([[2, 0.5], [0.5, 3]]))))\n"
         "inputs = (theta, x)\noutputs = logdensityof(Q, x)\n", "f64")
     theta, x = .3, np.array([.2, -.5])
     cov = np.array([[2, .5], [.5, 3]])
