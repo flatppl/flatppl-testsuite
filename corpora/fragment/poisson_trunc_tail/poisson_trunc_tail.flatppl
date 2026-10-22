@@ -1,0 +1,2 @@
+m = normalize(truncate(Poisson(rate = 3.0), interval(2, inf)))
+lp = logdensityof(m, 2)
