@@ -93,7 +93,11 @@ async function main() {
     sendWorker: (m) => Promise.resolve(w.handle(m)),
   };
 
-  const measure = await ctx.getMeasure(binding);
+  // A fixed binding that fails to evaluate gets no derivation. Its real cause is
+  // a build diagnostic, so name it instead of the materialiser's "no derivation".
+  const measure = await ctx.getMeasure(binding).catch((e) => {
+    throw withBuildDiagnostics(e, built);
+  });
   if (measure && measure.value && measure.value.data) {
     process.stdout.write(measure.value.data[0] + '\n');
   } else if (measure && measure.samples && measure.samples.length) {
@@ -102,6 +106,13 @@ async function main() {
     process.stderr.write('score_flatpdl: no value for binding ' + binding + '\n');
     process.exit(1);
   }
+}
+
+function withBuildDiagnostics(e, built) {
+  const errors = (built.diagnostics || []).filter((d) => d.severity === 'error');
+  const message = e && e.message ? e.message : String(e);
+  if (!errors.length) return e;
+  return new Error(message + ' (' + errors.map((d) => 'diagnostic: ' + d.message).join('; ') + ')');
 }
 
 main().catch((e) => {
