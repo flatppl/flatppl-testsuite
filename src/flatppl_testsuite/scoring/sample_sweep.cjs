@@ -37,14 +37,10 @@
 // requested binding names, to stdout:
 //   [{"mu": -18.386..., "y1": -18.854..., "y2": -19.263...}, ...]
 //
-// Engine resolution mirrors score_flatpdl.cjs exactly (--engine, then
-// $FLATPPL_JS_DIR, then the ~/.cache/flatppl-js clone); keep the two in sync
-// if the engine API changes.
+// Engine resolution is shared with score_flatpdl.cjs (score_core.cjs), as is the
+// sweep itself, which the persistent worker (score_worker.cjs) also runs.
 
-const fs = require('fs');
-const path = require('path');
-
-const RNGINIT_RE = /rnginit\(\s*\[[^\]]*\]\s*\)/;
+const core = require('./score_core.cjs');
 
 function usage(msg) {
   if (msg) process.stderr.write('sample_sweep: ' + msg + '\n');
@@ -67,103 +63,34 @@ function parseArgs(argv) {
   }
   if (pos.length !== 3) usage('expected <model.flatpdl.flatppl> <N> <bindings>');
   const n = Number(pos[1]);
-  if (!Number.isSafeInteger(n) || n <= 0) usage('N must be a positive integer');
-  if (!Number.isSafeInteger(base) || base < 0 || base >= 0x100000000) {
-    usage('base must be an integer in [0, 2^32)');
+  let bindings;
+  try { bindings = core.checkSweepArgs(n, base, [pos[2]]); } catch (e) {
+    if (e instanceof core.SweepUsageError) usage(e.message);
+    throw e;
   }
-  if (n > 0x100000000 - base) usage('seed range exceeds the four-byte domain');
-  const bindings = pos[2].split(',').map((s) => s.trim()).filter(Boolean);
-  if (!bindings.length) usage('need at least one binding');
   return { model: pos[0], n, bindings, engineDir, base };
-}
-
-function resolveEngine(explicit) {
-  const candidates = [
-    explicit,
-    process.env.FLATPPL_JS_DIR && path.join(process.env.FLATPPL_JS_DIR, 'packages', 'engine'),
-    path.join(require('os').homedir(), '.cache', 'flatppl-js', 'packages', 'engine'),
-  ].filter(Boolean);
-  for (const c of candidates) {
-    if (fs.existsSync(path.join(c, 'index.ts'))) return c;
-  }
-  usage('flatppl-js engine not found — pass --engine <dir> or set FLATPPL_JS_DIR '
-    + '(looked in: ' + candidates.join(', ') + ')');
-}
-
-// Injective seed -> 4-byte mapping (see the --base doc comment above).
-function seedBytes(i) {
-  return [i & 255, (i >>> 8) & 255, (i >>> 16) & 255, (i >>> 24) & 255];
 }
 
 async function main() {
   const { model, n, bindings, engineDir, base } = parseArgs(process.argv.slice(2));
-  const engine = resolveEngine(engineDir);
-  const { processSource, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
-  const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
-
-  const rawSrc = fs.readFileSync(model, 'utf8');
-  if (!RNGINIT_RE.test(rawSrc)) {
-    usage('model has no rnginit([...]) binding to seed-sweep: ' + model);
+  let dir;
+  try { dir = core.resolveEngine(engineDir); } catch (e) {
+    if (e instanceof core.EngineNotFound) usage(e.message);
+    throw e;
   }
-
-  // The worker is a stateless math kernel (see worker.ts's header comment);
-  // its `init` seed and the ctx's rootKey/sampleCount below are fixed across
-  // the whole sweep, exactly as in score_flatpdl.cjs. The per-seed
-  // randomness driving the swept realizations comes entirely from the
-  // `rnginit([...])` bytes substituted into the source below — verified by
-  // construction: the same fixed worker/rootKey config reproduces distinct,
-  // oracle-matching realizations per distinct rnginit byte-vector.
-  const w = createWorkerHandler();
-  w.handle({ type: 'init', seed: 3 });
-
-  const results = new Array(n);
-  for (let i = 0; i < n; i++) {
-    const [b0, b1, b2, b3] = seedBytes(base + i);
-    const src = rawSrc.replace(RNGINIT_RE, `rnginit([${b0}, ${b1}, ${b2}, ${b3}])`);
-
-    const proc = processSource(src);
-    for (const d of proc.diagnostics || []) {
-      if (d.severity === 'error') {
-        process.stderr.write('sample_sweep: diagnostic at seed ' + i + ': ' + d.message + '\n');
-        process.exit(1);
-      }
+  const engine = core.loadEngine(dir);
+  let results;
+  try {
+    results = await core.sampleSweep(engine, { model, n, bindings, base });
+  } catch (e) {
+    // A refused model or seed fails the sweep with its message, no stack.
+    if (e instanceof core.SweepError) {
+      if (e instanceof core.SweepUsageError) usage(e.message);
+      process.stderr.write('sample_sweep: ' + e.message + '\n');
+      process.exit(1);
     }
-    const built = orchestrator.buildDerivations(proc.bindings);
-    const cache = new Map();
-    const ctx = {
-      derivations: built.derivations,
-      bindings: built.bindings,
-      fixedValues: built.fixedValues || new Map(),
-      sampleCount: 1,
-      rootKey: 3,
-      rootSeed: 3,
-      marginalizationCount: 32,
-      moduleRegistry: proc.loweredModule && proc.loweredModule.moduleRegistry,
-      getMeasure: (name) => {
-        if (cache.has(name)) return cache.get(name);
-        const m = materialiser.materialiseMeasure(name, ctx);
-        cache.set(name, m);
-        return m;
-      },
-      sendWorker: (m) => Promise.resolve(w.handle(m)),
-    };
-
-    const row = {};
-    for (const binding of bindings) {
-      const measure = await ctx.getMeasure(binding);
-      if (measure && measure.value && measure.value.data) {
-        row[binding] = measure.value.data[0];
-      } else if (measure && measure.samples && measure.samples.length) {
-        row[binding] = measure.samples[0];
-      } else {
-        process.stderr.write(
-          'sample_sweep: no value for binding ' + binding + ' at seed ' + i + '\n');
-        process.exit(1);
-      }
-    }
-    results[i] = row;
+    throw e;
   }
-
   process.stdout.write(JSON.stringify(results) + '\n');
 }
 

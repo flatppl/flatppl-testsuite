@@ -10,7 +10,6 @@ Add an engine by subclassing ``FlatpplEngine`` and calling ``register_engine``.
 """
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import tempfile
@@ -18,6 +17,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ..config import CONFIG
+from . import worker
 
 
 def render_record(theta: dict) -> str:
@@ -54,20 +54,13 @@ class FlatpplEngine(ABC):
 
 
 class JsScoreEngine(FlatpplEngine):
-    """flatppl-js, via the ``score_js.cjs`` single-point scorer (Node 24)."""
+    """flatppl-js, via the ``score_js.cjs`` single-point scorer (Node 24), run by the
+    persistent score worker."""
 
     name = "js"
 
     def log_density(self, model: Path, binding: str, theta: dict) -> float:
-        proc = subprocess.run(
-            [CONFIG.node_bin, str(CONFIG.scorer), str(model), binding,
-             render_record(theta), "--engine",
-             str(CONFIG.flatppl_js_dir / "packages" / "engine")],
-            capture_output=True, text=True,
-        )
-        if proc.returncode != 0:
-            raise RuntimeError(f"score_js failed: {proc.stderr.strip()}")
-        return float(proc.stdout.strip())
+        return worker.score_js_file(model, binding, render_record(theta))
 
 
 class DeterminizeRefused(Exception):
@@ -87,7 +80,8 @@ class DetJsScoreEngine(FlatpplEngine):
     Appends ``__score__ = logdensityof(binding, theta)`` to the model, runs
     ``flatppl determinize`` to lower the whole thing to the deterministic
     FlatPDL profile (eliminating the measure layer), then evaluates the
-    resulting ``__score__`` binding via ``score_flatpdl.cjs``. Raises
+    resulting ``__score__`` binding with the persistent score worker
+    (``scoring/worker.py``, running the ``score_flatpdl.cjs`` core). Raises
     ``DeterminizeRefused`` if the determiniser can't legalize the model
     (exit 3); any other nonzero exit from either subprocess is a hard
     ``RuntimeError``.
@@ -112,16 +106,7 @@ class DetJsScoreEngine(FlatpplEngine):
                 raise DeterminizeRefused(det.stderr.strip())
             if det.returncode != 0:
                 raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
-            proc = subprocess.run(
-                [
-                    CONFIG.node_bin, str(CONFIG.flatpdl_scorer), str(out_path), "__score__",
-                    "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
-                ],
-                capture_output=True, text=True,
-            )
-            if proc.returncode != 0:
-                raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
-            return float(proc.stdout.strip())
+            return worker.score_binding_file(out_path, "__score__")
         finally:
             in_path.unlink(missing_ok=True)
             out_path.unlink(missing_ok=True)
@@ -148,24 +133,15 @@ def score_binding(model_path: Path, binding: str) -> float:
             raise DeterminizeRefused(det.stderr.strip())
         if det.returncode != 0:
             raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
-        proc = subprocess.run(
-            [
-                CONFIG.node_bin, str(CONFIG.flatpdl_scorer), str(out_path), binding,
-                "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
-            ],
-            capture_output=True, text=True,
-        )
-        if proc.returncode != 0:
-            raise RuntimeError(f"score_flatpdl failed: {proc.stderr.strip()}")
-        return float(proc.stdout.strip())
+        return worker.score_binding_file(out_path, binding)
 
 
 def sample_sweep(model_path: Path, n: int, bindings: list[str], base: int = 0) -> list[dict]:
     """Determinize a self-contained FlatPPL model whose last binding is
     ``rand(lawof(record(...)), rng)`` (the sample-path determinizer's
     target construct), then seed-sweep the resulting FlatPDL over N distinct
-    seeds via ``sample_sweep.cjs`` — ONE Node process for the whole sweep,
-    not a subprocess per seed (see that script's header comment) — returning
+    seeds via the persistent score worker (the ``sample_sweep.cjs`` core, one
+    request for the whole sweep, not a subprocess per seed) — returning
     N realizations of the requested bindings as an empirical sample set:
     ``[{binding: value, ...}, ...]``.
 
@@ -185,18 +161,7 @@ def sample_sweep(model_path: Path, n: int, bindings: list[str], base: int = 0) -
             raise DeterminizeRefused(det.stderr.strip())
         if det.returncode != 0:
             raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
-        proc = subprocess.run(
-            [
-                CONFIG.node_bin, str(CONFIG.sample_sweep_scorer), str(out_path),
-                str(n), ",".join(bindings),
-                "--engine", str(CONFIG.flatppl_js_dir / "packages" / "engine"),
-                "--base", str(base),
-            ],
-            capture_output=True, text=True,
-        )
-        if proc.returncode != 0:
-            raise RuntimeError(f"sample_sweep failed: {proc.stderr.strip()}")
-        return json.loads(proc.stdout)
+        return worker.sample_sweep_rows(out_path, n, bindings, base)
 
 
 _REGISTRY: dict[str, FlatpplEngine] = {}

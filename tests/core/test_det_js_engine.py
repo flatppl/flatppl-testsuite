@@ -11,7 +11,6 @@ here from `math` (independent of both flatppl-js and the sibling engine).
 """
 from __future__ import annotations
 
-import json
 import math
 import shutil
 import subprocess
@@ -20,6 +19,7 @@ from pathlib import Path
 import pytest
 
 from flatppl_testsuite.config import CONFIG
+from flatppl_testsuite.scoring import worker
 from flatppl_testsuite.scoring.engine import (
     DeterminizeRefused,
     get_engine,
@@ -67,11 +67,16 @@ def test_log_density_points_determinizes_once_per_model(tmp_path, monkeypatch):
     def tracked_run(command, *args, **kwargs):
         if len(command) > 1 and command[1] == "determinize":
             determinizations.append(command)
-        if len(command) > 2 and str(command[1]) == str(CONFIG.flatpdl_batch_scorer):
-            evaluated_sources.extend(json.loads(Path(command[2]).read_text()))
         return run(command, *args, **kwargs)
 
+    batch_rows = worker.score_batch_rows
+
+    def tracked_rows(sources, *args, **kwargs):
+        evaluated_sources.extend(sources)
+        return batch_rows(sources, *args, **kwargs)
+
     monkeypatch.setattr(subprocess, "run", tracked_run)
+    monkeypatch.setattr(worker, "score_batch_rows", tracked_rows)
     points = [
         {"a": 0.0, "b": [0.0, 0.0]},
         {"b": [2.0, 3.0], "a": 1.0},

@@ -18,10 +18,10 @@
 // Node >= 24 — the engine modules are TypeScript, loaded via Node's native type
 // stripping. Mirrors score_js.cjs's engine wiring (resolveEngine, processSource,
 // orchestrator.buildDerivations, createWorkerHandler, materialiser) exactly;
-// keep the two in sync if the engine API changes.
+// keep the two in sync if the engine API changes. The scoring itself lives in
+// score_core.cjs, shared with the persistent worker (score_worker.cjs).
 
-const fs = require('fs');
-const path = require('path');
+const core = require('./score_core.cjs');
 
 function usage(msg) {
   if (msg) process.stderr.write('score_flatpdl: ' + msg + '\n');
@@ -43,76 +43,16 @@ function parseArgs(argv) {
   return { model: pos[0], binding: pos[1], engineDir };
 }
 
-function resolveEngine(explicit) {
-  const candidates = [
-    explicit,
-    process.env.FLATPPL_JS_DIR && path.join(process.env.FLATPPL_JS_DIR, 'packages', 'engine'),
-    path.join(require('os').homedir(), '.cache', 'flatppl-js', 'packages', 'engine'),
-  ].filter(Boolean);
-  for (const c of candidates) {
-    if (fs.existsSync(path.join(c, 'index.ts'))) return c;
-  }
-  usage('flatppl-js engine not found — pass --engine <dir> or set FLATPPL_JS_DIR '
-    + '(looked in: ' + candidates.join(', ') + ')');
-}
-
 async function main() {
   const { model, binding, engineDir } = parseArgs(process.argv.slice(2));
-  const engine = resolveEngine(engineDir);
-  const { processSource, resolveBundleBytes, orchestrator, materialiser } = require(path.join(engine, 'index.ts'));
-  const { createWorkerHandler } = require(path.join(engine, 'worker.ts'));
-
-  const bundle = await resolveBundleBytes(path.resolve(model), fs.readFileSync(model),
-    (file) => file.startsWith('flatppl-zip:') ? null : fs.promises.readFile(file), { strict: false });
-  const proc = processSource(bundle.primarySource, { path: bundle.primaryPath, bundle });
-  for (const d of proc.diagnostics || []) {
-    if (d.severity === 'error') process.stderr.write('diagnostic: ' + d.message + '\n');
+  let dir;
+  try { dir = core.resolveEngine(engineDir); } catch (e) {
+    if (e instanceof core.EngineNotFound) usage(e.message);
+    throw e;
   }
-
-  const built = orchestrator.buildDerivations(proc.linkedBindings, {
-    moduleRegistry: proc.linkedModuleRegistry,
-  });
-  const w = createWorkerHandler();
-  w.handle({ type: 'init', seed: 3 });
-  const cache = new Map();
-  const ctx = {
-    derivations: built.derivations,
-    bindings: built.bindings,
-    fixedValues: built.fixedValues || new Map(),
-    sampleCount: 1,
-    rootKey: 3,
-    rootSeed: 3,
-    marginalizationCount: 32,
-    moduleRegistry: proc.linkedModuleRegistry,
-    getMeasure: (n) => {
-      if (cache.has(n)) return cache.get(n);
-      const m = materialiser.materialiseMeasure(n, ctx);
-      cache.set(n, m);
-      return m;
-    },
-    sendWorker: (m) => Promise.resolve(w.handle(m)),
-  };
-
-  // A fixed binding that fails to evaluate gets no derivation. Its real cause is
-  // a build diagnostic, so name it instead of the materialiser's "no derivation".
-  const measure = await ctx.getMeasure(binding).catch((e) => {
-    throw withBuildDiagnostics(e, built);
-  });
-  if (measure && measure.value && measure.value.data) {
-    process.stdout.write(measure.value.data[0] + '\n');
-  } else if (measure && measure.samples && measure.samples.length) {
-    process.stdout.write(measure.samples[0] + '\n');
-  } else {
-    process.stderr.write('score_flatpdl: no value for binding ' + binding + '\n');
-    process.exit(1);
-  }
-}
-
-function withBuildDiagnostics(e, built) {
-  const errors = (built.diagnostics || []).filter((d) => d.severity === 'error');
-  const message = e && e.message ? e.message : String(e);
-  if (!errors.length) return e;
-  return new Error(message + ' (' + errors.map((d) => 'diagnostic: ' + d.message).join('; ') + ')');
+  const engine = core.loadEngine(dir);
+  const value = await core.scoreBinding(engine, model, binding, (line) => process.stderr.write(line));
+  process.stdout.write(value + '\n');
 }
 
 main().catch((e) => {
