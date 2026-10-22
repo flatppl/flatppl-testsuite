@@ -1088,6 +1088,29 @@ TARGETED: tuple[Probe, ...] = (
                               "REFUSES outcome and message ARE the oracle, and "
                               "the pre-fix engine gives MALFORMED / "
                               "nonfinite-draws instead"),
+    # ----------------------------------------------------- integer truncation sets
+    # §03 `posintegers` is {1, 2, ...} and `nonnegintegers` {0, 1, ...}; §06
+    # truncate keeps M(A ∩ S). Over Poisson(4), posintegers drops the atom 0, so
+    # the mass is 1 - e^-4 and the kept law is the zero-truncated Poisson. Its
+    # central moments and log mass were summed at 50 digits with mpmath; the
+    # mean matches the closed form 4 / (1 - e^-4). `nonnegintegers` and
+    # `integers` keep every atom: Poisson(4)'s own moments, mass 1.
+    Probe("poisson.truncate_posintegers",
+          "u ~ Poisson(rate = 4.0)\nM = truncate(lawof(u), posintegers)\n", "M", 1, None,
+          4.074629441455096, 3.7705421221028117, 46.74719225927902, None,
+          -0.01848544682588656, None, "poisson", "truncate_posintegers",
+          note="posintegers drops the atom 0: every draw is a whole number at least 1",
+          support=(1, None, 1)),
+    Probe("poisson.truncate_nonnegintegers",
+          "u ~ Poisson(rate = 4.0)\nM = truncate(lawof(u), nonnegintegers)\n", "M", 1, None,
+          4.0, 4.0, 52.0, None, 0.0, None, "poisson", "truncate_nonnegintegers",
+          note="nonnegintegers keeps the atom 0 and every other atom: mass 1",
+          support=(0, None, 1)),
+    Probe("poisson.truncate_integers",
+          "u ~ Poisson(rate = 4.0)\nM = truncate(lawof(u), integers)\n", "M", 1, None,
+          4.0, 4.0, 52.0, None, 0.0, None, "poisson", "truncate_integers",
+          note="integers is unbounded below, so the lower CDF end is 0: mass 1",
+          support=(0, None, 1)),
 )
 
 
