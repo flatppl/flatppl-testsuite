@@ -1,0 +1,2 @@
+m = normalize(truncate(Categorical0(p = [0.2, 0.3, 0.5]), posintegers))
+lp = logdensityof(m, 1)

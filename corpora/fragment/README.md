@@ -11,7 +11,7 @@ append and no theta: it determinizes and scores `lp` directly.
 
 ## Contents
 
-One directory per fragment (31 in total), each a unified test dir:
+One directory per fragment (35 in total), each a unified test dir:
 
 | Path | What |
 |------|------|
