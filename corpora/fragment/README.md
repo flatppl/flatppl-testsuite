@@ -4,7 +4,7 @@ The second corpus for `flatppl-testsuite`: small, hand-written, self-contained
 FlatPPL models (not converted from a foreign format) that exercise one
 measure-algebra construct each — `superpose`, `truncate` (+ `normalize`),
 `pushfwd` (+ `bijection`), and `kchain` (+ `kernelof`) over a discrete latent.
-Unlike `corpora/hs3/` (a parameterized likelihood scanned over a theta
+Unlike `corpora/hs3/` (a parametric likelihood scanned over a theta
 vector), each fragment already ends in a fixed-point
 `lp = logdensityof(m, <point>)` binding, so the gate needs no `__score__`
 append and no theta: it determinizes and scores `lp` directly.

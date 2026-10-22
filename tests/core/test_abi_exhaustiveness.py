@@ -12,7 +12,7 @@ The normative rule (flatppl-design "Determinization" -> "Signature: `inputs` and
 
 So an UNREACHED `elementof` is explicitly well-formed and simply eliminated, and
 `flatppl stablehlo` accepts such a module (exit 0). This test additionally
-forbids it in handwritten fixtures, where a parameterized param that no output
+forbids it in handwritten fixtures, where a parametric param that no output
 reaches is an authoring slip -- a query that meant to feed it and does not, or a
 leftover shadowing duplicate of a binding the model already declares. Catching
 that early is worth a rule the spec does not impose; it is not evidence of
@@ -128,7 +128,7 @@ _IDS = [str(d.relative_to(_CORPORA)) for d in _abi_dirs()]
 
 
 @pytest.mark.parametrize("dir", _abi_dirs(), ids=_IDS)
-def test_inputs_lists_every_parameterized_param(dir: Path):
+def test_inputs_lists_every_parametric_param(dir: Path):
     query = (dir / "query.flatppl").read_text()
     body = json.loads((dir / "test.json").read_text())
     # Converted models are generated at runtime, so only their query is handwritten.
@@ -154,7 +154,7 @@ def test_inputs_lists_every_parameterized_param(dir: Path):
     bound = _reified_parameters(model + "\n" + query)
     unlisted = sorted(params - listed - pinned - bound)
     assert not unlisted, (
-        f"{dir.name}: parameterized elementof binding(s) {unlisted} are not listed "
+        f"{dir.name}: parametric elementof binding(s) {unlisted} are not listed "
         f"in `inputs` ({sorted(listed)}), pinned or explicitly reified. "
         "If an output depends freely on it the module is "
         "ill-formed per the spec; if nothing reaches it the spec would eliminate it, "

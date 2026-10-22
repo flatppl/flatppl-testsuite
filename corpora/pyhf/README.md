@@ -55,7 +55,7 @@ convert --from pyhf  ->  logdensityof(<binding>, <record>) at each point
 ```
 
 Scoring uses the det-js path (`unified/detjs_exec.log_density_points`). Rust
-determinizes one parameterized density per model. JS parses that FlatPDL once,
+determinizes one parametric density per model. JS parses that FlatPDL once,
 reifies the density with `functionof`, and broadcasts it over point indices.
 Column lookup preserves nested parameter axes. The result is one ordered score
 vector, checked against the expected point count. A batch evaluation error fails

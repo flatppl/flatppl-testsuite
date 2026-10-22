@@ -35,7 +35,7 @@ def log_density_at(model: Path, binding: str, theta: dict) -> float:
 
 
 def log_density_points(model: Path, binding: str, points: list[dict]) -> list["PointScore"]:
-    """Determinize one parameterized density, then score all model points.
+    """Determinize one parametric density, then score all model points.
 
     Broadcast the reified density over point indices in one JS evaluation.
     All points must have the same fields and input shapes.

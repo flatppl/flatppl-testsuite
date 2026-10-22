@@ -17,7 +17,7 @@ Two model shapes are recognized:
 
 1. **Inline** (`corpora/fragment/*`): one model file whose `logdensityof` query
    names a numeric point directly.
-2. **Parameterized** (`corpora/stablehlo/*`): a `model.flatppl` of
+2. **Parametric** (`corpora/stablehlo/*`): a `model.flatppl` of
    `elementof` declarations plus one `draw`, a `query.flatppl` holding the
    `logdensityof`, and a `points` list binding every declared parameter. Each
    point becomes its own case, suffixed `#<index>`. These need no ABI or engine
@@ -619,7 +619,7 @@ def _load(directory: Path) -> tuple[list[tuple[str, Probe | LinearGaussianProbe,
         if "points" in meta:
             model, query = directory / "model.flatppl", directory / "query.flatppl"
             if not (model.exists() and query.exists()):
-                raise _NoMatch("parameterized case without model.flatppl + query.flatppl")
+                raise _NoMatch("parametric case without model.flatppl + query.flatppl")
             text = model.read_text() + "\n" + query.read_text()
             expected = meta["expected"]
             if not isinstance(expected, list) or len(expected) != len(meta["points"]):
