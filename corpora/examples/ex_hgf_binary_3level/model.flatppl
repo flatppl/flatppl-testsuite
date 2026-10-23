@@ -18,11 +18,11 @@ log_noise ~ Normal(0, 0.5)
 action_noise = exp(log_noise)
 
 # Unit couplings and time steps, zero drifts, unit autoconnections.
-predict(state, p) = record(
+predict(state, omega, omega_vol) = record(
     mean = state.mean,
-    precision = 1 / (1 / state.precision + exp(p.omega + state.volatility_mean)),
+    precision = 1 / (1 / state.precision + exp(omega + state.volatility_mean)),
     volatility_mean = state.volatility_mean,
-    volatility_precision = 1 / (1 / state.volatility_precision + exp(p.omega_vol))
+    volatility_precision = 1 / (1 / state.volatility_precision + exp(omega_vol))
 )
 update_volatility(pred, mean, precision, surprise, weight) = record(
     mean = mean,
@@ -38,10 +38,10 @@ update_mean(pred, input, probability, precision, omega) = finish(pred,
 update_probability(pred, input, probability, omega) = update_mean(pred, input, probability,
     pred.precision + probability * (1 - probability), omega)
 correct(pred, input, omega) = update_probability(pred, input, invlogit(pred.mean), omega)
-update(state, input, p) = correct(predict(state, p), input, p.omega)
+update(state, input, omega, omega_vol) = correct(predict(state, omega, omega_vol), input, omega)
 
 s0 = record(mean = 0, precision = 1, volatility_mean = 0, volatility_precision = 1)
-states = scan(update, s0, u_data, record(omega = omega, omega_vol = omega_vol))
+states = scan(update, s0, u_data, omega, omega_vol)
 state_mean(state) = state.mean
 state_precision(state) = state.precision
 state_volatility_mean(state) = state.volatility_mean
