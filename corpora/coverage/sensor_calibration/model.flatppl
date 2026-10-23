@@ -33,5 +33,5 @@ y ~ Normal.(mu_pred, 0.5)
 
 prior = lawof(record(beta = beta))
 forward_kernel = kernelof(record(y = y), beta = beta)
-L = likelihoodof(pars -> forward_kernel(beta = pars.beta), record(y = y_obs))
+L = likelihoodof(forward_kernel, record(y = y_obs))
 posterior = bayesupdate(L, prior)

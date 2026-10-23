@@ -1,21 +1,22 @@
 """Independent oracle for cov_ar1_drift (closed form + scipy).
 
-The model is `x ~ markovchain(prev -> Normal(prev + drift, sigma_step),
-0.0, 120)` with drift 0.4 and a half-Cauchy prior on `sigma_step`. The
-chain density is the product of the step conditionals (§06: jointchain-
-like, no marginalization), so with increments d_k = x_k - x_{k-1} - drift
-and S = sum d_k^2 = 83.15890438672801:
+The model is `x ~ markovchain(step_kernel, 0.0, 120, sigma_step, drift)` with
+`step_kernel(prev, sigma, delta) = Normal(prev + delta, sigma)`, a Normal(0, 1)
+prior on `drift` and a half-Cauchy prior on `sigma_step`. The chain density is the
+product of the step conditionals (§06: jointchain-like, no marginalization), so with
+increments d_k = x_k - x_{k-1}, S1 = sum d_k and S2 = sum d_k^2:
 
-    log lik  = -n/2 log(2 pi) - n log s - S / (2 s^2)
-    log prior = log 2 + Cauchy(0, 1).logpdf(s)      (half-Cauchy via
-                normalize(truncate(Cauchy(0, 1), interval(0, inf))))
+    log lik   = -n/2 log(2 pi) - n log s - (S2 - 2 delta S1 + n delta^2) / (2 s^2)
+    log prior = Normal(0, 1).logpdf(delta) + log 2 + Cauchy(0, 1).logpdf(s)
+                (half-Cauchy via normalize(truncate(Cauchy(0, 1), interval(0, inf))))
+
+The posterior moments quoted in the example's header come from a two-dimensional
+quadrature of this closed form (scipy.integrate.dblquad over drift in [-2, 2],
+sigma_step in [0.3, 2.5], which holds all the mass): drift 0.3599 +- 0.0767,
+sigma_step 0.8410 +- 0.0550, correlation -0.004.
 
 STATUS: LIVE. The rust determiniser unrolls the `markovchain` trajectory
-into its step conditionals, so all four points are numerically checked at
-1e-9. This dir was authored as a refusal pin (`allow_skip: true`, the
-determiniser answering "density lowering for `markovchain` is not
-implemented (deferred to a later task)"); the lowering landed and the
-frozen values below took over unchanged.
+into its step conditionals, so all points are numerically checked at 1e-9.
 
 The point keys are `query.flatppl`'s ABI input names, not the model's
 draw names: the dir scores under Mode ABI, so one query, one point set
@@ -24,7 +25,6 @@ and one frozen vector serve both det-js and stablehlo.
 import numpy as np
 from scipy import stats
 
-DRIFT = 0.4
 N = 120
 
 X_DATA = np.array([
@@ -50,12 +50,15 @@ X_DATA = np.array([
     42.501826, 42.38132, 42.918669, 43.7028, 43.263506, 43.443864,
 ])
 
-_INC = np.diff(np.concatenate([[0.0], X_DATA])) - DRIFT
-_S = float((_INC ** 2).sum())
+_D = np.diff(np.concatenate([[0.0], X_DATA]))
+_S1 = float(_D.sum())
+_S2 = float((_D ** 2).sum())
 
 
 def oracle(point: dict) -> float:
     s = float(point["sigma_step_v"])
-    lik = -N / 2 * np.log(2 * np.pi) - N * np.log(s) - _S / (2 * s * s)
-    prior = np.log(2.0) + stats.cauchy.logpdf(s)
+    delta = float(point["drift_v"])
+    ss = _S2 - 2 * delta * _S1 + N * delta ** 2
+    lik = -N / 2 * np.log(2 * np.pi) - N * np.log(s) - ss / (2 * s * s)
+    prior = stats.norm.logpdf(delta) + np.log(2.0) + stats.cauchy.logpdf(s)
     return float(lik + prior)

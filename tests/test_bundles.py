@@ -24,7 +24,7 @@ POSTERIOR = """source = load_module("portable.zip")
 observed_sum = sum(source.observations)
 theta ~ Normal(0, 1)
 y ~ iid(Normal(theta, 1), 2)
-prior = lawof(theta)
+prior = lawof(record(theta = theta))
 K = kernelof(y, theta = theta)
 L = likelihoodof(K, source.observations)
 posterior = bayesupdate(L, prior)
@@ -65,7 +65,7 @@ def test_native_js_archive_density(tmp_path):
     assert float(observed_sum.stdout) == 3.0
     for theta in (0.0, 1.0, -2.0):
         scored = subprocess.run(
-            [CONFIG.node_bin, str(CONFIG.scorer), str(posterior), "posterior", str(theta), "--engine", engine],
+            [CONFIG.node_bin, str(CONFIG.scorer), str(posterior), "posterior", f"record(theta = {theta})", "--engine", engine],
             check=True, capture_output=True, text=True,
         )
         assert float(scored.stdout) == pytest.approx(density(theta), abs=1e-11)
