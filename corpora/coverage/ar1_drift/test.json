@@ -49,7 +49,7 @@
   "oracle": "closed form (product of step conditionals) + scipy Normal and half-Cauchy priors",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "4e3fa5570e6ce095c58817c1174cb60a9789eb30",
+    "revision": "cb91891a569f44e19bec2174a96cdf50dd31d13e",
     "path": "examples/ar1-noise-estimation.flatppl",
     "sha256": "64520c3f98ac672747b59eb832575914c46a8f24c2ebf6b38e4a54dad0feaa47"
   }
