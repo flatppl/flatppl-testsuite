@@ -10,5 +10,4 @@ sigma = f_root(a = sigma_sq)
 
 x ~ iid(Normal(mu = mu, sigma = sigma), 3)
 kernel = kernelof(x, mu = mu)
-kernel_input = record(mu = 1.5)
-dist = kernel(mu = kernel_input.mu)
+dist = kernel(mu = 1.5)
