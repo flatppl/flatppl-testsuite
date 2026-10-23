@@ -110,8 +110,8 @@ _GE_ONE_GATE = ("land(minimum(", ")>=1.0")
 
 
 _ARM = {
-    "lattice_snap": "iszero(sum(abs(",
-    "broadcast_round": "real(round.(",
+    "lattice_snap": "iszero(sum(abs.(",
+    "broadcast_round": "real.(round.(",
 }
 
 
