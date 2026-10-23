@@ -41,9 +41,9 @@
   "oracle": "Analytic radial density after integrating one shared Exponential variance",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "4e3fa5570e6ce095c58817c1174cb60a9789eb30",
+    "revision": "c4eaf06e86d3a91a51f42dba35b1d990dfabc6cb",
     "path": "examples/minimal.flatppl",
-    "sha256": "3f36509eca2e41b07a9298c24918ed3db4e62face3a2b9166576dc7d29ef7320"
+    "sha256": "42a9bce304797c42a14fe3d10e37c74104be12a83860be14c791aa1476f68827"
   },
   "engine_limits": {
     "det-js": "Numerical marginal integration requires the StableHLO extension."

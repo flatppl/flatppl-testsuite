@@ -9,16 +9,24 @@ datasets = table(
     efficiency = [0.5, 0.6, 0.7, 0.8, 0.9],
     counts     = [13, 10, 10, 2, 2],
 )
-exposure     = datasets.exposure
-efficiency   = datasets.efficiency
-counts_data  = datasets.counts
 
-# Measured event energies [keV], grouped by dataset.
-E1_data = [32.29945024522565, 69.08580773988763, 25.440423777510436, 75.61403615267723, 7.9267656229908585, 3.3354153534688638, 20.670985493456392, 82.75167461000609, 136.75349754794027, 19.976541400061382, 34.57232691499431, 52.32632653325007, 4.75519376172241]
-E2_data = [63.76604456320073, 4.602635553779128, 68.24639884216056, 4.272813246216692, 49.33863066627453, 41.748541234687956, 47.49935392156085, 37.52247790527123, 26.040570121268903, 58.08667451701596]
-E3_data = [58.822595816291454, 8.785379233761681, 55.58320441541379, 63.51718319418958, 58.297943138713215, 40.37315193306145, 7.875521943121733, 139.17144907577784, 100.79360983559722, 98.9325347685139]
-E4_data = [31.878682258259104, 21.28067021826852]
-E5_data = [53.041794807908694, 98.55886779280806]
+# Measured event energies [keV], one row per event, with the dataset it belongs to.
+events = table(
+    dataset = [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        4, 4,
+        5, 5,
+    ],
+    energy = [
+        32.29945024522565, 69.08580773988763, 25.440423777510436, 75.61403615267723, 7.9267656229908585, 3.3354153534688638, 20.670985493456392, 82.75167461000609, 136.75349754794027, 19.976541400061382, 34.57232691499431, 52.32632653325007, 4.75519376172241,
+        63.76604456320073, 4.602635553779128, 68.24639884216056, 4.272813246216692, 49.33863066627453, 41.748541234687956, 47.49935392156085, 37.52247790527123, 26.040570121268903, 58.08667451701596,
+        58.822595816291454, 8.785379233761681, 55.58320441541379, 63.51718319418958, 58.297943138713215, 40.37315193306145, 7.875521943121733, 139.17144907577784, 100.79360983559722, 98.9325347685139,
+        31.878682258259104, 21.28067021826852,
+        53.041794807908694, 98.55886779280806,
+    ],
+)
 
 # Fixed Gaussian signal shape [keV].
 S_mu    = 100.0
@@ -36,26 +44,19 @@ B ~ iid(LogNormal(log(m_B) - sigma_B^2 / 2.0, sigma_B), 5)
 Pi_prior = lawof(record(S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B))
 
 # Expected background and signal yields per dataset.
-nu_B = exposure .* B
-nu_S = exposure .* efficiency .* S
+nu_B = datasets.exposure .* B
+nu_S = datasets.exposure .* datasets.efficiency .* S
 
-# Shared mixture components.
-bkg = Exponential(1.0 / lam)
+# Signal component, shared by every event.
 sig = Normal(S_mu, S_sigma)
 
 # Observed count per dataset.
 event_counts ~ Poisson.(nu_B .+ nu_S)
 
-# All measured energies in one column, and the dataset each event belongs to.
-E_data = cat(E1_data, E2_data, E3_data, E4_data, E5_data)
-dataset_of_event = cat(fill(1, counts_data[1]), fill(2, counts_data[2]),
-                       fill(3, counts_data[3]), fill(4, counts_data[4]),
-                       fill(5, counts_data[5]))
-
 ###
-Per-event energy is a two-component mixture of background `bkg` and signal
-`sig`, mixed in proportion to that event's dataset's yields, as one broadcast
-over all 37 events.
+Per-event energy is a two-component mixture of an exponential background and
+the signal `sig`, mixed in proportion to that event's dataset's yields, as one
+broadcast over all events.
 
 `normalize` divides by the superposition's total mass, so the two components
 may carry the *unnormalised* yields: $(\nu_B p + \nu_S q) / (\nu_B + \nu_S)$
@@ -63,15 +64,12 @@ is the same measure as $w p + (1 - w) q$ with $w = \nu_B / (\nu_B + \nu_S)$.
 Written with the yields, the model never forms $1 - w$, which loses every
 significant digit of the signal weight once $w$ rounds to one.
 ###
-energy = (b, s, scale) -> normalize(superpose(weighted(b, Exponential(1.0 / scale)), weighted(s, sig)))
-E ~ energy.(nu_B[dataset_of_event], nu_S[dataset_of_event], lam)
+event_energy(b, s, scale) = normalize(superpose(weighted(b, Exponential(1.0 / scale)), weighted(s, sig)))
+E ~ event_energy.(nu_B[events.dataset], nu_S[events.dataset], lam)
 
-K_model = kernelof(
-    record(event_counts = event_counts, E = E),
-    S = S, sigma_B = sigma_B, m_B = m_B, lam = lam, B = B,
-) % Forward kernel (observation model)
+K_model = kernelof(record(event_counts = event_counts, E = E), S, sigma_B, m_B, lam, B)  % Forward kernel (observation model)
 L = likelihoodof(K_model, record(
-    event_counts = counts_data,
-    E = E_data,
+    event_counts = datasets.counts,
+    E = events.energy,
 ))
 Pi_post = bayesupdate(L, Pi_prior)
