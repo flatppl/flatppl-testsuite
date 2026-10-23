@@ -8,27 +8,37 @@
   "binding": "Pi_post",
   "status": "lowers",
   "inputs": [
-    "sigma_step_v"
+    "sigma_step_v",
+    "drift_v"
   ],
   "points": [
     {
-      "sigma_step_v": 0.6
+      "sigma_step_v": 0.6,
+      "drift_v": 0.0
     },
     {
-      "sigma_step_v": 0.8
+      "sigma_step_v": 0.8,
+      "drift_v": 0.4
     },
     {
-      "sigma_step_v": 1.0
+      "sigma_step_v": 1.0,
+      "drift_v": 0.36
     },
     {
-      "sigma_step_v": 1.5
+      "sigma_step_v": 1.5,
+      "drift_v": -0.2
+    },
+    {
+      "sigma_step_v": 0.84,
+      "drift_v": 0.3
     }
   ],
   "expected": [
-    -165.23109485257928,
-    -149.40957082611237,
-    -152.99680606377413,
-    -179.03843118955555
+    -187.75432671911727,
+    -150.40850935931704,
+    -153.89429915697878,
+    -188.36240012276022,
+    -150.43208003099403
   ],
   "tolerance": {
     "atol": 1e-09,
@@ -36,11 +46,11 @@
     "value_atol_f32": 1e-05,
     "value_rtol_f32": 1e-06
   },
-  "oracle": "closed form (product of step conditionals) + scipy half-Cauchy",
+  "oracle": "closed form (product of step conditionals) + scipy Normal and half-Cauchy priors",
   "source": {
     "repository": "https://github.com/flatppl/flatppl-examples",
-    "revision": "4e3fa5570e6ce095c58817c1174cb60a9789eb30",
+    "revision": "cb91891a569f44e19bec2174a96cdf50dd31d13e",
     "path": "examples/ar1-noise-estimation.flatppl",
-    "sha256": "7426d8acfa976233ac2748b910a2f325a2811357c316587cb3aca667d6426675"
+    "sha256": "64520c3f98ac672747b59eb832575914c46a8f24c2ebf6b38e4a54dad0feaa47"
   }
 }
