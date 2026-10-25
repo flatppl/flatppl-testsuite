@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-10-23T14:38:43+00:00",
-  "engine_commit": "c068a77134be7be6b52fd3a034337cd03194379b",
+  "generated_at": "2026-10-25T18:47:12+00:00",
+  "engine_commit": "14f2338a5ae21e9fe17fc5eeaf3727685ae57291",
   "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,

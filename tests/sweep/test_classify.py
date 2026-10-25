@@ -91,3 +91,42 @@ def test_a_genuine_determinize_failure_inside_score_binding_still_fails_loudly(m
     monkeypatch.setattr(classify_mod, "score_binding", _boom)
     with pytest.raises(RuntimeError, match="determinize failed"):
         classify_source(_PLAIN_SOURCE, "lp")
+
+
+def test_a_record_affine_wrap_is_refused_at_inference_with_a_static_marker():
+    """A one-input callable keeps a record whole (§04), so `2.0 * x` multiplies
+    a record: a static error, reported by inference with exit 1 before the
+    determiniser runs. It stays a refusal; only the refusing stage differs."""
+    src = ("mb = Normal(mu = 0.0, sigma = 1.0)\n"
+           "x = draw(mb)\n"
+           "m = pushfwd(x -> 2.0 * x + 1.0, lawof(record(x = x)))\n"
+           "lp = logdensityof(m, record(x = 1.0))\n")
+    v = classify_source(src, "lp")
+    assert v.outcome == Outcome.REFUSES
+    assert v.marker.startswith("static:")
+    assert "tmp" not in v.marker
+    assert v.value is None
+
+
+def _fake_determinize(monkeypatch, returncode, stderr):
+    def _run(*args, **kwargs):
+        return classify_mod.subprocess.CompletedProcess(args, returncode, "", stderr)
+
+    monkeypatch.setattr(classify_mod.subprocess, "run", _run)
+
+
+def test_an_inference_error_exit_is_a_static_refusal(monkeypatch):
+    _fake_determinize(
+        monkeypatch, 1,
+        "error: `mul` operand is a record, outside its domain: spec gives `mul` scalars\n"
+        "flatppl: :3 inference found 1 error(s) in `/var/folders/x/T/tmpab12cd34/probe.flatppl`\n",
+    )
+    v = classify_source(_PLAIN_SOURCE, "lp")
+    assert v.outcome == Outcome.REFUSES
+    assert v.marker == "static:operand-record-outside-domain-spec-gives"
+
+
+def test_a_non_inference_exit_1_still_fails_loudly(monkeypatch):
+    _fake_determinize(monkeypatch, 1, "error: cannot read probe.flatppl: permission denied\n")
+    with pytest.raises(RuntimeError, match="neither 0 nor 3"):
+        classify_source(_PLAIN_SOURCE, "lp")

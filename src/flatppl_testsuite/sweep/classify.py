@@ -126,6 +126,19 @@ def _crash_marker(message: str) -> str:
     return f"crash:{'-'.join(words)}"
 
 
+# Inference reports a static error on stderr and exits 1, before the
+# determiniser runs. Other exit-1 failures never print this line.
+_INFERENCE_ERRORS = re.compile(r"inference found \d+ error")
+
+
+def _static_marker(stderr: str) -> str:
+    """Marker for a refusal raised at inference, keyed off the first `error:` line."""
+    first = next((ln for ln in _strip_tmp_paths(stderr).splitlines()
+                  if ln.startswith("error:")), "")
+    words = re.findall(r"[a-z]{4,}", first.removeprefix("error:").lower())[:6]
+    return f"static:{'-'.join(words)}"
+
+
 def classify_source(source: str, binding: str) -> Verdict:
     """Determinize `source` and classify what came back.
 
@@ -142,6 +155,10 @@ def classify_source(source: str, binding: str) -> Verdict:
         )
         if det.returncode == 3:
             return Verdict("", Outcome.REFUSES, None, _marker(det.stderr))
+        if det.returncode == 1 and _INFERENCE_ERRORS.search(det.stderr):
+            # An ill-typed model is refused, not a tool failure (§04, §07). The
+            # `static:` marker tells it from a determiniser refusal.
+            return Verdict("", Outcome.REFUSES, None, _static_marker(det.stderr))
         if det.returncode != 0:
             # Not a probe verdict: the tool itself failed. Fail loudly.
             raise RuntimeError(
