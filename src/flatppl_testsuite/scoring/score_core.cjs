@@ -75,6 +75,77 @@ function freshWorker(engine) {
   return w;
 }
 
+// A model the engine refuses statically has no score: the JS engine still
+// evaluates it, and a static error on the scored path then yields a number the
+// spec does not define (a reified callable capturing a draw scores one random
+// atom). Refuse on any static error diagnostic, as the Rust CLI does.
+function refuseStaticErrors(proc, output) {
+  const errors = (proc.diagnostics || []).filter((d) => d.severity === 'error');
+  if (errors.length === 0) return;
+  throw new Error('the JS engine refuses the model scored by `' + output + '` statically: '
+    + errors.map((d) => 'diagnostic: ' + d.message).join('; '));
+}
+
+// The linker names a module binding `alias$name`; the user wrote `alias.name`.
+function userName(name) {
+  return name.replace(/\$/g, '.');
+}
+
+// §13 "Output reduction": draw nodes take their values from the explicit point,
+// unless marginalized out. A score that reads a draw outside every lawof has no
+// single value: each atom scores its own draw (decisions-log 2026-10-21, no
+// implicit marginal). Reading atom 0 would report one random conditional
+// density as the score, so refuse, with the wording of the flatppl-rust
+// determiniser. Like its `free_draw`, the walk does not trust the engine's
+// phases (a call to a draw-capturing callable is marked fixed): it follows
+// every `self` ref of the post-lift IR from the scored binding, stops at a
+// lawof or kernelof binding and at an inline lawof, which integrate their
+// draws out, enters function bodies except at their boundary inputs, and
+// reports every draw it reaches.
+function freeDraws(built, name) {
+  const found = [];
+  const seen = new Set();
+  const walk = (ir, bound) => {
+    if (!ir || typeof ir !== 'object') return;
+    if (Array.isArray(ir)) { for (const x of ir) walk(x, bound); return; }
+    if (ir.kind === 'ref' && ir.ns === 'self' && !bound.has(ir.name)) { visit(ir.name); return; }
+    if (ir.kind === 'call' && ir.op === 'lawof') return;
+    if (ir.kind === 'call' && ir.op === 'draw') { found.push('__inline'); return; }
+    if (ir.kind === 'call' && ir.op === 'functionof' && Array.isArray(ir.paramSources)) {
+      const inner = new Set(bound);
+      for (const p of ir.paramSources) if (p && p.kind === 'binding') inner.add(p.name);
+      walk(ir.body, inner);
+      return;
+    }
+    for (const k in ir) if (k !== 'loc' && k !== 'meta') walk(ir[k], bound);
+  };
+  const visit = (n) => {
+    if (seen.has(n)) return;
+    seen.add(n);
+    const b = built.bindings.get(n);
+    if (!b || b.type === 'lawof' || b.type === 'kernelof') return;
+    if (b.type === 'draw') { found.push(n); return; }
+    walk(b.ir, new Set());
+  };
+  visit(name);
+  return found;
+}
+
+function refuseFreeDraw(built, scored, output) {
+  const draws = freeDraws(built, scored);
+  if (draws.length === 0) return;
+  const named = draws.find((d) => !d.startsWith('__'));
+  if (named) {
+    const user = userName(named);
+    throw new Error('the density query in `' + output + '` reads draw `' + user + '`, which is neither in its '
+      + 'point nor integrated out by a `lawof` (§13 "Output reduction"); put `' + user
+      + '` in the point, or score `lawof(...)` of the value instead');
+  }
+  throw new Error('the density query in `' + output + '` reads an inline `draw`, which is neither in its '
+    + 'point nor integrated out by a `lawof` (§13 "Output reduction"); bind it, then put it in the point '
+    + 'or score `lawof(...)` of the value instead');
+}
+
 // score_flatpdl: one deterministic binding of one FlatPDL file, with module and
 // data resolution through the file's bundle. `diag(line)` receives each error
 // diagnostic as the one-shot script writes it to stderr.
@@ -85,10 +156,12 @@ async function scoreBinding(engine, model, binding, diag) {
   for (const d of proc.diagnostics || []) {
     if (d.severity === 'error') diag('diagnostic: ' + d.message + '\n');
   }
+  refuseStaticErrors(proc, binding);
 
   const built = engine.orchestrator.buildDerivations(proc.linkedBindings, {
     moduleRegistry: proc.linkedModuleRegistry,
   });
+  refuseFreeDraw(built, binding, binding);
   const w = freshWorker(engine);
   const ctx = makeCtx(engine, built, proc.linkedModuleRegistry, w);
 
@@ -110,16 +183,14 @@ async function scoreJs(engine, { model, binding, theta, count = 1 }, diag) {
     (file) => file.startsWith('flatppl-zip:') ? null : fs.promises.readFile(file), { strict: false });
   const src = bundle.primarySource + `\n__score__ = logdensityof(${binding}, ${theta})\n`;
   const proc = engine.processSource(src, { path: bundle.primaryPath, bundle });
-  // Surface diagnostics, but do NOT abort on them: a diagnostic on a binding
-  // off the scored measure's dependency path (e.g. a single-factor `cartprod`
-  // domain the engine flags) does not affect the density. If a diagnostic does
-  // break the scored binding, materialising it below throws and is reported.
   for (const d of proc.diagnostics || []) {
     if (d.severity === 'error') diag('diagnostic: ' + d.message + '\n');
   }
+  refuseStaticErrors(proc, binding);
   const built = engine.orchestrator.buildDerivations(proc.linkedBindings, {
     moduleRegistry: proc.linkedModuleRegistry,
   });
+  refuseFreeDraw(built, '__score__', binding);
   // The standard-module registry (e.g. `hepphys`) must be threaded into the
   // worker session env, or cross-module refs in the body fail to resolve.
   const ctx = makeCtx(engine, built, proc.linkedModuleRegistry, freshWorker(engine), count);
@@ -139,6 +210,7 @@ async function scoreOne(engine, src, binding, w, vectorSize) {
   }
 
   const built = engine.orchestrator.buildDerivations(proc.bindings);
+  refuseFreeDraw(built, binding, binding);
   const ctx = makeCtx(engine, built, proc.loweredModule && proc.loweredModule.moduleRegistry, w);
 
   const measure = await ctx.getMeasure(binding).catch((e) => {
@@ -253,4 +325,5 @@ async function sampleSweep(engine, { model, n, bindings, base }) {
 
 module.exports = {
   EngineNotFound, SweepError, SweepUsageError, checkSweepArgs, resolveEngine, loadEngine, scoreBinding, scoreJs, scoreBatch, sampleSweep,
+  freeDraws, refuseFreeDraw,
 };
