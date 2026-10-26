@@ -75,6 +75,52 @@ function freshWorker(engine) {
   return w;
 }
 
+// §13 "Output reduction": draw nodes take their values from the explicit point,
+// unless marginalized out. A score that reads a draw outside every lawof has no
+// single value: each atom scores its own draw (decisions-log 2026-10-21, no
+// implicit marginal). Reading atom 0 would report one random conditional
+// density as the score, so refuse, with the wording of the flatppl-rust
+// determiniser. The walk follows the post-lift IR from the scored binding and
+// stops at any binding that is not stochastic (a lawof is fixed), so the draws
+// it reaches are the free ones. Phase alone over-approximates: a binding that
+// reads a draw only through a lawof is still marked stochastic.
+function freeDraws(built, name) {
+  const found = [];
+  const seen = new Set();
+  const refs = (ir, out) => {
+    if (!ir || typeof ir !== 'object') return;
+    if (Array.isArray(ir)) { for (const x of ir) refs(x, out); return; }
+    if (ir.kind === 'ref' && ir.ns === 'self') out.add(ir.name);
+    for (const k in ir) if (k !== 'loc') refs(ir[k], out);
+  };
+  const visit = (n) => {
+    if (seen.has(n)) return;
+    seen.add(n);
+    const b = built.bindings.get(n);
+    if (!b || b.phase !== 'stochastic') return;
+    if (b.type === 'draw') { found.push(n); return; }
+    const next = new Set();
+    refs(b.ir, next);
+    for (const m of next) visit(m);
+  };
+  visit(name);
+  return found;
+}
+
+function refuseFreeDraw(built, scored, output) {
+  const draws = freeDraws(built, scored);
+  if (draws.length === 0) return;
+  const named = draws.find((d) => !d.startsWith('__'));
+  if (named) {
+    throw new Error('the density query in `' + output + '` reads draw `' + named + '`, which is neither in its '
+      + 'point nor integrated out by a `lawof` (§13 "Output reduction"); put `' + named
+      + '` in the point, or score `lawof(...)` of the value instead');
+  }
+  throw new Error('the density query in `' + output + '` reads an inline `draw`, which is neither in its '
+    + 'point nor integrated out by a `lawof` (§13 "Output reduction"); bind it, then put it in the point '
+    + 'or score `lawof(...)` of the value instead');
+}
+
 // score_flatpdl: one deterministic binding of one FlatPDL file, with module and
 // data resolution through the file's bundle. `diag(line)` receives each error
 // diagnostic as the one-shot script writes it to stderr.
@@ -89,6 +135,7 @@ async function scoreBinding(engine, model, binding, diag) {
   const built = engine.orchestrator.buildDerivations(proc.linkedBindings, {
     moduleRegistry: proc.linkedModuleRegistry,
   });
+  refuseFreeDraw(built, binding, binding);
   const w = freshWorker(engine);
   const ctx = makeCtx(engine, built, proc.linkedModuleRegistry, w);
 
@@ -120,6 +167,7 @@ async function scoreJs(engine, { model, binding, theta, count = 1 }, diag) {
   const built = engine.orchestrator.buildDerivations(proc.linkedBindings, {
     moduleRegistry: proc.linkedModuleRegistry,
   });
+  refuseFreeDraw(built, '__score__', binding);
   // The standard-module registry (e.g. `hepphys`) must be threaded into the
   // worker session env, or cross-module refs in the body fail to resolve.
   const ctx = makeCtx(engine, built, proc.linkedModuleRegistry, freshWorker(engine), count);
