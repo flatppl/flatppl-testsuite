@@ -205,14 +205,49 @@ def _arguments(jnp, src: str, values: list) -> list:
 
 
 @lru_cache(maxsize=64)
+def _runtime_status_index(src: str) -> int | None:
+    match = re.search(r"flatppl\.runtime_status\s*=\s*(\d+)\s*:\s*i64", src)
+    return int(match[1]) if match else None
+
+
+def _outputs(src: str, *args):
+    _, jnp, hlo_call = _jax()
+    result = hlo_call(*args, source=src)
+    index = _runtime_status_index(src)
+    if index is None:
+        return result
+    from jax.experimental import checkify
+
+    status = result[index]
+    checkify.check(jnp.all(status != 1), "FlatPPL index out of range")
+    checkify.check(jnp.all(status != 2), "FlatPPL integer conversion exceeds the target width")
+    checkify.check(jnp.all((status >= 0) & (status <= 2)), "Unknown FlatPPL runtime error")
+    return result[:index] + result[index + 1:]
+
+
+def _jit_checked(src: str, function):
+    jax, _, _ = _jax()
+    if _runtime_status_index(src) is None:
+        return jax.jit(function)
+    from jax.experimental import checkify
+
+    compiled = jax.jit(checkify.checkify(function))
+
+    def checked(*args):
+        error, result = compiled(*args)
+        error.throw()
+        return result
+
+    return checked
+
+
+@lru_cache(maxsize=64)
 def _jitted_value(src: str):
     """Reuse the compiled module while points remain runtime arguments."""
-    jax, _, hlo_call = _jax()
-
     def f(*a):
-        return hlo_call(*a, source=src)[0]
+        return _outputs(src, *a)[0]
 
-    return jax.jit(f)
+    return _jit_checked(src, f)
 
 
 def value(src: str, arg_values: list) -> float:
@@ -234,12 +269,12 @@ def _jitted_gradient(src: str, argnums: tuple):
     `stablehlo-gradient/dissimilar_mixture` one compile dominates the whole
     case, so paying it per point multiplied the dir's runtime by its point
     count."""
-    jax, _, hlo_call = _jax()
+    jax, _, _ = _jax()
 
     def f(*a):
-        return hlo_call(*a, source=src)[0].sum()
+        return _outputs(src, *a)[0].sum()
 
-    return jax.jit(jax.grad(f, argnums=argnums))
+    return _jit_checked(src, jax.grad(f, argnums=argnums))
 
 
 def gradient(src: str, arg_values: list, argnums: list[int]) -> list:
@@ -265,12 +300,10 @@ def _jitted_sample(src: str):
     do); without this cache each call would define + trace + XLA-compile a
     fresh closure, which is the classic "jit inside a loop" antipattern and
     makes a 100k-draw chain many times slower than compiling once."""
-    jax, _, hlo_call = _jax()
-
     def f(k, *a):
-        return hlo_call(k, *a, source=src)
+        return _outputs(src, k, *a)
 
-    return jax.jit(f)
+    return _jit_checked(src, f)
 
 
 def sample_call(
