@@ -10,6 +10,47 @@ from tests.test_unified import _gate_engine
 
 
 @pytest.mark.stablehlo_only
+def test_runtime_index_status_survives_value_and_gradient_execution(tmp_path):
+    _gate_engine("stablehlo")
+    from jax.experimental import checkify
+
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "x = elementof(cartpow(reals, 3))\nk = elementof(integers)\n"
+        "inputs = (x, k)\noutputs = get(x, k)\n"
+    )
+    source = ex.emit(query, "logdensity")
+    assert ex.value(source, [[2.0, 4.0, 8.0], 2]) == 4.0
+    assert ex.gradient(source, [[2.0, 4.0, 8.0], 2], [0]) == [[0.0, 1.0, 0.0]]
+    for execute in (
+        lambda: ex.value(source, [[2.0, 4.0, 8.0], 4]),
+        lambda: ex.gradient(source, [[2.0, 4.0, 8.0], 4], [0]),
+    ):
+        with pytest.raises(checkify.JaxRuntimeError, match="FlatPPL index out of range"):
+            execute()
+
+
+@pytest.mark.stablehlo_only
+def test_runtime_status_keeps_the_sample_key_in_its_abi_position(tmp_path):
+    _gate_engine("stablehlo")
+    from jax.experimental import checkify
+
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "k = elementof(integers)\nx ~ Normal(0.0, get([1.0, 2.0], k))\n"
+        "s = rnginit([0])\ndraws = rand(lawof(x), s)\n"
+        "inputs = k\noutputs = draws\n"
+    )
+    source = ex.emit(query, "sample", restrict_enzyme_compatible=False)
+    value, next_key = ex.sample_call(source, (1729, 0), [1])
+    assert np.isfinite(value)
+    np.testing.assert_array_equal(next_key, [1729, 1])
+    assert ex.samples(source, 3, [1], key=(1729, 0)).shape == (3,)
+    with pytest.raises(checkify.JaxRuntimeError, match="FlatPPL index out of range"):
+        ex.sample_call(source, (1729, 0), [3])
+
+
+@pytest.mark.stablehlo_only
 @pytest.mark.parametrize("dtype, tolerance", [("f64", 1e-11), ("f32", 2e-5)])
 def test_enzyme_mode_preserves_zero_products_and_selected_axes(tmp_path, dtype, tolerance):
     _gate_engine("stablehlo")
