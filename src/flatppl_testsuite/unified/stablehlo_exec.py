@@ -221,7 +221,11 @@ def _outputs(src: str, *args):
     status = result[index]
     checkify.check(jnp.all(status != 1), "FlatPPL index out of range")
     checkify.check(jnp.all(status != 2), "FlatPPL integer conversion exceeds the target width")
-    checkify.check(jnp.all((status >= 0) & (status <= 2)), "Unknown FlatPPL runtime error")
+    checkify.check(jnp.all(status != 3), "FlatPPL quantile probability must be in [0, 1]")
+    checkify.check(jnp.all(status != 4), "FlatPPL linear solve requires a nonsingular matrix")
+    checkify.check(jnp.all(status != 5), "FlatPPL uniform variate must be in [0, 1]")
+    checkify.check(jnp.all(status != 6), "FlatPPL RNG seed is outside its valid range")
+    checkify.check(jnp.all((status >= 0) & (status <= 6)), "Unknown FlatPPL runtime error")
     return result[:index] + result[index + 1:]
 
 
