@@ -12,7 +12,7 @@ from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.result import CheckResult, UNSCOREABLE
 from flatppl_testsuite.unified.loader import TestSpec, load_test, merged_body
 from flatppl_testsuite.unified.runners import (
-    convert_detjs, gradient_stablehlo, logdensity_detjs, logdensity_stablehlo,
+    convert_detjs, gradient_stablehlo, logdensity_detjs, logdensity_js, logdensity_stablehlo,
     sample_detjs, sample_stablehlo,
 )
 
@@ -22,6 +22,7 @@ _RUNNERS = {
     ("sample", "stablehlo"): sample_stablehlo.run,
     ("gradient", "stablehlo"): gradient_stablehlo.run,
     ("logdensity", "det-js"): logdensity_detjs.run,
+    ("logdensity", "js"): logdensity_js.run,
     ("sample", "det-js"): sample_detjs.run,
     ("convert", "det-js"): convert_detjs.run,
 }

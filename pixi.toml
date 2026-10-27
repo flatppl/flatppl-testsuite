@@ -39,7 +39,7 @@ FLATPPL_JS_DIR = "${FLATPPL_JS_DIR:-$PIXI_PROJECT_ROOT/../flatppl-js}"
 # One-time setup: install the pinned converter binary.
 setup = { cmd = "bash scripts/setup.sh" }
 # Run the whole test suite: tests/core/ (toolkit) + tests/test_unified.py (the
-# unified per-test-directory harness, det-js cases only in this env -- see
+# unified per-test-directory harness, JS and det-js cases in this env -- see
 # `unified` below for that alone).
 # `python -m pytest` (not the bare `pytest` console script) is robust when the
 # env exposes pytest as a module but not on PATH.
@@ -48,7 +48,7 @@ test = "python -m pytest -q"
 convert = ".pixi-bin/bin/flatppl convert --from hs3"
 # The unified per-test-directory harness alone (every `corpora/**/test.json`
 # dir, one case per (dir, engine) pair -- see tests/test_unified.py). In the
-# base env this runs every det-js case; run under `-e stablehlo` (with
+# base env this runs every JS and det-js case; run under `-e stablehlo` (with
 # FLATPPL_BIN + PYTHONPATH=$PWD/src) for the stablehlo cases too.
 unified = "python -m pytest tests/test_unified.py -q"
 # The density oracle sweep's sized defect report, from the committed table

@@ -130,7 +130,7 @@ def parse_expected(v):
 def _input_rhs(names: list[str]) -> re.Pattern[str]:
     return re.compile(
         r"^((?:" + "|".join(re.escape(name) for name in names) + r")[ \t]*=[ \t]*)(.*?)"
-        r"(?=^\w+[ \t]*(?:=|~|:)|\Z)",
+        r"(?=^\w+[ \t]*(?:\([^\n]*\)[ \t]*)?(?:=|~|:)|\Z)",
         re.M | re.S,
     )
 
@@ -196,14 +196,19 @@ def _determinize(model: Path, query: str, roots: list[str]) -> str:
             raise RuntimeError(f"determinize failed: {det.stderr.strip()}")
         # Canonical block docs can contain examples that look like bindings.
         # They carry no runtime meaning and must not intercept substitution.
-        lines = []
-        in_doc = False
-        for line in out_path.read_text().splitlines():
-            if line.startswith("%%%"):
-                in_doc = not in_doc
-            elif not in_doc and not line.startswith("%"):
-                lines.append(line)
-        return "\n".join(lines)
+        return strip_docs(out_path.read_text())
+
+
+def strip_docs(source: str) -> str:
+    """Remove doc blocks before looking for top-level ABI input bindings."""
+    lines = []
+    in_doc = False
+    for line in source.splitlines():
+        if line.startswith("%%%"):
+            in_doc = not in_doc
+        elif not in_doc and not line.startswith("%"):
+            lines.append(line)
+    return "\n".join(lines)
 
 
 @dataclass
@@ -230,7 +235,12 @@ def score_abi_points(
     evaluation into ONE Node process (see `_score_flatpdl_batch`) instead of
     spawning one process per point."""
     flatpdl = determinize_abi(model, query)
-    names = abi_input_names(flatpdl)
+    return _score_flatpdl_batch(bind_abi_sources(flatpdl, fields, points), "outputs")
+
+
+def bind_abi_sources(source: str, fields: list[str], points: list[dict]) -> list[str]:
+    """Bind each ABI input using the same source serialization for every engine."""
+    names = abi_input_names(source)
     if len(names) != len(fields):
         raise ValueError(
             f"ABI arity mismatch: module `inputs` lists {names} "
@@ -239,7 +249,7 @@ def score_abi_points(
 
     sources: list[str] = []
     for pt in points:
-        src = flatpdl
+        src = source
         for name, field in zip(names, fields):
             if field not in pt:
                 raise ValueError(f"point {pt} has no value for ABI field {field!r}")
@@ -252,7 +262,7 @@ def score_abi_points(
                 )
         sources.append(src)
 
-    return _score_flatpdl_batch(sources, "outputs")
+    return sources
 
 
 def _score_flatpdl_binding(flatpdl_path: Path, binding: str) -> float:
