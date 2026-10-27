@@ -6,8 +6,8 @@ engine is gated independently -- so a dir listing more than one engine can't
 have one engine's missing prerequisites silently suppress another engine's
 checks. The stablehlo runners need the `stablehlo` pixi env (jax +
 enzyme_ad) and a `stablehlo`-capable `flatppl` binary (`FLATPPL_BIN`); the
-det-js runner needs a resolvable `flatppl` binary and `score_flatpdl.cjs`.
-Both gates are scoped per engine, NOT the module, so det-js dirs (base pixi
+det-js runner needs a resolvable `flatppl` binary and `score_flatpdl.cjs`;
+the native JS runner needs Node and the JS engine. All gates are scoped per engine, NOT the module, so det-js dirs (base pixi
 env, no jax/enzyme) still collect+run under plain `pixi run test`.
 
 Run the stablehlo cases for real:
@@ -36,9 +36,7 @@ _CASE_IDS = [f"{d.relative_to(_CORPORA)}::{engine}" for d, engine in _CASES]
 # field itself is what `pixi run -e stablehlo unified` selects with `-m
 # stablehlo_only` to scope that env to its own 76 cases instead of
 # re-running every det-js case too (see pixi.toml's stablehlo `unified`
-# task). A future third engine falls out of this the same way: it gets no
-# mark and stays out of the stablehlo-only selection without anyone having
-# to touch this file again.
+# task). Other engines get no mark and stay out of the stablehlo-only selection.
 _CASE_PARAMS = [
     pytest.param(d, engine, marks=pytest.mark.stablehlo_only if engine == "stablehlo" else ())
     for d, engine in _CASES
@@ -90,6 +88,11 @@ def _gate_engine(engine: str) -> None:
                 engine,
                 "FLATPPL_BIN must point at a `flatppl` built with the `stablehlo` feature",
             )
+    elif engine == "js":
+        from flatppl_testsuite.unified.runners import logdensity_js
+
+        if not logdensity_js.engine_available():
+            _unavailable(engine, "native JS scorer, Node, and flatppl-js must be available")
     elif engine == "det-js":
         from flatppl_testsuite.unified import detjs_exec as ex
 

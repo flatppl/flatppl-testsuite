@@ -72,6 +72,7 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    "stablehlo/integration_narrow_interval": {"stablehlo", "js"},
     "formula/thinplate_gaussian_gradient": {"stablehlo"},
     "formula/categorical_default_gradient": {"stablehlo"},
     "formula/categorical_reordered_gradient": {"stablehlo"},
@@ -162,7 +163,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 655
+EXPECTED_CASES = 656
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

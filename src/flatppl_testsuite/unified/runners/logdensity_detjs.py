@@ -43,11 +43,11 @@ def _close(got: float, want: float, atol: float, rtol: float) -> bool:
         return False
 
 
-def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
+def run(spec: TestSpec, dir: Path, *, abi_scorer=None) -> list[CheckResult]:
     tid = dir.name
     body = spec.body
-    model = dir / body["model"]
-    binding = body["binding"]
+    model = dir / body.get("model", "model.flatppl")
+    binding = body.get("binding")
     tol = body.get("tolerance", {})
     atol = tol.get("atol", 1e-9)
     rtol = tol.get("rtol", 1e-9)
@@ -79,7 +79,7 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                 return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
                                     "query.flatppl present but test.json declares no "
                                     "`inputs` (ABI field order)")]
-            scores = ex.score_abi_points(model, query, fields, points)
+            scores = (abi_scorer or ex.score_abi_points)(model, query, fields, points)
         else:                                                # Mode B (splice)
             scores = [ex.PointScore(value=ex.log_density_at(model, binding, pt)) for pt in points]
 

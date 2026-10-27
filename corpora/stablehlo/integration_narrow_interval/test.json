@@ -1,6 +1,6 @@
 {
   "test_type": "logdensity",
-  "engines": ["stablehlo"],
+  "engines": ["stablehlo", "js"],
   "numerical_integrals": true,
   "inputs": ["lo", "hi"],
   "points": [{"lo": 0.26, "hi": 0.27}, {"lo": 0.5, "hi": 0.5001}],

@@ -75,6 +75,8 @@ query and independent oracle beside it.
 asks the registry; no unified runner does, because a runner must score with the engine
 its label names (`tests/core/test_detjs_runners_are_det_js.py`). The 2DeltaNLL math is
 engine-agnostic: `scoring/flatppl_engine.py` takes the scorer as an argument.
+The unified `js` log-density runner evaluates the shared ABI query directly in JS;
+`det-js` first runs the Rust determinizer. Both compare against the same frozen values.
 
 ## Dependencies
 
@@ -93,7 +95,7 @@ subprocess the upstream HS3TestSuite checkout named by `HS3SUITE`.
 
 A run starts **one Node scoring worker per Python process** (so one per pytest-xdist
 worker), not one Node process per scored case: the worker loads the engine once and
-every det-js score goes to it as a JSON-line request. Each request builds its own
+every JS and det-js score goes to it as a JSON-line request. Each request builds its own
 derivation graph, RNG seed and cache, so nothing carries over between cases. A request
 that exceeds `FLATPPL_SCORE_TIMEOUT` seconds (default 300) or a worker that dies fails
 that request only; the next one starts a fresh worker. The worker restarts once its
@@ -105,7 +107,7 @@ worker score by hand.
 
 ```sh
 pixi run setup                        # install the pinned converter + resolve the JS engine
-pixi run test                         # pytest: tests/core/ + the unified harness (det-js cases)
+pixi run test                         # pytest: tests/core/ + the unified harness (JS and det-js cases)
 pixi run unified                      # the unified harness alone
 pixi run convert <in.json> <out.flatppl>   # convert one fixture (debugging aid)
 

@@ -41,7 +41,7 @@ jobs:
       # degrades every case for that engine to a skip and the step still exits 0,
       # silently deleting the gate this step exists to be.
       - name: Run FlatPPL tests against frozen ROOT-verified values
-        run: FLATPPL_REQUIRE_ENGINES=det-js pixi run test
+        run: FLATPPL_REQUIRE_ENGINES=det-js,js pixi run test
 
       # Provenance is INFORMATIONAL and this step never fails the run. Both
       # engines are built at main above, so a verdict table pinned behind them is
