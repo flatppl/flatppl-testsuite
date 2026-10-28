@@ -51,6 +51,91 @@ def test_runtime_status_keeps_the_sample_key_in_its_abi_position(tmp_path):
 
 
 @pytest.mark.stablehlo_only
+def test_order_statistics_check_probability_during_value_and_gradient_calls(tmp_path):
+    _gate_engine("stablehlo")
+    from jax.experimental import checkify
+
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "xs = elementof(cartpow(reals, 3))\np = elementof(reals)\n"
+        "inputs = (xs, p)\noutputs = median(xs) + quantile(xs, p)\n"
+    )
+    source = ex.emit(query, "logdensity")
+    assert ex.value(source, [[8, 2, 4], .25]) == 7
+    dx, dp = ex.gradient(source, [[8, 2, 4], .25], [0, 1])
+    np.testing.assert_array_equal(dx, [0, .5, 1.5])
+    assert dp == 4
+    assert np.isnan(ex.value(source, [[8, 2, 4], np.nan]))
+    for execute in (ex.value, lambda src, args: ex.gradient(src, args, [0, 1])):
+        with pytest.raises(checkify.JaxRuntimeError, match="quantile probability"):
+            execute(source, [[8, 2, 4], 1.1])
+
+
+@pytest.mark.stablehlo_only
+def test_linear_solve_checks_singularity_during_value_and_gradient_calls(tmp_path):
+    _gate_engine("stablehlo")
+    from jax.experimental import checkify
+
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "A = elementof(cartpow(reals, [2, 2]))\nb = elementof(cartpow(reals, 2))\n"
+        "inputs = (A, b)\noutputs = sum(linsolve(A, b))\n"
+    )
+    source = ex.emit(query, "logdensity")
+    point = [[[2, 1], [1, 3]], [5, 7]]
+    assert ex.value(source, point) == pytest.approx(3.4, rel=2e-6)
+    np.testing.assert_allclose(ex.gradient(source, point, [1]), [[.4, .2]], rtol=2e-6)
+    for execute in (ex.value, lambda src, args: ex.gradient(src, args, [1])):
+        with pytest.raises(checkify.JaxRuntimeError, match="nonsingular matrix"):
+            execute(source, [[[1, 2], [2, 4]], [5, 7]])
+
+
+@pytest.mark.stablehlo_only
+def test_inverse_uniform_transport_checks_domain_and_keeps_endpoints(tmp_path):
+    _gate_engine("stablehlo")
+    from jax.experimental import checkify
+
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "u = elementof(reals)\ninputs = u\n"
+        "outputs = builtin_fromuniform(Exponential, record(rate = 2), u)\n"
+    )
+    source = ex.emit(query, "logdensity")
+    assert ex.value(source, [.5]) == pytest.approx(np.log(2) / 2, rel=2e-6)
+    assert ex.gradient(source, [.5], [0]) == [1]
+    assert ex.value(source, [0]) == 0
+    assert np.isposinf(ex.value(source, [1]))
+    for execute in (ex.value, lambda src, args: ex.gradient(src, args, [0])):
+        with pytest.raises(checkify.JaxRuntimeError, match="uniform variate"):
+            execute(source, [np.nan])
+
+
+@pytest.mark.stablehlo_only
+def test_rng_seed_checks_preserve_integer_and_byte_seed_equivalence(tmp_path):
+    _gate_engine("stablehlo")
+    from jax.experimental import checkify
+
+    query = tmp_path / "query.flatppl"
+    draws = []
+    for domain, valid, invalid in (
+        ("integers", 1, -1),
+        ("cartpow(integers, 8)", [1, 0, 0, 0, 0, 0, 0, 0], [256, 0, 0, 0, 0, 0, 0, 0]),
+    ):
+        query.write_text(
+            f"seed = external({domain})\ns = rnginit(seed)\n"
+            "x, next = rand(Normal(0, 1), s)\ninputs = seed\noutputs = (x, next)\n"
+        )
+        source = ex.emit(query, "sample", restrict_enzyme_compatible=False)
+        draw = ex.value(source, [valid])
+        assert np.isfinite(draw)
+        assert ex.value(source, [valid]) == draw
+        draws.append(draw)
+        with pytest.raises(checkify.JaxRuntimeError, match="RNG seed"):
+            ex.value(source, [invalid])
+    assert draws[0] == draws[1]
+
+
+@pytest.mark.stablehlo_only
 @pytest.mark.parametrize("dtype, tolerance", [("f64", 1e-11), ("f32", 2e-5)])
 def test_enzyme_mode_preserves_zero_products_and_selected_axes(tmp_path, dtype, tolerance):
     _gate_engine("stablehlo")
