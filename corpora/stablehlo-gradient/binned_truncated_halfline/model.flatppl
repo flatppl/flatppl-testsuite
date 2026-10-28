@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+s = elementof(posreals)
+intensity = normalize(truncate(Normal(0.0, s), interval(0.0, inf)))

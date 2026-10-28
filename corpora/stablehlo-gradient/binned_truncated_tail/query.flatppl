@@ -1,0 +1,2 @@
+inputs = rate
+outputs = logdensityof(BinnedPoissonProcess([1001, inf], intensity), [0])

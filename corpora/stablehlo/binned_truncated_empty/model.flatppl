@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+mu = elementof(reals)
+a = elementof(reals)
+intensity = truncate(Normal(mu, 1.0), interval(a, a+1))

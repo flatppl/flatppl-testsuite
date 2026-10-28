@@ -1,0 +1,5 @@
+flatppl_compat = "0.1"
+mu = elementof(reals)
+sigma = elementof(posreals)
+edge = elementof(posreals)
+intensity = weighted(5.0, normalize(truncate(Normal(mu, sigma), interval(-0.5, edge))))
