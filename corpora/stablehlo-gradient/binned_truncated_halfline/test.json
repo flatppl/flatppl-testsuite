@@ -1,0 +1,32 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "inputs": [
+    "s"
+  ],
+  "points": [
+    {
+      "s": 0.8
+    },
+    {
+      "s": 1.2
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 3e-05,
+    "grad_rtol": 0.0003
+  },
+  "grad_params": [
+    "s"
+  ],
+  "expected_grad": [
+    {
+      "s": -0.5707783918406935
+    },
+    {
+      "s": -0.391544271403198
+    }
+  ]
+}

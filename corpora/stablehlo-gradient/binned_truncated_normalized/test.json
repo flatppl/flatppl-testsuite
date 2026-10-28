@@ -1,0 +1,44 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "inputs": [
+    "mu",
+    "sigma",
+    "edge"
+  ],
+  "points": [
+    {
+      "mu": 0.2,
+      "sigma": 0.8,
+      "edge": 1.7
+    },
+    {
+      "mu": -0.4,
+      "sigma": 1.2,
+      "edge": 1.9
+    }
+  ],
+  "grad_params": [
+    "mu",
+    "sigma",
+    "edge"
+  ],
+  "expected_grad": [
+    {
+      "mu": 1.2907229246855867,
+      "sigma": 0.6461357188152197,
+      "edge": 0.2402984020317986
+    },
+    {
+      "mu": 0.7076510893175857,
+      "sigma": 0.9475067981141463,
+      "edge": 0.2168765301793084
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 3e-05,
+    "grad_rtol": 0.0003
+  }
+}

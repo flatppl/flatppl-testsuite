@@ -1,0 +1,4 @@
+flatppl_compat = "0.1"
+a = elementof(nonnegreals)
+reference = weighted((x, p) -> p/x, Lebesgue(interval(0, 1)), a)
+intensity = truncate(reference, interval(0.5, 1))

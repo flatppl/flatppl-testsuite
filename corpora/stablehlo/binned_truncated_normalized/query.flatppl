@@ -1,0 +1,2 @@
+inputs = (mu, sigma, edge)
+outputs = logdensityof(BinnedPoissonProcess([-2, -1, 0, 1], intensity), [0, 0, 2])

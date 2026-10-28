@@ -1,0 +1,35 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "js",
+    "stablehlo"
+  ],
+  "inputs": [
+    "mu",
+    "sigma",
+    "edge"
+  ],
+  "points": [
+    {
+      "mu": 0.2,
+      "sigma": 0.8,
+      "edge": 1.7
+    },
+    {
+      "mu": -0.4,
+      "sigma": 1.2,
+      "edge": 1.9
+    }
+  ],
+  "expected": [
+    -2.3687892950584217,
+    -2.322460756067679
+  ],
+  "tolerance": {
+    "atol": 1e-09,
+    "rtol": 1e-09,
+    "value_atol_f32": 3e-05,
+    "value_rtol_f32": 3e-05
+  }
+}
