@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+a = elementof(reals)
+intensity = weighted((x, p) -> p*p*exp(x), Lebesgue(interval(0, 1)), a)

@@ -35,11 +35,11 @@ EXPECTED_COUNTS = {
     "pyhf": 173,
     "pyhf-rejects": 29,
     "sample": 1,
-    "stablehlo": 41,
-    "stablehlo-gradient": 37,
+    "stablehlo": 43,
+    "stablehlo-gradient": 39,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 512
+EXPECTED_TOTAL = 516
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -163,7 +163,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 656
+EXPECTED_CASES = 660
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
