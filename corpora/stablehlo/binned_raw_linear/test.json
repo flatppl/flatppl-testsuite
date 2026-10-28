@@ -1,0 +1,34 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "numerical_integrals": true,
+  "inputs": [
+    "a"
+  ],
+  "points": [
+    {
+      "a": 0.0
+    },
+    {
+      "a": 0.1
+    },
+    {
+      "a": 0.5
+    },
+    {
+      "a": 1.0
+    }
+  ],
+  "expected": [
+    -0.0,
+    -0.17182818284590454,
+    -0.8591409142295227,
+    -1.7182818284590453
+  ],
+  "tolerance": {
+    "value_atol_f32": 3e-05,
+    "value_rtol_f32": 0.0003
+  }
+}
