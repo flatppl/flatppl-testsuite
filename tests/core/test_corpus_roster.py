@@ -35,11 +35,11 @@ EXPECTED_COUNTS = {
     "pyhf": 173,
     "pyhf-rejects": 29,
     "sample": 1,
-    "stablehlo": 43,
-    "stablehlo-gradient": 39,
+    "stablehlo": 49,
+    "stablehlo-gradient": 45,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 516
+EXPECTED_TOTAL = 528
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -72,6 +72,11 @@ EXPECTED_ENGINES = {
 # only, so the corpus-wide pin cannot express it. An override is as deliberate an
 # edit as the corpus default, and a dir that drops an engine still fails here.
 ENGINE_OVERRIDES = {
+    "stablehlo/binned_truncated_empty": {"det-js", "js", "stablehlo"},
+    "stablehlo/binned_truncated_halfline": {"det-js", "js", "stablehlo"},
+    "stablehlo/binned_truncated_normalized": {"det-js", "js", "stablehlo"},
+    "stablehlo/binned_truncated_raw": {"det-js", "js", "stablehlo"},
+    "stablehlo/binned_truncated_tail": {"det-js", "js", "stablehlo"},
     "stablehlo/integration_narrow_interval": {"stablehlo", "js"},
     "formula/thinplate_gaussian_gradient": {"stablehlo"},
     "formula/categorical_default_gradient": {"stablehlo"},
@@ -163,7 +168,7 @@ ENGINE_OVERRIDES = {
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 660
+EXPECTED_CASES = 682
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {
