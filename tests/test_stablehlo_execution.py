@@ -72,7 +72,8 @@ def test_order_statistics_check_probability_during_value_and_gradient_calls(tmp_
 
 
 @pytest.mark.stablehlo_only
-def test_linear_solve_checks_singularity_during_value_and_gradient_calls(tmp_path):
+@pytest.mark.parametrize("target", ["cpu", "gpu"])
+def test_linear_solve_checks_singularity_during_value_and_gradient_calls(tmp_path, target):
     _gate_engine("stablehlo")
     from jax.experimental import checkify
 
@@ -81,13 +82,33 @@ def test_linear_solve_checks_singularity_during_value_and_gradient_calls(tmp_pat
         "A = elementof(cartpow(reals, [2, 2]))\nb = elementof(cartpow(reals, 2))\n"
         "inputs = (A, b)\noutputs = sum(linsolve(A, b))\n"
     )
-    source = ex.emit(query, "logdensity")
+    source = ex.emit(query, "logdensity", target=target)
     point = [[[2, 1], [1, 3]], [5, 7]]
     assert ex.value(source, point) == pytest.approx(3.4, rel=2e-6)
     np.testing.assert_allclose(ex.gradient(source, point, [1]), [[.4, .2]], rtol=2e-6)
     for execute in (ex.value, lambda src, args: ex.gradient(src, args, [1])):
         with pytest.raises(checkify.JaxRuntimeError, match="nonsingular matrix"):
             execute(source, [[[1, 2], [2, 4]], [5, 7]])
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("dtype, tolerance", [("f32", 2e-6), ("f64", 1e-12)])
+def test_gpu_determinant_preserves_the_singular_cofactor_gradient(tmp_path, dtype, tolerance):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "A = elementof(cartpow(reals, [3, 3]))\n"
+        "inputs = A\noutputs = det(A)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=dtype, target="gpu")
+    point = [[[0, 2, 0], [0, 0, 3], [0, 0, 0]]]
+    assert ex.value(source, point) == 0
+    # Only deleting the last row and first column leaves a nonzero minor: 2 * 3.
+    np.testing.assert_allclose(
+        ex.gradient(source, point, [0]),
+        [[[0, 0, 0], [0, 0, 0], [6, 0, 0]]],
+        rtol=tolerance, atol=tolerance,
+    )
 
 
 @pytest.mark.stablehlo_only
