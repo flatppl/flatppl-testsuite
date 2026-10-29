@@ -59,6 +59,7 @@ class EmitRefused(RuntimeError):
 
 def emit(
     model_path: Path, mode: str, *, dtype: str | None = None,
+    target: str | None = None,
     restrict_enzyme_compatible: bool = True,
     numerical_integrals: bool = False,
 ) -> str:
@@ -67,6 +68,7 @@ def emit(
     proc = subprocess.run(
         [str(flatppl_bin()), "stablehlo", str(model_path), "--mode", mode]
         + (["--dtype", dtype] if dtype is not None else [])
+        + (["--target", target] if target is not None else [])
         + ([] if restrict_enzyme_compatible else ["--restrict-enzyme-compatible=false"])
         + (["--numerical-integrals"] if numerical_integrals else []),
         capture_output=True, text=True,
