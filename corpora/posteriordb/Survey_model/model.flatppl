@@ -15,7 +15,7 @@ theta ~ Uniform(unitinterval)
 counts(n, theta) = iid(Binomial(n, theta), 5)
 possible_sizes = indicesof(zeros(500))
 population_weights = ones(500)
-y ~ normalize(ksuperpose(counts, population_weights)(possible_sizes, theta))
+y ~ normalize(ksuperpose(counts, population_weights, possible_sizes, theta))
 
 Pi_prior = lawof(record(theta = theta))
 K_model = kernelof(record(y = y), theta = theta)

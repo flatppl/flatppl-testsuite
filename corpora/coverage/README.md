@@ -33,7 +33,7 @@ Two kinds of dir live here:
 | `censored_lifetimes` | `truncate` with a LATENT bound, exact `-inf` gate point | lowers, matches closed form incl. -inf |
 | `constrained_reference` | `Lebesgue` with a latent interval bound, without volume normalization | closed-form oracle at interior, endpoint and exterior points; both engines |
 | `affine_reference` | `Lebesgue` on zero-sum and simplex supports, including rounded valid coordinates and tiny invalid ones | exact rational support oracle; both engines |
-| `mv_mixture` | §06 `ksuperpose` family axes by parameter rank: a MULTIVARIATE mixture (N x d `mu`, N x d x d `cov`) | determiniser refuses (no per-component slice extraction) |
+| `mv_mixture` | §06 `ksuperpose` broadcasts vectors of mean vectors and covariance matrices | authored as a refusal pin; now lowers, matches scipy |
 | `mv_mixture_sample` | the same mixture's sample path, per-draw component selection | determiniser refuses (ksuperpose sampling unimplemented) |
 | `stdmod_interp_poly6` | §09 standard-module FUNCTION members, one per lowered module: `particle-physics` (both degree-6 HistFactory interpolators, both extrapolation branches), `polynomials` (`legendre`), `distances` (`euclidean`) | lowers, matches a 6x6 solve of §09's C² conditions cross-checked against ROOT, plus `scipy.special` and the norm written out |
 

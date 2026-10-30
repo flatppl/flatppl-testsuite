@@ -27,7 +27,7 @@ w ~ Dirichlet(alpha = [2.0, 2.0, 2.0])
 sigma ~ Gamma(shape = 3.0, rate = 4.0)
 
 % Σw = 1 exactly, so normalize only settles the static mass class for draw.
-line = normalize(ksuperpose(Normal, w)(mu = centers, sigma = sigma))
+line = normalize(ksuperpose(Normal, w, mu = centers, sigma = sigma))
 y ~ iid(line, N)
 
 prior = lawof(record(w = w, sigma = sigma))
