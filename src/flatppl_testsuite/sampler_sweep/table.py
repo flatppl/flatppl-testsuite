@@ -70,7 +70,7 @@ REFUSAL_PATTERNS: tuple[tuple[str, str], ...] = (
     ("no sampler",
      "a density-only distribution's sampler stub"),
     ("Undefined variable",
-     "the construct does not exist in this engine at all (e.g. ksuperpose)"),
+     "the construct does not exist in this engine at all"),
     ("not a measure expression we can sample",
      "an inline combinator the sampler walker does not handle"),
     ("step boundary",

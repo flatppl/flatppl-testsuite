@@ -48,12 +48,9 @@ plausible while the coordinates are locked together.
 
 NOT IN v1, with the reason:
 
-* `ksuperpose` — absent from flatppl-js entirely. Verified, not assumed:
-  `ksuperpose(Normal, [0.5, 0.5])(...)` raises the static diagnostic
-  `Undefined variable 'ksuperpose'`, and `grep -rln ksuperpose` over the
-  flatppl-js repo returns nothing. It is also not in the merged spec — §06 only
-  gains it on an unmerged `ksuperpose-spec` branch. flatppl-rust refuses its
-  sample lowering explicitly (`crates/determinizer/src/sample.rs`,
+* `ksuperpose` — JS covers component selection in its mixture sampler tests.
+  This sweep uses explicit `superpose` components instead. Rust still refuses
+  mixture sampling (`crates/determinizer/src/sample.rs`,
   `refuse_ksuperpose_sample`).
 * `MvNormal`, `Wishart`, `LKJ`, `Multinomial` — not REGISTRY entries in
   `sampler-registry.ts` (the matrix families live in flatppl-rust's `src/`, per

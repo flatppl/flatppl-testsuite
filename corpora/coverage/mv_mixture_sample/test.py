@@ -1,7 +1,7 @@
 """INDEPENDENT closed-form oracle for the bivariate `ksuperpose` mixture
 sample path (`model.flatppl` / `model_density.flatppl`):
 
-    mix = normalize(ksuperpose(MvNormal, [0.3, 0.7])(mu = mus, cov = covs))
+    mix = normalize(ksuperpose(MvNormal, [0.3, 0.7], mu = mus, cov = covs))
     mus = [[-2, 1], [3, -1]]
     covs = [[[1, 0.3], [0.3, 1]], [[0.5, 0], [0, 2]]]
 
