@@ -1,0 +1,5 @@
+py = load_module("normal_box.flatppl")
+x ~ py.std
+state = rnginit(0)
+inputs = state
+outputs = rand(lawof(x), state)

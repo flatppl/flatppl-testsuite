@@ -1,0 +1,2 @@
+# The Stan model, served by flatppl-bridge's BridgeStan plugin.
+posterior = external(anything)

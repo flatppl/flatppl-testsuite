@@ -54,3 +54,6 @@ ENV/
 htmlcov/
 .tox/
 .nox/
+
+# black-box row builds (scripts/setup_bridge.sh)
+/.bridge/

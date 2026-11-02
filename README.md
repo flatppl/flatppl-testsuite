@@ -115,6 +115,11 @@ pixi run convert <in.json> <out.flatppl>   # convert one fixture (debugging aid)
 FLATPPL_BIN=/path/to/flatppl PYTHONPATH=$PWD/src pixi run -e stablehlo unified
 # Regenerate a test dir's frozen expected/stat from its test.py oracle:
 pixi run -e stablehlo regen corpora/stablehlo/linear_regression
+
+# Black-box row: a BridgeStan box served by flatppl-bridge, queried through
+# flatppl-python (builds both from sibling checkouts; needs a C++17 compiler):
+pixi run -e bridge bridge-setup
+pixi run -e bridge bridge
 ```
 
 ## Engine pins

@@ -1,0 +1,4 @@
+py = load_module("normal_box.flatppl")
+mu = elementof(reals)
+inputs = mu
+outputs = logdensityof(iid(py.K(mu = mu, sigma = 1.5), 5), [0.3, 1.1, -0.4, 2.0, 0.8])

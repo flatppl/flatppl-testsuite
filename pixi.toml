@@ -171,6 +171,37 @@ regen = "python -m flatppl_testsuite.unified.regen"
 # pure duplicate work already covered, correctly, by `pixi run test`.
 unified = "python -m pytest tests/test_unified.py tests/test_stablehlo_reuse.py tests/test_stablehlo_execution.py tests/test_metrics.py tests/test_splines.py tests/test_positive_count_normalization.py tests/test_broadcast_reductions.py tests/test_broadcast_sharing.py tests/test_constant_branches.py tests/test_poisson_precision.py tests/test_poisson_sampling.py tests/test_rowwise_sampling.py tests/test_lkj_sampling.py tests/test_ksuperpose_sampling.py tests/test_mixture_families.py tests/test_interval_masses.py tests/test_interval_inputs.py tests/test_von_mises.py tests/test_iid_shapes.py tests/test_dependent_prior_bounds.py tests/test_mixed_measure_density.py tests/test_exponential_tilt.py tests/test_segment_sums.py tests/test_input_vectors.py tests/test_interpolation.py tests/test_pyhf_helpers.py tests/test_pyhf_yields.py tests/test_regression_reference.py tests/test_formula_distributional_scale.py tests/test_posteriordb.py tests/test_bundles.py -q -m stablehlo_only"
 
+# ---------------------------------------------------------------------------
+# Black-box row: a BridgeStan box served by flatppl-bridge, queried from FlatPPL
+# through flatppl-python (tests/test_bridge_box.py). `bridge-setup` builds
+# flatppl-python and flatppl-bridge from sibling checkouts (FLATPPL_PYTHON_DIR,
+# FLATPPL_BRIDGE_DIR) and the Stan model; BridgeStan needs a C++17 compiler.
+#   pixi run -e bridge bridge-setup && pixi run -e bridge bridge
+[feature.bridge.dependencies]
+python = "3.12.*"
+scipy = ">=1.11"
+numpy = ">=2.0"
+pyarrow = ">=25"
+pip = "*"
+maturin = ">=1.9,<2"
+rust = ">=1.96"
+
+[feature.bridge.pypi-dependencies]
+jax = "==0.11.2"
+jaxlib = "==0.11.2"
+pytest = ">=8"
+bridgestan = "==2.9.0"
+
+[feature.bridge.target.osx-arm64.pypi-dependencies]
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp312-cp312-macosx_14_0_arm64.whl#sha256=362386dc1bd44345cb32063f64cceb3f1d04e02bf288e24f714f606a41defae4" }
+
+[feature.bridge.target.linux-64.pypi-dependencies]
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp312-cp312-manylinux_2_35_x86_64.whl#sha256=33e866efc31afe9b864551bf5bdaffa16fa7528790b525be8d27c739effe5dd4" }
+
+[feature.bridge.tasks]
+bridge-setup = "bash scripts/setup_bridge.sh"
+bridge = "python -m pytest tests/test_bridge_box.py -q -m bridge_only"
+
 [environments]
 root = ["root"]
 pyhs3 = ["pyhs3"]
@@ -178,3 +209,4 @@ pyhs3 = ["pyhs3"]
 # scoring path, so a frozen number cannot come from the engine under test.
 pyhf = { features = ["pyhf"], no-default-feature = true }
 stablehlo = { features = ["stablehlo"], no-default-feature = true }
+bridge = { features = ["bridge"], no-default-feature = true }
