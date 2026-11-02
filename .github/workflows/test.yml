@@ -16,7 +16,7 @@ jobs:
           # pixi.lock is intentionally not committed; solve on the fly.
           locked: false
           # Base env (python + node 24 + rust) + the stablehlo gate env
-          # (python 3.12 + enzyme-ad/jax pins + scipy). Never the heavy
+          # (python 3.15 + enzyme-ad/jax pins + scipy). Never the heavy
           # root/pyhs3 oracle environments.
           environments: default stablehlo
 
@@ -59,6 +59,6 @@ jobs:
       # setup-built `flatppl stablehlo` verb, executes under Enzyme-JAX, checks
       # value + jax.grad gradient vs each dir's frozen/oracle expectation, plus
       # @sample distribution + multi-rng independence. Separate env (python
-      # 3.12 / enzyme pins), so a separate step.
+      # 3.15 / enzyme pins), so a separate step.
       - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
         run: FLATPPL_REQUIRE_ENGINES=stablehlo FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo unified
