@@ -1,0 +1,2 @@
+# A normalized Python-callable measure with its own sampler.
+std = external(anything)

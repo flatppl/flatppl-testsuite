@@ -1,0 +1,4 @@
+stan = load_module("interface.flatppl")
+theta = elementof(cartpow(reals, 2))
+inputs = theta
+outputs = logdensityof(stan.posterior, theta)
