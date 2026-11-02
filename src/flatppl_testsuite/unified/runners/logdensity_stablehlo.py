@@ -15,6 +15,10 @@ writes them that way for every corpus. Each entry therefore goes through
 that convention -- a second bare `float()` here is how the two would drift.
 `corpora/stablehlo/pushfwd_asinh` and `pushfwd_log_exponential` need it: past a
 map's f32 overflow the correctly rounded density IS `-inf`.
+
+An entry `{"error": <message part>}` expects the device status to raise an error
+whose message contains that part, for example a distribution parameter outside
+its declared value set (status 9).
 """
 from __future__ import annotations
 
@@ -71,6 +75,18 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                 arg_values.append(pt[name])
             else:
                 arg_values.extend(ex.data_columns(ld_sources[name]))
+        if isinstance(want, dict):
+            try:
+                got = ex.value(src, arg_values)
+                ok, detail = False, f"expected an error containing {want['error']!r}, got {got}"
+            except Exception as e:  # checkify.JaxRuntimeError
+                ok = want["error"] in str(e)
+                detail = "" if ok else f"expected {want['error']!r} in {e}"
+            results.append(CheckResult(
+                tid, f"logdensity[{i}]", "passed" if ok else "failed",
+                "" if ok else NUMERIC_MISMATCH, "" if ok else f"point {pt}: {detail}",
+            ))
+            continue
         got = ex.value(src, arg_values)
         want = parse_expected(want)
         try:
