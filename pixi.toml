@@ -139,19 +139,19 @@ polars = ">=1.43.2,<2"
 [feature.stablehlo.pypi-dependencies]
 # enzyme_ad.jax.hlo_call imports emitted StableHLO (@main) as a jit-able +
 # differentiable jax callable — the executor for value AND gradient checks.
-# The FlatPPL Enzyme fork's alpha 12 wheels, pinned per platform below, support
+# The FlatPPL Enzyme fork's alpha 13 wheels, pinned per platform below, support
 # native matrix derivatives and preserve shared inputs and compact residuals.
 # pixi 0.81 does not verify the #sha256 fragment. Check downloads against
 # the release's SHA256SUMS.
-jax = "==0.11.2"
-jaxlib = "==0.11.2"
+jax = "==0.12.0.1"
+jaxlib = "==0.12.0.1"
 pytest = ">=8"
 
 [feature.stablehlo.target.osx-arm64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp315-cp315-macosx_14_0_arm64.whl#sha256=8f8bd93e973669d9d7222013103f7f8898da67eb776e31fa07fc1712b0c96143" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.13/enzyme_ad-0.0.15%2Bflatppl.13-cp315-cp315-macosx_14_0_arm64.whl#sha256=005e80f52bbcde3dbe063c00f1b95d8f1f7a559bfaf8822a78a192b5595c68ec" }
 
 [feature.stablehlo.target.linux-64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp315-cp315-manylinux_2_35_x86_64.whl#sha256=a00b3dd239020a340191652d6cbb669c4ad95652418dff3d62629045fd2f51f2" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.13/enzyme_ad-0.0.15%2Bflatppl.13-cp315-cp315-manylinux_2_35_x86_64.whl#sha256=4fdd2fadcacf11157cb48d5b17b001b7af8161b4b6da1a0d1b7034dd39a93d85" }
 
 # The stablehlo-feature tasks live here (the `stablehlo` env is
 # no-default-feature, so the base `[tasks]` are not in scope). Point
