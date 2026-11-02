@@ -128,9 +128,9 @@ gen-pyhf-rejects = { cmd = "python corpora/pyhf-rejects/gen_expected.py" }
 # (`enzyme_ad.jax.hlo_call`) so the emitted density modules are checked as
 # NUMBERS and GRADIENTS, not just structurally. Keep the released Enzyme and
 # JAX pair aligned: their MLIR parsers must agree on dense boolean encoding.
-# Python 3.12 has binary Enzyme wheels on the supported CI/local platforms.
+# Python 3.15 has binary Enzyme wheels on the supported CI/local platforms.
 [feature.stablehlo.dependencies]
-python = "3.12.*"
+python = "3.15.*"
 # Independent numerical oracles.
 scipy = ">=1.11"
 numpy = ">=2.0"
@@ -148,10 +148,10 @@ jaxlib = "==0.11.2"
 pytest = ">=8"
 
 [feature.stablehlo.target.osx-arm64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp312-cp312-macosx_14_0_arm64.whl#sha256=362386dc1bd44345cb32063f64cceb3f1d04e02bf288e24f714f606a41defae4" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp315-cp315-macosx_14_0_arm64.whl#sha256=8f8bd93e973669d9d7222013103f7f8898da67eb776e31fa07fc1712b0c96143" }
 
 [feature.stablehlo.target.linux-64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp312-cp312-manylinux_2_35_x86_64.whl#sha256=33e866efc31afe9b864551bf5bdaffa16fa7528790b525be8d27c739effe5dd4" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp315-cp315-manylinux_2_35_x86_64.whl#sha256=a00b3dd239020a340191652d6cbb669c4ad95652418dff3d62629045fd2f51f2" }
 
 # The stablehlo-feature tasks live here (the `stablehlo` env is
 # no-default-feature, so the base `[tasks]` are not in scope). Point
