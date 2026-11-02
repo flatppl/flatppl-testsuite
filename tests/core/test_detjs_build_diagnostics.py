@@ -6,7 +6,7 @@ scorers used to report only the materialiser's "no derivation for '<binding>'".
 
 The refused binding passes `MvNormal` a `cov` that is not positive definite
 (eigenvalues 3 and -1). It is a well-formed matrix, so no static check refuses
-it: the Cholesky factorisation fails at run time. The refusal tests feed the
+it: §08 declares `cov` positive definite, and the engine refuses it at run time. The refusal tests feed the
 scorers that FlatPDL directly. They test the scorers, whatever the determiniser
 does upstream. A positive-definite `cov` is the control on the full det-js
 path: it must score scipy's
@@ -32,8 +32,12 @@ SCIPY_LOGPDF = -2.6954601010511796
 REFUSED_FLATPDL = (
     "lp = builtin_logdensityof(MvNormal, record(mu = [0.2, -0.1], "
     "cov = rowstack([[1.0, 2.0], [2.0, 1.0]])), [0.7, -1.2])\n")
-REFUSAL = ("Fixed-phase binding 'lp' failed to evaluate: "
-           "lower_cholesky: matrix is not positive definite")
+# The engine names the parameter and its value set; an engine that predates the
+# check reports the failed factorization instead.
+REFUSAL = re.compile(
+    r"Fixed-phase binding 'lp' failed to evaluate: (MvNormal: parameter 'cov' = .* is "
+    r"outside its declared value set positive definite matrices|lower_cholesky: matrix is "
+    r"not positive definite)")
 
 
 def _js_available() -> bool:
@@ -73,14 +77,14 @@ def test_a_refused_fixed_binding_reaches_the_check_result(tmp_path, monkeypatch)
     case = _case(tmp_path, "rowstack([[1.0, 0.3], [0.3, 2.0]])")
     [result] = logdensity_detjs.run(load_test(case), case)
     assert result.status == "failed", result
-    assert REFUSAL in result.message, result.message
+    assert REFUSAL.search(result.message), result.message
 
 
 @needs_js
 def test_a_refused_named_binding_names_its_cause(tmp_path):
     flatpdl = tmp_path / "m.flatpdl.flatppl"
     flatpdl.write_text(REFUSED_FLATPDL)
-    with pytest.raises(RuntimeError, match=re.escape(REFUSAL)):
+    with pytest.raises(RuntimeError, match=REFUSAL):
         detjs_exec._score_flatpdl_binding(flatpdl, "lp")
 
 
