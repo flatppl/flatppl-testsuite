@@ -29,7 +29,7 @@ b ~ Gamma(shape = 8.0, rate = 0.5)
 sig_shape = normalize(truncate(Normal(mu = 5.0, sigma = 0.8), window))
 bkg_shape = weighted(0.1, Lebesgue(support = window))
 intensity = superpose(weighted(s, sig_shape), weighted(b, bkg_shape))
-events ~ PoissonProcess(intensity = intensity)
+events ~ PoissonProcess(intensity)
 
 prior = lawof(record(s = s, b = b))
 forward_kernel = kernelof(record(events = events), s = s, b = b)
