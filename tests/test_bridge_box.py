@@ -53,8 +53,22 @@ def server():
         variate="reals",
         normalized=True,
     )
+    box.kernel(
+        "K",
+        logdensity=lambda p, x: stats.norm.logpdf(x, p["mu"], p["sigma"]),
+        gradient=_kernel_gradient,
+        input="cartprod(mu = reals, sigma = posreals)",
+        variate="reals",
+        normalized=True,
+    )
     with fb.Server({"py": box}, libraries={"stan": (str(library), config)}) as running:
         yield running
+
+
+def _kernel_gradient(p, x):
+    z = (x - p["mu"]) / p["sigma"]
+    d_input = {"mu": z / p["sigma"], "sigma": (z**2 - 1.0) / p["sigma"]}
+    return d_input, -z / p["sigma"]
 
 
 def _standard_normal(size, rng):
@@ -144,3 +158,15 @@ def test_a_draw_from_a_normalized_box_measure_uses_the_box_sampler(server):
         seed = np.asarray(key).astype("<u8").view(np.uint8)
         rng = np.random.Generator(np.random.PCG64(np.random.SeedSequence(list(seed))))
         np.testing.assert_allclose(value, _standard_normal((), rng), rtol=1e-15)
+
+
+def test_iid_of_a_record_input_kernel_differentiates_under_vmap(server):
+    observed = np.asarray(DATA["y1"])
+    with jax.enable_x64():
+        density = _compile(server, "kernel.flatppl", dtype="float64")
+        mus = jax.numpy.array([-0.5, 0.4, 1.3])
+        values = jax.jit(jax.vmap(density))(mus)
+        gradients = jax.jit(jax.vmap(jax.grad(density)))(mus)
+    for mu, value, gradient in zip(np.asarray(mus), values, gradients, strict=True):
+        np.testing.assert_allclose(value, stats.norm.logpdf(observed, mu, 1.5).sum(), rtol=1e-12)
+        np.testing.assert_allclose(gradient, np.sum(observed - mu) / 1.5**2, rtol=1e-12)
