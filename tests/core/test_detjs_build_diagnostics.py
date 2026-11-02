@@ -4,17 +4,18 @@ A fixed binding the engine cannot evaluate gets no derivation, and the reason
 lives in `orchestrator.buildDerivations`'s diagnostics, not the analyzer's. The
 scorers used to report only the materialiser's "no derivation for '<binding>'".
 
-The refused binding passes a vector of vectors as `MvNormal`'s `cov`. §03
-"Arrays": "Vectors of vectors are not interpreted as matrices implicitly", and
-§08 gives `cov` as a matrix. The determiniser now refuses that source
-statically, so the refusal tests feed the scorers the FlatPDL it used to emit
-directly. They test the scorers, whatever the determiniser does upstream. The
-`rowstack` spelling is the control on the full det-js path: it must score
-scipy's `multivariate_normal.logpdf([0.7, -1.2], [0.2, -0.1], [[1, .3], [.3, 2]])`.
+The refused binding passes `MvNormal` a `cov` that is not positive definite
+(eigenvalues 3 and -1). It is a well-formed matrix, so no static check refuses
+it: the Cholesky factorisation fails at run time. The refusal tests feed the
+scorers that FlatPDL directly. They test the scorers, whatever the determiniser
+does upstream. A positive-definite `cov` is the control on the full det-js
+path: it must score scipy's
+`multivariate_normal.logpdf([0.7, -1.2], [0.2, -0.1], [[1, .3], [.3, 2]])`.
 """
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -27,10 +28,12 @@ from flatppl_testsuite.unified.runners import logdensity_detjs
 
 SCIPY_LOGPDF = -2.6954601010511796
 
-# The FlatPDL `flatppl determinize` emitted for the vector-of-vectors model.
+# FlatPDL whose `cov` fails only at run time.
 REFUSED_FLATPDL = (
     "lp = builtin_logdensityof(MvNormal, record(mu = [0.2, -0.1], "
-    "cov = [[1.0, 0.3], [0.3, 2.0]]), [0.7, -1.2])\n")
+    "cov = rowstack([[1.0, 2.0], [2.0, 1.0]])), [0.7, -1.2])\n")
+REFUSAL = ("Fixed-phase binding 'lp' failed to evaluate: "
+           "lower_cholesky: matrix is not positive definite")
 
 
 def _js_available() -> bool:
@@ -70,14 +73,14 @@ def test_a_refused_fixed_binding_reaches_the_check_result(tmp_path, monkeypatch)
     case = _case(tmp_path, "rowstack([[1.0, 0.3], [0.3, 2.0]])")
     [result] = logdensity_detjs.run(load_test(case), case)
     assert result.status == "failed", result
-    assert "vector-of-vectors" in result.message and "rowstack" in result.message, result.message
+    assert REFUSAL in result.message, result.message
 
 
 @needs_js
 def test_a_refused_named_binding_names_its_cause(tmp_path):
     flatpdl = tmp_path / "m.flatpdl.flatppl"
     flatpdl.write_text(REFUSED_FLATPDL)
-    with pytest.raises(RuntimeError, match="vector-of-vectors.*rowstack"):
+    with pytest.raises(RuntimeError, match=re.escape(REFUSAL)):
         detjs_exec._score_flatpdl_binding(flatpdl, "lp")
 
 
