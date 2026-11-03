@@ -16,7 +16,7 @@ python = ">=3.11"
 # type-stripping, which needs Node >=24.
 nodejs = "24.*"
 # rust provides cargo, used to install the flatppl CLI from git at a pinned rev.
-rust = ">=1.75"
+rust = ">=1.96"
 # INDEPENDENT oracle for the det-js corpora's test.py::oracle()/regen.py
 # offline path (closed-form Normal/mixture/truncation/log-normal densities,
 # etc.) — never the sibling engine.
@@ -187,16 +187,16 @@ maturin = ">=1.9,<2"
 rust = ">=1.96"
 
 [feature.bridge.pypi-dependencies]
-jax = "==0.11.2"
-jaxlib = "==0.11.2"
+jax = "==0.12.0.1"
+jaxlib = "==0.12.0.1"
 pytest = ">=8"
 bridgestan = "==2.9.0"
 
 [feature.bridge.target.osx-arm64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp312-cp312-macosx_14_0_arm64.whl#sha256=362386dc1bd44345cb32063f64cceb3f1d04e02bf288e24f714f606a41defae4" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.13/enzyme_ad-0.0.15%2Bflatppl.13-cp312-cp312-macosx_14_0_arm64.whl#sha256=db6bae9ca57cf9668fc73c41bd90afc81912e8066a1bab7014c8fdf0bd4750cb" }
 
 [feature.bridge.target.linux-64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.12/enzyme_ad-0.0.15%2Bflatppl.12-cp312-cp312-manylinux_2_35_x86_64.whl#sha256=33e866efc31afe9b864551bf5bdaffa16fa7528790b525be8d27c739effe5dd4" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.13/enzyme_ad-0.0.15%2Bflatppl.13-cp312-cp312-manylinux_2_35_x86_64.whl#sha256=78b737445fa5e8d31297de35aae7f272d6a237daae5b7452f4d8d2510f2c9bb2" }
 
 [feature.bridge.tasks]
 bridge-setup = "bash scripts/setup_bridge.sh"

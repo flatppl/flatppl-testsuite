@@ -9,9 +9,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.11.2
         with:
           # pixi.lock is intentionally not committed; solve on the fly.
           locked: false
@@ -25,7 +25,7 @@ jobs:
       # flatppl-rust@main every run, on purpose — that, and the flatppl-js@main
       # clone setup.sh makes, are what put an upstream regression in front of the
       # frozen values on the merge that introduces it.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
