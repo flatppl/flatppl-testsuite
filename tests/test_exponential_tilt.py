@@ -14,8 +14,16 @@ def _call(tmp_path, source, precision):
     query = tmp_path / "query.flatppl"
     query.write_text(source)
     module = ex.emit(query, "logdensity", dtype=precision)
-    _, _, hlo_call = ex._jax()
-    return lambda *args: hlo_call(*args, source=module)
+    jax, _, _ = ex._jax()
+    call = ex.call_with_status(module)
+    jitted = jax.jit(call)
+
+    def results(*args):
+        return call(*args)[0]
+
+    # A jitted call that must report no runtime error.
+    results.checked = lambda *args: ex.expect_valid(jitted(*args))
+    return results
 
 
 def _families():
@@ -81,7 +89,7 @@ def test_family_normalizers_and_slope_derivatives(
         "outputs = (logdensityof(Q, x), logdensityof(T, x), logdensityof(W, x))\n", precision)
     args = (jnp.asarray(theta, dtype=dtype), jnp.asarray(-1.2, dtype=dtype),
             jnp.asarray(point, dtype=integer if domain == "integers" else dtype))
-    actual = jax.jit(call)(*args)
+    actual = call.checked(*args)
     raw = base_score + np.sum(theta * point) - 1.2
     expected = [raw - log_mgf + 1.2, raw - log_mgf + 1.2, raw]
     np.testing.assert_allclose(actual, expected, rtol=tolerance, atol=tolerance)
@@ -108,6 +116,8 @@ def test_named_weight_captures_keep_live_parameters_under_vmap_and_ad(tmp_path, 
                        [-2, 2, .25, -1e20, 1]], dtype=dtype)
     evaluate = jax.jit(jax.vmap(jax.value_and_grad(lambda *a: call(*a)[0], argnums=tuple(range(5)))))
     values, gradient = evaluate(*(jnp.asarray(column) for column in points.T))
+    for point in points:
+        call.checked(*point)
     mu, sigma, theta, _, x = points.astype(np.float64).T
     mean = mu + theta*sigma**2
     delta = x - mean
@@ -131,6 +141,7 @@ def test_scalar_and_singleton_coefficients_broadcast_over_mvnormal(tmp_path, coe
     cov = np.array([[2, .5], [.5, 3]])
     mean = np.array([1, -1]) + cov @ np.full(2, theta)
     value, gradient = jax.jit(jax.value_and_grad(lambda t: call(t, x)[0]))(theta)
+    call.checked(theta, x)
     assert value == pytest.approx(stats.multivariate_normal.logpdf(x, mean, cov), abs=1e-11)
     assert gradient == pytest.approx(np.sum(x - mean), abs=1e-11)
 
@@ -156,7 +167,7 @@ def test_count_tails_and_reversed_tilts_keep_natural_parameters(
         "restored = normalize(logweighted(fn(-theta * _), first))\n"
         "inputs = theta\noutputs = (logdensityof(first, 1), logdensityof(restored, 1))\n", precision)
     argument = jnp.asarray(-1000, dtype=dtype)
-    value = jax.jit(call)(argument)
+    value = call.checked(argument)
     gradient = jax.jit(jax.jacrev(lambda t: jnp.stack(call(t))))(argument)
     np.testing.assert_allclose(value, [tail_score, original_score], rtol=tolerance, atol=tolerance)
     np.testing.assert_allclose(gradient, [1, 0], rtol=tolerance, atol=tolerance)
@@ -185,17 +196,17 @@ def test_supported_count_endpoints_retain_one_sided_derivatives(
         f"inputs = (a, theta)\noutputs = logdensityof(Q, {point})\n", precision)
     args = (jnp.asarray(parameter, dtype=dtype), jnp.asarray(.5, dtype=dtype))
     value, gradient = jax.jit(jax.value_and_grad(lambda *a: call(*a)[0], argnums=(0, 1)))(*args)
+    call.checked(*args)
     assert value == 0
     np.testing.assert_allclose(gradient, [derivative, 0], rtol=tolerance, atol=tolerance)
     if base.startswith(("Bernoulli", "Binomial")):
         for theta in (-1000, 1000):
-            assert jax.jit(call)(args[0], jnp.asarray(theta, dtype=dtype))[0] == 0
+            assert call.checked(args[0], jnp.asarray(theta, dtype=dtype))[0] == 0
 
 
 @pytest.mark.stablehlo_only
 def test_negative_binomial_large_shape_retains_small_count_mass(tmp_path):
     _gate_engine("stablehlo")
-    jax, _, _ = ex._jax()
     call = _call(tmp_path,
         "a = external(posreals)\ntheta = external(reals)\nx = external(integers)\n"
         "Q = normalize(logweighted(fn(theta * _), NegativeBinomial(a, 2)))\n"
@@ -203,7 +214,7 @@ def test_negative_binomial_large_shape_retains_small_count_mass(tmp_path):
     theta = np.log(3.) - 710
     rate = np.exp(np.log(1e308) - 710)
     for count in (0, 1, 2):
-        value = jax.jit(call)(1e308, theta, np.int64(count))[0]
+        value = call.checked(1e308, theta, np.int64(count))[0]
         # For k<=2 the exact rising product differs from a**k by <=1e-308.
         # The next term in a*log(1-exp(-710)) is also below 1e-308.
         expected = -rate + count*(np.log(1e308)-710) - math.lgamma(count+1)
@@ -214,7 +225,7 @@ def test_negative_binomial_large_shape_retains_small_count_mass(tmp_path):
 @pytest.mark.parametrize("precision,count", [("f32", 10**8), ("f64", 10**18)])
 def test_negative_binomial_large_count_uses_the_finite_product_oracle(tmp_path, precision, count):
     _gate_engine("stablehlo")
-    jax, jnp, _ = ex._jax()
+    _, jnp, _ = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
     integer = np.int32 if precision == "f32" else np.int64
     tolerance = 3e-5 if precision == "f32" else 1e-10
@@ -223,7 +234,7 @@ def test_negative_binomial_large_count_uses_the_finite_product_oracle(tmp_path, 
         "Q = normalize(logweighted(fn(0 * _), NegativeBinomial(2, beta)))\n"
         "inputs = (beta, x)\noutputs = logdensityof(Q, x)\n", precision)
     beta = float(dtype(1/count))
-    value = jax.jit(call)(jnp.asarray(beta, dtype=dtype), jnp.asarray(count, dtype=integer))[0]
+    value = call.checked(jnp.asarray(beta, dtype=dtype), jnp.asarray(count, dtype=integer))[0]
     # At shape two the binomial coefficient is exactly k+1.
     expected = np.log(count+1) + 2*np.log(beta) - (count+2)*np.log1p(beta)
     assert value == pytest.approx(expected, rel=tolerance, abs=tolerance)
@@ -251,6 +262,7 @@ def test_nb2_underflowing_shape_mean_ratio_retains_density_and_theta_gradient(
         for count in (0, 1):
             args = tuple(jnp.asarray(v, dtype=dtype) for v in (mu, shape, theta))
             value, gradient = evaluate(*args, jnp.asarray(count, dtype=integer))
+            call.checked(*args, jnp.asarray(count, dtype=integer))
             # psi/mu is below the source precision. Its omitted contribution
             # is negligible here; finite k=0/1 products avoid gamma differences.
             log_success = np.log(shape)-np.log(mu) if theta == 0 else np.log(-np.expm1(theta))

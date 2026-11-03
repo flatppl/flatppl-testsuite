@@ -11,8 +11,9 @@ def _sampler(tmp_path, source, precision):
     query = tmp_path / "query.flatppl"
     query.write_text(source)
     module = ex.emit(query, "sample", dtype=precision, restrict_enzyme_compatible=False)
-    jax, _, hlo_call = ex._jax()
-    return jax.jit(lambda *args: hlo_call(*args, source=module))
+    jax, _, _ = ex._jax()
+    draw = jax.jit(ex.call_with_status(module))
+    return lambda *args: ex.expect_valid(draw(*args))
 
 
 @pytest.mark.stablehlo_only

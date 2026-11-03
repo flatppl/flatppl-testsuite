@@ -17,7 +17,7 @@ def test_rowwise_scalar_laws_keep_cell_laws_and_successor_keys(
     tmp_path, precision, law, field, point,
 ):
     _gate_engine("stablehlo")
-    jax, jnp, hlo_call = ex._jax()
+    jax, jnp, _ = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
     prefix = (
         "p = external(cartpow(reals, 9))\n"
@@ -34,7 +34,7 @@ def test_rowwise_scalar_laws_keep_cell_laws_and_successor_keys(
         query = tmp_path / "query.flatppl"
         query.write_text(prefix + body + suffix)
         module = ex.emit(query, "sample", dtype=precision, restrict_enzyme_compatible=False)
-        return lambda key, params: hlo_call(key, params, source=module)
+        return ex.call_with_status(module)
 
     row_parameter = "d" if law == "StudentT" else "q"
     draw = sampler(
@@ -54,8 +54,8 @@ def test_rowwise_scalar_laws_keep_cell_laws_and_successor_keys(
     keys = jnp.asarray([[23, 0], [0x8000000000000123, 0]], dtype=jnp.uint64)
     singles = []
     for key, values in zip(keys, points, strict=True):
-        actual = jax.block_until_ready(sample(key, values))
-        expected = jax.block_until_ready(reference(key, values))
+        actual = ex.expect_valid(jax.block_until_ready(sample(key, values)))
+        expected = ex.expect_valid(jax.block_until_ready(reference(key, values)))
         assert actual[0].shape == (2, 3) and actual[0].dtype == dtype
         for left, right in zip(actual, expected, strict=True):
             assert left.devices() == {jax.devices()[0]}
@@ -65,18 +65,19 @@ def test_rowwise_scalar_laws_keep_cell_laws_and_successor_keys(
         singles.append(actual)
 
     # This exercises executor batching; Rust BatchSpec compilation is separate.
-    batched = jax.block_until_ready(jax.jit(jax.vmap(draw))(keys, points))
+    batched = ex.expect_valid(jax.block_until_ready(jax.jit(jax.vmap(draw))(keys, points)))
     for index, actual in enumerate(batched):
         np.testing.assert_array_equal(actual, np.stack([row[index] for row in singles]))
 
     def collect(key):
         def step(state, _):
-            value, advanced, _, _ = draw(state, jnp.asarray(params))
-            return advanced, value
+            (value, advanced, _, _), status = draw(state, jnp.asarray(params))
+            return advanced, (value, status)
 
         return jax.lax.scan(step, key, None, length=2048)
 
-    _, values = jax.block_until_ready(jax.jit(collect)(keys[-1]))
+    _, draws = jax.block_until_ready(jax.jit(collect)(keys[-1]))
+    values = ex.expect_valid(draws)
     z = (np.asarray(values, dtype=np.float64) - params[None, :2, None]) / params[None, None, 2:5]
     assert np.all(np.isfinite(z))
     if law == "Bernoulli":

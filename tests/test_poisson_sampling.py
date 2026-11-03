@@ -12,8 +12,7 @@ def _sampler(tmp_path, source, precision):
     query = tmp_path / "query.flatppl"
     query.write_text(source)
     module = ex.emit(query, "sample", dtype=precision, restrict_enzyme_compatible=False)
-    _, _, hlo_call = ex._jax()
-    return lambda *args: hlo_call(*args, source=module)
+    return ex.call_with_status(module)
 
 
 def _batches(draw):
@@ -21,12 +20,18 @@ def _batches(draw):
 
     def collect(key, *params):
         def step(state, _):
-            value, advanced = draw(state, *params)
-            return advanced, value
+            (value, advanced), status = draw(state, *params)
+            return advanced, (value, status)
 
         return jax.lax.scan(step, key, None, length=16)
 
-    return jax.jit(collect)
+    collect = jax.jit(collect)
+
+    def checked(key, *params):
+        state, (values, status) = collect(key, *params)
+        return state, ex.expect_valid((values, status))
+
+    return checked
 
 
 def _assert_count_law(values, law, mean, variance, fourth_moment):
@@ -101,10 +106,10 @@ def test_poisson_rejection_threads_complete_successor_state(tmp_path, precision)
     key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
     for rate in (0, 4, 10, 400, 1000):
         parameter = jnp.asarray(rate, dtype=dtype)
-        value, state = single(key, parameter)
-        next_value, advanced = single(state, parameter)
-        repeated, repeated_state = single(key, parameter)
-        together = chain(key, parameter)
+        value, state = ex.expect_valid(single(key, parameter))
+        next_value, advanced = ex.expect_valid(single(state, parameter))
+        repeated, repeated_state = ex.expect_valid(single(key, parameter))
+        together = ex.expect_valid(chain(key, parameter))
         assert value.dtype == dtype
         np.testing.assert_array_equal(value, repeated)
         np.testing.assert_array_equal(state, repeated_state)

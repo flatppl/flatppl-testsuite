@@ -32,6 +32,7 @@ import subprocess
 import tempfile
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -212,15 +213,38 @@ def _runtime_status_index(src: str) -> int | None:
     return int(match[1]) if match else None
 
 
-def _outputs(src: str, *args):
-    _, jnp, hlo_call = _jax()
-    result = hlo_call(*args, source=src)
+def split_runtime_status(src: str, result) -> tuple[tuple, Any]:
+    """Split a raw `hlo_call` result of `src` into its authored results and the
+    runtime status the module declares, or a zero status when it declares none."""
+    _, jnp, _ = _jax()
+    result = tuple(result)
     index = _runtime_status_index(src)
     if index is None:
+        return result, jnp.zeros((), jnp.int32)
+    return result[:index] + result[index + 1:], result[index]
+
+
+def call_with_status(src: str):
+    """`hlo_call` of `src` returning `(results, status)`, see `split_runtime_status`."""
+    _, _, hlo_call = _jax()
+    return lambda *args: split_runtime_status(src, hlo_call(*args, source=src))
+
+
+def expect_valid(call_result):
+    """The results of a `call_with_status` call that must report no runtime error."""
+    results, status = call_result
+    status = np.asarray(status)
+    assert np.all(status == 0), f"runtime status {status}"
+    return results
+
+
+def _outputs(src: str, *args):
+    _, jnp, hlo_call = _jax()
+    result, status = split_runtime_status(src, hlo_call(*args, source=src))
+    if _runtime_status_index(src) is None:
         return result
     from jax.experimental import checkify
 
-    status = result[index]
     checkify.check(jnp.all(status != 1), "FlatPPL index out of range")
     checkify.check(jnp.all(status != 2), "FlatPPL integer conversion exceeds the target width")
     checkify.check(jnp.all(status != 3), "FlatPPL quantile probability must be in [0, 1]")
@@ -232,7 +256,7 @@ def _outputs(src: str, *args):
                    "FlatPPL distribution parameter is outside its declared value set")
     checkify.check(jnp.all((status >= 0) & (status <= 7) | (status == 9)),
                    "Unknown FlatPPL runtime error")
-    return result[:index] + result[index + 1:]
+    return result
 
 
 def _jit_checked(src: str, function):
