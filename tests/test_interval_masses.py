@@ -32,14 +32,22 @@ def test_gamma_tail_and_full_support_prior_scores(tmp_path, precision, tolerance
         + ")\n"
     )
     source = ex.emit(query, "logdensity", dtype=precision)
-    jax, jnp, hlo_call = ex._jax()
+    jax, jnp, _ = ex._jax()
+    call = ex.call_with_status(source)
     dtype = np.float32 if precision == "f32" else np.float64
 
     def scores(point):
-        return jnp.stack(hlo_call(*point, source=source))
+        results, status = call(*point)
+        return jnp.stack(results), status
 
-    values = jax.jit(scores)
-    gradients = jax.jit(jax.jacrev(scores))
+    checked = jax.jit(scores)
+    jacobian = jax.jit(jax.jacrev(scores, has_aux=True))
+
+    def values(point):
+        return checked(point)[0]
+
+    def gradients(point):
+        return ex.expect_valid(jacobian(point))
     for point in np.array([
         [1, 2, -1], [4, .1, 1], [13, 2, 12], [6, .1, 5],
     ], dtype=dtype):
@@ -58,7 +66,7 @@ def test_gamma_tail_and_full_support_prior_scores(tmp_path, precision, tolerance
                 shape / rate - x + max(lower, 0) * hazard,
                 rate * hazard,
             ])
-        actual_values, actual_gradients = values(point), gradients(point)
+        actual_values, actual_gradients = ex.expect_valid(checked(point)), gradients(point)
         assert actual_values.devices() == {jax.devices()[0]}
         np.testing.assert_allclose(actual_values[:3], expected_values,
                                    rtol=tolerance, atol=tolerance)
@@ -88,14 +96,22 @@ def test_student_t_live_bounds_and_location_scale_gradients(tmp_path, precision,
         + ")\n"
     )
     source = ex.emit(query, "logdensity", dtype=precision)
-    jax, jnp, hlo_call = ex._jax()
+    jax, jnp, _ = ex._jax()
+    call = ex.call_with_status(source)
     dtype = np.float32 if precision == "f32" else np.float64
 
     def scores(point):
-        return jnp.stack(hlo_call(*point, source=source))
+        results, status = call(*point)
+        return jnp.stack(results), status
 
-    values = jax.jit(scores)
-    gradients = jax.jit(jax.jacrev(scores))
+    checked = jax.jit(scores)
+    jacobian = jax.jit(jax.jacrev(scores, has_aux=True))
+
+    def values(point):
+        return checked(point)[0]
+
+    def gradients(point):
+        return ex.expect_valid(jacobian(point))
     for point in np.array([
         [1.1, 1, 3, 0, 10], [.5, 0, 1, 0, 2], [-.5, 0, 1, -2, 0],
         [5, 0, 1, 4, 8], [-5, 0, 1, -8, -4], [.3, 0, 1, -2, 1.5],
@@ -116,7 +132,7 @@ def test_student_t_live_bounds_and_location_scale_gradients(tmp_path, precision,
                 lower_hazard / sigma,
                 -upper_hazard / sigma,
             ])
-        actual_values, actual_gradients = values(point), gradients(point)
+        actual_values, actual_gradients = ex.expect_valid(checked(point)), gradients(point)
         assert actual_values.devices() == {jax.devices()[0]}
         assert actual_gradients.devices() == {jax.devices()[0]}
         np.testing.assert_allclose(actual_values, expected_values,

@@ -52,15 +52,23 @@ outputs = (logdensityof(positive_poisson(p[1]), count),
   logdensityof(K(p[1], p[2], p[3]), point), poisson_rows, nb_rows)
 """)
     source = ex.emit(query, "logdensity", dtype=precision)
-    jax, jnp, hlo_call = ex._jax()
+    jax, jnp, _ = ex._jax()
+    call = ex.call_with_status(source)
     dtype = np.float32 if precision == "f32" else np.float64
     count_dtype = np.int32 if precision == "f32" else np.int64
 
     def scores(point, count):
-        poisson, nb, conditional, poisson_rows, nb_rows = hlo_call(point, count, source=source)
-        return jnp.concatenate((jnp.stack((poisson, nb, conditional)), poisson_rows, nb_rows))
+        (poisson, nb, conditional, poisson_rows, nb_rows), status = call(point, count)
+        rows = jnp.concatenate((jnp.stack((poisson, nb, conditional)), poisson_rows, nb_rows))
+        return rows, status
 
-    values, gradients = jax.jit(scores), jax.jit(jax.jacrev(scores))
+    checked, jacobian = jax.jit(scores), jax.jit(jax.jacrev(scores, has_aux=True))
+
+    def values(point, count):
+        return checked(point, count)[0]
+
+    def gradients(point, count):
+        return ex.expect_valid(jacobian(point, count))
     for point, count in [([.01, 2, 50], 1), ([.2, .7, 2], 2), ([3, 2.3, .6], 7), ([20, 4, .05], 3)]:
         point, count = jnp.asarray(point, dtype=dtype), jnp.asarray(count, dtype=count_dtype)
         rate, shape, beta = np.asarray(point).astype(np.float64)
@@ -71,7 +79,7 @@ outputs = (logdensityof(positive_poisson(p[1]), count),
         nb2, dnb2 = _negative_binomial(shape + 1, beta, int(count) + 1)
         expected = [p, nb, p + p2 + nb + nb2, p, p2, nb, nb2]
         expected_gradient = [dp, dnb, dp + dp2 + dnb + dnb2, dp, dp2, dnb, dnb2]
-        actual, derivative = values(point, count), gradients(point, count)
+        actual, derivative = ex.expect_valid(checked(point, count)), gradients(point, count)
         assert actual.devices() == derivative.devices() == {jax.devices()[0]}
         np.testing.assert_allclose(actual, expected, rtol=tolerance, atol=tolerance)
         np.testing.assert_allclose(derivative, expected_gradient, rtol=tolerance, atol=tolerance)

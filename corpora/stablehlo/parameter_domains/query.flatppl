@@ -1,0 +1,2 @@
+inputs = (sigma, rate, probs, shape, x, k, c, y)
+outputs = (lp)

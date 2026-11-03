@@ -98,8 +98,11 @@ def regen_dir(dir: Path) -> list[float] | list[dict] | dict:
         _write(dir, raw)
         return [expected_scalar]
     # Mode B (det-js logdensity, `points` present): test.py::oracle(point) is
-    # called once per point, in order, and the whole list is frozen.
-    expected = [float(mod.oracle(pt)) for pt in raw["points"]]
+    # called once per point, in order, and the whole list is frozen. A point the
+    # spec leaves undefined, such as a parameter outside its value set, freezes
+    # the oracle's `{"error": <message part>}` instead of a number.
+    expected = [v if isinstance(v := mod.oracle(pt), dict) else float(v)
+                for pt in raw["points"]]
     raw["expected"] = _json_safe(expected)
     _write(dir, raw)
     return expected

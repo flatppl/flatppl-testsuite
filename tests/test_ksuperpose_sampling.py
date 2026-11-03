@@ -15,8 +15,9 @@ def _sampler(tmp_path, source, precision):
     query = tmp_path / "query.flatppl"
     query.write_text(source)
     module = ex.emit(query, "sample", dtype=precision, restrict_enzyme_compatible=False)
-    jax, _, hlo_call = ex._jax()
-    return jax.jit(lambda *args: hlo_call(*args, source=module))
+    jax, _, _ = ex._jax()
+    draw = jax.jit(ex.call_with_status(module))
+    return lambda *args: ex.expect_valid(draw(*args))
 
 
 def _draw(tmp_path, source, precision, *inputs):
@@ -123,18 +124,16 @@ def test_invalid_runtime_mass_reports_a_status(tmp_path, precision, lanes):
         f"outputs = rand({law}, rnginit(0))\n"
     )
     module = ex.emit(query, "sample", dtype=precision, restrict_enzyme_compatible=False)
-    status_index = ex._runtime_status_index(module)
-    assert status_index is not None
-    jax, _, hlo_call = ex._jax()
-    draw = jax.jit(lambda *args: hlo_call(*args, source=module))
+    assert ex._runtime_status_index(module) is not None
+    jax, _, _ = ex._jax()
+    draw = jax.jit(ex.call_with_status(module))
     key = jnp.asarray(KEY, dtype=jnp.uint64)
     # Zero mass, a negative weight, infinite mass and a NaN weight leave the
     # normalized weights outside the simplex: status 7, not a draw.
     for weights in ([0.0, 0.0], [-1.0, 2.0], [1.0, np.inf], [np.nan, 1.0]):
-        result = draw(key, jnp.asarray(weights, dtype=dtype))
-        assert int(result[status_index]) == 7, weights
-    result = draw(key, jnp.asarray([0.0, 1.0], dtype=dtype))
-    assert int(result[status_index]) == 0
+        _, status = draw(key, jnp.asarray(weights, dtype=dtype))
+        assert int(status) == 7, weights
+    result = ex.expect_valid(draw(key, jnp.asarray([0.0, 1.0], dtype=dtype)))
     # A zero weight never selects its component.
     assert np.all(np.asarray(result[0]) > 0)
 
