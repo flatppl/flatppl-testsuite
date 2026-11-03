@@ -1,7 +1,7 @@
 {
  "metadata": {
-  "generated_at": "2026-11-03T07:33:28+00:00",
-  "engine_commit": "996fe9208b15b5bb8607941cf5b62d9ff3c41327",
+  "generated_at": "2026-11-03T09:34:19+00:00",
+  "engine_commit": "858c4d05f38a96550089f3686b30ada3f32988d2",
   "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
@@ -5343,7 +5343,7 @@
    "n": 200000,
    "k": 3,
    "marker": "is-not-supported",
-   "error": "iid: sampling iid over a record measure at >1 atoms (an ensemble of tables) is not supported; sample a single dataset (1 atom)",
+   "error": "Binding 'b' failed to evaluate: iid: sampling iid over a record measure at >1 atoms (an ensemble of tables) is not supported; sample a single dataset (1 atom)",
    "checks": [],
    "note": "pins the >1-atoms ensemble-of-tables refusal; the carded base-draw-sharing defect is NOT reachable at this shape"
   },
