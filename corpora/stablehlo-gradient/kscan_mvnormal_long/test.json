@@ -1,0 +1,47 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "inputs": [
+    "phi",
+    "a"
+  ],
+  "grad_params": [
+    "phi",
+    "a"
+  ],
+  "points": [
+    {
+      "phi": 0.9,
+      "a": 0.1
+    },
+    {
+      "phi": 0.5,
+      "a": -0.3
+    },
+    {
+      "phi": 1.0,
+      "a": 0.0
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.001,
+    "grad_rtol": 0.0001
+  },
+  "oracle": "Closed-form derivatives of the Gaussian vector autoregression (numpy)",
+  "expected_grad": [
+    {
+      "phi": 172.84921151120642,
+      "a": -75.1336081011825
+    },
+    {
+      "phi": 832.9088726506056,
+      "a": 200.6818435358469
+    },
+    {
+      "phi": -0.8924172724947361,
+      "a": 2.546968306926271
+    }
+  ]
+}

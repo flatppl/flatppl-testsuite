@@ -1,0 +1,4 @@
+drift = elementof(reals)
+scale = elementof(posreals)
+inputs = (drift, scale)
+outputs = logdensityof(markovchain(step, 0.0, 1000, drift, scale), x_data)

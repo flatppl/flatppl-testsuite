@@ -1,0 +1,13 @@
+%%%
+# A 1000-step drifting random walk
+
+Step k is $x_k \sim \mathrm{Normal}(x_{k-1} + \delta, s)$ with $x_0 = 0$, a
+`markovchain` with the drift and the step scale as additional arguments. The
+initial state carries no density, so the trajectory has 1000 terms. The
+observed path is a fixed deterministic curve.
+%%%
+flatppl_compat = "0.1"
+
+t = linspace(0.0, 20.0, 1000)
+x_data = sin.(t) .+ 0.05 .* t
+step(prev, drift, scale) = Normal(prev + drift, scale)

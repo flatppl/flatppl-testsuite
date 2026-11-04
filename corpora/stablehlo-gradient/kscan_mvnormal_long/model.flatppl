@@ -1,0 +1,16 @@
+%%%
+# A 1000-step vector autoregression with an exogenous input
+
+Step k is $x_k \sim \mathrm{MvNormal}(\phi x_{k-1} + a u_k \mathbf{1}, \Sigma)$
+with $x_0 = (0.5, 0.5, 0.5)$, a `kscan` over the input sequence $u$. The
+initial state carries no density, so the trajectory has 1000 terms. The
+observed path is a fixed deterministic curve.
+%%%
+flatppl_compat = "0.1"
+
+t = linspace(0.0, 20.0, 1000)
+u = linspace(-1.0, 1.0, 1000)
+point(s) = [sin(s), cos(s), sin(2.0 * s)]
+traj = point.(t)
+Sigma = rowstack([[1.0, 0.3, 0.0], [0.3, 1.0, 0.3], [0.0, 0.3, 1.0]])
+step(prev, ui, phi, a) = MvNormal(phi .* prev .+ a * ui, Sigma)
