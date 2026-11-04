@@ -34,6 +34,11 @@ def _batches(draw):
     return checked
 
 
+def _integer(precision):
+    # Section 08: a discrete variate is an integer, at the dtype's width.
+    return np.int32 if precision == "f32" else np.int64
+
+
 def _assert_count_law(values, law, mean, variance, fourth_moment):
     values = np.asarray(values, dtype=np.float64).reshape(-1)
     count = values.size
@@ -67,7 +72,7 @@ def test_poisson_iid_small_large_and_switch_rates(tmp_path, precision):
     key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
     for rate in (0, 4, 9.999, 10, 400, 1000, 1e6):
         _, values = collect(key, jnp.asarray(rate, dtype=dtype))
-        assert values.dtype == dtype
+        assert values.dtype == _integer(precision)
         _assert_count_law(values, poisson(rate), rate, rate, rate + 3 * rate**2)
 
 
@@ -110,7 +115,7 @@ def test_poisson_rejection_threads_complete_successor_state(tmp_path, precision)
         next_value, advanced = ex.expect_valid(single(state, parameter))
         repeated, repeated_state = ex.expect_valid(single(key, parameter))
         together = ex.expect_valid(chain(key, parameter))
-        assert value.dtype == dtype
+        assert value.dtype == _integer(precision)
         np.testing.assert_array_equal(value, repeated)
         np.testing.assert_array_equal(state, repeated_state)
         np.testing.assert_array_equal(value, together[0])
