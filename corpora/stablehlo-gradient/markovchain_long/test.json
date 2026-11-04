@@ -1,0 +1,47 @@
+{
+  "test_type": "gradient",
+  "engines": [
+    "stablehlo"
+  ],
+  "inputs": [
+    "drift",
+    "scale"
+  ],
+  "grad_params": [
+    "drift",
+    "scale"
+  ],
+  "points": [
+    {
+      "drift": 0.02,
+      "scale": 0.1
+    },
+    {
+      "drift": 0.0,
+      "scale": 0.05
+    },
+    {
+      "drift": -0.01,
+      "scale": 0.2
+    }
+  ],
+  "tolerance": {
+    "grad_atol": 0.001,
+    "grad_rtol": 0.0001
+  },
+  "oracle": "Closed-form derivatives of the Gaussian random-walk increments (numpy)",
+  "expected_grad": [
+    {
+      "drift": -1808.7054749272377,
+      "scale": -9469.76615756431
+    },
+    {
+      "drift": 765.1781002910507,
+      "scale": -18345.986780281655
+    },
+    {
+      "drift": 297.8236312681907,
+      "scale": -4956.873680315082
+    }
+  ]
+}

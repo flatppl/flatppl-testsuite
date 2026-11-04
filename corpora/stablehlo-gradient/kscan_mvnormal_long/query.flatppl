@@ -1,0 +1,4 @@
+phi = elementof(reals)
+a = elementof(reals)
+inputs = (phi, a)
+outputs = logdensityof(kscan(step, [0.5, 0.5, 0.5], u, phi, a), traj)
