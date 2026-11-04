@@ -1,0 +1,5 @@
+flatppl_compat = "0.1"
+p = elementof(reals)
+coefficients = elementof(cartpow(reals, 8))
+horner(acc, c, p) = acc*p + c
+value = reduce(horner, coefficients, p)
