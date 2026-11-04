@@ -20,13 +20,18 @@ def _sampler(tmp_path, source, precision):
     return lambda *args: ex.expect_valid(draw(*args))
 
 
-def _draw(tmp_path, source, precision, *inputs):
+def _integer(precision):
+    return np.int32 if precision == "f32" else np.int64
+
+
+def _draw(tmp_path, source, precision, *inputs, integer=False):
     _, jnp, _ = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
     draw = _sampler(tmp_path, source, precision)
     key = jnp.asarray(KEY, dtype=jnp.uint64)
     values = draw(key, *[jnp.asarray(x, dtype=dtype) for x in inputs])[0]
-    assert values.dtype == dtype
+    # Section 08: a discrete variate is an integer, at the dtype's width.
+    assert values.dtype == (_integer(precision) if integer else dtype)
     return np.asarray(values, dtype=np.float64)
 
 
@@ -100,8 +105,7 @@ def test_poisson_mixture_counts_follow_the_mixture_pmf(tmp_path, precision):
     _gate_engine("stablehlo")
     values = _draw(tmp_path,
         "M = normalize(ksuperpose(Poisson, [1.0, 3.0], rate = [1.0, 8.0]))\n"
-        f"outputs = rand(iid(M, {N}), rnginit(0))\n", precision)
-    np.testing.assert_array_equal(values, np.rint(values))
+        f"outputs = rand(iid(M, {N}), rnginit(0))\n", precision, integer=True)
     support = np.arange(21)
     pmf = 0.25 * stats.poisson.pmf(support, 1) + 0.75 * stats.poisson.pmf(support, 8)
     pmf[-1] += 1 - pmf.sum()
