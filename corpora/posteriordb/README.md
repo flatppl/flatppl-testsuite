@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Forty-nine posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Sixty-four posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. Models with a worked-example
 role also live in
@@ -28,24 +28,28 @@ FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 `kidscore_interaction`, `kidscore_momhs`, `kidscore_momhsiq`, `kidscore_momiq`,
 and `arma11`, `2*log(2)`
 for `gp_regr`, and `3*log(2)` for `irt_2pl` and
-`radon_variable_intercept_slope_noncentered`. Proper Uniform priors on
+`radon_variable_intercept_slope_noncentered`. Among the `radon_mn-*` rows,
+`radon_pooled` and `radon_county_intercept` add `log(2)` and the four other
+noncentered models add `2*log(2)`. Proper Uniform priors on
 fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
-`-log(5)` for `Mh_model`. The ordered mixture adds `3*log(2)`. Stan starts the
+`-log(5)` for `Mh_model`, and the two Uniform(0, 100) scales add `-2*log(100)` for
+`radon_mod-radon_county`. The ordered mixture adds `3*log(2)`. Stan starts the
 `hmm_example` forward recursion with weight one per state, so the uniform
 initial distribution adds `-log(2)`. Its positive ordered means keep Stan's
 truncated Normal densities without renormalization. These constants leave the
 gradients and posterior laws unchanged. Each manifest records the raw Stan
 scores and its offset.
-Unbounded flat priors (the Kidscore, earnings, mesquite, Sesame, wells and
+Unbounded flat priors (the Kidscore, earnings, mesquite, Sesame, wells, NES and
 NES-logit regressions, and the Kilpisjarvi residual scale) use explicit Lebesgue
 measure and its zero density contribution.
 
 Every oracle point passed an independent unconstraining check in both
 directions. A constrained directional finite difference checked each model.
 The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9` for
-the next 15, `1.17e-9` for the following 45, and `3.68e-9` for the 39 points
-after them. The rate model also matched an analytic Beta-Binomial calculation.
-These are density and differentiation checks, not convergence claims.
+the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39, and
+`7.68e-9` for the 45 points after them. The rate model also matched an
+analytic Beta-Binomial calculation. These are density and differentiation
+checks, not convergence claims.
 
 The unified tests check densities through Rust-to-JS and StableHLO.
 `tests/test_posteriordb.py` checks JS's own measure/data path and full
@@ -70,6 +74,7 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `logearn_height_male` | 1, `beta[2]` | `0.0119`; `0.0125` | `0.0134`, `0.0157` | `0.0119` |
 | `logearn_logheight_male` | 1, `beta[2]` | `0.0019` | `0.0019`, `0.0021` | `0.00058` |
 | `kidscore_momiq` | 1, `beta[2]` | `0.00029`; `0.00030` | `0.00042`, `0.00048` | `0.00030` |
+| `kidscore_momhsiq` | 1, `beta[3]` | `0.00017` | `0.00027`, `0.00034` | `0.00033` |
 | `kilpisjarvi` | 2, `beta` | `0.174` | `0.169`, `0.177` | `0.0163` |
 
 These rows regress on uncentered height (about 66), log height, maternal IQ
