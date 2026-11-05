@@ -1,0 +1,24 @@
+%%%
+# Surgical mortality
+
+PosteriorDB's `surgical_data-surgical_model`. Deaths in twelve hospitals are
+binomial with logit rates b. The rates are Normal around mu with an inverse-
+gamma variance.
+%%%
+flatppl_compat = "0.1"
+
+N = 12
+data = load_data("data/surgical_data.json", cartprod(
+    n = cartpow(nonnegintegers, N), r = cartpow(nonnegintegers, N)))
+
+mu ~ Normal(0, 1000)
+sigmasq ~ InverseGamma(0.001, 0.001)
+b ~ iid(Normal(mu, sqrt(sigmasq)), N)
+r ~ Binomial.(data.n, invlogit.(b))
+
+Pi_prior = lawof(record(mu = mu, sigmasq = sigmasq, b = b))
+K_model = kernelof(record(r = r), mu = mu, sigmasq = sigmasq, b = b)
+L = likelihoodof(K_model, record(r = data.r))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(mu = reals, sigmasq = posreals, b = cartpow(reals, 12))
+Pi_post_input = record(mu = -2.47, sigmasq = 0.161, b = fill(-2.44, 12))

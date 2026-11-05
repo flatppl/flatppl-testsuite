@@ -1,0 +1,8 @@
+p_alpha0 = elementof(reals)
+p_alpha1 = elementof(reals)
+p_alpha12 = elementof(reals)
+p_alpha2 = elementof(reals)
+p_tau = elementof(posreals)
+p_b = elementof(cartpow(reals, 21))
+inputs = (p_alpha0, p_alpha1, p_alpha12, p_alpha2, p_tau, p_b)
+outputs = logdensityof(Pi_post, record(alpha0 = p_alpha0, alpha1 = p_alpha1, alpha12 = p_alpha12, alpha2 = p_alpha2, tau = p_tau, b = p_b))

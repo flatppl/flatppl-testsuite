@@ -1,0 +1,31 @@
+%%%
+# LSAT item responses
+
+PosteriorDB's `lsat_data-lsat_model`. A Rasch model for five LSAT items
+answered by 1000 students. The data give 32 response patterns and their
+cumulative counts. Each student has an ability theta, each item a difficulty
+alpha, and a common discrimination beta scales the abilities. The normalized
+half-Normal prior on beta adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 1000
+R = 32
+T = 5
+data = load_data("data/lsat_data.json", cartprod(
+    culm = cartpow(posintegers, R), response = cartpow(nonnegintegers, [R, T])))
+pattern(j) = 1 + sum(ifelse.(data.culm .< j, 1, 0))
+responses = data.response[pattern.(indicesof(zeros(N))), :]
+
+alpha ~ iid(Normal(0, 100), T)
+theta ~ iid(Normal(0, 1), N)
+beta ~ normalize(truncate(Normal(0, 100), interval(0, inf)))
+log_odds = aggregate(sum, [.j, .k], beta * theta[.j] - alpha[.k])
+y ~ Bernoulli.(invlogit.(log_odds))
+
+Pi_prior = lawof(record(alpha = alpha, theta = theta, beta = beta))
+K_model = kernelof(record(y = y), alpha = alpha, theta = theta, beta = beta)
+L = likelihoodof(K_model, record(y = responses))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = cartpow(reals, 5), theta = cartpow(reals, 1000), beta = posreals)
+Pi_post_input = record(alpha = [-2.61, -1.05, -0.292, -1.08, -2.15], theta = fill(0.0, 1000), beta = 0.712)

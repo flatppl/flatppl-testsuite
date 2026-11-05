@@ -1,0 +1,30 @@
+%%%
+# Learning from shocks, multiplicative form
+
+PosteriorDB's `dogs-dogs_log`. The shock probability is the inverse logit of
+beta[1] times earlier avoidances plus beta[2] times earlier shocks. The two
+coefficients are uniform on (-100, 0) and (0, 100). Stan states both Uniform
+priors, so the targets agree.
+%%%
+flatppl_compat = "0.1"
+
+J = 30
+T = 25
+data = load_data("data/dogs.json", cartprod(y = cartpow(nonnegintegers, [J, T])))
+dogs = indicesof(zeros(J))
+previous_trials = indicesof(zeros(T - 1))
+shock_history(j) = cat([0], scan((total, shock) -> total + shock,
+    0, data.y[j, previous_trials]))
+avoid_history(j) = (indicesof(zeros(T)) .- 1) .- shock_history(j)
+n_shock = rowstack(shock_history.(dogs))
+n_avoid = rowstack(avoid_history.(dogs))
+
+beta ~ joint(Uniform(interval(-100, 0)), Uniform(interval(0, 100)))
+y ~ Bernoulli.(invlogit.(beta[1] .* n_avoid .+ beta[2] .* n_shock))
+
+Pi_prior = lawof(record(beta = beta))
+K_model = kernelof(record(y = y), beta = beta)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 2))
+Pi_post_input = record(beta = [-0.367, 0.0495])

@@ -1,0 +1,31 @@
+%%%
+# Pilot ratings with crossed effects
+
+PosteriorDB's `pilots-pilots`. Ratings of 40 flights depend on additive
+group and scenario effects. Each set of effects is Normal around ten times a
+standard-Normal mean. All three scales are uniform on (0, 100); normalizing
+them adds -3 log(100) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 40
+data = load_data("data/pilots.json", cartprod(
+    group_id = cartpow(posintegers, N), scenario_id = cartpow(posintegers, N), y = cartpow(reals, N)))
+
+mu_a ~ Normal(0, 1)
+mu_b ~ Normal(0, 1)
+sigma_a ~ Uniform(interval(0, 100))
+sigma_b ~ Uniform(interval(0, 100))
+sigma_y ~ Uniform(interval(0, 100))
+a ~ iid(Normal(10 * mu_a, sigma_a), 5)
+b ~ iid(Normal(10 * mu_b, sigma_b), 8)
+y ~ Normal.(a[data.group_id] .+ b[data.scenario_id], sigma_y)
+
+Pi_prior = lawof(record(a = a, b = b, mu_a = mu_a, mu_b = mu_b,
+                        sigma_a = sigma_a, sigma_b = sigma_b, sigma_y = sigma_y))
+K_model = kernelof(record(y = y), a = a, b = b, mu_a = mu_a, mu_b = mu_b,
+                   sigma_a = sigma_a, sigma_b = sigma_b, sigma_y = sigma_y)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(a = cartpow(reals, 5), b = cartpow(reals, 8), mu_a = reals, mu_b = reals, sigma_a = interval(0.0, 100.0), sigma_b = interval(0.0, 100.0), sigma_y = interval(0.0, 100.0))
+Pi_post_input = record(a = [0.805, 0.757, 0.9, 0.898, 0.841], b = [-0.548, -0.574, -0.374, -0.548, -0.333, 0.0137, -0.722, 0.0771], mu_a = 0.0835, mu_b = -0.0331, sigma_a = 0.0897, sigma_b = 0.243, sigma_y = 0.218)

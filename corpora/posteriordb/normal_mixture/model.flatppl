@@ -1,0 +1,24 @@
+%%%
+# Two-component mixture with unit scales
+
+PosteriorDB's `normal_2-normal_mixture`. Each observation is Normal(mu[1],
+1) with probability theta, otherwise Normal(mu[2], 1). The means are
+unordered, so the posterior has two symmetric modes.
+%%%
+flatppl_compat = "0.1"
+
+N = 1000
+data = load_data("data/normal_2.json", cartprod(y = cartpow(reals, N)))
+
+theta ~ Uniform(unitinterval)
+mu ~ iid(Normal(0, 10), 2)
+component = normalize(superpose(
+    weighted(theta, Normal(mu[1], 1)), weighted(1 - theta, Normal(mu[2], 1))))
+y ~ iid(component, N)
+
+Pi_prior = lawof(record(theta = theta, mu = mu))
+K_model = kernelof(record(y = y), theta = theta, mu = mu)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = interval(0.0, 1.0), mu = cartpow(reals, 2))
+Pi_post_input = record(theta = 0.695, mu = [10.1, -10.0])

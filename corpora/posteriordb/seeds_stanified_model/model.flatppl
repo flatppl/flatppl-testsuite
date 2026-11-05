@@ -1,0 +1,28 @@
+%%%
+# Seed germination, weakly informative priors
+
+PosteriorDB's `seeds_data-seeds_stanified_model`. The seeds model with
+Normal(0, 1) coefficient priors and a half-Cauchy plate scale. The
+normalized half-Cauchy adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+I = 21
+data = load_data("data/seeds_data.json", cartprod(
+    n = cartpow(nonnegintegers, I), N = cartpow(nonnegintegers, I),
+    x1 = cartpow(reals, I), x2 = cartpow(reals, I)))
+
+alpha0 ~ Normal(0, 1)
+alpha1 ~ Normal(0, 1)
+alpha12 ~ Normal(0, 1)
+alpha2 ~ Normal(0, 1)
+sigma ~ normalize(truncate(Cauchy(0, 1), interval(0, inf)))
+b ~ iid(Normal(0, sigma), I)
+eta = alpha0 .+ alpha1 .* data.x1 .+ alpha2 .* data.x2 .+ alpha12 .* data.x1 .* data.x2 .+ b
+n ~ Binomial.(data.N, invlogit.(eta))
+Pi_prior = lawof(record(alpha0 = alpha0, alpha1 = alpha1, alpha12 = alpha12, alpha2 = alpha2, b = b, sigma = sigma))
+K_model = kernelof(record(n = n), alpha0 = alpha0, alpha1 = alpha1, alpha12 = alpha12, alpha2 = alpha2, b = b, sigma = sigma)
+L = likelihoodof(K_model, record(n = data.n))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha0 = reals, alpha1 = reals, alpha12 = reals, alpha2 = reals, b = cartpow(reals, 21), sigma = posreals)
+Pi_post_input = record(alpha0 = -0.44, alpha1 = 0.396, alpha12 = -0.869, alpha2 = 1.17, b = fill(0.0, 21), sigma = 0.308)

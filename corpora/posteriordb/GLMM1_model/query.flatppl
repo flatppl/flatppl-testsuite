@@ -1,0 +1,5 @@
+p_alpha = elementof(cartpow(reals, 235))
+p_mu_alpha = elementof(reals)
+p_sd_alpha = elementof(interval(0.0, 5.0))
+inputs = (p_alpha, p_mu_alpha, p_sd_alpha)
+outputs = logdensityof(Pi_post, record(alpha = p_alpha, mu_alpha = p_mu_alpha, sd_alpha = p_sd_alpha))

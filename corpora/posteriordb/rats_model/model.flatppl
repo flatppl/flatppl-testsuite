@@ -1,0 +1,33 @@
+%%%
+# Growth of rats
+
+PosteriorDB's `rats_data-rats_model`. Weights of 30 rats at five ages follow
+rat-specific lines centered at the mean age xbar. Intercepts and slopes are
+Normal around mu_alpha and mu_beta. The three scales have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 30
+Npts = 150
+data = load_data("data/rats_data.json", cartprod(
+    rat = cartpow(posintegers, Npts), x = cartpow(reals, Npts), y = cartpow(reals, Npts), xbar = reals))
+
+mu_alpha ~ Normal(0, 100)
+mu_beta ~ Normal(0, 100)
+sigma_y = elementof(posreals)
+sigma_alpha = elementof(posreals)
+sigma_beta = elementof(posreals)
+alpha ~ iid(Normal(mu_alpha, sigma_alpha), N)
+beta ~ iid(Normal(mu_beta, sigma_beta), N)
+y ~ Normal.(alpha[data.rat] .+ beta[data.rat] .* (data.x .- data.xbar), sigma_y)
+
+Pi_scales = Lebesgue(cartprod(sigma_y = posreals, sigma_alpha = posreals, sigma_beta = posreals))
+K_effects = kernelof(record(alpha = alpha, beta = beta, mu_alpha = mu_alpha, mu_beta = mu_beta),
+                     sigma_y = sigma_y, sigma_alpha = sigma_alpha, sigma_beta = sigma_beta)
+Pi_prior = jointchain(Pi_scales, K_effects)
+K_model = kernelof(record(y = y), sigma_y = sigma_y, sigma_alpha = sigma_alpha, sigma_beta = sigma_beta,
+                   alpha = alpha, beta = beta, mu_alpha = mu_alpha, mu_beta = mu_beta)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(sigma_y = posreals, sigma_alpha = posreals, sigma_beta = posreals, alpha = cartpow(reals, 30), beta = cartpow(reals, 30), mu_alpha = reals, mu_beta = reals)
+Pi_post_input = record(sigma_y = 6.25, sigma_alpha = 16.0, sigma_beta = 0.62, alpha = fill(243.0, 30), beta = fill(6.18, 30), mu_alpha = 240.0, mu_beta = 6.48)

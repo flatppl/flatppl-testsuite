@@ -1,0 +1,29 @@
+%%%
+# Seed germination with random effects
+
+PosteriorDB's `seeds_data-seeds_model`. Germination counts on 21 plates are
+binomial with logit linear predictor in seed type, root extract and their
+product, plus a plate effect. The plate effects have a Gamma-distributed
+precision tau.
+%%%
+flatppl_compat = "0.1"
+
+I = 21
+data = load_data("data/seeds_data.json", cartprod(
+    n = cartpow(nonnegintegers, I), N = cartpow(nonnegintegers, I),
+    x1 = cartpow(reals, I), x2 = cartpow(reals, I)))
+
+alpha0 ~ Normal(0, 1000)
+alpha1 ~ Normal(0, 1000)
+alpha12 ~ Normal(0, 1000)
+alpha2 ~ Normal(0, 1000)
+tau ~ Gamma(shape = 0.001, rate = 0.001)
+b ~ iid(Normal(0, 1 / sqrt(tau)), I)
+eta = alpha0 .+ alpha1 .* data.x1 .+ alpha2 .* data.x2 .+ alpha12 .* data.x1 .* data.x2 .+ b
+n ~ Binomial.(data.N, invlogit.(eta))
+Pi_prior = lawof(record(alpha0 = alpha0, alpha1 = alpha1, alpha12 = alpha12, alpha2 = alpha2, tau = tau, b = b))
+K_model = kernelof(record(n = n), alpha0 = alpha0, alpha1 = alpha1, alpha12 = alpha12, alpha2 = alpha2, tau = tau, b = b)
+L = likelihoodof(K_model, record(n = data.n))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha0 = reals, alpha1 = reals, alpha12 = reals, alpha2 = reals, tau = posreals, b = cartpow(reals, 21))
+Pi_post_input = record(alpha0 = -0.524, alpha1 = 0.303, alpha12 = -1.03, alpha2 = 1.23, tau = 11.0, b = fill(0.0, 21))

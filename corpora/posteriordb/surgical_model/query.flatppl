@@ -1,0 +1,5 @@
+p_mu = elementof(reals)
+p_sigmasq = elementof(posreals)
+p_b = elementof(cartpow(reals, 12))
+inputs = (p_mu, p_sigmasq, p_b)
+outputs = logdensityof(Pi_post, record(mu = p_mu, sigmasq = p_sigmasq, b = p_b))
