@@ -63,14 +63,16 @@ float32 tolerance at an oracle point, in line with the engine's float32 error.
 An engine float32 error clearly above the independent one is an engine defect.
 The independent evaluation is plain NumPy float32 over 200 summation orders.
 
-| Row | Point, component | Engine float32 error | NumPy float32 error (median, max) | Tolerance |
+| Row | Point, component | Engine float32 error (M4; CI) | NumPy float32 error (median, max) | Tolerance |
 |---|---|---:|---:|---:|
 | `logearn_height` | 1, `beta[2]` | `0.028` | `0.027`, `0.033` | `0.0014` |
+| `logearn_height_male` | 1, `beta[2]` | `0.0119`; `0.0125` | `0.0134`, `0.0157` | `0.0119` |
 | `logearn_logheight_male` | 1, `beta[2]` | `0.0019` | `0.0019`, `0.0021` | `0.00058` |
+| `kidscore_momiq` | 1, `beta[2]` | `0.00029`; `0.00030` | `0.00042`, `0.00048` | `0.00030` |
 
-Both rows regress log earnings on height (about 66) or log height. Near the
-posterior mean the coefficient gradient is a small difference of large float32
-sums.
+These rows regress on uncentered height (about 66), log height or maternal IQ
+(about 100). Near the posterior mean the coefficient gradient is a small
+difference of large float32 sums. CI runs on Linux x86-64; the M4 runs locally.
 
 ## Excluded posteriors
 
