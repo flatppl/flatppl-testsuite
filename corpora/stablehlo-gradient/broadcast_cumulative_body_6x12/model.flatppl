@@ -1,0 +1,16 @@
+%%%
+# Cumulative ops in a broadcast callable, 6 rows of 12
+
+Each of the 6 rows of `x` is scanned by a callable that a broadcast maps
+over the row indices. The scan's operand is one row per broadcast cell.
+%%%
+flatppl_compat = "0.1"
+
+x = elementof(cartpow(reals, [6, 12]))
+a = elementof(reals)
+rows = indicesof(zeros(6))
+cols = indicesof(zeros(12))
+sums(j, m) = cumsum(m[j, cols])
+peaks(j, m) = cummax(m[j, cols])
+S = rowstack(sums.(rows, [x]))
+M = rowstack(peaks.(rows, [x]))

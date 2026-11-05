@@ -1,0 +1,12 @@
+%%%
+# Dotted cumulative ops over a vector of rows, 6 rows of 12
+
+`cumsum.(vv)` and `cummax.(vv)` scan each of the 6 inner vectors of `vv`.
+%%%
+flatppl_compat = "0.1"
+
+x = elementof(cartpow(reals, [6, 12]))
+a = elementof(reals)
+vv = [x[1, :], x[2, :], x[3, :], x[4, :], x[5, :], x[6, :]]
+S = rowstack(cumsum.(vv))
+M = rowstack(cummax.(vv))

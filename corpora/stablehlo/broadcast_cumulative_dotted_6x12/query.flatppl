@@ -1,0 +1,2 @@
+inputs = (a, x)
+outputs = a * sum(S .* S) / 2.0 + sum(M .* M) / 2.0
