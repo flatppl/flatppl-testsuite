@@ -12,6 +12,12 @@ from tests.test_unified import _gate_engine
 
 
 CASES = sorted((Path(__file__).resolve().parents[1] / "corpora/posteriordb").glob("*/test.json"))
+# A manifest lists "precisions" only to drop float32, with evidence in the README.
+PRECISION_CASES = [
+    (manifest, precision)
+    for manifest in CASES
+    for precision in json.loads(manifest.read_text()).get("precisions", ["f32", "f64"])
+]
 
 
 @pytest.mark.parametrize("manifest", CASES, ids=lambda path: path.parent.name)
@@ -27,8 +33,10 @@ def test_native_js_posterior(manifest):
 
 
 @pytest.mark.stablehlo_only
-@pytest.mark.parametrize("precision", ["f32", "f64"])
-@pytest.mark.parametrize("manifest", CASES, ids=lambda path: path.parent.name)
+@pytest.mark.parametrize(
+    ("manifest", "precision"), PRECISION_CASES,
+    ids=[f"{manifest.parent.name}-{precision}" for manifest, precision in PRECISION_CASES],
+)
 def test_stablehlo_posterior_gradients(manifest, precision):
     """Check full constrained gradients against frozen, independent Stan AD."""
     _gate_engine("stablehlo")
