@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from scipy import stats
 
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
@@ -91,3 +92,54 @@ def test_lkj_threads_rng_and_preserves_point_mass(tmp_path, precision, family):
     values, unchanged = point(key)
     np.testing.assert_array_equal(values, np.ones((3, 1, 1)))
     np.testing.assert_array_equal(unchanged, key)
+
+
+# Keys that differ only in the counter word give overlapping THREE_FRY streams.
+_KEY = np.random.default_rng(20261105).integers(0, 2**63, 2).astype(np.uint64)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision", ["f32", "f64"])
+@pytest.mark.parametrize("n", [2, 3, 5])
+def test_lkj_correlation_marginals(tmp_path, precision, n):
+    """Every correlation r of LKJ(n, eta) has (r + 1) / 2 ~ Beta(b, b),
+    b = eta - 1 + n / 2 (Lewandowski, Kurowicka and Joe 2009)."""
+    _gate_engine("stablehlo")
+    _, jnp, _ = ex._jax()
+    dtype = np.float32 if precision == "f32" else np.float64
+    m = 20000
+    draw = _sampler(tmp_path,
+        "eta = external(posreals)\ninputs = eta\n"
+        f"outputs = rand(iid(LKJCholesky({n}, eta), {m}), rnginit(0))\n", precision)
+    pairs = list(zip(*np.tril_indices(n, -1)))
+    for eta in (0.5, 1.0, 4.0):
+        factor, _ = draw(jnp.asarray(_KEY), jnp.asarray(eta, dtype=dtype))
+        factor = np.asarray(factor, dtype=np.float64)
+        correlation = factor @ factor.swapaxes(-1, -2)
+        assert np.linalg.eigvalsh(correlation).min() > 0
+        b = eta - 1 + n / 2
+        for i, j in pairs:
+            r = correlation[:, i, j]
+            p = stats.kstest((r + 1) / 2, stats.beta(b, b).cdf).pvalue
+            assert p * len(pairs) > 1e-3, (eta, i, j, p)
+
+
+@pytest.mark.stablehlo_only
+def test_lkj_lanes_do_not_share_random_bits(tmp_path):
+    """One rejection loop and one normal draw serve every row and lane. Reused
+    bits would repeat matrices or correlate neighbouring draws."""
+    _gate_engine("stablehlo")
+    _, jnp, _ = ex._jax()
+    n, m = 5, 20000
+    draw = _sampler(tmp_path,
+        "eta = external(posreals)\ninputs = eta\n"
+        f"outputs = rand(iid(LKJCholesky({n}, eta), {m}), rnginit(0))\n", "f64")
+    factor, _ = draw(jnp.asarray(_KEY), jnp.asarray(1.0))
+    factor = np.asarray(factor)
+    lower = np.tril_indices(n, -1)
+    cells = (factor @ factor.swapaxes(-1, -2))[:, lower[0], lower[1]]
+    assert len(np.unique(cells, axis=0)) == m
+    a = (cells[0::2] - cells[0::2].mean(0)) / cells[0::2].std(0)
+    b = (cells[1::2] - cells[1::2].mean(0)) / cells[1::2].std(0)
+    cross = a.T @ b / len(a)
+    assert np.abs(cross).max() < 5 / np.sqrt(len(a))
