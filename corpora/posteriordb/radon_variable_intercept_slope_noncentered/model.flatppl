@@ -1,0 +1,41 @@
+%%%
+# Radon with varying intercepts and slopes
+
+PosteriorDB's `radon_mn-radon_variable_intercept_slope_noncentered`. Log
+radon in 919 Minnesota homes depends on the floor of measurement. Each of
+85 counties has its own intercept and floor slope, in noncentered form.
+The three normalized half-Normal scale priors add 3 log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 919
+J = 85
+data = load_data("data/radon_mn.json", cartprod(
+    county_idx = cartpow(posintegers, N), floor_measure = cartpow(reals, N),
+    log_radon = cartpow(reals, N)))
+
+sigma_y ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+sigma_alpha ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+sigma_beta ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+alpha_raw ~ iid(Normal(0, 1), J)
+beta_raw ~ iid(Normal(0, 1), J)
+mu_alpha ~ Normal(0, 10)
+mu_beta ~ Normal(0, 10)
+alpha = mu_alpha .+ sigma_alpha .* alpha_raw
+beta = mu_beta .+ sigma_beta .* beta_raw
+mu = alpha[data.county_idx] .+ data.floor_measure .* beta[data.county_idx]
+y ~ Normal.(mu, sigma_y)
+
+Pi_prior = lawof(record(sigma_y = sigma_y, sigma_alpha = sigma_alpha,
+                        sigma_beta = sigma_beta, alpha_raw = alpha_raw,
+                        beta_raw = beta_raw, mu_alpha = mu_alpha, mu_beta = mu_beta))
+K_model = kernelof(record(y = y), sigma_y = sigma_y, sigma_alpha = sigma_alpha,
+                   sigma_beta = sigma_beta, alpha_raw = alpha_raw, beta_raw = beta_raw,
+                   mu_alpha = mu_alpha, mu_beta = mu_beta)
+L = likelihoodof(K_model, record(y = data.log_radon))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(sigma_y = posreals, sigma_alpha = posreals,
+                          sigma_beta = posreals, alpha_raw = cartpow(reals, J),
+                          beta_raw = cartpow(reals, J), mu_alpha = reals, mu_beta = reals)
+Pi_post_input = record(sigma_y = 0.75, sigma_alpha = 0.3, sigma_beta = 0.3,
+                       alpha_raw = zeros(J), beta_raw = zeros(J), mu_alpha = 1.5, mu_beta = -0.65)

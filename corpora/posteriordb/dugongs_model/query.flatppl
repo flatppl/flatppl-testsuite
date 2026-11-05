@@ -1,0 +1,6 @@
+p_alpha = elementof(reals)
+p_beta = elementof(reals)
+p_lambda = elementof(interval(0.5, 1))
+p_tau = elementof(posreals)
+inputs = (p_alpha, p_beta, p_lambda, p_tau)
+outputs = logdensityof(Pi_post, record(alpha = p_alpha, beta = p_beta, lambda = p_lambda, tau = p_tau))

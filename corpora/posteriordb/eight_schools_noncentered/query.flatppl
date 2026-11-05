@@ -1,0 +1,5 @@
+p_theta_trans = elementof(cartpow(reals, 8))
+p_mu = elementof(reals)
+p_tau = elementof(posreals)
+inputs = (p_theta_trans, p_mu, p_tau)
+outputs = logdensityof(Pi_post, record(theta_trans = p_theta_trans, mu = p_mu, tau = p_tau))

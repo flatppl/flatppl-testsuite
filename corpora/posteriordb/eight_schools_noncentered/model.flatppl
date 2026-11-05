@@ -1,0 +1,25 @@
+%%%
+# Eight schools, noncentered
+
+PosteriorDB's `eight_schools-eight_schools_noncentered`. Standardized
+effects are scaled by tau and shifted by mu. This removes the funnel of the
+centered model. The normalized half-Cauchy adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+J = 8
+data = load_data("data/eight_schools.json", cartprod(
+    y = cartpow(reals, J), sigma = cartpow(posreals, J)))
+
+theta_trans ~ iid(Normal(0, 1), J)
+mu ~ Normal(0, 5)
+tau ~ normalize(truncate(Cauchy(0, 5), interval(0, inf)))
+theta = theta_trans .* tau .+ mu
+y ~ Normal.(theta, data.sigma)
+
+Pi_prior = lawof(record(theta_trans = theta_trans, mu = mu, tau = tau))
+K_model = kernelof(record(y = y), theta_trans = theta_trans, mu = mu, tau = tau)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta_trans = cartpow(reals, J), mu = reals, tau = posreals)
+Pi_post_input = record(theta_trans = zeros(J), mu = 4.4, tau = 3.6)

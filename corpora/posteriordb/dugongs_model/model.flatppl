@@ -1,0 +1,26 @@
+%%%
+# Dugong growth curve
+
+PosteriorDB's `dugongs_data-dugongs_model`. Length approaches an asymptote
+alpha as age x grows, with mean alpha - beta * lambda^x. The precision tau
+has a vague Gamma prior.
+%%%
+flatppl_compat = "0.1"
+
+N = 27
+data = load_data("data/dugongs_data.json", cartprod(
+    x = cartpow(reals, N), Y = cartpow(reals, N)))
+
+alpha ~ Normal(0, 1000)
+beta ~ Normal(0, 1000)
+lambda ~ Uniform(interval(0.5, 1))
+tau ~ Gamma(shape = 0.0001, rate = 0.0001)
+sigma = 1 / sqrt(tau)
+y ~ Normal.(alpha .- beta .* lambda .^ data.x, sigma)
+
+Pi_prior = lawof(record(alpha = alpha, beta = beta, lambda = lambda, tau = tau))
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta, lambda = lambda, tau = tau)
+L = likelihoodof(K_model, record(y = data.Y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta = reals, lambda = interval(0.5, 1), tau = posreals)
+Pi_post_input = record(alpha = 2.65, beta = 0.97, lambda = 0.86, tau = 100.0)
