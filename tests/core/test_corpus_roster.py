@@ -29,17 +29,17 @@ EXPECTED_COUNTS = {
     "coverage": 25,
     "examples": 24,
     "formula": 90,
-    "fragment": 35,
+    "fragment": 37,
     "hs3": 12,
     "posteriordb": 87,
     "pyhf": 173,
     "pyhf-rejects": 29,
     "sample": 1,
-    "stablehlo": 55,
-    "stablehlo-gradient": 53,
+    "stablehlo": 57,
+    "stablehlo-gradient": 55,
     "stablehlo-sample": 24,
 }
-EXPECTED_TOTAL = 613
+EXPECTED_TOTAL = 619
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -164,11 +164,13 @@ ENGINE_OVERRIDES = {
     # StableHLO row on the same grid. Its `"stablehlo"` override block switches
     # the test_type from `convert` to `logdensity` and points at `query.flatppl`.
     "hs3/conversions/histfactory": {"det-js", "stablehlo"},
+    # erfc(10) and erfc(26) underflow f32, so the tail row is f64 det-js only.
+    "fragment/special_functions_erfc_tail": {"det-js"},
 }
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 838
+EXPECTED_CASES = 845
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

@@ -1,0 +1,4 @@
+sf = standard_module("special-functions", "0.1")
+a = draw(Normal(mu = log(sf.erfc(10.0)), sigma = 1.0))
+b = draw(Normal(mu = log(sf.erfc(26.0)), sigma = 1.0))
+lp = logdensityof(lawof(record(a = a, b = b)), record(a = -100.0, b = -680.0))
