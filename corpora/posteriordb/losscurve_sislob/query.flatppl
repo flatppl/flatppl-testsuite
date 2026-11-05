@@ -1,0 +1,8 @@
+p_omega = elementof(posreals)
+p_theta = elementof(posreals)
+p_LR = elementof(cartpow(posreals, 10))
+p_mu_LR = elementof(reals)
+p_sd_LR = elementof(posreals)
+p_loss_sd = elementof(posreals)
+inputs = (p_omega, p_theta, p_LR, p_mu_LR, p_sd_LR, p_loss_sd)
+outputs = logdensityof(Pi_post, record(omega = p_omega, theta = p_theta, LR = p_LR, mu_LR = p_mu_LR, sd_LR = p_sd_LR, loss_sd = p_loss_sd))

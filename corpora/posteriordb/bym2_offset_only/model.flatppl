@@ -1,0 +1,36 @@
+%%%
+# BYM2 model of traffic accidents
+
+PosteriorDB's `traffic_accident_nyc-bym2_offset_only`. Accident counts in
+1921 New York census tracts are Poisson around expected counts E. The log
+relative risk is beta0 plus sigma times a mix of unstructured effects theta
+and spatial effects phi, weighted by rho. The spatial effects carry Stan's
+intrinsic conditional autoregressive log density over 5461 neighbour pairs
+and a soft sum-to-zero term, written as a log weight on Lebesgue measure.
+The normalized half-Normal scale prior adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 1921
+N_edges = 5461
+data = load_data("data/traffic_accident_nyc.json", cartprod(
+    node1 = cartpow(posintegers, N_edges), node2 = cartpow(posintegers, N_edges),
+    y = cartpow(nonnegintegers, N), E = cartpow(posreals, N), scaling_factor = posreals))
+
+beta0 ~ Normal(0, 1)
+sigma ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+rho ~ Beta(0.5, 0.5)
+theta ~ iid(Normal(0, 1), N)
+phi = elementof(cartpow(reals, N))
+icar(x) = -0.5 * sum((x.phi[data.node1] .- x.phi[data.node2]) .^ 2) +
+    logdensityof(Normal(0, 0.001 * N), sum(x.phi))
+Pi_phi = logweighted(icar, Lebesgue(cartprod(phi = cartpow(reals, N))))
+convolved_re = sqrt(1 - rho) .* theta .+ sqrt(rho / data.scaling_factor) .* phi
+y ~ Poisson.(exp.(log.(data.E) .+ beta0 .+ convolved_re .* sigma))
+
+Pi_prior = joint(lawof(record(beta0 = beta0, sigma = sigma, rho = rho, theta = theta)), Pi_phi)
+K_model = kernelof(record(y = y), beta0 = beta0, sigma = sigma, rho = rho, theta = theta, phi = phi)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta0 = reals, sigma = posreals, rho = interval(0.0, 1.0), theta = cartpow(reals, 1921), phi = cartpow(reals, 1921))
+Pi_post_input = record(beta0 = -6.62, sigma = 1.2, rho = 0.57, theta = fill(0.0, 1921), phi = fill(0.0, 1921))

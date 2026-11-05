@@ -1,0 +1,30 @@
+%%%
+# Radon, varying floor slopes, national data
+
+PosteriorDB's `radon_all-radon_variable_slope_noncentered`. Log radon in
+12573 homes in 386 US counties. County floor slopes are noncentered draws
+around mu_beta, and the intercept is shared. The two normalized half-Normal
+scale priors add 2 log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 12573
+J = 386
+data = load_data("../_data/radon_all.json", cartprod(
+    county_idx = cartpow(posintegers, N), floor_measure = cartpow(reals, N),
+    log_radon = cartpow(reals, N)))
+
+alpha ~ Normal(0, 10)
+beta_raw ~ iid(Normal(0, 1), J)
+mu_beta ~ Normal(0, 10)
+sigma_beta ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+sigma_y ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+beta = mu_beta .+ sigma_beta .* beta_raw
+y ~ Normal.(alpha .+ data.floor_measure .* beta[data.county_idx], sigma_y)
+
+Pi_prior = lawof(record(alpha = alpha, beta_raw = beta_raw, mu_beta = mu_beta, sigma_beta = sigma_beta, sigma_y = sigma_y))
+K_model = kernelof(record(y = y), alpha = alpha, beta_raw = beta_raw, mu_beta = mu_beta, sigma_beta = sigma_beta, sigma_y = sigma_y)
+L = likelihoodof(K_model, record(y = data.log_radon))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta_raw = cartpow(reals, 386), mu_beta = reals, sigma_beta = posreals, sigma_y = posreals)
+Pi_post_input = record(alpha = 1.02, beta_raw = fill(0.0, 386), mu_beta = -0.369, sigma_beta = 0.366, sigma_y = 1.01)

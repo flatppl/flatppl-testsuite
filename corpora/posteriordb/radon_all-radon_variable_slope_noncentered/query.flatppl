@@ -1,0 +1,7 @@
+p_alpha = elementof(reals)
+p_beta_raw = elementof(cartpow(reals, 386))
+p_mu_beta = elementof(reals)
+p_sigma_beta = elementof(posreals)
+p_sigma_y = elementof(posreals)
+inputs = (p_alpha, p_beta_raw, p_mu_beta, p_sigma_beta, p_sigma_y)
+outputs = logdensityof(Pi_post, record(alpha = p_alpha, beta_raw = p_beta_raw, mu_beta = p_mu_beta, sigma_beta = p_sigma_beta, sigma_y = p_sigma_y))

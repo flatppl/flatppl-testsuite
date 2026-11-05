@@ -1,0 +1,41 @@
+%%%
+# Insurance loss development
+
+PosteriorDB's `loss_curves-losscurve_sislob`. Cumulative losses of ten
+underwriting cohorts grow along a curve in development time. The data flag
+selects a Weibull growth factor 1 - exp(-(t/theta)^omega) or a log-logistic
+one t^omega / (t^omega + theta^omega). Each cohort has a loss ratio LR; the
+expected loss is LR times premium times the growth factor, with noise
+proportional to premium. All priors are log-Normal except the Normal mean of
+the log loss ratios.
+%%%
+flatppl_compat = "0.1"
+
+n_data = 55
+n_time = 10
+n_cohort = 10
+data = load_data("data/loss_curves.json", cartprod(
+    growthmodel_id = nonnegintegers, cohort_id = cartpow(posintegers, n_data),
+    t_idx = cartpow(posintegers, n_data), t_value = cartpow(posreals, n_time),
+    premium = cartpow(reals, n_cohort), loss = cartpow(reals, n_data)))
+
+omega ~ LogNormal(0, 0.5)
+theta ~ LogNormal(0, 0.5)
+mu_LR ~ Normal(0, 0.5)
+sd_LR ~ LogNormal(0, 0.5)
+LR ~ iid(LogNormal(mu_LR, sd_LR), n_cohort)
+loss_sd ~ LogNormal(0, 0.7)
+weibull = 1 .- exp.(-(data.t_value ./ theta) .^ omega)
+loglogistic = data.t_value .^ omega ./ (data.t_value .^ omega .+ theta ^ omega)
+gf = ifelse(data.growthmodel_id == 1, weibull, loglogistic)
+lm = LR[data.cohort_id] .* data.premium[data.cohort_id] .* gf[data.t_idx]
+y ~ Normal.(lm, loss_sd .* data.premium[data.cohort_id])
+
+Pi_prior = lawof(record(omega = omega, theta = theta, LR = LR, mu_LR = mu_LR, sd_LR = sd_LR,
+                        loss_sd = loss_sd))
+K_model = kernelof(record(y = y), omega = omega, theta = theta, LR = LR, mu_LR = mu_LR,
+                   sd_LR = sd_LR, loss_sd = loss_sd)
+L = likelihoodof(K_model, record(y = data.loss))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(omega = posreals, theta = posreals, LR = cartpow(posreals, 10), mu_LR = reals, sd_LR = posreals, loss_sd = posreals)
+Pi_post_input = record(omega = 1.53, theta = 2.13, LR = [0.635, 0.784, 1.42, 1.06, 0.931, 0.886, 0.958, 0.81, 0.781, 0.602], mu_LR = -0.292, sd_LR = 0.407, loss_sd = 0.0292)
