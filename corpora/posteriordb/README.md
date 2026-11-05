@@ -74,6 +74,7 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `logearn_height_male` | 1, `beta[2]` | `0.0119`; `0.0125` | `0.0134`, `0.0157` | `0.0119` |
 | `logearn_logheight_male` | 1, `beta[2]` | `0.0019` | `0.0019`, `0.0021` | `0.00058` |
 | `kidscore_momiq` | 1, `beta[2]` | `0.00029`; `0.00030` | `0.00042`, `0.00048` | `0.00030` |
+| `kidscore_momhsiq` | 1, `beta[3]` | `0.00017` | `0.00027`, `0.00034` | `0.00033` |
 | `kilpisjarvi` | 2, `beta` | `0.174` | `0.169`, `0.177` | `0.0163` |
 
 These rows regress on uncentered height (about 66), log height, maternal IQ
