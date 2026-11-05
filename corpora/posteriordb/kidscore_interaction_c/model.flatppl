@@ -1,0 +1,28 @@
+%%%
+# Child test scores with centered predictors
+
+PosteriorDB's `kidiq_with_mom_work-kidscore_interaction_c`. Maternal high-
+school completion and IQ enter centered at their sample means, with their
+product. Both the coefficients and the residual scale have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 434
+data = load_data("data/kidiq_with_mom_work.json", cartprod(
+    kid_score = cartpow(reals, N),
+    mom_hs = cartpow(reals, N),
+    mom_iq = cartpow(reals, N)))
+mom_hs_c = data.mom_hs .- mean(data.mom_hs)
+mom_iq_c = data.mom_iq .- mean(data.mom_iq)
+X = colstack([ones(N), mom_hs_c, mom_iq_c, mom_hs_c .* mom_iq_c])
+
+beta = elementof(cartpow(reals, 4))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 4), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.kid_score))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 4), sigma = posreals)
+Pi_post_input = record(beta = [87.6, 2.86, 0.589, -0.483], sigma = 18.0)

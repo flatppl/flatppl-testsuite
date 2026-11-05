@@ -1,0 +1,25 @@
+%%%
+# Child test scores and maternal work
+
+PosteriorDB's `kidiq_with_mom_work-kidscore_mom_work`. Indicators for
+maternal work categories 2, 3 and 4 shift the mean child score. Both the
+coefficients and the residual scale have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 434
+data = load_data("data/kidiq_with_mom_work.json", cartprod(
+    kid_score = cartpow(reals, N),
+    mom_work = cartpow(posintegers, N)))
+X = colstack([ones(N), ifelse.(data.mom_work .== 2, 1.0, 0.0), ifelse.(data.mom_work .== 3, 1.0, 0.0), ifelse.(data.mom_work .== 4, 1.0, 0.0)])
+
+beta = elementof(cartpow(reals, 4))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 4), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.kid_score))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 4), sigma = posreals)
+Pi_post_input = record(beta = [82.0, 3.88, 11.5, 5.2], sigma = 20.3)

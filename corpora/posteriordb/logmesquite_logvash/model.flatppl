@@ -1,0 +1,31 @@
+%%%
+# Log mesquite weight on canopy volume, shape and height
+
+PosteriorDB's `mesquite-logmesquite_logvash`. Log shrub weight depends on
+log canopy volume, area and shape, log height and the group. Both the
+coefficients and the residual scale have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 46
+data = load_data("data/mesquite.json", cartprod(
+    weight = cartpow(reals, N),
+    diam1 = cartpow(reals, N),
+    diam2 = cartpow(reals, N),
+    canopy_height = cartpow(reals, N),
+    total_height = cartpow(reals, N),
+    group = cartpow(reals, N)))
+canopy_volume = data.diam1 .* data.diam2 .* data.canopy_height
+canopy_area = data.diam1 .* data.diam2
+X = colstack([ones(N), log.(canopy_volume), log.(canopy_area), log.(data.diam1 ./ data.diam2), log.(data.total_height), data.group])
+
+beta = elementof(cartpow(reals, 6))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 6), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = log.(data.weight)))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 6), sigma = posreals)
+Pi_post_input = record(beta = [5.31, 0.387, 0.41, -0.317, 0.423, -0.539], sigma = 0.339)

@@ -1,0 +1,25 @@
+%%%
+# Earnings and height
+
+PosteriorDB's `earnings-earn_height`. Earnings are Normal around a linear
+function of height. Both the coefficients and the residual scale have flat
+priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 1192
+data = load_data("data/earnings.json", cartprod(
+    earn = cartpow(posreals, N),
+    height = cartpow(posreals, N)))
+X = colstack([ones(N), data.height])
+
+beta = elementof(cartpow(reals, 2))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 2), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.earn))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 2), sigma = posreals)
+Pi_post_input = record(beta = [-61300.0, 1260.0], sigma = 18900.0)
