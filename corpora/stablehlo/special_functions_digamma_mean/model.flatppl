@@ -1,0 +1,3 @@
+sf = standard_module("special-functions", "0.1")
+m = elementof(posreals)
+a = draw(Normal(mu = sf.digamma(m), sigma = 1.0))

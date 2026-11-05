@@ -1,0 +1,4 @@
+sf = standard_module("special-functions", "0.1")
+mu = sf.digamma(1.7) + sf.polygamma(1, 1.7)
+x = draw(Normal(mu = mu, sigma = 1.0))
+lp = logdensityof(lawof(record(x = x)), record(x = 0.5))
