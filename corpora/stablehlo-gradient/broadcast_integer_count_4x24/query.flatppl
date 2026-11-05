@@ -1,0 +1,2 @@
+inputs = (a, k)
+outputs = log(a) * sum(H) - a * sum(H .* H)
