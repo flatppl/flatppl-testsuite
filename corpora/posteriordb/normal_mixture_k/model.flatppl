@@ -1,0 +1,27 @@
+%%%
+# Five-component Gaussian mixture
+
+PosteriorDB's `normal_5-normal_mixture_k`. Each observation comes from one
+of five Normal components with simplex weights theta. The means have
+Normal(0, 10) priors and the scales are uniform on (0, 10). The uniform
+simplex prior has density 24, and normalizing the scale priors adds -5
+log(10), so the target exceeds Stan's by log(24) - 5 log(10).
+%%%
+flatppl_compat = "0.1"
+
+K = 5
+N = 1701
+data = load_data("data/normal_5.json", cartprod(y = cartpow(reals, N)))
+
+theta ~ Dirichlet(ones(K))
+mu ~ iid(Normal(0, 10), K)
+sigma ~ iid(Uniform(interval(0, 10)), K)
+component = normalize(ksuperpose(Normal, theta, mu = mu, sigma = sigma))
+y ~ iid(component, N)
+
+Pi_prior = lawof(record(theta = theta, mu = mu, sigma = sigma))
+K_model = kernelof(record(y = y), theta = theta, mu = mu, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = stdsimplex(5), mu = cartpow(reals, 5), sigma = cartpow(interval(0.0, 10.0), 5))
+Pi_post_input = record(theta = [0.336856, 0.132968, 0.111442, 0.235191, 0.1835429999999999], mu = [0.651, 5.41, -3.55, -9.69, 3.09], sigma = [3.51, 1.93, 1.61, 2.05, 0.536])

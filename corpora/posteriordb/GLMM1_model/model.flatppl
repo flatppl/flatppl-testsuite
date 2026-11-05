@@ -1,0 +1,26 @@
+%%%
+# Poisson counts with site effects
+
+PosteriorDB's `GLMM_data-GLMM1_model`. Bird counts at 235 sites in nine
+years are Poisson with a log rate that depends on the site only. Site
+effects are Normal around mu_alpha. Their scale is uniform on (0, 5).
+Normalizing it adds -log(5) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+nobs = 2072
+nsite = 235
+data = load_data("data/GLMM_data.json", cartprod(
+    obs = cartpow(nonnegintegers, nobs), obssite = cartpow(posintegers, nobs)))
+
+mu_alpha ~ Normal(0, 10)
+sd_alpha ~ Uniform(interval(0, 5))
+alpha ~ iid(Normal(mu_alpha, sd_alpha), nsite)
+y ~ Poisson.(exp.(alpha[data.obssite]))
+
+Pi_prior = lawof(record(alpha = alpha, mu_alpha = mu_alpha, sd_alpha = sd_alpha))
+K_model = kernelof(record(y = y), alpha = alpha, mu_alpha = mu_alpha, sd_alpha = sd_alpha)
+L = likelihoodof(K_model, record(y = data.obs))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = cartpow(reals, 235), mu_alpha = reals, sd_alpha = interval(0.0, 5.0))
+Pi_post_input = record(alpha = fill(2.09, 235), mu_alpha = 2.06, sd_alpha = 1.28)

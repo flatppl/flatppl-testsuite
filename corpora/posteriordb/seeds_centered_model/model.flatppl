@@ -1,0 +1,29 @@
+%%%
+# Seed germination, sum-to-zero effects
+
+PosteriorDB's `seeds_data-seeds_centered_model`. The weakly informative
+seeds model with plate effects c centered at their mean before they enter
+the predictor. The normalized half-Cauchy adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+I = 21
+data = load_data("data/seeds_data.json", cartprod(
+    n = cartpow(nonnegintegers, I), N = cartpow(nonnegintegers, I),
+    x1 = cartpow(reals, I), x2 = cartpow(reals, I)))
+
+alpha0 ~ Normal(0, 1)
+alpha1 ~ Normal(0, 1)
+alpha12 ~ Normal(0, 1)
+alpha2 ~ Normal(0, 1)
+sigma ~ normalize(truncate(Cauchy(0, 1), interval(0, inf)))
+c ~ iid(Normal(0, sigma), I)
+b = c .- mean(c)
+eta = alpha0 .+ alpha1 .* data.x1 .+ alpha2 .* data.x2 .+ alpha12 .* data.x1 .* data.x2 .+ b
+n ~ Binomial.(data.N, invlogit.(eta))
+Pi_prior = lawof(record(alpha0 = alpha0, alpha1 = alpha1, alpha12 = alpha12, alpha2 = alpha2, c = c, sigma = sigma))
+K_model = kernelof(record(n = n), alpha0 = alpha0, alpha1 = alpha1, alpha12 = alpha12, alpha2 = alpha2, c = c, sigma = sigma)
+L = likelihoodof(K_model, record(n = data.n))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha0 = reals, alpha1 = reals, alpha12 = reals, alpha2 = reals, c = cartpow(reals, 21), sigma = posreals)
+Pi_post_input = record(alpha0 = -0.63, alpha1 = 0.128, alpha12 = -0.695, alpha2 = 1.35, c = fill(0.0, 21), sigma = 0.295)

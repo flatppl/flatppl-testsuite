@@ -1,0 +1,8 @@
+p_alpha0 = elementof(reals)
+p_alpha1 = elementof(reals)
+p_alpha12 = elementof(reals)
+p_alpha2 = elementof(reals)
+p_c = elementof(cartpow(reals, 21))
+p_sigma = elementof(posreals)
+inputs = (p_alpha0, p_alpha1, p_alpha12, p_alpha2, p_c, p_sigma)
+outputs = logdensityof(Pi_post, record(alpha0 = p_alpha0, alpha1 = p_alpha1, alpha12 = p_alpha12, alpha2 = p_alpha2, c = p_c, sigma = p_sigma))

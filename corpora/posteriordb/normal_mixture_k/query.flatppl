@@ -1,0 +1,5 @@
+p_theta = elementof(stdsimplex(5))
+p_mu = elementof(cartpow(reals, 5))
+p_sigma = elementof(cartpow(interval(0.0, 10.0), 5))
+inputs = (p_theta, p_mu, p_sigma)
+outputs = logdensityof(Pi_post, record(theta = p_theta, mu = p_mu, sigma = p_sigma))

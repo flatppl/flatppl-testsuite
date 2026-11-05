@@ -1,0 +1,3 @@
+p_beta = elementof(cartpow(reals, 3))
+inputs = p_beta
+outputs = logdensityof(Pi_post, record(beta = p_beta))
