@@ -1,0 +1,28 @@
+%%%
+# Radon, partial pooling
+
+PosteriorDB's `radon_mn-radon_partially_pooled_noncentered`. County means
+are noncentered draws around mu_alpha, with no predictors. The two
+normalized half-Normal scale priors add 2 log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 919
+J = 85
+data = load_data("data/radon_mn.json", cartprod(
+    county_idx = cartpow(posintegers, N), floor_measure = cartpow(reals, N),
+    log_radon = cartpow(reals, N)))
+
+alpha_raw ~ iid(Normal(0, 1), J)
+mu_alpha ~ Normal(0, 10)
+sigma_alpha ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+sigma_y ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+alpha = mu_alpha .+ sigma_alpha .* alpha_raw
+y ~ Normal.(alpha[data.county_idx], sigma_y)
+
+Pi_prior = lawof(record(alpha_raw = alpha_raw, mu_alpha = mu_alpha, sigma_alpha = sigma_alpha, sigma_y = sigma_y))
+K_model = kernelof(record(y = y), alpha_raw = alpha_raw, mu_alpha = mu_alpha, sigma_alpha = sigma_alpha, sigma_y = sigma_y)
+L = likelihoodof(K_model, record(y = data.log_radon))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha_raw = cartpow(reals, 85), mu_alpha = reals, sigma_alpha = posreals, sigma_y = posreals)
+Pi_post_input = record(alpha_raw = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], mu_alpha = 1.31, sigma_alpha = 0.31, sigma_y = 0.8)
