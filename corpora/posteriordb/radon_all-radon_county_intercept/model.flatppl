@@ -1,0 +1,27 @@
+%%%
+# Radon, county intercepts, national data
+
+PosteriorDB's `radon_all-radon_county_intercept`. Log radon in 12573 homes
+in 386 US counties. Each county has its own intercept with an independent
+Normal(0, 10) prior, and the floor slope is shared. The normalized half-
+Normal scale prior adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 12573
+J = 386
+data = load_data("../_data/radon_all.json", cartprod(
+    county_idx = cartpow(posintegers, N), floor_measure = cartpow(reals, N),
+    log_radon = cartpow(reals, N)))
+
+alpha ~ iid(Normal(0, 10), J)
+beta ~ Normal(0, 10)
+sigma_y ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+y ~ Normal.(alpha[data.county_idx] .+ beta .* data.floor_measure, sigma_y)
+
+Pi_prior = lawof(record(alpha = alpha, beta = beta, sigma_y = sigma_y))
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta, sigma_y = sigma_y)
+L = likelihoodof(K_model, record(y = data.log_radon))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = cartpow(reals, 386), beta = reals, sigma_y = posreals)
+Pi_post_input = record(alpha = fill(0.956, 386), beta = -0.0821, sigma_y = 0.929)

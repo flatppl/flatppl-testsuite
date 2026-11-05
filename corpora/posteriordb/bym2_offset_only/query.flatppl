@@ -1,0 +1,7 @@
+p_beta0 = elementof(reals)
+p_sigma = elementof(posreals)
+p_rho = elementof(interval(0.0, 1.0))
+p_theta = elementof(cartpow(reals, 1921))
+p_phi = elementof(cartpow(reals, 1921))
+inputs = (p_beta0, p_sigma, p_rho, p_theta, p_phi)
+outputs = logdensityof(Pi_post, record(beta0 = p_beta0, sigma = p_sigma, rho = p_rho, theta = p_theta, phi = p_phi))

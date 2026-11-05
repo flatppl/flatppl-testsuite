@@ -1,0 +1,32 @@
+%%%
+# Radon, hierarchical intercepts with uranium, national data
+
+PosteriorDB's `radon_all-radon_hierarchical_intercept_noncentered`. Log
+radon in 12573 homes in 386 US counties. County intercepts are noncentered
+draws around mu_alpha. Log uranium and the floor enter with shared slopes.
+The two normalized half-Normal scale priors add 2 log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 12573
+J = 386
+data = load_data("../_data/radon_all.json", cartprod(
+    county_idx = cartpow(posintegers, N), floor_measure = cartpow(reals, N),
+    log_radon = cartpow(reals, N),
+    log_uppm = cartpow(reals, N)))
+
+alpha_raw ~ iid(Normal(0, 1), J)
+beta ~ iid(Normal(0, 10), 2)
+mu_alpha ~ Normal(0, 10)
+sigma_alpha ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+sigma_y ~ normalize(truncate(Normal(0, 1), interval(0, inf)))
+alpha = mu_alpha .+ sigma_alpha .* alpha_raw
+mu = alpha[data.county_idx] .+ data.log_uppm .* beta[1] .+ data.floor_measure .* beta[2]
+y ~ Normal.(mu, sigma_y)
+
+Pi_prior = lawof(record(alpha_raw = alpha_raw, beta = beta, mu_alpha = mu_alpha, sigma_alpha = sigma_alpha, sigma_y = sigma_y))
+K_model = kernelof(record(y = y), alpha_raw = alpha_raw, beta = beta, mu_alpha = mu_alpha, sigma_alpha = sigma_alpha, sigma_y = sigma_y)
+L = likelihoodof(K_model, record(y = data.log_radon))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha_raw = cartpow(reals, 386), beta = cartpow(reals, 2), mu_alpha = reals, sigma_alpha = posreals, sigma_y = posreals)
+Pi_post_input = record(alpha_raw = fill(0.0, 386), beta = [-0.0366, -0.0772], mu_alpha = 0.989, sigma_alpha = 0.541, sigma_y = 0.929)

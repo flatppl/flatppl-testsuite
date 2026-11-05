@@ -1,8 +1,9 @@
 # posteriorDB targets
 
-Seventy-eight posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Eighty-seven posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
-a query, and three frozen density/gradient points. Models with a worked-example
+a query, and three frozen density/gradient points. The seven `radon_all-*` rows
+share one copy of their data in `_data/radon_all.json`. Models with a worked-example
 role also live in
 [`flatppl-examples/posteriordb`](https://github.com/flatppl/flatppl-examples/tree/main/posteriordb).
 The others exist only here, as engine tests.
@@ -30,7 +31,9 @@ and `arma11`, `2*log(2)`
 for `gp_regr`, and `3*log(2)` for `irt_2pl` and
 `radon_variable_intercept_slope_noncentered`. Among the `radon_mn-*` rows,
 `radon_pooled` and `radon_county_intercept` add `log(2)` and the four other
-noncentered models add `2*log(2)`. Proper Uniform priors on
+noncentered models add `2*log(2)`. The `radon_all-*` rows use the same offsets
+as their `radon_mn-*` twins, and the national varying intercept and slope model
+adds `3*log(2)`. `bym2_offset_only` adds `log(2)`. Proper Uniform priors on
 fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `-log(5)` for `Mh_model` and `GLMM1_model`, `-2*log(100)` for
 `radon_mod-radon_county`, `-3*log(100)` for `pilots` and `-5*log(100)` for
@@ -53,11 +56,11 @@ Every oracle point passed an independent unconstraining check in both
 directions. A constrained directional finite difference checked each model.
 The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9` for
 the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
-`7.68e-9` for the next 45, and `1.04e-8` for the 42 points after them. Rows
-without reference draws take their second and third points from a short
-adaptive HMC run on Stan's own density. The rate model also matched an
-analytic Beta-Binomial calculation. These are density and differentiation
-checks, not convergence claims.
+`7.68e-9` for the next 45, `1.04e-8` for the next 42, and `7.5e-8` for the 27
+points after them. Rows without reference draws take their second and third
+points from a short adaptive HMC run on Stan's own density. The rate model
+also matched an analytic Beta-Binomial calculation. These are density and
+differentiation checks, not convergence claims.
 
 The unified tests check densities through Rust-to-JS and StableHLO.
 `tests/test_posteriordb.py` checks JS's own measure/data path and full
@@ -86,12 +89,16 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `kilpisjarvi` | 2, `beta` | `0.174` | `0.169`, `0.177` | `0.0163` |
 | `pilots` | 3, `sigma_a` | `0.00110` | `0.00112`, `0.00112` | `0.00051` |
 | `election88_full` | 3, `beta[1]` | `0.00049` | `0.00042`, `0.00094` | `0.00046` |
+| `radon_all-radon_pooled` | 1, `sigma_y` | `0.0019` | `0.0017`, `0.0023` | `0.0012` |
+| `radon_all-radon_variable_slope_noncentered` | 3, `sigma_y` | `0.0015` | `0.0009`, `0.0032` | `0.0006` |
+| `radon_all-radon_variable_intercept_slope_noncentered` | 3, `mu_alpha` | `0.00051` | `0.00052`, `0.00081` | `0.00048` |
 
 These rows regress on uncentered height (about 66), log height, maternal IQ
 (about 100) or the calendar year (about 2000), or they sum thousands of
-observations (`election88_full`) or cancel large scale terms (`pilots`, where
-sigma_a is 0.015). Near the posterior mean the coefficient gradient is a small
-difference of large float32 sums. CI runs on Linux x86-64; the M4 runs locally.
+observations (`election88_full`, the 12573-home `radon_all` rows) or cancel
+large scale terms (`pilots`, where sigma_a is 0.015). Near the posterior mean
+the coefficient gradient is a small difference of large float32 sums. CI runs
+on Linux x86-64; the M4 runs locally.
 
 ## Excluded posteriors
 
@@ -101,5 +108,22 @@ depends on factorization roundoff. At the three oracle points, float64
 gradients differ from Stan's by up to `5.8e-9` (absolute). float32 gradients
 differ by up to 30%, or are NaN at one posterior draw. float32 cannot represent
 the jitter, which comes from the Stan source. The JS densities match Stan.
+
+## Skipped posteriors
+
+These posteriors have no row by design. Posteriors held on engine findings land later.
+
+- ODE models: `lotka_volterra`, `one_comp_mm_elim_abs`, `sir`, `soil_incubation`.
+  FlatPPL has no ODE solver.
+- Cholesky correlation factors: `dogs_nonhierarchical`, `hier_2pl`,
+  `kronecker_gp`. FlatPPL has no set or chart for them.
+- A second parameterization of a ported model on the same data: the centered
+  radon twins, `eight_schools_noncentered`, `log10earn_height`,
+  `logearn_interaction_z`, `kidscore_interaction_c2`, `kidscore_interaction_z`,
+  `wells_dist100_model`, `wells_interaction_c_model`.
+- Exact duplicates: `covid19imperial_v3` on `ecdc0401` and `ecdc0501`. Its Stan
+  file is byte-identical to `covid19imperial_v2`.
+- Data over 5 MB: `mnist-nn_rbm1bJ100`, `prostate-logistic_regression_rhs`.
+- No Stan source at this revision: `M0_data-M0_model_discrete`.
 
 The imported Stan sources and data retain posteriorDB's [BSD license](LICENSE).
