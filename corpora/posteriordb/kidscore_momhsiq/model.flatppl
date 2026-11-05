@@ -1,0 +1,28 @@
+%%%
+# Child test scores, maternal high school and IQ
+
+PosteriorDB's `kidiq-kidscore_momhsiq`. Child test scores depend linearly on
+maternal high-school completion and IQ. The coefficients have flat priors.
+The normalized half-Cauchy scale prior adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 434
+data = load_data("data/kidiq.json", cartprod(
+    kid_score = cartpow(reals, N),
+    mom_hs = cartpow(reals, N),
+    mom_iq = cartpow(reals, N)))
+X = colstack([ones(N), data.mom_hs, data.mom_iq])
+
+beta = elementof(cartpow(reals, 3))
+sigma ~ normalize(truncate(Cauchy(0, 2.5), interval(0, inf)))
+y ~ Normal.(X * beta, sigma)
+
+Pi_proper = lawof((sigma = sigma))
+Pi_improper = Lebesgue(cartprod(beta = cartpow(reals, 3)))
+Pi_prior = joint(Pi_improper, Pi_proper)
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.kid_score))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 3), sigma = posreals)
+Pi_post_input = record(beta = [25.8, 5.99, 0.563], sigma = 18.1)

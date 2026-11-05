@@ -1,0 +1,30 @@
+%%%
+# Mesquite weight
+
+PosteriorDB's `mesquite-mesquite`. Shrub weight is Normal around a linear
+function of six measurements. Both the coefficients and the residual scale
+have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 46
+data = load_data("data/mesquite.json", cartprod(
+    weight = cartpow(reals, N),
+    diam1 = cartpow(reals, N),
+    diam2 = cartpow(reals, N),
+    canopy_height = cartpow(reals, N),
+    total_height = cartpow(reals, N),
+    density = cartpow(reals, N),
+    group = cartpow(reals, N)))
+X = colstack([ones(N), data.diam1, data.diam2, data.canopy_height, data.total_height, data.density, data.group])
+
+beta = elementof(cartpow(reals, 7))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 7), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.weight))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 7), sigma = posreals)
+Pi_post_input = record(beta = [-727.0, 187.0, 374.0, 356.0, -102.0, 132.0, -365.0], sigma = 278.0)
