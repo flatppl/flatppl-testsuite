@@ -1,0 +1,14 @@
+%%%
+# An integer running count mapped over 4 rows
+
+A broadcast maps a callable over the row indices. Its `scan` carries an
+integer count of the row's events, as posteriordb's dogs_hierarchical does.
+%%%
+flatppl_compat = "0.1"
+
+k = elementof(cartpow(nonnegintegers, [4, 24]))
+a = elementof(posreals)
+rows = indicesof(zeros(4))
+steps = indicesof(zeros(24))
+history(j, m) = scan((t, s) -> t + s, 0, m[j, steps])
+H = rowstack(history.(rows, [k]))
