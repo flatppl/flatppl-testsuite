@@ -1,0 +1,3 @@
+sf = standard_module("special-functions", "0.1")
+m = elementof(reals)
+a = draw(Normal(mu = sf.erfcx(m), sigma = 1.0))

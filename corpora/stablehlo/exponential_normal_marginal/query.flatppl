@@ -1,0 +1,4 @@
+t_y = elementof(reals)
+lp = logdensityof(lawof(y), t_y)
+inputs = (t_y, lam, sig)
+outputs = (lp)
