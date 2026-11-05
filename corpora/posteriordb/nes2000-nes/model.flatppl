@@ -1,0 +1,29 @@
+%%%
+# Party identification, 2000
+
+PosteriorDB's `nes2000-nes`. Seven-point party identification is regressed
+on ideology, race, age group, education, sex and income. Age enters as
+indicators for groups 2, 3 and 4. The coefficients and the residual scale
+have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 476
+data = load_data("data/nes2000.json", cartprod(
+    partyid7 = cartpow(reals, N), real_ideo = cartpow(reals, N), race_adj = cartpow(reals, N),
+    educ1 = cartpow(reals, N), gender = cartpow(reals, N), income = cartpow(reals, N),
+    age_discrete = cartpow(posintegers, N)))
+X = colstack([ones(N), data.real_ideo, data.race_adj,
+    ifelse.(data.age_discrete .== 2, 1.0, 0.0), ifelse.(data.age_discrete .== 3, 1.0, 0.0),
+    ifelse.(data.age_discrete .== 4, 1.0, 0.0), data.educ1, data.gender, data.income])
+
+beta = elementof(cartpow(reals, 9))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 9), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.partyid7))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 9), sigma = posreals)
+Pi_post_input = record(beta = [0.805, 0.789, -1.08, -0.454, -0.718, -0.483, 0.245, -0.0926, 0.236], sigma = 1.79)

@@ -1,0 +1,6 @@
+p_a = elementof(cartpow(reals, 386))
+p_mu_a = elementof(reals)
+p_sigma_a = elementof(interval(0.0, 100.0))
+p_sigma_y = elementof(interval(0.0, 100.0))
+inputs = (p_a, p_mu_a, p_sigma_a, p_sigma_y)
+outputs = logdensityof(Pi_post, record(a = p_a, mu_a = p_mu_a, sigma_a = p_sigma_a, sigma_y = p_sigma_y))
