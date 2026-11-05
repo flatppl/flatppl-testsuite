@@ -5,8 +5,8 @@
     "engine_commit": "185a9f84a35b513b5d3ec7af93b1f9377f8bd648",
     "probe_count": 859,
     "outcome_counts": {
-      "LOWERS": 676,
-      "REFUSES": 183,
+      "LOWERS": 677,
+      "REFUSES": 182,
       "MALFORMED": 0
     },
     "ci_slice": {
@@ -8637,11 +8637,11 @@
     },
     {
       "probe_id": "pushfwd.scalar_affine_vector.direct.single.noconsumer",
-      "outcome": "REFUSES",
+      "outcome": "LOWERS",
       "oracle": -3.536671427529236,
-      "value": null,
-      "marker": "functionof:refuse-functionof-flatppl-forward-over-vector",
-      "spec_justified": false,
+      "value": -3.536671427529236,
+      "marker": null,
+      "spec_justified": null,
       "oracle_unvalidated": false,
       "known_defect": false,
       "known_defect_reason": null

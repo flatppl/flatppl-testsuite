@@ -727,9 +727,8 @@ LITERAL_PROBES: tuple[LiteralProbe, ...] = (
     # conforming engine to recognize "affine maps composed from
     # `add`/`sub`/`neg`/`mul`/`divide` (with positive scaling)" by name and score
     # them analytically. flatppl-js #224 taught its own density route the scalar
-    # spelling over a vector base; the determiniser this table drives still
-    # refuses it, so the row reads REFUSES and is NOT spec-justified -- a tracked
-    # capability gap against that clause, carrying the value it should have.
+    # spelling over a vector base, and the determiniser lowers it since
+    # flatppl-rust's scalar-affine recogniser: log-volume 2 log 2 for the 2 cells.
     #
     # ORACLE. The pushforward of `iid(Normal(0, 1), 2)` through `x -> 2 x` is a
     # pair of independent `Normal(0, 2)`, so
@@ -743,7 +742,7 @@ LITERAL_PROBES: tuple[LiteralProbe, ...] = (
         binding="lp",
         oracle=-3.536671427529236102,
         note="scalar-affine map over an iid vector base; §06 case 1 names affine "
-             "maps as analytically scoreable, so a refusal is a capability gap",
+             "maps as analytically scoreable",
         refusal_spec_justified=False,
     ),
     # ------------------------------------------ a superposition component's mass
