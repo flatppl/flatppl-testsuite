@@ -1,0 +1,4 @@
+lam = elementof(posreals)
+sig = elementof(posreals)
+v = draw(Exponential(rate = lam))
+y = draw(Normal(mu = v, sigma = sig))
