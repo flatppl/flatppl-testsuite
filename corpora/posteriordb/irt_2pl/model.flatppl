@@ -1,0 +1,35 @@
+%%%
+# Two-parameter item response theory
+
+PosteriorDB's `irt_2pl-irt_2pl`. Each of 20 items has a discrimination a
+and a difficulty b. Each of 100 students has an ability theta. A correct
+answer has log-odds a[i] * (theta[j] - b[i]). The three normalized
+half-Cauchy scale priors add 3 log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+I = 20
+J = 100
+data = load_data("data/irt_2pl.json", cartprod(y = cartpow(nonnegintegers, [I, J])))
+
+sigma_theta ~ normalize(truncate(Cauchy(0, 2), interval(0, inf)))
+theta ~ iid(Normal(0, sigma_theta), J)
+sigma_a ~ normalize(truncate(Cauchy(0, 2), interval(0, inf)))
+a ~ iid(LogNormal(0, sigma_a), I)
+mu_b ~ Normal(0, 5)
+sigma_b ~ normalize(truncate(Cauchy(0, 2), interval(0, inf)))
+b ~ iid(Normal(mu_b, sigma_b), I)
+log_odds = aggregate(sum, [.i, .j], a[.i] * (theta[.j] - b[.i]))
+y ~ Bernoulli.(invlogit.(log_odds))
+
+Pi_prior = lawof(record(sigma_theta = sigma_theta, theta = theta, sigma_a = sigma_a,
+                        a = a, mu_b = mu_b, sigma_b = sigma_b, b = b))
+K_model = kernelof(record(y = y), sigma_theta = sigma_theta, theta = theta,
+                   sigma_a = sigma_a, a = a, mu_b = mu_b, sigma_b = sigma_b, b = b)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(sigma_theta = posreals, theta = cartpow(reals, J),
+                          sigma_a = posreals, a = cartpow(posreals, I), mu_b = reals,
+                          sigma_b = posreals, b = cartpow(reals, I))
+Pi_post_input = record(sigma_theta = 1.0, theta = zeros(J), sigma_a = 1.0,
+                       a = ones(I), mu_b = 0.0, sigma_b = 1.0, b = zeros(I))

@@ -43,4 +43,7 @@ def test_stablehlo_posterior_gradients(manifest, precision):
         np.testing.assert_allclose(ex.value(source, arguments), expected_value, rtol=rtol, atol=atol)
         gradient = ex.gradient(source, arguments, list(range(len(inputs))))
         for name, actual in zip(inputs, gradient, strict=True):
+            if name in spec.get("simplex_inputs", []):
+                # Only the tangent component is defined on a simplex.
+                actual = np.asarray(actual) - np.mean(actual, axis=-1, keepdims=True)
             np.testing.assert_allclose(actual, expected_gradient[name], rtol=rtol, atol=atol)
