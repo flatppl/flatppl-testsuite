@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Thirty-six posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Forty-nine posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. Models with a worked-example
 role also live in
@@ -36,15 +36,16 @@ initial distribution adds `-log(2)`. Its positive ordered means keep Stan's
 truncated Normal densities without renormalization. These constants leave the
 gradients and posterior laws unchanged. Each manifest records the raw Stan
 scores and its offset.
-Unbounded flat priors (the Kidscore, earnings, mesquite and `wells_dist`
-regressions) use explicit Lebesgue measure and its zero density contribution.
+Unbounded flat priors (the Kidscore, earnings, mesquite, Sesame, wells and
+NES-logit regressions, and the Kilpisjarvi residual scale) use explicit Lebesgue
+measure and its zero density contribution.
 
 Every oracle point passed an independent unconstraining check in both
 directions. A constrained directional finite difference checked each model.
-The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9`
-for the next 15, and `1.17e-9` for the 45 points after them. The rate model also matched an analytic
-Beta-Binomial calculation. These are density and differentiation checks, not
-convergence claims.
+The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9` for
+the next 15, `1.17e-9` for the following 45, and `3.68e-9` for the 39 points
+after them. The rate model also matched an analytic Beta-Binomial calculation.
+These are density and differentiation checks, not convergence claims.
 
 The unified tests check densities through Rust-to-JS and StableHLO.
 `tests/test_posteriordb.py` checks JS's own measure/data path and full
@@ -69,9 +70,10 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `logearn_height_male` | 1, `beta[2]` | `0.0119`; `0.0125` | `0.0134`, `0.0157` | `0.0119` |
 | `logearn_logheight_male` | 1, `beta[2]` | `0.0019` | `0.0019`, `0.0021` | `0.00058` |
 | `kidscore_momiq` | 1, `beta[2]` | `0.00029`; `0.00030` | `0.00042`, `0.00048` | `0.00030` |
+| `kilpisjarvi` | 2, `beta` | `0.174` | `0.169`, `0.177` | `0.0163` |
 
-These rows regress on uncentered height (about 66), log height or maternal IQ
-(about 100). Near the posterior mean the coefficient gradient is a small
+These rows regress on uncentered height (about 66), log height, maternal IQ
+(about 100) or the calendar year (about 2000). Near the posterior mean the coefficient gradient is a small
 difference of large float32 sums. CI runs on Linux x86-64; the M4 runs locally.
 
 ## Excluded posteriors

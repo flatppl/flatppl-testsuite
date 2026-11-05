@@ -1,0 +1,4 @@
+p_theta1 = elementof(unitinterval)
+p_theta2 = elementof(unitinterval)
+inputs = (p_theta1, p_theta2)
+outputs = logdensityof(Pi_post, record(theta1 = p_theta1, theta2 = p_theta2))

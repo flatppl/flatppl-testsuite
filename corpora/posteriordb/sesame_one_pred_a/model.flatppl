@@ -1,0 +1,24 @@
+%%%
+# Watching Sesame Street
+
+PosteriorDB's `sesame_data-sesame_one_pred_a`. Whether a child watched the
+programme is regressed linearly on whether the child was encouraged to
+watch. The coefficients and the residual scale have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 240
+data = load_data("data/sesame_data.json", cartprod(
+    encouraged = cartpow(reals, N), watched = cartpow(reals, N)))
+X = colstack([ones(N), data.encouraged])
+
+beta = elementof(cartpow(reals, 2))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 2), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.watched))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 2), sigma = posreals)
+Pi_post_input = record(beta = [0.545, 0.362], sigma = 0.381)

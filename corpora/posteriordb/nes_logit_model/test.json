@@ -1,0 +1,82 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_alpha",
+    "p_beta"
+  ],
+  "points": [
+    {
+      "p_alpha": -1.41,
+      "p_beta": [
+        0.328
+      ]
+    },
+    {
+      "p_alpha": -1.52603,
+      "p_beta": [
+        0.358386
+      ]
+    },
+    {
+      "p_alpha": -1.62163,
+      "p_beta": [
+        0.415576
+      ]
+    }
+  ],
+  "expected": [
+    -778.459013513091,
+    -778.6824106334184,
+    -780.24507094846
+  ],
+  "expected_grad": [
+    {
+      "p_alpha": 0.423699911577217,
+      "p_beta": [
+        0.7189216202807405
+      ]
+    },
+    {
+      "p_alpha": 5.875847710927098,
+      "p_beta": [
+        8.691266257548797
+      ]
+    },
+    {
+      "p_alpha": -17.586251899774144,
+      "p_beta": [
+        -82.8805748949581
+      ]
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "nes_logit_model",
+    "dataset": "nes_logit_data",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -778.459013513091,
+      -778.6824106334184,
+      -780.24507094846
+    ],
+    "log_density_offset": 0.0
+  }
+}

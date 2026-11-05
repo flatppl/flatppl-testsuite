@@ -1,0 +1,63 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_theta"
+  ],
+  "points": [
+    {
+      "p_theta": 0.499
+    },
+    {
+      "p_theta": 0.604152
+    },
+    {
+      "p_theta": 0.438405
+    }
+  ],
+  "expected": [
+    -13.862983611278906,
+    -14.306544368744527,
+    -14.01586467747952
+  ],
+  "expected_grad": [
+    {
+      "p_theta": 0.08000032000127176
+    },
+    {
+      "p_theta": -8.710095907879621
+    },
+    {
+      "p_theta": 5.003532488758477
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "Rate_5_model",
+    "dataset": "Rate_5_data",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -13.862983611278906,
+      -14.306544368744527,
+      -14.01586467747952
+    ],
+    "log_density_offset": 0.0
+  }
+}

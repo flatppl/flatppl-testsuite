@@ -1,0 +1,88 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_alpha",
+    "p_beta"
+  ],
+  "points": [
+    {
+      "p_alpha": 0.00275,
+      "p_beta": [
+        -0.897,
+        0.461
+      ]
+    },
+    {
+      "p_alpha": 0.137129086948149,
+      "p_beta": [
+        -1.00371139288655,
+        0.394199879889735
+      ]
+    },
+    {
+      "p_alpha": -0.0600220856269122,
+      "p_beta": [
+        -1.0109733193821,
+        0.490677227482792
+      ]
+    }
+  ],
+  "expected": [
+    -1965.3341614076237,
+    -1967.9213680435375,
+    -1967.8397039372667
+  ],
+  "expected_grad": [
+    {
+      "p_alpha": -0.12018232307751031,
+      "p_beta": [
+        -0.03779020938503774,
+        -0.3015344312092374
+      ]
+    },
+    {
+      "p_alpha": 13.907700665570049,
+      "p_beta": [
+        21.5688623175406,
+        71.66245547748056
+      ]
+    },
+    {
+      "p_alpha": 50.10180472174971,
+      "p_beta": [
+        33.28392789876098,
+        65.47769509925267
+      ]
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "wells_dist100ars_model",
+    "dataset": "wells_data",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -1965.3341614076237,
+      -1967.9213680435375,
+      -1967.8397039372667
+    ],
+    "log_density_offset": 0.0
+  }
+}

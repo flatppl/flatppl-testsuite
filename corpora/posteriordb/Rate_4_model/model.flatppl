@@ -1,0 +1,21 @@
+%%%
+# Rate with a prior-only twin
+
+PosteriorDB's `Rate_4_data-Rate_4_model`. One binomial count informs theta.
+A second parameter, thetaprior, has the same uniform Beta(1, 1) prior and no
+data, so its posterior is its prior.
+%%%
+flatppl_compat = "0.1"
+
+data = load_data("data/Rate_4_data.json", cartprod(n = posintegers, k = nonnegintegers))
+
+theta ~ Beta(1, 1)
+thetaprior ~ Beta(1, 1)
+k ~ Binomial(data.n, theta)
+
+Pi_prior = lawof(record(theta = theta, thetaprior = thetaprior))
+K_model = kernelof(record(k = k), theta = theta, thetaprior = thetaprior)
+L = likelihoodof(K_model, record(k = data.k))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = unitinterval, thetaprior = unitinterval)
+Pi_post_input = record(theta = 0.12, thetaprior = 0.5)

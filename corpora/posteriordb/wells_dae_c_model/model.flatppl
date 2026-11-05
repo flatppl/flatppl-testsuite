@@ -1,0 +1,30 @@
+%%%
+# Switching wells: centered distance and arsenic with interaction
+
+PosteriorDB's `wells_data-wells_dae_c_model`. Logistic regression of
+switching on centered distance and arsenic, their product, and education in
+four-year units. The intercept and the coefficients have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 3020
+data = load_data("data/wells_data.json", cartprod(
+    switched = cartpow(nonnegintegers, N),
+    dist = cartpow(reals, N),
+    arsenic = cartpow(reals, N),
+    educ = cartpow(reals, N)))
+c_dist100 = (data.dist .- mean(data.dist)) ./ 100
+c_arsenic = data.arsenic .- mean(data.arsenic)
+educ4 = data.educ ./ 4
+X = colstack([c_dist100, c_arsenic, c_dist100 .* c_arsenic, educ4])
+
+alpha = elementof(reals)
+beta = elementof(cartpow(reals, 4))
+y ~ Bernoulli.(invlogit.(alpha .+ X * beta))
+
+Pi_prior = Lebesgue(cartprod(alpha = reals, beta = cartpow(reals, 4)))
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta)
+L = likelihoodof(K_model, record(y = data.switched))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta = cartpow(reals, 4))
+Pi_post_input = record(alpha = 0.148, beta = [-0.875, 0.477, -0.163, 0.169])

@@ -1,0 +1,24 @@
+%%%
+# Vote and income
+
+PosteriorDB's `nes_logit_data-nes_logit_model`. A logistic regression
+relates the presidential vote to income. The intercept and the coefficient
+have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 1179
+data = load_data("data/nes_logit_data.json", cartprod(
+    income = cartpow(reals, N), vote = cartpow(nonnegintegers, N)))
+X = colstack([data.income])
+
+alpha = elementof(reals)
+beta = elementof(cartpow(reals, 1))
+y ~ Bernoulli.(invlogit.(alpha .+ X * beta))
+
+Pi_prior = Lebesgue(cartprod(alpha = reals, beta = cartpow(reals, 1)))
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta)
+L = likelihoodof(K_model, record(y = data.vote))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta = cartpow(reals, 1))
+Pi_post_input = record(alpha = -1.41, beta = [0.328])
