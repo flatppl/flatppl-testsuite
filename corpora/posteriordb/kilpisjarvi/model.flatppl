@@ -1,0 +1,28 @@
+%%%
+# Kilpisjarvi summer temperatures
+
+PosteriorDB's `kilpisjarvi_mod-kilpisjarvi`. Mean summer temperature at
+Kilpisjarvi follows a linear trend in the year. The data set supplies the
+Normal prior means and scales of the intercept and slope. The residual scale
+has a flat prior.
+%%%
+flatppl_compat = "0.1"
+
+N = 62
+data = load_data("data/kilpisjarvi_mod.json", cartprod(
+    x = cartpow(reals, N), y = cartpow(reals, N), pmualpha = reals, psalpha = posreals,
+    pmubeta = reals, psbeta = posreals))
+
+alpha ~ Normal(data.pmualpha, data.psalpha)
+beta ~ Normal(data.pmubeta, data.psbeta)
+sigma = elementof(posreals)
+y ~ Normal.(alpha .+ beta .* data.x, sigma)
+
+Pi_proper = lawof(record(alpha = alpha, beta = beta))
+Pi_improper = Lebesgue(cartprod(sigma = posreals))
+Pi_prior = joint(Pi_proper, Pi_improper)
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta = reals, sigma = posreals)
+Pi_post_input = record(alpha = -60.7, beta = 0.0176, sigma = 1.13)

@@ -1,0 +1,22 @@
+%%%
+# Difference between two rates
+
+PosteriorDB's `Rate_2_data-Rate_2_model`. Two binomial counts have separate
+rates with uniform Beta(1, 1) priors.
+%%%
+flatppl_compat = "0.1"
+
+data = load_data("data/Rate_2_data.json", cartprod(
+    n1 = posintegers, n2 = posintegers, k1 = nonnegintegers, k2 = nonnegintegers))
+
+theta1 ~ Beta(1, 1)
+theta2 ~ Beta(1, 1)
+k1 ~ Binomial(data.n1, theta1)
+k2 ~ Binomial(data.n2, theta2)
+
+Pi_prior = lawof(record(theta1 = theta1, theta2 = theta2))
+K_model = kernelof(record(k1 = k1, k2 = k2), theta1 = theta1, theta2 = theta2)
+L = likelihoodof(K_model, record(k1 = data.k1, k2 = data.k2))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta1 = unitinterval, theta2 = unitinterval)
+Pi_post_input = record(theta1 = 0.502, theta2 = 0.665)

@@ -1,0 +1,29 @@
+%%%
+# Switching wells: distance, arsenic, education
+
+PosteriorDB's `wells_data-wells_dae_model`. Logistic regression of switching
+on distance in hundreds of metres, arsenic level and education in four-year
+units. The intercept and the coefficients have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 3020
+data = load_data("data/wells_data.json", cartprod(
+    switched = cartpow(nonnegintegers, N),
+    dist = cartpow(reals, N),
+    arsenic = cartpow(reals, N),
+    educ = cartpow(reals, N)))
+dist100 = data.dist ./ 100
+educ4 = data.educ ./ 4
+X = colstack([dist100, data.arsenic, educ4])
+
+alpha = elementof(reals)
+beta = elementof(cartpow(reals, 3))
+y ~ Bernoulli.(invlogit.(alpha .+ X * beta))
+
+Pi_prior = Lebesgue(cartprod(alpha = reals, beta = cartpow(reals, 3)))
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta)
+L = likelihoodof(K_model, record(y = data.switched))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta = cartpow(reals, 3))
+Pi_post_input = record(alpha = -0.214, beta = [-0.896, 0.468, 0.171])

@@ -1,0 +1,21 @@
+%%%
+# Common rate of two counts
+
+PosteriorDB's `Rate_3_data-Rate_3_model`. Two binomial counts share one rate
+with a uniform Beta(1, 1) prior.
+%%%
+flatppl_compat = "0.1"
+
+data = load_data("data/Rate_3_data.json", cartprod(
+    n1 = posintegers, n2 = posintegers, k1 = nonnegintegers, k2 = nonnegintegers))
+
+theta ~ Beta(1, 1)
+k1 ~ Binomial(data.n1, theta)
+k2 ~ Binomial(data.n2, theta)
+
+Pi_prior = lawof(record(theta = theta))
+K_model = kernelof(record(k1 = k1, k2 = k2), theta = theta)
+L = likelihoodof(K_model, record(k1 = data.k1, k2 = data.k2))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = unitinterval)
+Pi_post_input = record(theta = 0.591)
