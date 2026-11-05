@@ -57,8 +57,9 @@ with FlatPPL.
 
 `gp_pois_regr-gp_pois_regr` adds a jitter of `1e-10` to a nearly singular
 squared-exponential covariance before its Cholesky factorization. The result
-depends on factorization roundoff: float64 gradients differ from Stan's by up to
-`5.8e-9` (absolute) and float32 values and gradients by up to 23%. float32
-cannot represent the jitter. The JS densities match Stan.
+depends on factorization roundoff. At the three oracle points, float64
+gradients differ from Stan's by up to `5.8e-9` (absolute). float32 gradients
+differ by up to 30%, or are NaN at one posterior draw. float32 cannot represent
+the jitter, which comes from the Stan source. The JS densities match Stan.
 
 The imported Stan sources and data retain posteriorDB's [BSD license](LICENSE).
