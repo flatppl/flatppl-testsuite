@@ -1,0 +1,39 @@
+%%%
+# Input-output hidden Markov regression
+
+PosteriorDB's `iohmm_reg_simulated-iohmm_reg`. Three hidden states each have
+a regression of y on four inputs u with coefficients b and scale sigma.
+Stan's forward step weights each source state i by a softmax of u[t] * w
+over the source index alone, so the transition weight does not depend on the
+destination state. The forward recursion then factorizes into one log-sum-
+exp per time step, and the target is not a normalized likelihood of y. The
+model keeps it as an explicit log weight on the prior. The uniform simplex
+prior on pi1 and the three normalized half-Normal scales add 4 log(2) to
+Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+T = 500
+K = 3
+M = 4
+data = load_data("data/iohmm_reg_simulated.json", cartprod(y = cartpow(reals, T), u = cartpow(reals, [T, M])))
+
+pi1 ~ Dirichlet(ones(K))
+w ~ iid(iid(Normal(0, 5), M), K)
+b ~ iid(iid(Normal(0, 5), M), K)
+sigma ~ iid(normalize(truncate(Normal(0, 3), interval(0, inf))), K)
+Pi_prior = lawof(record(pi1 = pi1, w = w, b = b, sigma = sigma))
+
+row_max(X) = aggregate(maximum, [.t], X[.t, .k])
+row_logsumexp(X) = row_max(X) .+ log.(aggregate(sum, [.t], exp(X[.t, .k] - row_max(X)[.t])))
+log_obs(x) = aggregate(sum, [.t, .k], -0.5 * ((data.y[.t] - (data.u * transpose(rowstack(x.b)))[.t, .k])
+    / x.sigma[.k])^2 - log(x.sigma[.k]) - 0.5 * log(2 * pi))
+log_trans(x) = (data.u * transpose(rowstack(x.w))) .- addaxes(row_logsumexp(data.u * transpose(rowstack(x.w))), 0, 1)
+middle = indicesof(zeros(T - 2)) .+ 1
+% Stan's forward recursion, collapsed: one log-sum-exp per step.
+log_target(x) = logsumexp(log.(x.pi1) .+ log_obs(x)[1, :] .+ log_trans(x)[2, :]) +
+    sum(row_logsumexp(log_obs(x)[middle, :] .+ log_trans(x)[middle .+ 1, :])) +
+    logsumexp(log_obs(x)[T, :])
+Pi_post = logweighted(log_target, Pi_prior)
+Pi_post_domain = cartprod(pi1 = stdsimplex(3), w = cartpow(cartpow(reals, 4), 3), b = cartpow(cartpow(reals, 4), 3), sigma = cartpow(posreals, 3))
+Pi_post_input = record(pi1 = [0.026665, 0.15385, 0.819485], w = [[1.75, 1.58, 1.9, 3.57], [1.63, 1.77, 1.84, 3.28], [1.55, 1.54, 1.85, 3.31]], b = [[4.98, 5.98, 7.03, 0.494], [-0.0888, -1.11, -4.81, 0.0371], [1.01, 4.92, 0.127, -0.606]], sigma = [0.199, 2.56, 1.05])

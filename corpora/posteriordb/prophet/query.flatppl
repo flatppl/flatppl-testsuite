@@ -1,0 +1,7 @@
+p_k = elementof(reals)
+p_m = elementof(reals)
+p_delta = elementof(cartpow(reals, 25))
+p_sigma_obs = elementof(posreals)
+p_beta = elementof(cartpow(reals, 34))
+inputs = (p_k, p_m, p_delta, p_sigma_obs, p_beta)
+outputs = logdensityof(Pi_post, record(k = p_k, m = p_m, delta = p_delta, sigma_obs = p_sigma_obs, beta = p_beta))
