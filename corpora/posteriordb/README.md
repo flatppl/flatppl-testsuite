@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Ninety-six posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and three posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -50,8 +50,9 @@ fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `low_dim_gauss_mix_collapse` adds `2*log(2)`. The uniform five-component simplex
 of `normal_mixture_k` has density 24 and its Uniform(0, 10) scales add
 `-5*log(10)`. The ordered mixture adds `3*log(2)`. Stan starts the
-`hmm_example` forward recursion with weight one per state, so the uniform
-initial distribution adds `-log(2)`. Its positive ordered means keep Stan's
+`hmm_example`, `hmm_drive_0` and `bball_drive_event_1-hmm_drive_1` forward
+recursions with weight one per state, so the uniform initial distribution adds
+`-log(2)`. Their positive ordered parameters keep Stan's
 truncated Normal densities without renormalization. These constants leave the
 gradients and posterior laws unchanged. Each manifest records the raw Stan
 scores and its offset.
@@ -108,6 +109,8 @@ recursion over 50 orders of the four input columns.
 | `radon_all-radon_pooled` | 1, `sigma_y` | `0.0019` | `0.0017`, `0.0023` | `0.0012` |
 | `radon_all-radon_variable_slope_noncentered` | 3, `sigma_y` | `0.0015` | `0.0009`, `0.0032` | `0.0006` |
 | `radon_all-radon_variable_intercept_slope_noncentered` | 3, `mu_alpha` | `0.00051` | `0.00052`, `0.00081` | `0.00048` |
+| `diamonds` | 3, `Intercept` | `9.89` | `16.0`, `28.4` | `0.0087` |
+| `accel_splines` | 2, `zs_1_1[4]` | `0.00103` | `0.00161`, `0.00171` | `0.00071` |
 | `prophet` | 2, `beta[3]` | `0.00443` | `0.00711`, `0.00823` | `0.00147` |
 | `iohmm_reg` | 2, `b[1][1]` | `0.00072` | `0.00044`, `0.00079` (JAX) | `0.00056` |
 
@@ -116,7 +119,8 @@ indicator, log height, maternal IQ (about 100) or the calendar year (about
 2000), or they sum thousands of observations (`election88_full`, the
 12573-home `radon_all` rows) or cancel large scale terms (`pilots`, where
 sigma_a is 0.015) or factor a nearly singular covariance
-(`hierarchical_gp`). Near the posterior mean the coefficient gradient is a
+(`hierarchical_gp`) or center 24 predictors over 5000 rows (`diamonds`).
+Near the posterior mean the coefficient gradient is a
 small difference of large float32 sums. CI runs on Linux x86-64; the M4 runs
 locally.
 

@@ -1,0 +1,6 @@
+p_theta1 = elementof(stdsimplex(2))
+p_theta2 = elementof(stdsimplex(2))
+p_phi = elementof(ordered(2))
+p_lambda = elementof(ordered(2))
+inputs = (p_theta1, p_theta2, p_phi, p_lambda)
+outputs = logdensityof(Pi_post, record(theta1 = p_theta1, theta2 = p_theta2, phi = p_phi, lambda = p_lambda))

@@ -1,0 +1,38 @@
+%%%
+# Motorcycle acceleration, approximate Gaussian processes
+
+PosteriorDB's `mcycle_gp-accel_gp`. Head acceleration after a crash is
+Normal with a mean and a log scale that each follow a Hilbert-space
+approximate Gaussian process in time. Each process weights basis functions X
+by the square root of the squared-exponential spectral density at
+sqrt(lambda), times standard Normal coefficients. Stan normalizes its half-
+Student-t amplitude priors, so the targets agree.
+%%%
+flatppl_compat = "0.1"
+
+N = 133
+data = load_data("data/mcycle_gp.json", cartprod(
+    Y = cartpow(reals, N), Xgp_1 = cartpow(reals, [N, 40]), slambda_1 = cartpow(reals, [40, 1]),
+    Xgp_sigma_1 = cartpow(reals, [N, 20]), slambda_sigma_1 = cartpow(reals, [20, 1])))
+
+Intercept ~ locscale(StudentT(3), -13, 36)
+sdgp_1 ~ normalize(truncate(locscale(StudentT(3), 0, 36), interval(0, inf)))
+lscale_1 ~ InverseGamma(1.124909, 0.0177)
+zgp_1 ~ iid(Normal(0, 1), 40)
+Intercept_sigma ~ locscale(StudentT(3), 0, 10)
+sdgp_sigma_1 ~ normalize(truncate(locscale(StudentT(3), 0, 36), interval(0, inf)))
+lscale_sigma_1 ~ InverseGamma(1.124909, 0.0177)
+zgp_sigma_1 ~ iid(Normal(0, 1), 20)
+% Square root of the one-dimensional squared-exponential spectral density.
+sqrt_spd(slambda, sdgp, lscale) = sqrt.(sdgp^2 * sqrt(2 * pi) * lscale .* exp.(-0.5 * lscale^2 .* slambda .^ 2))
+mu = Intercept .+ data.Xgp_1 * (sqrt_spd(data.slambda_1[:, 1], sdgp_1, lscale_1) .* zgp_1)
+sigma = exp.(Intercept_sigma .+ data.Xgp_sigma_1 *
+    (sqrt_spd(data.slambda_sigma_1[:, 1], sdgp_sigma_1, lscale_sigma_1) .* zgp_sigma_1))
+y ~ Normal.(mu, sigma)
+
+Pi_prior = lawof(record(Intercept = Intercept, sdgp_1 = sdgp_1, lscale_1 = lscale_1, zgp_1 = zgp_1, Intercept_sigma = Intercept_sigma, sdgp_sigma_1 = sdgp_sigma_1, lscale_sigma_1 = lscale_sigma_1, zgp_sigma_1 = zgp_sigma_1))
+K_model = kernelof(record(y = y), Intercept = Intercept, sdgp_1 = sdgp_1, lscale_1 = lscale_1, zgp_1 = zgp_1, Intercept_sigma = Intercept_sigma, sdgp_sigma_1 = sdgp_sigma_1, lscale_sigma_1 = lscale_sigma_1, zgp_sigma_1 = zgp_sigma_1)
+L = likelihoodof(K_model, record(y = data.Y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(Intercept = reals, sdgp_1 = posreals, lscale_1 = posreals, zgp_1 = cartpow(reals, 40), Intercept_sigma = reals, sdgp_sigma_1 = posreals, lscale_sigma_1 = posreals, zgp_sigma_1 = cartpow(reals, 20))
+Pi_post_input = record(Intercept = 0.272, sdgp_1 = 27.2, lscale_1 = 0.0702, zgp_1 = fill(0.0, 40), Intercept_sigma = 2.28, sdgp_sigma_1 = 6.77, lscale_sigma_1 = 0.00937, zgp_sigma_1 = fill(0.0, 20))
