@@ -1,0 +1,5 @@
+p_b = elementof(cartpow(reals, 24))
+p_Intercept = elementof(reals)
+p_sigma = elementof(posreals)
+inputs = (p_b, p_Intercept, p_sigma)
+outputs = logdensityof(Pi_post, record(b = p_b, Intercept = p_Intercept, sigma = p_sigma))
