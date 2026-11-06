@@ -1,0 +1,26 @@
+%%%
+# Log earnings with a height-sex interaction
+
+PosteriorDB's `earnings-logearn_interaction`. Log earnings depend on height,
+a male indicator and their product. Both the coefficients and the residual
+scale have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 1192
+data = load_data("data/earnings.json", cartprod(
+    earn = cartpow(posreals, N),
+    height = cartpow(posreals, N),
+    male = cartpow(reals, N)))
+X = colstack([ones(N), data.height, data.male, data.height .* data.male])
+
+beta = elementof(cartpow(reals, 4))
+sigma = elementof(posreals)
+y ~ Normal.(X * beta, sigma)
+
+Pi_prior = Lebesgue(cartprod(beta = cartpow(reals, 4), sigma = posreals))
+K_model = kernelof(record(y = y), beta = beta, sigma = sigma)
+L = likelihoodof(K_model, record(y = log.(data.earn)))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta = cartpow(reals, 4), sigma = posreals)
+Pi_post_input = record(beta = [8.39, 0.017, -0.0776, 0.00742], sigma = 0.882)
