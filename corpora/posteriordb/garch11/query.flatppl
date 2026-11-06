@@ -1,0 +1,6 @@
+p_mu = elementof(reals)
+p_alpha0 = elementof(posreals)
+p_alpha1 = elementof(unitinterval)
+p_beta1 = elementof(unitinterval)
+inputs = (p_mu, p_alpha0, p_alpha1, p_beta1)
+outputs = logdensityof(Pi_post, record(mu = p_mu, alpha0 = p_alpha0, alpha1 = p_alpha1, beta1 = p_beta1))

@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Eighty-nine posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Ninety-one posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -101,6 +101,7 @@ NumPy form.
 | `radon_all-radon_pooled` | 1, `sigma_y` | `0.0019` | `0.0017`, `0.0023` | `0.0012` |
 | `radon_all-radon_variable_slope_noncentered` | 3, `sigma_y` | `0.0015` | `0.0009`, `0.0032` | `0.0006` |
 | `radon_all-radon_variable_intercept_slope_noncentered` | 3, `mu_alpha` | `0.00051` | `0.00052`, `0.00081` | `0.00048` |
+| `accel_splines` | 2, `zs_1_1[4]` | `0.00103` | `0.00161`, `0.00171` | `0.00071` |
 
 These rows regress on uncentered height (about 66), its product with an
 indicator, log height, maternal IQ (about 100) or the calendar year (about
