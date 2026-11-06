@@ -1,0 +1,43 @@
+%%%
+# Two-parameter IRT with latent regression
+
+PosteriorDB's `fims_Aus_Jpn_irt-2pl_latent_reg_irt`. 500 students answer 14
+items. A correct answer has log-odds alpha[i] * theta[j] - beta[i]. Item
+difficulties sum to zero: beta_free holds the first 13 and the last is minus
+their sum. Stan adds normal_lpdf(beta | 0, 3) over all 14, a log weight on
+Lebesgue measure for beta_free. Abilities are Normal around a regression on
+four student covariates W, centered and scaled as Stan's adjustment does.
+Its test for binary columns never succeeds because of operator precedence,
+so columns 2 to 4 use the mean and twice the standard deviation, and column
+1 is kept as is.
+%%%
+flatppl_compat = "0.1"
+
+I = 14
+J = 500
+N = 7000
+K = 4
+data = load_data("data/fims_Aus_Jpn_irt.json", cartprod(
+    ii = cartpow(posintegers, N), jj = cartpow(posintegers, N), y = cartpow(nonnegintegers, N),
+    W = cartpow(reals, [J, K])))
+column_mean = aggregate(mean, [.k], data.W[.j, .k])
+column_std = aggregate(std, [.k], data.W[.j, .k])
+shift = cat([0.0], column_mean[[2, 3, 4]])
+scale = cat([1.0], 2 .* column_std[[2, 3, 4]])
+W_adj = aggregate(sum, [.j, .k], (data.W[.j, .k] - shift[.k]) / scale[.k])
+
+alpha ~ iid(LogNormal(1, 1), I)
+lambda_adj ~ iid(StudentT(3), K)
+theta ~ Normal.(W_adj * lambda_adj, 1)
+beta_free = elementof(cartpow(reals, I - 1))
+beta = cat(beta_free, [-sum(beta_free)])
+y ~ Bernoulli.(invlogit.(alpha[data.ii] .* theta[data.jj] .- beta[data.ii]))
+
+difficulty_weight(p) = sum(logdensityof.(Normal(0, 3), cat(p.beta_free, [-sum(p.beta_free)])))
+Pi_difficulty = logweighted(difficulty_weight, Lebesgue(cartprod(beta_free = cartpow(reals, I - 1))))
+Pi_prior = joint(lawof(record(alpha = alpha, lambda_adj = lambda_adj, theta = theta)), Pi_difficulty)
+K_model = kernelof(record(y = y), alpha = alpha, lambda_adj = lambda_adj, theta = theta, beta_free = beta_free)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = cartpow(posreals, 14), lambda_adj = cartpow(reals, 4), theta = cartpow(reals, 500), beta_free = cartpow(reals, 13))
+Pi_post_input = record(alpha = fill(1.1, 14), lambda_adj = [-0.0644, 0.0921, 1.28, -0.229], theta = fill(0.0, 500), beta_free = fill(0.116, 13))
