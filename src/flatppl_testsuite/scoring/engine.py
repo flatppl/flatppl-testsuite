@@ -20,14 +20,21 @@ from ..config import CONFIG
 from . import worker
 
 
+class Matrix(list):
+    """Nested rows that render as a FlatPPL matrix, not an array of arrays."""
+
+
 def render_record(theta: dict) -> str:
     """Serialise a Python dict to a FlatPPL ``record(...)`` literal.
 
-    Booleans retain their literals, integers emit ``N.0``, and sequences become arrays.
+    Booleans retain their literals, integers emit ``N.0``, sequences become arrays,
+    and a ``Matrix`` becomes ``rowstack`` of its rows.
     """
     def lit(v):
         if isinstance(v, bool):
             return "true" if v else "false"
+        if isinstance(v, Matrix):
+            return "rowstack(" + lit(list(v)) + ")"
         if isinstance(v, (list, tuple)):
             return "[" + ", ".join(lit(x) for x in v) + "]"
         return f"{v}.0" if isinstance(v, int) else repr(float(v))

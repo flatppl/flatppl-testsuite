@@ -45,8 +45,16 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     if not isinstance(expected, list):
         expected = [expected]
     tol = body.get("tolerance", {})
-    atol = tol.get("value_atol_f32", 1e-4)
-    rtol = tol.get("value_rtol_f32", 0.0)
+    # A row that lists only "f64" among its "precisions" has float32 evidence
+    # against it (corpora/posteriordb/README.md), so it runs in float64 against
+    # its float64 tolerance.
+    dtype = None if "f32" in body.get("precisions", ["f32"]) else "f64"
+    if dtype is None:
+        atol = tol.get("value_atol_f32", 1e-4)
+        rtol = tol.get("value_rtol_f32", 0.0)
+    else:
+        atol = tol.get("atol", 1e-9)
+        rtol = tol.get("rtol", 1e-9)
 
     if len(expected) != len(points):
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
@@ -54,7 +62,7 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                             "(run regen)")]
 
     try:
-        src = ex.emit_concat(dir, "logdensity", model_name=model_name,
+        src = ex.emit_concat(dir, "logdensity", model_name=model_name, dtype=dtype,
                              numerical_integrals=body.get("numerical_integrals", False))
     except ex.EmitRefused as e:
         # A refusal is a SKIP, matching `logdensity_detjs`'s DeterminizeRefused
