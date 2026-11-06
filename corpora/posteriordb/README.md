@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Eighty-seven posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Eighty-eight posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -54,13 +54,14 @@ measure and its zero density contribution.
 
 Every oracle point passed an independent unconstraining check in both
 directions. A constrained directional finite difference checked each model.
-The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9` for
-the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
-`7.68e-9` for the next 45, `1.04e-8` for the next 42, and `7.5e-8` for the 27
-points after them. Rows without reference draws take their second and third
-points from a short adaptive HMC run on Stan's own density. The rate model
-also matched an analytic Beta-Binomial calculation. These are density and
-differentiation checks, not convergence claims.
+The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9`
+for the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
+`7.68e-9` for the next 45, `1.04e-8` for the next 42, `7.5e-8` for the next
+27, and `1.72e-10` for the three `logearn_interaction` points. Rows without
+reference draws take their second and third points from a short adaptive HMC
+run on Stan's own density. The rate model also matched an analytic
+Beta-Binomial calculation. These are density and differentiation checks, not
+convergence claims.
 
 The unified tests check densities through Rust-to-JS and StableHLO.
 `tests/test_posteriordb.py` checks JS's own measure/data path and full
@@ -84,6 +85,7 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `logearn_height` | 1, `beta[2]` | `0.028` | `0.027`, `0.033` | `0.0014` |
 | `logearn_height_male` | 1, `beta[2]` | `0.0119`; `0.0125` | `0.0134`, `0.0157` | `0.0119` |
 | `logearn_logheight_male` | 1, `beta[2]` | `0.0019` | `0.0019`, `0.0021` | `0.00058` |
+| `logearn_interaction` | 1, `beta[4]` | `0.0259` | `0.0259`, `0.0272` | `0.00041` |
 | `kidscore_momiq` | 1, `beta[2]` | `0.00029`; `0.00030` | `0.00042`, `0.00048` | `0.00030` |
 | `kidscore_momhsiq` | 1, `beta[3]` | `0.00017` | `0.00027`, `0.00034` | `0.00033` |
 | `kilpisjarvi` | 2, `beta` | `0.174` | `0.169`, `0.177` | `0.0163` |
@@ -93,12 +95,13 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `radon_all-radon_variable_slope_noncentered` | 3, `sigma_y` | `0.0015` | `0.0009`, `0.0032` | `0.0006` |
 | `radon_all-radon_variable_intercept_slope_noncentered` | 3, `mu_alpha` | `0.00051` | `0.00052`, `0.00081` | `0.00048` |
 
-These rows regress on uncentered height (about 66), log height, maternal IQ
-(about 100) or the calendar year (about 2000), or they sum thousands of
-observations (`election88_full`, the 12573-home `radon_all` rows) or cancel
-large scale terms (`pilots`, where sigma_a is 0.015). Near the posterior mean
-the coefficient gradient is a small difference of large float32 sums. CI runs
-on Linux x86-64; the M4 runs locally.
+These rows regress on uncentered height (about 66), its product with an
+indicator, log height, maternal IQ (about 100) or the calendar year (about
+2000), or they sum thousands of observations (`election88_full`, the
+12573-home `radon_all` rows) or cancel large scale terms (`pilots`, where
+sigma_a is 0.015). Near the posterior mean the coefficient gradient is a
+small difference of large float32 sums. CI runs on Linux x86-64; the M4 runs
+locally.
 
 ## Excluded posteriors
 
