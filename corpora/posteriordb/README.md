@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Ninety-eight posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -50,8 +50,9 @@ fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `low_dim_gauss_mix_collapse` adds `2*log(2)`. The uniform five-component simplex
 of `normal_mixture_k` has density 24 and its Uniform(0, 10) scales add
 `-5*log(10)`. The ordered mixture adds `3*log(2)`. Stan starts the
-`hmm_example` forward recursion with weight one per state, so the uniform
-initial distribution adds `-log(2)`. Its positive ordered means keep Stan's
+`hmm_example`, `hmm_drive_0` and `bball_drive_event_1-hmm_drive_1` forward
+recursions with weight one per state, so the uniform initial distribution adds
+`-log(2)`. Their positive ordered parameters keep Stan's
 truncated Normal densities without renormalization. These constants leave the
 gradients and posterior laws unchanged. Each manifest records the raw Stan
 scores and its offset.
