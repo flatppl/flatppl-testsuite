@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and three posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -91,7 +91,8 @@ clearly above the independent one is an engine defect. The independent
 evaluation is plain NumPy float32 over 200 summation orders. For
 `hierarchical_gp` it is a JAX float32 gradient (`jax.grad`) of the Stan
 formula over 50 observation orders, since its Cholesky adjoint has no hand
-NumPy form.
+NumPy form. For `iohmm_reg` it is a JAX float32 gradient of Stan's forward
+recursion over 50 orders of the four input columns.
 
 | Row | Point, component | Engine float32 error (M4; CI) | NumPy float32 error (median, max) | Tolerance |
 |---|---|---:|---:|---:|
@@ -110,6 +111,8 @@ NumPy form.
 | `radon_all-radon_variable_intercept_slope_noncentered` | 3, `mu_alpha` | `0.00051` | `0.00052`, `0.00081` | `0.00048` |
 | `diamonds` | 3, `Intercept` | `9.89` | `16.0`, `28.4` | `0.0087` |
 | `accel_splines` | 2, `zs_1_1[4]` | `0.00103` | `0.00161`, `0.00171` | `0.00071` |
+| `prophet` | 2, `beta[3]` | `0.00443` | `0.00711`, `0.00823` | `0.00147` |
+| `iohmm_reg` | 2, `b[1][1]` | `0.00072` | `0.00044`, `0.00079` (JAX) | `0.00056` |
 
 These rows regress on uncentered height (about 66), its product with an
 indicator, log height, maternal IQ (about 100) or the calendar year (about

@@ -1,0 +1,35 @@
+%%%
+# Prophet forecast of package downloads
+
+PosteriorDB's `rstan_downloads-prophet`. Daily downloads follow a piecewise-
+linear trend with 25 changepoints plus seasonal regressors that act
+additively and multiplicatively. Trend changes delta have a Laplace prior
+with scale tau, which favours few changes. The data flag selects the linear
+trend. The normalized half-Normal noise prior adds log(2) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+T = 1169
+K = 34
+S = 25
+data = load_data("data/rstan_downloads.json", cartprod(
+    t = cartpow(reals, T), y = cartpow(reals, T), t_change = cartpow(reals, S),
+    X = cartpow(reals, [T, K]), sigmas = cartpow(posreals, K), tau = posreals,
+    s_a = cartpow(reals, K), s_m = cartpow(reals, K)))
+% Changepoint indicators: column s is one from the s-th changepoint onward.
+A = aggregate(sum, [.i, .s], ifelse(data.t[.i] >= data.t_change[.s], 1.0, 0.0))
+
+k ~ Normal(0, 5)
+m ~ Normal(0, 5)
+delta ~ iid(Laplace(0, data.tau), S)
+sigma_obs ~ normalize(truncate(Normal(0, 0.5), interval(0, inf)))
+beta ~ Normal.(0, data.sigmas)
+trend = (k .+ A * delta) .* data.t .+ (m .+ A * (-data.t_change .* delta))
+y ~ Normal.(trend .* (1 .+ data.X * (beta .* data.s_m)) .+ data.X * (beta .* data.s_a), sigma_obs)
+
+Pi_prior = lawof(record(k = k, m = m, delta = delta, sigma_obs = sigma_obs, beta = beta))
+K_model = kernelof(record(y = y), k = k, m = m, delta = delta, sigma_obs = sigma_obs, beta = beta)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(k = reals, m = reals, delta = cartpow(reals, 25), sigma_obs = posreals, beta = cartpow(reals, 34))
+Pi_post_input = record(k = 0.117, m = 0.519, delta = fill(0.0152, 25), sigma_obs = 0.0272, beta = fill(0.0, 34))
