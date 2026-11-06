@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from flatppl_testsuite.scoring.engine import JsScoreEngine
+from flatppl_testsuite.scoring.engine import JsScoreEngine, Matrix
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
 
@@ -27,7 +27,10 @@ def test_native_js_posterior(manifest):
     spec = json.loads(manifest.read_text())
     engine = JsScoreEngine()
     for point, expected in zip(spec["points"], spec["expected"], strict=True):
-        parameters = {name.removeprefix("p_"): value for name, value in point.items()}
+        parameters = {
+            name.removeprefix("p_"): Matrix(value) if name in spec.get("matrix_inputs", []) else value
+            for name, value in point.items()
+        }
         actual = engine.log_density(manifest.parent / "model.flatppl", "Pi_post", parameters)
         np.testing.assert_allclose(actual, expected, rtol=1e-10, atol=1e-8)
 

@@ -1,0 +1,60 @@
+%%%
+# Hierarchical Gaussian processes for state votes
+
+PosteriorDB's `state_wide_presidential_votes-hierarchical_gp`. Republican
+vote shares in 50 states over 14 elections are Normal around a mean plus
+year, state and region effects and two Gaussian-process trends, one per
+region and one per state. Each process covariance adds a long and a short
+squared-exponential kernel and a jitter of 1e-6. A total variance tot_var is
+split across 17 components by a Dirichlet(2, ..., 2) simplex prop_var.
+States use the scale of their region.
+%%%
+flatppl_compat = "0.1"
+
+N = 550
+N_states = 50
+N_regions = 10
+N_years = 14
+data = load_data("data/state_wide_presidential_votes.json", cartprod(
+    state_region_ind = cartpow(posintegers, N_states), state_ind = cartpow(posintegers, N),
+    region_ind = cartpow(posintegers, N), year_ind = cartpow(posintegers, N), y = cartpow(unitinterval, N)))
+years = indicesof(zeros(N_years)) .* 1.0
+distance_sq = (addaxes(years, 0, 1) .- addaxes(years, 1, 0)).^2
+% Indicator matrices pick GP[year_ind[n], region_ind[n]] row by row.
+year_of = ifelse.(addaxes(data.year_ind, 0, 1) .== addaxes(indicesof(zeros(N_years)), 1, 0), 1.0, 0.0)
+region_of = ifelse.(addaxes(data.region_ind, 0, 1) .== addaxes(indicesof(zeros(N_regions)), 1, 0), 1.0, 0.0)
+state_of = ifelse.(addaxes(data.state_ind, 0, 1) .== addaxes(indicesof(zeros(N_states)), 1, 0), 1.0, 0.0)
+
+GP_region_std ~ iid(Normal(0, 1), [N_years, N_regions])
+GP_state_std ~ iid(Normal(0, 1), [N_years, N_states])
+year_std ~ iid(Normal(0, 1), 11)
+state_std ~ iid(Normal(0, 1), N_states)
+region_std ~ iid(Normal(0, 1), N_regions)
+tot_var ~ Gamma(shape = 3, rate = 3)
+prop_var ~ Dirichlet(fill(2.0, 17))
+mu ~ Normal(0.5, 0.5)
+length_GP_region_long ~ Weibull(30, 8)
+length_GP_state_long ~ Weibull(30, 8)
+length_GP_region_short ~ Weibull(30, 3)
+length_GP_state_short ~ Weibull(30, 3)
+
+vars = 17 .* prop_var .* tot_var
+sigma_state = sqrt.(vars[indicesof(zeros(10)) .+ 2])
+region_re = sqrt(vars[2]) .* region_std
+year_re = sqrt(vars[1]) .* year_std
+state_re = sigma_state[data.state_region_ind] .* state_std
+kernel(variance, length) = variance .* exp.(-0.5 .* distance_sq ./ length^2)
+cov_region = kernel(vars[13], length_GP_region_long) + kernel(vars[15], length_GP_region_short) + 1e-6 * eye(N_years)
+cov_state = kernel(vars[14], length_GP_state_long) + kernel(vars[16], length_GP_state_short) + 1e-6 * eye(N_years)
+GP_region = lower_cholesky(cov_region) * GP_region_std
+GP_state = lower_cholesky(cov_state) * GP_state_std
+obs_mu = mu .+ year_re[data.year_ind] .+ state_re[data.state_ind] .+ region_re[data.region_ind] .+
+    ((year_of * GP_region) .* region_of) * ones(N_regions) .+ ((year_of * GP_state) .* state_of) * ones(N_states)
+y ~ Normal.(obs_mu, sqrt(vars[17]))
+
+Pi_prior = lawof(record(GP_region_std = GP_region_std, GP_state_std = GP_state_std, year_std = year_std, state_std = state_std, region_std = region_std, tot_var = tot_var, prop_var = prop_var, mu = mu, length_GP_region_long = length_GP_region_long, length_GP_state_long = length_GP_state_long, length_GP_region_short = length_GP_region_short, length_GP_state_short = length_GP_state_short))
+K_model = kernelof(record(y = y), GP_region_std = GP_region_std, GP_state_std = GP_state_std, year_std = year_std, state_std = state_std, region_std = region_std, tot_var = tot_var, prop_var = prop_var, mu = mu, length_GP_region_long = length_GP_region_long, length_GP_state_long = length_GP_state_long, length_GP_region_short = length_GP_region_short, length_GP_state_short = length_GP_state_short)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(GP_region_std = cartpow(reals, [14, 10]), GP_state_std = cartpow(reals, [14, 50]), year_std = cartpow(reals, 11), state_std = cartpow(reals, 50), region_std = cartpow(reals, 10), tot_var = posreals, prop_var = stdsimplex(17), mu = reals, length_GP_region_long = posreals, length_GP_state_long = posreals, length_GP_region_short = posreals, length_GP_state_short = posreals)
+Pi_post_input = record(GP_region_std = fill(0.0, [14, 10]), GP_state_std = fill(0.0, [14, 50]), year_std = fill(0.0, 11), state_std = fill(0.0, 50), region_std = fill(0.0, 10), tot_var = 0.000772, prop_var = [0.091134, 0.053748, 0.052177, 0.03425, 0.055755, 0.069456, 0.029885, 0.073944, 0.055944, 0.091195, 0.036463, 0.041223, 0.069434, 0.068058, 0.10271, 0.043469, 0.031155], mu = 0.527, length_GP_region_long = 7.85, length_GP_state_long = 8.02, length_GP_region_short = 1.71, length_GP_state_short = 3.0)
