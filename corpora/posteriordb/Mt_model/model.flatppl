@@ -1,0 +1,28 @@
+%%%
+# Capture-recapture with occasion effects
+
+PosteriorDB's `Mt_data-Mt_model`. Each augmented animal belongs to the
+population with probability omega. Present animals are captured on occasion
+t with probability p[t]; absent animals are never captured. The mixture
+marginalizes membership for each capture history.
+%%%
+flatppl_compat = "0.1"
+
+M = 237
+T = 3
+data = load_data("data/Mt_data.json", cartprod(y = cartpow(nonnegintegers, [M, T])))
+history(i) = data.y[i, :]
+histories = history.(indicesof(zeros(M)))
+
+omega ~ Uniform(unitinterval)
+p ~ iid(Uniform(unitinterval), T)
+capture_history = normalize(superpose(
+    weighted(omega, Bernoulli.(p)), weighted(1 - omega, Dirac(fill(false, T)))))
+y ~ iid(capture_history, M)
+
+Pi_prior = lawof(record(omega = omega, p = p))
+K_model = kernelof(record(y = y), omega = omega, p = p)
+L = likelihoodof(K_model, record(y = histories))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(omega = interval(0.0, 1.0), p = cartpow(interval(0.0, 1.0), 3))
+Pi_post_input = record(omega = 0.401, p = [0.129, 0.6, 0.602])

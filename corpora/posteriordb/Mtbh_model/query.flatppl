@@ -1,0 +1,7 @@
+p_omega = elementof(interval(0.0, 1.0))
+p_mean_p = elementof(cartpow(interval(0.0, 1.0), 5))
+p_gamma = elementof(reals)
+p_sigma = elementof(interval(0.0, 3.0))
+p_eps_raw = elementof(cartpow(reals, 146))
+inputs = (p_omega, p_mean_p, p_gamma, p_sigma, p_eps_raw)
+outputs = logdensityof(Pi_post, record(omega = p_omega, mean_p = p_mean_p, gamma = p_gamma, sigma = p_sigma, eps_raw = p_eps_raw))
