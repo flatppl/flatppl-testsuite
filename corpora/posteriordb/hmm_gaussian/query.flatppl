@@ -1,0 +1,6 @@
+p_pi1 = elementof(stdsimplex(3))
+p_A = elementof(cartpow(stdsimplex(3), 3))
+p_mu = elementof(ordered(3))
+p_sigma = elementof(cartpow(posreals, 3))
+inputs = (p_pi1, p_A, p_mu, p_sigma)
+outputs = logdensityof(Pi_post, record(pi1 = p_pi1, A = p_A, mu = p_mu, sigma = p_sigma))

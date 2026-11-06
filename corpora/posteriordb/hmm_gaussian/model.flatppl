@@ -1,0 +1,36 @@
+%%%
+# Three-state Gaussian hidden Markov model
+
+PosteriorDB's `hmm_gaussian_simulated-hmm_gaussian`. A hidden three-state
+Markov chain with initial probabilities pi1 and transition rows A emits
+Normal observations with ordered means mu and scales sigma. The posterior
+reweights the prior by Stan's forward-algorithm target, written as a scan of
+log forward variables. Stan's first forward step adds the vectorized
+normal_lpdf, which sums the first observation's log density over all three
+states. That target is not a normalized likelihood of y, so the model keeps
+it as an explicit log weight. The simplex priors are uniform, which adds
+4 log(2) to Stan's flat target. The means and scales have flat priors.
+%%%
+flatppl_compat = "0.1"
+T = 500
+K = 3
+data = load_data("data/hmm_gaussian_simulated.json", cartprod(y = cartpow(reals, T)))
+
+pi1 ~ Dirichlet(ones(K))
+A ~ iid(Dirichlet(ones(K)), K)
+Pi_proper = lawof(record(pi1 = pi1, A = A))
+Pi_improper = Lebesgue(cartprod(mu = ordered(K), sigma = cartpow(posreals, K)))
+Pi_prior = joint(Pi_proper, Pi_improper)
+
+normal_lpdf(y, m, s) = -0.5 * ((y - m) / s)^2 - log(s) - 0.5 * log(2 * pi)
+forward(la, t, p) = maximum(la) .+ log.(p.A_t * exp.(la .- maximum(la))) .+ p.log_lik[t, :]
+log_target(x) = logsumexp(scan(forward,
+    log.(x.pi1) .+ sum(normal_lpdf.(data.y[1], x.mu, x.sigma)), indicesof(zeros(T - 1)) .+ 1,
+    record(A_t = transpose(rowstack(x.A)),
+           log_lik = aggregate(sum, [.t, .k], normal_lpdf(data.y[.t], x.mu[.k], x.sigma[.k]))))[T - 1])
+Pi_post = logweighted(log_target, Pi_prior)
+Pi_post_domain = cartprod(pi1 = stdsimplex(3), A = cartpow(stdsimplex(3), 3), mu = ordered(3),
+    sigma = cartpow(posreals, 3))
+Pi_post_input = record(pi1 = [0.34, 0.33, 0.33],
+    A = [[0.2, 0.4, 0.4], [0.4, 0.2, 0.4], [0.4, 0.4, 0.2]],
+    mu = [9.0, 18.0, 29.0], sigma = [0.3, 3.0, 3.0])

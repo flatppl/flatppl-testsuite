@@ -1,0 +1,53 @@
+%%%
+# Basketball drives as a hidden Markov model
+
+PosteriorDB's `bball_drive_event_0-hmm_drive_0`. A hidden two-state chain
+separates drives from other play. Each state emits two Exponential
+observations: inverse speed u with rate phi and hoop distance v with rate
+lambda. A scan over the observed history runs the forward filter. Each
+observation pair is a two-component mixture weighted by the predicted state
+probabilities. The product of these mixtures is the forward-algorithm
+likelihood.
+
+Dirichlet priors with data rows alpha govern the transition rows. Both rate
+vectors keep Stan's Normal densities on 0 < x[1] < x[2], without
+renormalization. Stan starts the recursion with weight one for each state.
+The uniform initial distribution here subtracts log(2) from Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+N = 416
+data = load_data("data/bball_drive_event_0.json", cartprod(
+    u = cartpow(posreals, N), v = cartpow(posreals, N), alpha = cartpow(posreals, [2, 2])))
+
+theta1 ~ Dirichlet(data.alpha[1, :])
+theta2 ~ Dirichlet(data.alpha[2, :])
+phi = elementof(ordered(2))
+lambda = elementof(ordered(2))
+rate_prior = truncate(truncate(joint(Normal(0, 1), Normal(3, 1)), ordered(2)), cartpow(posreals, 2))
+
+% Log-likelihood ratio of state 1 against state 2 for each observation pair.
+log_ratio = log(phi[1] / phi[2]) - log(lambda[2] / lambda[1]) .-
+    (phi[1] - phi[2]) .* data.u .- (lambda[1] - lambda[2]) .* data.v
+% Filter on the current observation, then predict state 1 for the next one.
+predict(q, r, p) = p.theta2[1] + (p.theta1[1] - p.theta2[1]) * invlogit(logit(q) + r)
+step(state, r, p) = record(current = state.next, next = predict(state.next, r, p))
+states = scan(step, record(current = 0.5, next = 0.5), log_ratio,
+    record(theta1 = theta1, theta2 = theta2))
+state_weight(state) = state.current
+weight = state_weight.(states)
+emission(w, phi1, phi2, lambda1, lambda2) = normalize(superpose(
+    weighted(w, joint(Exponential(phi1), Exponential(lambda1))),
+    weighted(1 - w, joint(Exponential(phi2), Exponential(lambda2)))))
+y ~ emission.(weight, phi[1], phi[2], lambda[1], lambda[2])
+
+Pi_prior = joint(lawof(record(theta1 = theta1, theta2 = theta2)),
+    joint(phi = rate_prior, lambda = rate_prior))
+K_model = kernelof(record(y = y), theta1 = theta1, theta2 = theta2, phi = phi, lambda = lambda)
+% Each observation is the pair [u, v]: a vector of vectors, as the broadcast variate is.
+pair(a, b) = [a, b]
+L = likelihoodof(K_model, record(y = pair.(data.u, data.v)))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta1 = stdsimplex(2), theta2 = stdsimplex(2),
+    phi = ordered(2), lambda = ordered(2))
+Pi_post_input = record(theta1 = [0.99, 0.01], theta2 = [0.035, 0.965], phi = [1.8, 6.7], lambda = [0.028, 0.076])
