@@ -1,0 +1,30 @@
+%%%
+# Latent Dirichlet allocation with two topics, three_men2
+
+PosteriorDB's `three_men2-ldaK2`. 14 documents with 4999 words in all use a
+vocabulary of 249 words. Each document mixes two topics with weights theta,
+and each topic draws words with probabilities phi. Summing over the topic of
+each word gives the word probabilities theta * phi. All simplex priors are
+uniform.
+%%%
+flatppl_compat = "0.1"
+
+V = 249
+M = 14
+N = 4999
+K = 2
+data = load_data("data/three_men2.json", cartprod(
+    w = cartpow(posintegers, N), doc = cartpow(posintegers, N)))
+
+theta ~ iid(Dirichlet(ones(K)), M)
+phi ~ iid(Dirichlet(ones(V)), K)
+word_probs = rowstack(theta) * rowstack(phi)
+document_words = [word_probs[1, :], word_probs[2, :], word_probs[3, :], word_probs[4, :], word_probs[5, :], word_probs[6, :], word_probs[7, :], word_probs[8, :], word_probs[9, :], word_probs[10, :], word_probs[11, :], word_probs[12, :], word_probs[13, :], word_probs[14, :]]
+w ~ Categorical.(document_words[data.doc])
+
+Pi_prior = lawof(record(theta = theta, phi = phi))
+K_model = kernelof(record(w = w), theta = theta, phi = phi)
+L = likelihoodof(K_model, record(w = data.w))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = cartpow(stdsimplex(2), 14), phi = cartpow(stdsimplex(249), 2))
+Pi_post_input = record(theta = fill(fill(1 / K, K), M), phi = fill(fill(1 / V, V), K))
