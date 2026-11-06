@@ -52,6 +52,9 @@ def run(spec: TestSpec, dir: Path, *, abi_scorer=None) -> list[CheckResult]:
     atol = tol.get("atol", 1e-9)
     rtol = tol.get("rtol", 1e-9)
     points = body.get("points")
+    if points is not None:
+        matrices = set(body.get("matrix_inputs", []))
+        points = [{k: ex.Matrix(v) if k in matrices else v for k, v in pt.items()} for pt in points]
 
     try:
         if points is None:                                  # Mode A

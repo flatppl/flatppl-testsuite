@@ -22,6 +22,7 @@ from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.engine import (  # noqa: F401  (re-exported)
     DeterminizeRefused,
     DetJsScoreEngine,
+    Matrix,
     sample_sweep,
     score_binding,
     temporary_source_dir,
@@ -139,6 +140,8 @@ def _literal(v) -> str:
     """A Python value as FlatPPL source. Lists become `[...]` (a vector input
     such as eight_schools' 8-element `theta`); ints are written as floats so a
     real-domain param does not silently become an integer literal."""
+    if isinstance(v, Matrix):
+        return "rowstack(" + _literal(list(v)) + ")"
     if isinstance(v, (list, tuple)):
         return "[" + ", ".join(_literal(x) for x in v) + "]"
     if isinstance(v, bool):
