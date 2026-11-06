@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Ninety-one posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Ninety-five posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -25,6 +25,12 @@ gradient is not defined on the simplex, so `simplex_inputs` in a manifest lists
 the inputs whose engine gradient is centered before the comparison.
 `matrix_inputs` lists the inputs that are matrices rather than arrays of
 arrays, so the JS checks write them with `rowstack`.
+
+The three `three_men*-ldaK2` rows have 249-word simplices, where `J'J` has
+condition numbers up to `8.5e9`. Their saved gradients come instead from the Stan
+formula in 60-digit decimal arithmetic, projected onto the simplex tangent
+space. The chart solve missed these values by up to `4.7e-6`. Central
+differences in the same arithmetic agree with them to `1e-30`.
 
 FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 `log(2)` to Stan's score for `arK`, `blr`, `eight_schools_centered`,
