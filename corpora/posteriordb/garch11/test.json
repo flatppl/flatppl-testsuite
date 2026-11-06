@@ -1,0 +1,84 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_mu",
+    "p_alpha0",
+    "p_alpha1",
+    "p_beta1"
+  ],
+  "points": [
+    {
+      "p_mu": 5.0,
+      "p_alpha0": 1.5,
+      "p_alpha1": 0.55,
+      "p_beta1": 0.3
+    },
+    {
+      "p_mu": 5.05695436027256,
+      "p_alpha0": 2.08842941516031,
+      "p_alpha1": 0.460508517206413,
+      "p_beta1": 0.192469730151307
+    },
+    {
+      "p_mu": 4.971631704274,
+      "p_alpha0": 2.50004225698598,
+      "p_alpha1": 0.484950808161013,
+      "p_beta1": 0.173578665560493
+    }
+  ],
+  "expected": [
+    -446.5979845912114,
+    -448.15451727032513,
+    -448.6438099354916
+  ],
+  "expected_grad": [
+    {
+      "p_mu": 2.7685307650869566,
+      "p_alpha0": -1.9564547673242418,
+      "p_alpha1": 0.14594461303332018,
+      "p_beta1": -3.238352362402088
+    },
+    {
+      "p_mu": -1.466848043259189,
+      "p_alpha0": -0.07417829478782098,
+      "p_alpha1": 13.017806882935485,
+      "p_beta1": 10.550082033683683
+    },
+    {
+      "p_mu": 3.334280288692508,
+      "p_alpha0": -2.2666051928939184,
+      "p_alpha1": 3.7426039652393053,
+      "p_beta1": -2.2132756195221033
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "garch11",
+    "dataset": "garch",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "stan_log_density": [
+      -447.29113177177135,
+      -448.8476644508851,
+      -449.33695711605156
+    ],
+    "log_density_offset": 0.6931471805599453
+  }
+}

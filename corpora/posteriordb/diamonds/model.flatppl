@@ -1,0 +1,28 @@
+%%%
+# Diamond prices
+
+PosteriorDB's `diamonds-diamonds`. A Normal regression of 5000 log prices
+on 24 centered predictors. The intercept has a Student-t prior and the
+residual scale a half-Student-t prior. Stan already normalizes that half-t,
+so the targets agree. The correlated predictors give a hard posterior.
+%%%
+flatppl_compat = "0.1"
+
+N = 5000
+K = 25
+data = load_data("data/diamonds.json", cartprod(Y = cartpow(reals, N), X = cartpow(reals, [N, K])))
+predictors = data.X[:, indicesof(zeros(K - 1)) .+ 1]
+means_X = aggregate(mean, [.k], predictors[.n, .k])
+Xc = aggregate(sum, [.n, .k], predictors[.n, .k] - means_X[.k])
+
+b ~ iid(Normal(0, 1), K - 1)
+Intercept ~ locscale(StudentT(3), 8, 10)
+sigma ~ normalize(truncate(locscale(StudentT(3), 0, 10), interval(0, inf)))
+y ~ Normal.(Intercept .+ Xc * b, sigma)
+
+Pi_prior = lawof(record(b = b, Intercept = Intercept, sigma = sigma))
+K_model = kernelof(record(y = y), b = b, Intercept = Intercept, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.Y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(b = cartpow(reals, K - 1), Intercept = reals, sigma = posreals)
+Pi_post_input = record(b = zeros(K - 1), Intercept = 8.0, sigma = 1.0)

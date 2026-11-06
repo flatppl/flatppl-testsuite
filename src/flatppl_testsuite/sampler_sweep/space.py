@@ -789,8 +789,8 @@ TARGETED: tuple[Probe, ...] = (
           "tm = normalize(weighted(fn(exp(_)), Normal(mu = 0.0, sigma = 1.0)))\n"
           "theta ~ tm\n"
           "cells = [0.0, 0.0]\n"
-          "obs = functionof(joint(a = Normal(mu = am, sigma = 1.0), "
-          "b = Normal(mu = am, sigma = 1.0)), am = am)\n"
+          "obs = functionof(joint(a = Normal(mu = _am_, sigma = 1.0), "
+          "b = Normal(mu = _am_, sigma = 1.0)), am = _am_)\n"
           "y = broadcast(obs, am = theta .+ cells)\n",
           "y", 4, None,
           1.0, 2.0, 12.0, 1.0, 0.0, None,

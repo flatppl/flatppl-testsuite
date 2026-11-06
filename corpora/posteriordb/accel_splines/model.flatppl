@@ -1,0 +1,35 @@
+%%%
+# Motorcycle acceleration, penalized splines
+
+PosteriorDB's `mcycle_splines-accel_splines`. Head acceleration is Normal
+with a mean and a log scale that each combine a linear term and a thin-plate
+spline with 38 knots. Spline coefficients are standard Normal times a half-
+Student-t scale, which Stan normalizes. The linear coefficients bs and
+bs_sigma have flat priors.
+%%%
+flatppl_compat = "0.1"
+
+N = 133
+data = load_data("data/mcycle_splines.json", cartprod(
+    Y = cartpow(reals, N), Xs = cartpow(reals, [N, 1]), Zs_1_1 = cartpow(reals, [N, 38]),
+    Xs_sigma = cartpow(reals, [N, 1]), Zs_sigma_1_1 = cartpow(reals, [N, 38])))
+
+Intercept ~ locscale(StudentT(3), -13, 36)
+zs_1_1 ~ iid(Normal(0, 1), 38)
+sds_1_1 ~ normalize(truncate(locscale(StudentT(3), 0, 36), interval(0, inf)))
+Intercept_sigma ~ locscale(StudentT(3), 0, 10)
+zs_sigma_1_1 ~ iid(Normal(0, 1), 38)
+sds_sigma_1_1 ~ normalize(truncate(locscale(StudentT(3), 0, 36), interval(0, inf)))
+bs = elementof(cartpow(reals, 1))
+bs_sigma = elementof(cartpow(reals, 1))
+mu = Intercept .+ data.Xs * bs .+ data.Zs_1_1 * (sds_1_1 .* zs_1_1)
+sigma = exp.(Intercept_sigma .+ data.Xs_sigma * bs_sigma .+ data.Zs_sigma_1_1 * (sds_sigma_1_1 .* zs_sigma_1_1))
+y ~ Normal.(mu, sigma)
+
+Pi_prior = joint(lawof(record(Intercept = Intercept, zs_1_1 = zs_1_1, sds_1_1 = sds_1_1, Intercept_sigma = Intercept_sigma, zs_sigma_1_1 = zs_sigma_1_1, sds_sigma_1_1 = sds_sigma_1_1)),
+    Lebesgue(cartprod(bs = cartpow(reals, 1), bs_sigma = cartpow(reals, 1))))
+K_model = kernelof(record(y = y), Intercept = Intercept, zs_1_1 = zs_1_1, sds_1_1 = sds_1_1, Intercept_sigma = Intercept_sigma, zs_sigma_1_1 = zs_sigma_1_1, sds_sigma_1_1 = sds_sigma_1_1, bs = bs, bs_sigma = bs_sigma)
+L = likelihoodof(K_model, record(y = data.Y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(Intercept = reals, zs_1_1 = cartpow(reals, 38), sds_1_1 = posreals, Intercept_sigma = reals, zs_sigma_1_1 = cartpow(reals, 38), sds_sigma_1_1 = posreals, bs = cartpow(reals, 1), bs_sigma = cartpow(reals, 1))
+Pi_post_input = record(Intercept = -8.4, zs_1_1 = fill(0.0, 38), sds_1_1 = 68.8, Intercept_sigma = 2.97, zs_sigma_1_1 = fill(0.0, 38), sds_sigma_1_1 = 1.51, bs = [0.157], bs_sigma = [2.27])
