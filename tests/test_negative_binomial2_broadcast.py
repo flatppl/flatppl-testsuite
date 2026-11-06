@@ -34,3 +34,20 @@ def test_negative_binomial2_broadcast_scores_each_count(tmp_path, precision, tol
         np.testing.assert_allclose(ex.value(source, [psi]), value, rtol=tolerance, atol=tolerance)
         np.testing.assert_allclose(ex.gradient(source, [psi], [0])[0], slope,
                                    rtol=tolerance, atol=tolerance)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,tolerance", [("f32", 3e-6), ("f64", 1e-13)])
+def test_negative_binomial2_family_superposition(tmp_path, precision, tolerance):
+    """ksuperpose scores every NegativeBinomial2 member through the same broadcast."""
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text(
+        "psi = elementof(posreals)\ninputs = psi\noutputs = logdensityof("
+        "ksuperpose(NegativeBinomial2, [0.3, 1.2], mu = [1.0, 2.0], psi = psi), 3)\n"
+    )
+    source = ex.emit(query, "logdensity", dtype=precision)
+    weights, means = np.array([0.3, 1.2]), np.array([1.0, 2.0])
+    for psi in [0.5, 2.0, 9.0]:
+        expected = special.logsumexp(np.log(weights) + stats.nbinom.logpmf(3, psi, psi / (psi + means)))
+        np.testing.assert_allclose(ex.value(source, [psi]), expected, rtol=tolerance, atol=tolerance)
