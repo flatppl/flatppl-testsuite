@@ -1,0 +1,34 @@
+%%%
+# Capture-recapture with occasion, behaviour and individual effects
+
+PosteriorDB's `Mtbh_data-Mtbh_model`. As Mth, with a behavioural effect
+gamma on the logit of each capture after the first occasion when the animal
+was caught on the previous occasion. The previous captures are the observed
+histories, as in Stan. The scale is uniform on (0, 3); normalizing it adds
+-log(3) to Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+M = 146
+T = 5
+data = load_data("data/Mtbh_data.json", cartprod(y = cartpow(nonnegintegers, [M, T])))
+occasions = indicesof(zeros(T))
+% previous[i, j] is the observed capture of animal i on occasion j - 1, and zero on occasion 1.
+previous = data.y * ifelse.(addaxes(occasions, 0, 1) .+ 1 .== addaxes(occasions, 1, 0), 1.0, 0.0)
+
+omega ~ Uniform(unitinterval)
+mean_p ~ iid(Uniform(unitinterval), T)
+gamma ~ Normal(0, 10)
+sigma ~ Uniform(interval(0, 3))
+eps_raw ~ iid(Normal(0, 1), M)
+lp = addaxes(sigma .* eps_raw, 0, 1) .+ addaxes(logit.(mean_p), 1, 0) .+ gamma .* previous
+capture(row, omega) = normalize(superpose(
+    weighted(omega, Bernoulli.(invlogit.(row))), weighted(1 - omega, Dirac(fill(false, [1, T])))))
+y ~ capture.(splitblocks(lp, [1, T]), omega)
+
+Pi_prior = lawof(record(omega = omega, mean_p = mean_p, gamma = gamma, sigma = sigma, eps_raw = eps_raw))
+K_model = kernelof(record(y = y), omega = omega, mean_p = mean_p, gamma = gamma, sigma = sigma, eps_raw = eps_raw)
+L = likelihoodof(K_model, record(y = splitblocks(data.y, [1, T])))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(omega = interval(0.0, 1.0), mean_p = cartpow(interval(0.0, 1.0), 5), gamma = reals, sigma = interval(0.0, 3.0), eps_raw = cartpow(reals, 146))
+Pi_post_input = record(omega = 0.267, mean_p = [0.407, 0.46, 0.538, 0.35, 0.372], gamma = -0.755, sigma = 0.186, eps_raw = fill(0.0, 146))

@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred and four posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and seven posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -43,7 +43,8 @@ noncentered models add `2*log(2)`. The `radon_all-*` rows use the same offsets
 as their `radon_mn-*` twins, and the national varying intercept and slope model
 adds `3*log(2)`. `bym2_offset_only` adds `log(2)`. Proper Uniform priors on
 fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
-`-log(5)` for `Mh_model` and `GLMM1_model`, `-2*log(100)` for
+`-log(5)` for `Mh_model`, `Mth_model` and `GLMM1_model`, `-log(3)` for
+`Mtbh_model`, `-2*log(100)` for
 `radon_mod-radon_county`, `-3*log(100)` for `pilots` and `-5*log(100)` for
 `election88_full`. `seeds_stanified_model`, `seeds_centered_model` and
 `lsat_model` add `log(2)` for one half-Cauchy or half-Normal prior, and

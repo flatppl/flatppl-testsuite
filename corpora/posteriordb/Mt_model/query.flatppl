@@ -1,0 +1,4 @@
+p_omega = elementof(interval(0.0, 1.0))
+p_p = elementof(cartpow(interval(0.0, 1.0), 3))
+inputs = (p_omega, p_p)
+outputs = logdensityof(Pi_post, record(omega = p_omega, p = p_p))
