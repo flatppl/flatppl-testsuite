@@ -1,0 +1,7 @@
+p_beta0 = elementof(reals)
+p_z = elementof(cartpow(reals, 1536))
+p_tau = elementof(posreals)
+p_lambda = elementof(cartpow(posreals, 1536))
+p_caux = elementof(posreals)
+inputs = (p_beta0, p_z, p_tau, p_lambda, p_caux)
+outputs = logdensityof(Pi_post, record(beta0 = p_beta0, z = p_z, tau = p_tau, lambda = p_lambda, caux = p_caux))

@@ -1,0 +1,35 @@
+%%%
+# Ovarian cancer, regularized horseshoe logistic regression
+
+PosteriorDB's `ovarian-logistic_regression_rhs`. 54 patients, 1536 gene-
+expression covariates and a logistic link. The coefficients beta are z times
+a regularized local scale times the global scale tau, with half-Student-t
+local and global priors and an inverse-gamma slab. Stan leaves the 1537
+half-t truncations unnormalized, so the normalized priors add 1537 log(2) to
+Stan's target.
+%%%
+flatppl_compat = "0.1"
+
+n = 54
+d = 1536
+data = load_data("data/ovarian.json", cartprod(
+    y = cartpow(nonnegintegers, n), x = cartpow(reals, [n, d]), scale_icept = posreals,
+    scale_global = posreals, nu_global = posreals, nu_local = posreals, slab_scale = posreals,
+    slab_df = posreals))
+
+beta0 ~ Normal(0, data.scale_icept)
+z ~ iid(Normal(0, 1), d)
+tau ~ normalize(truncate(locscale(StudentT(data.nu_global), 0, data.scale_global * 2), interval(0, inf)))
+lambda ~ iid(normalize(truncate(StudentT(data.nu_local), interval(0, inf))), d)
+caux ~ InverseGamma(0.5 * data.slab_df, 0.5 * data.slab_df)
+c = data.slab_scale * sqrt(caux)
+lambda_tilde = sqrt.(c^2 .* lambda .^ 2 ./ (c^2 .+ tau^2 .* lambda .^ 2))
+beta = z .* lambda_tilde .* tau
+y ~ Bernoulli.(invlogit.(beta0 .+ data.x * beta))
+
+Pi_prior = lawof(record(beta0 = beta0, z = z, tau = tau, lambda = lambda, caux = caux))
+K_model = kernelof(record(y = y), beta0 = beta0, z = z, tau = tau, lambda = lambda, caux = caux)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(beta0 = reals, z = cartpow(reals, 1536), tau = posreals, lambda = cartpow(posreals, 1536), caux = posreals)
+Pi_post_input = record(beta0 = 7.02, z = fill(0.0, 1536), tau = 0.0106, lambda = fill(27.7, 1536), caux = 0.804)
