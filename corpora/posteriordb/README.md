@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-Eighty-eight posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+Eighty-nine posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -23,6 +23,8 @@ its mean. Stan's simplex chart is `x=softmax(V u)`, where `V` has the
 orthonormal Helmert columns `(1,...,1,-k,0,...,0)/sqrt(k(k+1))`. An ambient
 gradient is not defined on the simplex, so `simplex_inputs` in a manifest lists
 the inputs whose engine gradient is centered before the comparison.
+`matrix_inputs` lists the inputs that are matrices rather than arrays of
+arrays, so the JS checks write them with `rowstack`.
 
 FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 `log(2)` to Stan's score for `arK`, `blr`, `eight_schools_centered`,
@@ -57,11 +59,11 @@ directions. A constrained directional finite difference checked each model.
 The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9`
 for the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
 `7.68e-9` for the next 45, `1.04e-8` for the next 42, `7.5e-8` for the next
-27, and `1.72e-10` for the three `logearn_interaction` points. Rows without
-reference draws take their second and third points from a short adaptive HMC
-run on Stan's own density. The rate model also matched an analytic
-Beta-Binomial calculation. These are density and differentiation checks, not
-convergence claims.
+27, `1.72e-10` for the three `logearn_interaction` points, and `2.6e-10` for
+the three `hierarchical_gp` points. Rows without reference draws take their
+second and third points from a short adaptive HMC run on Stan's own density.
+The rate model also matched an analytic Beta-Binomial calculation. These are
+density and differentiation checks, not convergence claims.
 
 The unified tests check densities through Rust-to-JS and StableHLO.
 `tests/test_posteriordb.py` checks JS's own measure/data path and full
@@ -73,12 +75,16 @@ with FlatPPL.
 
 ## Float64-only rows
 
-A manifest may list `"precisions": ["f64"]`. `tests/test_posteriordb.py` then
-checks StableHLO in float64 only. The JS checks do not change. A row qualifies
-only when an independent float32 evaluation of the Stan formula misses the
-float32 tolerance at an oracle point, in line with the engine's float32 error.
-An engine float32 error clearly above the independent one is an engine defect.
-The independent evaluation is plain NumPy float32 over 200 summation orders.
+A manifest may list `"precisions": ["f64"]`. `tests/test_posteriordb.py` and
+the unified StableHLO runner then check StableHLO in float64 only. The JS
+checks do not change. A row qualifies only when an independent float32
+evaluation of the Stan formula misses the float32 tolerance at an oracle
+point, in line with the engine's float32 error. An engine float32 error
+clearly above the independent one is an engine defect. The independent
+evaluation is plain NumPy float32 over 200 summation orders. For
+`hierarchical_gp` it is a JAX float32 gradient (`jax.grad`) of the Stan
+formula over 50 observation orders, since its Cholesky adjoint has no hand
+NumPy form.
 
 | Row | Point, component | Engine float32 error (M4; CI) | NumPy float32 error (median, max) | Tolerance |
 |---|---|---:|---:|---:|
@@ -86,6 +92,7 @@ The independent evaluation is plain NumPy float32 over 200 summation orders.
 | `logearn_height_male` | 1, `beta[2]` | `0.0119`; `0.0125` | `0.0134`, `0.0157` | `0.0119` |
 | `logearn_logheight_male` | 1, `beta[2]` | `0.0019` | `0.0019`, `0.0021` | `0.00058` |
 | `logearn_interaction` | 1, `beta[4]` | `0.0259` | `0.0259`, `0.0272` | `0.00041` |
+| `hierarchical_gp` | 3, `length_GP_region_short` | `0.00315` | `0.00330`, `0.00338` (JAX) | `0.00050` |
 | `kidscore_momiq` | 1, `beta[2]` | `0.00029`; `0.00030` | `0.00042`, `0.00048` | `0.00030` |
 | `kidscore_momhsiq` | 1, `beta[3]` | `0.00017` | `0.00027`, `0.00034` | `0.00033` |
 | `kilpisjarvi` | 2, `beta` | `0.174` | `0.169`, `0.177` | `0.0163` |
@@ -99,7 +106,8 @@ These rows regress on uncentered height (about 66), its product with an
 indicator, log height, maternal IQ (about 100) or the calendar year (about
 2000), or they sum thousands of observations (`election88_full`, the
 12573-home `radon_all` rows) or cancel large scale terms (`pilots`, where
-sigma_a is 0.015). Near the posterior mean the coefficient gradient is a
+sigma_a is 0.015) or factor a nearly singular covariance
+(`hierarchical_gp`). Near the posterior mean the coefficient gradient is a
 small difference of large float32 sums. CI runs on Linux x86-64; the M4 runs
 locally.
 
