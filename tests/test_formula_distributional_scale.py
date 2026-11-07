@@ -70,7 +70,7 @@ base_after, base_final_state = rand(Normal(0, 1), base_state)
 expected = theta[1] .+ (theta[2] .* (reference.y .- theta[1]))
 outputs = (value.y, expected, after, base_after, final_state, base_final_state)
 """, precision)
-    key = jnp.asarray([19, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(19))
     for point in np.asarray([[.5, .8], [.2, 1.5]], dtype=dtype):
         mu, sigma = point.astype(np.float64)
         delta = np.asarray([2, 4, 8, 7]) - mu
@@ -128,7 +128,7 @@ outputs = (value, s .* reference, after, base_after, final_state, base_final_sta
 """, precision)
     _, jnp, _ = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
-    key = jnp.asarray([19, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(19))
     for scale in [.8, 1.7, -1, 0, np.inf, -np.inf, np.nan]:
         actual = sample(key, jnp.asarray(scale, dtype=dtype))
         if math.isfinite(scale) and scale > 0:

@@ -31,8 +31,9 @@ def test_multinomial_profiles_draw_alike_and_follow_the_law(tmp_path, precision)
     p = jnp.asarray([0.1, 0.2, 0.3, 0.4], dtype=dtype)
     cpu = _sampler(tmp_path, precision, "cpu")
     gpu = _sampler(tmp_path, precision, "gpu")
-    # Keys that differ only in the counter word give overlapping THREE_FRY streams.
-    key = jnp.asarray(np.random.default_rng(20261105).integers(0, 2**63, 2).astype(np.uint64))
+    # States come from rnginit: hand-written keys that differ only in the counter word
+    # give overlapping THREE_FRY streams.
+    key = jnp.asarray(ex.rng_state(20261105))
     rows = []
     for _ in range(2000):
         counts, next_key = gpu(key, p)

@@ -159,7 +159,32 @@ def _jax():
     return jax, jnp, hlo_call
 
 
-DEFAULT_KEY = (0, 0)
+DEFAULT_SEED = 0
+
+# §07 makes a random state opaque, and it comes from `rnginit(seed)` or a saved
+# state. A THREE_FRY state is `[key, counter]`, so hand-written states that
+# differ only in the counter word give overlapping streams. The helpers seed
+# only through the engine's own `rnginit`.
+_RNGINIT_QUERY = """flatppl_compat = "0.1"
+seed = elementof(nonnegintegers)
+state = rnginit(seed)
+inputs = (seed)
+outputs = (state)
+"""
+
+
+@lru_cache(maxsize=None)
+def rng_state(seed: int = DEFAULT_SEED) -> np.ndarray:
+    """The random state ``rnginit(seed)`` gives, as a ``uint64[2]`` array."""
+    with tempfile.TemporaryDirectory() as tmp:
+        query = Path(tmp) / "rnginit.flatppl"
+        query.write_text(_RNGINIT_QUERY)
+        src = emit(query, "logdensity", dtype="f64", restrict_enzyme_compatible=False)
+    jax, jnp, _ = _jax()
+    results, _ = jax.jit(call_with_status(src))(*_arguments(jnp, src, [int(seed)]))
+    state = np.asarray(results[0], dtype=np.uint64)
+    state.setflags(write=False)
+    return state
 
 
 @lru_cache(maxsize=64)
@@ -346,9 +371,8 @@ def sample_call(
     """Execute a threaded-key ``@sample`` ONCE at ``key`` (+ any free params).
 
     Returns ``(value, new_key)`` as numpy arrays — the raw building block for
-    reproducibility/advance/chaining/distribution checks. ``key`` is a
-    length-2 ``(lo, hi)`` pair (or an existing ``tensor<2xui64>``-shaped
-    array, e.g. a previous call's ``new_key``, to chain draws)."""
+    reproducibility/advance/chaining/distribution checks. ``key`` is a state
+    from `rng_state` or a previous call's ``new_key``, to chain draws."""
     _, jnp, _ = _jax()
     jit_f = _jitted_sample(src)
     args = _arguments(jnp, src, [key, *(arg_values or [])])
@@ -357,7 +381,7 @@ def sample_call(
 
 
 def samples(
-    src: str, n: int, arg_values: list | None = None, key: tuple = DEFAULT_KEY
+    src: str, n: int, arg_values: list | None = None, key: Any = None
 ) -> np.ndarray:
     """Draw ``n`` independent realisations of a threaded-key ``@sample`` by
     CHAINING the key forward: call 1 uses ``key``, call ``i+1`` uses call
@@ -367,6 +391,7 @@ def samples(
     length-``k`` vector variate). Returns shape ``(n,)`` or ``(n, k)``."""
     # Parameters stay fixed throughout a chain. Convert them once and retain
     # the returned key on the device instead of round-tripping it per draw.
+    key = rng_state() if key is None else key
     _, jnp, _ = _jax()
     jit_f = _jitted_sample(src)
     cur, *args = _arguments(jnp, src, [key, *(arg_values or [])])
@@ -378,14 +403,14 @@ def samples(
 
 
 def samples_fanned(
-    src: str, n: int, arg_values: list | None = None, key: tuple = DEFAULT_KEY
+    src: str, n: int, arg_values: list | None = None, key: Any = None
 ) -> np.ndarray:
     """Like `samples`, but for a Tier-1 FANNED ``@sample`` (``iid(K, m)``)
     whose single call already returns an ``[m]`` batch of iid draws from ONE
     ``rng_bit_generator`` advance. Chains calls (each advancing the key once)
     until at least ``n`` draws are collected, then trims to exactly ``n``."""
     draws: list[np.ndarray] = []
-    cur = key
+    cur = rng_state() if key is None else key
     total = 0
     while total < n:
         v, cur = sample_call(src, cur, arg_values)
@@ -396,7 +421,7 @@ def samples_fanned(
 
 
 def samples_fanned_multivariate(
-    src: str, n: int, d: int, arg_values: list | None = None, key: tuple = DEFAULT_KEY
+    src: str, n: int, d: int, arg_values: list | None = None, key: Any = None
 ) -> np.ndarray:
     """Like `samples_fanned`, but for a Tier-2 MULTIVARIATE fanned ``@sample``
     (``iid(MvNormal(mu, cov), m)``) whose single call returns an ``[m, d]``
@@ -406,7 +431,7 @@ def samples_fanned_multivariate(
     components — and stacked along axis 0 until at least ``n`` rows are
     collected, then trimmed to exactly ``n``. Returns shape ``(n, d)``."""
     draws: list[np.ndarray] = []
-    cur = key
+    cur = rng_state() if key is None else key
     total = 0
     while total < n:
         v, cur = sample_call(src, cur, arg_values)
