@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred and eleven posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and twelve posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -31,9 +31,10 @@ condition numbers up to `8.5e9`. Their saved gradients come instead from the Sta
 formula in 60-digit decimal arithmetic, projected onto the simplex tangent
 space. The chart solve missed these values by up to `4.7e-6`. Central
 differences in the same arithmetic agree with them to `1e-30`.
-`prideprejudice_chapter-ldaK5` takes its gradients the same way, for 1495-word
-simplices whose posterior draws hold entries down to `1e-43`. There, central
-differences in the same arithmetic agree with them to `1e-32`.
+`prideprejudice_chapter-ldaK5` and `prideprejudice_paragraph-ldaK5` take their
+gradients the same way, for 1495-word simplices whose posterior draws hold
+entries down to `4e-44`. There, central differences in the same arithmetic agree
+with them to `1e-32`.
 
 FlatPPL normalizes half-Normal and half-Cauchy priors. Consequently, add
 `log(2)` to Stan's score for `arK`, `blr`, `eight_schools_centered`,
@@ -120,6 +121,7 @@ recursion over 50 orders of the four input columns.
 | `prophet` | 2, `beta[3]` | `0.00443` | `0.00711`, `0.00823` | `0.00147` |
 | `iohmm_reg` | 2, `b[1][1]` | `0.00072` | `0.00044`, `0.00079` (JAX) | `0.00056` |
 | `prideprejudice_chapter-ldaK5` | 2, `phi[5][1227]` | `inf` | `inf`, `inf` | `1.2e35` |
+| `prideprejudice_paragraph-ldaK5` | 2, `phi[5][248]` | `inf` | `inf`, `inf` | `7.5e38` |
 
 These rows regress on uncentered height (about 66), its product with an
 indicator, log height, maternal IQ (about 100) or the calendar year (about
