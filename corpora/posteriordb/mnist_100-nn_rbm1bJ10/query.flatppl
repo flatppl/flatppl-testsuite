@@ -1,0 +1,8 @@
+p_sigma2_alpha = elementof(posreals)
+p_sigma2_beta = elementof(posreals)
+p_alpha = elementof(cartpow(reals, [784, 10]))
+p_beta = elementof(cartpow(reals, [10, 9]))
+p_alpha1 = elementof(cartpow(reals, 10))
+p_beta1 = elementof(cartpow(reals, 9))
+inputs = (p_sigma2_alpha, p_sigma2_beta, p_alpha, p_beta, p_alpha1, p_beta1)
+outputs = logdensityof(Pi_post, record(sigma2_alpha = p_sigma2_alpha, sigma2_beta = p_sigma2_beta, alpha = p_alpha, beta = p_beta, alpha1 = p_alpha1, beta1 = p_beta1))

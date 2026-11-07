@@ -1,0 +1,7 @@
+p_alpha = elementof(cartpow(posreals, 7))
+p_theta = elementof(cartpow(reals, 392))
+p_lambda_adj = elementof(cartpow(reals, 1))
+p_beta_free = elementof(cartpow(reals, 6))
+p_kappa_free = elementof(cartpow(reals, 2))
+inputs = (p_alpha, p_theta, p_lambda_adj, p_beta_free, p_kappa_free)
+outputs = logdensityof(Pi_post, record(alpha = p_alpha, theta = p_theta, lambda_adj = p_lambda_adj, beta_free = p_beta_free, kappa_free = p_kappa_free))

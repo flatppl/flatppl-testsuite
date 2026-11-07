@@ -1,0 +1,39 @@
+%%%
+# One-hidden-layer neural network classifier
+
+PosteriorDB's `mnist_100-nn_rbm1bJ10`. 100 MNIST images of 784 pixels are
+classified into 10 digits by a network with 10 tanh hidden units. Image n
+has hidden units tanh(alpha' x_n + alpha1) and class logits [1, beta' h +
+beta1]: Stan fixes the first logit at 1, not 0. The weight variances have
+the inverse-gamma priors of Lampinen and Vehtari (2001), with nu = 0.5 and
+the prior scales (0.05 / M^(1/nu))^2 and (0.05 / J^(1/nu))^2.
+%%%
+flatppl_compat = "0.1"
+
+N = 100
+M = 784
+K = 10
+J = 10
+nu = 0.5
+s2_0_alpha = (0.05 / M ^ (1 / nu)) ^ 2
+s2_0_beta = (0.05 / J ^ (1 / nu)) ^ 2
+data = load_data("data/mnist_100.json", cartprod(
+    x = cartpow(cartpow(reals, M), N), y = cartpow(posintegers, N)))
+
+sigma2_alpha ~ InverseGamma(nu / 2, nu * s2_0_alpha / 2)
+sigma2_beta ~ InverseGamma(nu / 2, nu * s2_0_beta / 2)
+alpha ~ iid(Normal(0, sqrt(sigma2_alpha)), [M, J])
+beta ~ iid(Normal(0, sqrt(sigma2_beta)), [J, K - 1])
+alpha1 ~ iid(Normal(0, 1), J)
+beta1 ~ iid(Normal(0, 1), K - 1)
+class_probs(x, A, a1, B, b1) = softmax(cat([1.0], transpose(B) * tanh.(transpose(A) * x + a1) + b1))
+y ~ Categorical.(class_probs.(data.x, fill(alpha, N), fill(alpha1, N), fill(beta, N), fill(beta1, N)))
+
+Pi_prior = lawof(record(sigma2_alpha = sigma2_alpha, sigma2_beta = sigma2_beta, alpha = alpha, beta = beta,
+    alpha1 = alpha1, beta1 = beta1))
+K_model = kernelof(record(y = y), sigma2_alpha = sigma2_alpha, sigma2_beta = sigma2_beta, alpha = alpha,
+    beta = beta, alpha1 = alpha1, beta1 = beta1)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(sigma2_alpha = posreals, sigma2_beta = posreals, alpha = cartpow(reals, [784, 10]), beta = cartpow(reals, [10, 9]), alpha1 = cartpow(reals, 10), beta1 = cartpow(reals, 9))
+Pi_post_input = record(sigma2_alpha = 0.349, sigma2_beta = 0.296, alpha = fill(0.00856, [784, 10]), beta = fill(-0.0368, [10, 9]), alpha1 = [-1.12, 0.308, -0.934, 0.098, 0.178, -0.389, 0.219, -0.955, 0.191, -0.307], beta1 = [0.753, 0.689, -0.467, 0.508, 0.63, 1.11, 0.127, 0.166, -0.552])
