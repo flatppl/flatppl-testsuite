@@ -1,0 +1,33 @@
+%%%
+# Latent Dirichlet allocation with five topics
+
+PosteriorDB's `prideprejudice_chapter-ldaK5`. Pride and Prejudice split into
+61 chapters holds 32877 word instances over a vocabulary of 1495 words. Each
+chapter mixes five topics with weights theta, and each topic draws words
+with probabilities phi. Summing over the topic of each word gives the word
+probabilities theta * phi, as Stan's log_sum_exp over topics does. The
+Dirichlet parameters alpha and beta come from the data.
+%%%
+flatppl_compat = "0.1"
+
+V = 1495
+M = 61
+N = 32877
+K = 5
+data = load_data("data/prideprejudice_chapter.json", cartprod(
+    w = cartpow(posintegers, N), doc = cartpow(posintegers, N),
+    alpha = cartpow(posreals, K), beta = cartpow(posreals, V)))
+
+theta ~ iid(Dirichlet(data.alpha), M)
+phi ~ iid(Dirichlet(data.beta), K)
+% The word probabilities of a document are its topic weights mixed over the topics' rows.
+mix(t, P) = transpose(P) * t
+document_words = mix.(theta, fill(rowstack(phi), M))
+w ~ Categorical.(document_words[data.doc])
+
+Pi_prior = lawof(record(theta = theta, phi = phi))
+K_model = kernelof(record(w = w), theta = theta, phi = phi)
+L = likelihoodof(K_model, record(w = data.w))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = cartpow(stdsimplex(K), M), phi = cartpow(stdsimplex(V), K))
+Pi_post_input = record(theta = fill(fill(1 / K, K), M), phi = fill(fill(1 / V, V), K))

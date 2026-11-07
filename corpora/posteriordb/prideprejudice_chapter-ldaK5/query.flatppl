@@ -1,0 +1,4 @@
+p_theta = elementof(cartpow(stdsimplex(5), 61))
+p_phi = elementof(cartpow(stdsimplex(1495), 5))
+inputs = (p_theta, p_phi)
+outputs = logdensityof(Pi_post, record(theta = p_theta, phi = p_phi))
