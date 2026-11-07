@@ -7,8 +7,9 @@ from scipy import stats
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
 
-# Keys that differ only in the counter word give overlapping THREE_FRY streams.
-KEY = np.random.default_rng(20261105).integers(0, 2**63, 2).astype(np.uint64)
+# States come from rnginit: hand-written keys that differ only in the counter word
+# give overlapping THREE_FRY streams.
+SEED = 20261105
 ALPHAS = {
     2: [0.3, 2.5],
     10: list(np.linspace(0.2, 3.0, 10)),
@@ -26,9 +27,9 @@ def _draws(tmp_path, d, m, alpha, precision):
     jax, jnp, _ = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
     draw = jax.jit(ex.call_with_status(module))
-    values, state = ex.expect_valid(draw(jnp.asarray(KEY), jnp.asarray(alpha, dtype=dtype)))
+    values, state = ex.expect_valid(draw(jnp.asarray(ex.rng_state(SEED)), jnp.asarray(alpha, dtype=dtype)))
     assert values.dtype == dtype
-    assert not np.array_equal(np.asarray(state), KEY)
+    assert not np.array_equal(np.asarray(state), ex.rng_state(SEED))
     return np.asarray(values, dtype=np.float64)
 
 
