@@ -1,0 +1,53 @@
+%%%
+# Generalized partial credit model with latent regression
+
+PosteriorDB's `timssAusTwn_irt-gpcm_latent_reg_irt`. 500 students answer 11
+items scored 0 to m[i], where m[i] is the largest observed score on item i,
+as Stan's transformed data computes. Items with m[i] = 1 have one step and
+items with m[i] = 2 have two. With t = alpha[i] * theta[j], the score is
+Categorical with probabilities softmax(cumsum([0, t - b_1, ..., t - b_m]))
+over the item's own steps, so a two-step item adds the logit 2t - b_1 - b_2.
+The step parameters of all items form one vector beta whose last entry is
+minus the sum of the others. Stan adds normal_lpdf(beta | 0, 3) over the
+full vector, a log weight on Lebesgue measure for beta_free. Abilities are
+Normal around a regression on five covariates. Stan's test for binary
+columns never succeeds because of operator precedence, so columns 2 to 5 are
+centered by their mean and scaled by twice their standard deviation, and
+column 1 is kept as is.
+%%%
+flatppl_compat = "0.1"
+
+I = 11
+J = 500
+N = 5500
+K = 5
+data = load_data("data/timssAusTwn_irt.json", cartprod(
+    ii = cartpow(posintegers, N), jj = cartpow(posintegers, N), y = cartpow(nonnegintegers, N),
+    W = cartpow(reals, [J, K])))
+% The first and second step of each item in beta, and whether the item has a second step.
+first_step = [1, 2, 3, 5, 7, 8, 9, 11, 13, 14, 15]
+second_step = [1, 2, 4, 6, 7, 8, 10, 12, 13, 14, 15]
+two_steps = [false, false, true, true, false, false, true, true, false, false, false]
+column_mean = aggregate(mean, [.k], data.W[.j, .k])
+column_std = aggregate(std, [.k], data.W[.j, .k])
+shift = cat([0.0], column_mean[[2, 3, 4, 5]])
+scale = cat([1.0], 2 .* column_std[[2, 3, 4, 5]])
+W_adj = aggregate(sum, [.j, .k], (data.W[.j, .k] - shift[.k]) / scale[.k])
+
+alpha ~ iid(LogNormal(1, 1), I)
+lambda_adj ~ iid(StudentT(3), K)
+theta ~ Normal.(W_adj * lambda_adj, 1)
+beta_free = elementof(cartpow(reals, 14))
+beta = cat(beta_free, [-sum(beta_free)])
+pcm_probs(t, b1, b2, two) = softmax([0.0, t - b1, ifelse(two, 2 * t - b1 - b2, -inf)])
+y ~ Categorical.(pcm_probs.(alpha[data.ii] .* theta[data.jj], beta[first_step[data.ii]],
+    beta[second_step[data.ii]], two_steps[data.ii]))
+
+step_weight(p) = sum(logdensityof.(Normal(0, 3), cat(p.beta_free, [-sum(p.beta_free)])))
+Pi_steps = logweighted(step_weight, Lebesgue(cartprod(beta_free = cartpow(reals, 14))))
+Pi_prior = joint(lawof(record(alpha = alpha, theta = theta, lambda_adj = lambda_adj)), Pi_steps)
+K_model = kernelof(record(y = y), alpha = alpha, theta = theta, lambda_adj = lambda_adj, beta_free = beta_free)
+L = likelihoodof(K_model, record(y = data.y .+ 1))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = cartpow(posreals, 11), theta = cartpow(reals, 500), lambda_adj = cartpow(reals, 5), beta_free = cartpow(reals, 14))
+Pi_post_input = record(alpha = fill(1.59, 11), theta = fill(0.0, 500), lambda_adj = [0.0662, 1.37, 0.0649, -0.119, 0.159], beta_free = fill(0.0745, 14))
