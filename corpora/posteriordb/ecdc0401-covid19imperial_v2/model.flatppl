@@ -1,0 +1,77 @@
+%%%
+# Imperial College COVID-19 model, version 2
+
+PosteriorDB's `ecdc0401-covid19imperial_v2`. Daily deaths in 14 European
+countries are negative binomial around expected deaths. Expected deaths
+convolve infections with the infection-to-death distribution f and a country
+noise factor. Infections follow a renewal equation: each day's infections
+are the reproduction number, reduced by the share already infected, times
+past infections weighted by the serial interval SI. The reproduction number
+is mu times exp(-X alpha) for intervention covariates X. A scan over days
+carries the infection matrix. Stan truncates the Normal(3.28, kappa) prior
+on mu at zero without renormalizing; that normalizer depends on kappa, so
+the model keeps it as a log weight. The half-Normal priors on kappa and phi
+add 2 log(2) to Stan's target. The ifr_noise prior is normalized; its
+truncation mass differs from one by less than 1e-23.
+%%%
+flatppl_compat = "0.1"
+
+M = 14
+P = 6
+N0 = 6
+N2 = 100
+n_obs = 235
+data = load_data("data/ecdc0401.json", cartprod(
+    N = cartpow(posintegers, M), deaths = cartpow(integers, [N2, M]), f = cartpow(reals, [N2, M]),
+    X = cartpow(reals, [M, N2, P]), EpidemicStart = cartpow(posintegers, M), pop = cartpow(posreals, M),
+    SI = cartpow(reals, N2)))
+days = indicesof(zeros(N2))
+% Lagged weights for day i: entry j holds w[i - j] for j < i and zero otherwise.
+lagged(w, i) = w[ifelse.(days .< i, i .- days, 1)] .* ifelse.(days .< i, 1.0, 0.0)
+lagged_rows(W, i) = W[ifelse.(days .< i, i .- days, 1), :] .* addaxes(ifelse.(days .< i, 1.0, 0.0), 0, 1)
+% Observed country-days, as indicator matrices of their day and country.
+in_window = ifelse.(land.(addaxes(days, 0, 1) .>= addaxes(data.EpidemicStart, 1, 0),
+    addaxes(days, 0, 1) .<= addaxes(data.N, 1, 0)), 1.0, 0.0)
+
+alpha_hier ~ iid(Gamma(shape = 0.1667, rate = 1), P)
+kappa ~ normalize(truncate(Normal(0, 0.5), interval(0, inf)))
+tau ~ Exponential(0.03)
+y ~ iid(Exponential(1 / tau), M)
+phi ~ normalize(truncate(Normal(0, 5), interval(0, inf)))
+ifr_noise ~ iid(normalize(truncate(Normal(1, 0.1), interval(0, inf))), M)
+mu = elementof(cartpow(posreals, M))
+
+alpha = alpha_hier .- log(1.05) / 6
+Rt = addaxes(mu, 1, 0) .* exp.(-aggregate(sum, [.i, .m], data.X[.m, .i, .p] * alpha[.p]))
+seed = addaxes(ifelse.(days .<= N0, 1.0, 0.0), 0, 1) .* addaxes(y, 1, 0)
+renew(state, i, p) = record(
+    prediction = state.prediction .+ addaxes(onehot(i, N2), 0, 1) .* addaxes(
+        (p.pop .- state.cumulative) ./ p.pop .* p.Rt[i, :] .* (transpose(state.prediction) * lagged(p.SI, i)), 1, 0),
+    cumulative = state.cumulative .+ (p.pop .- state.cumulative) ./ p.pop .* p.Rt[i, :] .*
+        (transpose(state.prediction) * lagged(p.SI, i)))
+history = scan(renew, record(prediction = seed, cumulative = N0 .* y), indicesof(zeros(N2 - N0)) .+ N0,
+    record(Rt = Rt, pop = data.pop, SI = data.SI))
+final(state) = state.prediction
+prediction = final(history[N2 - N0])
+expected_row(state, i, p) = ifelse(i == 1, 1e-15 .* p.prediction[1, :],
+    p.ifr_noise .* (transpose(p.prediction .* lagged_rows(p.f, i)) * ones(N2)))
+E_deaths = rowstack(scan(expected_row, zeros(M), days,
+    record(prediction = prediction, f = data.f, ifr_noise = ifr_noise)))
+% Observed country-days in column-major order, and the observed deaths.
+cell_day(k) = mod(k - 1, N2) + 1
+cell_country(k) = div(k - 1, N2) + 1
+observed(k) = in_window[cell_day(k), cell_country(k)] > 0.0
+cells = filter(observed, indicesof(zeros(N2 * M)))
+observed_deaths(k) = data.deaths[cell_day(k), cell_country(k)]
+by_day = ifelse.(addaxes(cell_day.(cells), 0, 1) .== addaxes(days, 1, 0), 1.0, 0.0)
+by_country = ifelse.(addaxes(cell_country.(cells), 0, 1) .== addaxes(indicesof(zeros(M)), 1, 0), 1.0, 0.0)
+deaths ~ NegativeBinomial2.(((by_day * E_deaths) .* by_country) * ones(M), phi)
+
+Pi_proper = lawof(record(alpha_hier = alpha_hier, kappa = kappa, y = y, phi = phi, tau = tau, ifr_noise = ifr_noise))
+mu_weight(x) = sum(logdensityof.(Normal(3.28, x.kappa), x.mu))
+Pi_prior = logweighted(mu_weight, joint(Pi_proper, Lebesgue(cartprod(mu = cartpow(posreals, M)))))
+K_model = kernelof(record(deaths = deaths), alpha_hier = alpha_hier, kappa = kappa, y = y, phi = phi, tau = tau, ifr_noise = ifr_noise, mu = mu)
+L = likelihoodof(K_model, record(deaths = observed_deaths.(cells)))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha_hier = cartpow(posreals, 6), kappa = posreals, y = cartpow(posreals, 14), phi = posreals, tau = posreals, ifr_noise = cartpow(posreals, 14), mu = cartpow(posreals, 14))
+Pi_post_input = record(alpha_hier = [0.254, 0.000905, 2.7e-06, 6.11e-06, 0.747, 2.56e-06], kappa = 0.436, y = fill(62.5, 14), phi = 6.92, tau = 48.5, ifr_noise = fill(1.01, 14), mu = fill(3.49, 14))

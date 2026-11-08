@@ -52,13 +52,16 @@ fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `radon_mod-radon_county`, `-3*log(100)` for `pilots` and `-5*log(100)` for
 `election88_full`. `seeds_stanified_model`, `seeds_centered_model` and
 `lsat_model` add `log(2)` for one half-Cauchy or half-Normal prior, and
-`low_dim_gauss_mix_collapse` adds `2*log(2)`. The uniform five-component simplex
-of `normal_mixture_k` has density 24 and its Uniform(0, 10) scales add
+`low_dim_gauss_mix_collapse` and `ecdc0401-covid19imperial_v2` add
+`2*log(2)`. The uniform five-component simplex of `normal_mixture_k` has
+density 24 and its Uniform(0, 10) scales add
 `-5*log(10)`. The ordered mixture adds `3*log(2)`. Stan starts the
 `hmm_example`, `hmm_drive_0` and `bball_drive_event_1-hmm_drive_1` forward
 recursions with weight one per state, so the uniform initial distribution adds
 `-log(2)`. Their positive ordered parameters keep Stan's
-truncated Normal densities without renormalization. These constants leave the
+truncated Normal densities without renormalization. So does the positive `mu`
+of `ecdc0401-covid19imperial_v2`, whose kappa-dependent normalizer the model
+keeps as a log weight. These constants leave the
 gradients and posterior laws unchanged. Each manifest records the raw Stan
 scores and its offset.
 Unbounded flat priors (the Kidscore, earnings, mesquite, Sesame, wells, NES and
