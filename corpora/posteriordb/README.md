@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred and fourteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and fifteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -77,8 +77,9 @@ for the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
 27, `1.72e-10` for the three `logearn_interaction` points, `2.6e-10` for
 the three `hierarchical_gp` points, `9.2e-9` for the nine points of
 `science_irt-grsm_latent_reg_irt`, `timssAusTwn_irt-gpcm_latent_reg_irt` and
-`mnist_100-nn_rbm1bJ10`, and `4.5e-10` for the three
-`state_space_stochastic_level_stochastic_seasonal` points. Rows without reference draws take their
+`mnist_100-nn_rbm1bJ10`, `4.5e-10` for the three
+`state_space_stochastic_level_stochastic_seasonal` points, and `1.6e-10` for the
+three `bones_data-bones_model` points. Rows without reference draws take their
 second and third points from a short adaptive HMC run on Stan's own density.
 The rate model also matched an analytic Beta-Binomial calculation. These are
 density and differentiation checks, not convergence claims.
