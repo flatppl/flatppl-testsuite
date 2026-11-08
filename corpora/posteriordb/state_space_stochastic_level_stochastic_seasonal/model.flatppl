@@ -1,0 +1,48 @@
+%%%
+# UK driver casualties, level and seasonal state space
+
+PosteriorDB's `uk_drivers-state_space_stochastic_level_stochastic_seasonal`.
+Log casualties are Normal around a random-walk level mu plus a seasonal
+effect, the petrol price x and the seat-belt law indicator w. Each seasonal
+effect from month 12 on is Normal around minus the sum of the previous
+eleven. The level lies within three standard deviations of the data mean.
+The first level, the first eleven seasonal effects and both coefficients
+have flat priors, so the prior is a log weight on Lebesgue measure. The
+positive ordered scales keep Stan's Student-t densities without
+renormalization.
+%%%
+flatppl_compat = "0.1"
+
+n = 192
+data = load_data("data/uk_drivers.json", cartprod(
+    y = cartpow(reals, n), x = cartpow(reals, n), w = cartpow(reals, n)))
+lo = mean(data.y) - 3 * std(data.y)
+hi = mean(data.y) + 3 * std(data.y)
+
+mu = elementof(cartpow(interval(lo, hi), n))
+seasonal = elementof(cartpow(reals, n))
+beta = elementof(reals)
+lambda = elementof(reals)
+sigma = elementof(ordered(3))
+y ~ Normal.(mu .+ beta .* data.x .+ lambda .* data.w .+ seasonal, sigma[3])
+
+normal_lpdf(v, m, s) = -0.5 * ((v - m) / s)^2 - log(s) - 0.5 * log(2 * pi)
+later = indicesof(zeros(n - 1)) .+ 1
+seasonal_steps = indicesof(zeros(n - 11)) .+ 11
+% The eleven previous seasonal effects, summed directly as in Stan (running sums lose float32 gradient accuracy).
+lag(s, k) = s[seasonal_steps .- k]
+previous_eleven(s) = lag(s, 1) .+ lag(s, 2) .+ lag(s, 3) .+ lag(s, 4) .+ lag(s, 5) .+ lag(s, 6) .+
+    lag(s, 7) .+ lag(s, 8) .+ lag(s, 9) .+ lag(s, 10) .+ lag(s, 11)
+log_prior(p) = sum(normal_lpdf.(p.seasonal[seasonal_steps], -previous_eleven(p.seasonal), p.sigma[1])) +
+    sum(normal_lpdf.(p.mu[later], p.mu[later .- 1], p.sigma[2])) +
+    sum(logdensityof.(StudentT(4), p.sigma))
+support = cartprod(mu = cartpow(interval(lo, hi), n), seasonal = cartpow(reals, n), beta = reals,
+    lambda = reals, sigma = ordered(3))
+positive = cartprod(mu = cartpow(interval(lo, hi), n), seasonal = cartpow(reals, n), beta = reals,
+    lambda = reals, sigma = cartpow(posreals, 3))
+Pi_prior = logweighted(log_prior, truncate(Lebesgue(support), positive))
+K_model = kernelof(record(y = y), mu = mu, seasonal = seasonal, beta = beta, lambda = lambda, sigma = sigma)
+L = likelihoodof(K_model, record(y = data.y))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(mu = cartpow(interval(6.892129944921048, 7.920085261361286), 192), seasonal = cartpow(reals, 192), beta = reals, lambda = reals, sigma = ordered(3))
+Pi_post_input = record(mu = fill(7.4, 192), seasonal = fill(-7.57e-05, 192), beta = -0.0162, lambda = -0.257, sigma = [0.011869, 0.036223, 0.053422])
