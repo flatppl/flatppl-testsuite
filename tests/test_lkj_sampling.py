@@ -27,7 +27,7 @@ def test_lkj_iid_law(tmp_path, precision, family):
     draw = _sampler(tmp_path,
         "eta = external(posreals)\ninputs = eta\n"
         f"outputs = rand(iid({family}(4, eta), 4096), rnginit(0))\n", precision)
-    key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(0x123456789ABCDEF))
     for eta in (0.5, 2.0):
         values, _ = draw(key, jnp.asarray(eta, dtype=dtype))
         assert values.devices() == {jax.devices()[0]}
@@ -69,7 +69,7 @@ def test_lkj_iid_law(tmp_path, precision, family):
 def test_lkj_threads_rng_and_preserves_point_mass(tmp_path, precision, family):
     _gate_engine("stablehlo")
     _, jnp, _ = ex._jax()
-    key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(0x123456789ABCDEF))
     single = _sampler(tmp_path,
         f"outputs = rand({family}(3, 2), rnginit(0))\n", precision)
     chain = _sampler(tmp_path,
@@ -94,8 +94,9 @@ def test_lkj_threads_rng_and_preserves_point_mass(tmp_path, precision, family):
     np.testing.assert_array_equal(unchanged, key)
 
 
-# Keys that differ only in the counter word give overlapping THREE_FRY streams.
-_KEY = np.random.default_rng(20261105).integers(0, 2**63, 2).astype(np.uint64)
+# States come from rnginit: hand-written keys that differ only in the counter word
+# give overlapping THREE_FRY streams.
+_SEED = 20261105
 
 
 @pytest.mark.stablehlo_only
@@ -113,7 +114,7 @@ def test_lkj_correlation_marginals(tmp_path, precision, n):
         f"outputs = rand(iid(LKJCholesky({n}, eta), {m}), rnginit(0))\n", precision)
     pairs = list(zip(*np.tril_indices(n, -1)))
     for eta in (0.5, 1.0, 4.0):
-        factor, _ = draw(jnp.asarray(_KEY), jnp.asarray(eta, dtype=dtype))
+        factor, _ = draw(jnp.asarray(ex.rng_state(_SEED)), jnp.asarray(eta, dtype=dtype))
         factor = np.asarray(factor, dtype=np.float64)
         correlation = factor @ factor.swapaxes(-1, -2)
         assert np.linalg.eigvalsh(correlation).min() > 0
@@ -134,7 +135,7 @@ def test_lkj_lanes_do_not_share_random_bits(tmp_path):
     draw = _sampler(tmp_path,
         "eta = external(posreals)\ninputs = eta\n"
         f"outputs = rand(iid(LKJCholesky({n}, eta), {m}), rnginit(0))\n", "f64")
-    factor, _ = draw(jnp.asarray(_KEY), jnp.asarray(1.0))
+    factor, _ = draw(jnp.asarray(ex.rng_state(_SEED)), jnp.asarray(1.0))
     factor = np.asarray(factor)
     lower = np.tril_indices(n, -1)
     cells = (factor @ factor.swapaxes(-1, -2))[:, lower[0], lower[1]]

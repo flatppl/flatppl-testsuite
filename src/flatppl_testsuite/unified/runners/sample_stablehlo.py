@@ -2,7 +2,8 @@
 
 Concatenate model.flatppl + query.flatppl into one module, emit StableHLO
 (`flatppl stablehlo --mode sample`), execute the threaded-key `@sample` and
-dispatch to `sample_checks` for whichever checks `test.json` lists. The
+dispatch to `sample_checks` for whichever checks `test.json` lists. The chain
+starts from `rnginit(seed)` for the manifest's `seed`. The
 fan-out check instead concatenates model.flatppl + query_iid.flatppl (the
 `iid(K, m)`-batched query). ABI param order comes from `inputs` (defaults to
 `params`' dict order, mirroring `logdensity_stablehlo.py`'s `inputs` usage).
@@ -30,7 +31,7 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     body = spec.body
     params: dict = body["params"]
     n_draws = int(body["draws"])
-    key = tuple(int(k) for k in body["key"])
+    key = ex.rng_state(int(body["seed"]))
     active = set(body["checks"])
     stat: dict = body["stat"]
     tol = {**checks.DEFAULT_TOLERANCES, **body.get("tolerance", {})}
