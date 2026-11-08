@@ -81,6 +81,22 @@ def _frozen(base: Base):
     raise OracleUnsupported(f"base {k}")
 
 
+def _infinite_variate(x) -> bool:
+    """Whether a variate has an infinite coordinate, which scores -inf.
+
+    §03 "Note on infinities": "`posreals`, `nonnegreals`, and `reals` admit `inf`
+    (and, for `reals`, `-inf`) as legal values… When FlatPPL refers to
+    `Lebesgue(support = reals)`, the reference measure is the ordinary Lebesgue
+    measure on the finite-real part; the points ±∞ carry zero Lebesgue mass."
+    So ±inf lies outside every density's support and the log-density is -inf.
+    scipy gives NaN instead where its formula meets `inf - inf` (the gamma
+    logpdf's `xlogy(a - 1, x) - x`). A NaN coordinate is not infinite and stays
+    NaN.
+    """
+    xs = x if isinstance(x, (list, tuple)) else [x]
+    return any(isinstance(v, float) and math.isinf(v) for v in xs)
+
+
 def _base_logpdf(base: Base, x: float) -> float:
     """Base log-density at `x`.
 
@@ -103,6 +119,8 @@ def _base_logpdf(base: Base, x: float) -> float:
     float and then rounding separately for `logpmf` is the shape that lets the two
     disagree. Compute `n` once; gate on `n`; evaluate at `n`.
     """
+    if _infinite_variate(x):
+        return -math.inf
     d = _frozen(base)
     if _is_discrete(base):
         n = float(round(x))
@@ -206,6 +224,8 @@ def _vector_base_logpdf(base: Base, x) -> float:
     off-surface point rather than return -inf, and an exception here would abort the
     sweep on a probe instead of scoring it.
     """
+    if _infinite_variate(list(x)):
+        return -math.inf
     if not in_support(base, x):
         return -math.inf
     if base.kind == "multinomial":
