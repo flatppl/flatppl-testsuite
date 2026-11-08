@@ -85,7 +85,7 @@ def test_matrix_iid_sampling_preserves_flat_draws_and_successor(
 
     matrix, flat = sampler("[2, 3]"), sampler("6")
     for seed in (0x123456789abcdef, 31):
-        key = jnp.asarray([seed, 0], dtype=jnp.uint64)
+        key = jnp.asarray(ex.rng_state(seed))
         shaped, vector = matrix(key), flat(key)
         assert shaped[0].shape == (2, 3) + event_shape
         assert vector[0].shape == (6,) + event_shape
