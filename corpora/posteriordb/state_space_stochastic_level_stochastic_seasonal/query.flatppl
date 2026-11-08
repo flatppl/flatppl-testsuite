@@ -1,0 +1,7 @@
+p_mu = elementof(cartpow(interval(6.892129944921048, 7.920085261361286), 192))
+p_seasonal = elementof(cartpow(reals, 192))
+p_beta = elementof(reals)
+p_lambda = elementof(reals)
+p_sigma = elementof(ordered(3))
+inputs = (p_mu, p_seasonal, p_beta, p_lambda, p_sigma)
+outputs = logdensityof(Pi_post, record(mu = p_mu, seasonal = p_seasonal, beta = p_beta, lambda = p_lambda, sigma = p_sigma))
