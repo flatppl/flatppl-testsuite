@@ -13,4 +13,4 @@ u = linspace(-1.0, 1.0, 1000)
 point(s) = [sin(s), cos(s), sin(2.0 * s)]
 traj = point.(t)
 Sigma = rowstack([[1.0, 0.3, 0.0], [0.3, 1.0, 0.3], [0.0, 0.3, 1.0]])
-step(prev, ui, phi, a) = MvNormal(phi .* prev .+ a * ui, Sigma)
+step(prev, ui, q) = MvNormal(q.phi .* prev .+ q.a * ui, Sigma)

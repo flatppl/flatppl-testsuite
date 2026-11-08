@@ -1,4 +1,4 @@
-"""Expand the three recurrence steps, passing the same tuple at each step."""
+"""Expand the three recurrence steps, passing the same parameter record whole at each step."""
 
 
 def oracle(point):

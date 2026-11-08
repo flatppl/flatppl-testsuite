@@ -17,9 +17,9 @@ histories = history.(indicesof(zeros(M)))
 omega ~ Uniform(unitinterval)
 p ~ Uniform(unitinterval)
 c ~ Uniform(unitinterval)
-capture_step(previous, p, c) = Bernoulli(ifelse(previous == 1, c, p))
+capture_step(previous, q) = Bernoulli(ifelse(previous == 1, q.c, q.p))
 capture_history = normalize(superpose(
-    weighted(omega, markovchain(capture_step, 0, T, p, c)),
+    weighted(omega, markovchain(capture_step, 0, T, (p = p, c = c))),
     weighted(1 - omega, Dirac(fill(0, T)))))
 y ~ iid(capture_history, M)
 

@@ -38,10 +38,10 @@ update_mean(pred, input, probability, precision, omega) = finish(pred,
 update_probability(pred, input, probability, omega) = update_mean(pred, input, probability,
     pred.precision + probability * (1 - probability), omega)
 correct(pred, input, omega) = update_probability(pred, input, invlogit(pred.mean), omega)
-update(state, input, omega, omega_vol) = correct(predict(state, omega, omega_vol), input, omega)
+update(state, input, p) = correct(predict(state, p.omega, p.omega_vol), input, p.omega)
 
 s0 = record(mean = 0, precision = 1, volatility_mean = 0, volatility_precision = 1)
-states = scan(update, s0, u_data, omega, omega_vol)
+states = scan(update, s0, u_data, (omega = omega, omega_vol = omega_vol))
 state_mean(state) = state.mean
 state_precision(state) = state.precision
 state_volatility_mean(state) = state.volatility_mean

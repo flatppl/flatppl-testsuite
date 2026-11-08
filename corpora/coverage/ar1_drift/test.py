@@ -1,7 +1,7 @@
 """Independent oracle for cov_ar1_drift (closed form + scipy).
 
-The model is `x ~ markovchain(step_kernel, 0.0, 120, sigma_step, drift)` with
-`step_kernel(prev, sigma, delta) = Normal(prev + delta, sigma)`, a Normal(0, 1)
+The model is `x ~ markovchain(step_kernel, 0.0, 120, (sigma_step = sigma_step, drift = drift))` with
+`step_kernel(prev, q) = Normal(prev + q.drift, q.sigma_step)`, a Normal(0, 1)
 prior on `drift` and a half-Cauchy prior on `sigma_step`. The chain density is the
 product of the step conditionals (§06: jointchain-like, no marginalization), so with
 increments d_k = x_k - x_{k-1}, S1 = sum d_k and S2 = sum d_k^2:
