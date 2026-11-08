@@ -34,12 +34,12 @@ EXPECTED_COUNTS = {
     "posteriordb": 116,
     "pyhf": 173,
     "pyhf-rejects": 29,
-    "sample": 1,
+    "sample": 2,
     "stablehlo": 61,
     "stablehlo-gradient": 59,
     "stablehlo-sample": 26,
 }
-EXPECTED_TOTAL = 662
+EXPECTED_TOTAL = 663
 
 # corpus -> the engine set EVERY dir in it must declare.
 #
@@ -163,11 +163,13 @@ ENGINE_OVERRIDES = {
     "hs3/conversions/histfactory": {"det-js", "stablehlo"},
     # erfc(10) and erfc(26) underflow f32, so the tail row is f64 det-js only.
     "fragment/special_functions_erfc_tail": {"det-js"},
+    # Chain sampling on StableHLO is checked by stablehlo-sample/markovchain_ar1.
+    "sample/markovchain_ar1": {"det-js"},
 }
 
 # Total (dir, engine) pairs the harness must collect -- the number that actually
 # determines how many cases run.
-EXPECTED_CASES = 922
+EXPECTED_CASES = 923
 
 # The rosters whose individual membership the legacy gates pinned by name.
 EXPECTED_EXAMPLES = {

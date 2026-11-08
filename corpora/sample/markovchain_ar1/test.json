@@ -1,0 +1,83 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "det-js"
+  ],
+  "model": "markovchain_ar1.flatppl",
+  "density_model": "markovchain_ar1_density.flatppl",
+  "density_binding": "m",
+  "oracle": "closed-form (independent oracle; see test.py)",
+  "n_samples": 4000,
+  "seed_base": 0,
+  "bindings": [
+    "x1",
+    "x2",
+    "x3"
+  ],
+  "checks": [
+    {
+      "id": "mean_x1",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "x1",
+      "expected": 1.6,
+      "atol": 0.07905694150420947
+    },
+    {
+      "id": "mean_x3",
+      "kind": "sample_stats",
+      "stat": "mean",
+      "field": "x3",
+      "expected": 1.0240000000000002,
+      "atol": 0.11318127053536729
+    },
+    {
+      "id": "var_x1",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "x1",
+      "expected": 1.0,
+      "atol": 0.11180339887498948
+    },
+    {
+      "id": "var_x3",
+      "kind": "sample_stats",
+      "stat": "var",
+      "field": "x3",
+      "expected": 2.0496000000000003,
+      "atol": 0.22915224633417847
+    },
+    {
+      "id": "cov_x2_x3",
+      "kind": "sample_stats",
+      "stat": "cov",
+      "fields": [
+        "x2",
+        "x3"
+      ],
+      "expected": 1.3120000000000003,
+      "atol": 0.17823243251439957,
+      "note": "THE CARRIED-STATE CATCH: step 3 draws from step 2's value, so Cov(x2, x3) = rho Var(x2) = 1.312. Steps drawn from init would be independent (covariance 0)."
+    },
+    {
+      "id": "var_x3_minus_x2",
+      "kind": "sample_stats",
+      "stat": "var_diff",
+      "fields": [
+        "x3",
+        "x2"
+      ],
+      "expected": 1.0655999999999999,
+      "atol": 0.11913770184118878,
+      "note": "x3 - x2 = (rho - 1) x2 + z3, so its variance is (1 - rho)^2 Var(x2) + 1 = 1.0656, free of most of the marginal variance."
+    },
+    {
+      "id": "density_consistency",
+      "kind": "density_consistency",
+      "n_points": 5,
+      "atol": 1e-06,
+      "rtol": 1e-06,
+      "note": "The closed-form log-density at each of the first n_points swept realizations must match det-js's density of the same law, written as three chained Normal draws in density_model (a projection record of one chain draw has no joint density)."
+    }
+  ]
+}
