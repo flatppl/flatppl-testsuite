@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred and thirteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and sixteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -53,6 +53,9 @@ fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `election88_full`. `seeds_stanified_model`, `seeds_centered_model` and
 `lsat_model` add `log(2)` for one half-Cauchy or half-Normal prior, and
 `low_dim_gauss_mix_collapse` and `ecdc0401-covid19imperial_v2` add
+`2*log(2)`. `multi_occupancy` adds `log(2)`:
+Stan states `(rho_uv + 1) / 2 ~ beta(2, 2)` without the Jacobian of the half,
+which the normalized prior adds as `-log(2)`, and its two half-Cauchy scales add
 `2*log(2)`. The uniform five-component simplex of `normal_mixture_k` has
 density 24 and its Uniform(0, 10) scales add
 `-5*log(10)`. The ordered mixture adds `3*log(2)`. Stan starts the
@@ -75,9 +78,12 @@ The maximum scaled error was `1.68e-7` for the first 48 points, `1.79e-9`
 for the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
 `7.68e-9` for the next 45, `1.04e-8` for the next 42, `7.5e-8` for the next
 27, `1.72e-10` for the three `logearn_interaction` points, `2.6e-10` for
-the three `hierarchical_gp` points, and `9.2e-9` for the nine points of
+the three `hierarchical_gp` points, `9.2e-9` for the nine points of
 `science_irt-grsm_latent_reg_irt`, `timssAusTwn_irt-gpcm_latent_reg_irt` and
-`mnist_100-nn_rbm1bJ10`. Rows without reference draws take their
+`mnist_100-nn_rbm1bJ10`, `4.5e-10` for the three
+`state_space_stochastic_level_stochastic_seasonal` points, `1.6e-10` for the
+three `bones_data-bones_model` points, and `1.11e-9` for the three
+`multi_occupancy` points. Rows without reference draws take their
 second and third points from a short adaptive HMC run on Stan's own density.
 The rate model also matched an analytic Beta-Binomial calculation. These are
 density and differentiation checks, not convergence claims.
@@ -102,7 +108,10 @@ evaluation is plain NumPy float32 over 200 summation orders. For
 `hierarchical_gp` it is a JAX float32 gradient (`jax.grad`) of the Stan
 formula over 50 observation orders, since its Cholesky adjoint has no hand
 NumPy form. For `iohmm_reg` it is a JAX float32 gradient of Stan's forward
-recursion over 50 orders of the four input columns.
+recursion over 50 orders of the four input columns. For
+`state_space_stochastic_level_stochastic_seasonal` it is a JAX float32
+gradient of the Stan formula, which sums the eleven previous seasonal effects
+directly, as the FlatPPL model does.
 
 | Row | Point, component | Engine float32 error (M4; CI) | NumPy float32 error (median, max) | Tolerance |
 |---|---|---:|---:|---:|
@@ -125,13 +134,15 @@ recursion over 50 orders of the four input columns.
 | `iohmm_reg` | 2, `b[1][1]` | `0.00072` | `0.00044`, `0.00079` (JAX) | `0.00056` |
 | `prideprejudice_chapter-ldaK5` | 2, `phi[5][1227]` | `inf` | `inf`, `inf` | `1.2e35` |
 | `prideprejudice_paragraph-ldaK5` | 2, `phi[5][248]` | `inf` | `inf`, `inf` | `7.5e38` |
+| `state_space_stochastic_level_stochastic_seasonal` | 3, `seasonal[77]` | `0.00120` | `0.00117`, `0.00117` (JAX) | `0.00031` |
 
 These rows regress on uncentered height (about 66), its product with an
 indicator, log height, maternal IQ (about 100) or the calendar year (about
 2000), or they sum thousands of observations (`election88_full`, the
 12573-home `radon_all` rows) or cancel large scale terms (`pilots`, where
 sigma_a is 0.015) or factor a nearly singular covariance
-(`hierarchical_gp`) or center 24 predictors over 5000 rows (`diamonds`).
+(`hierarchical_gp`) or center 24 predictors over 5000 rows (`diamonds`), or divide
+by a seasonal scale near `0.012` (`state_space_stochastic_level_stochastic_seasonal`).
 Near the posterior mean the coefficient gradient is a
 small difference of large float32 sums. The `ldaK5` posterior draws under
 Dirichlet(0.1) priors hold simplex entries below `2.6e-39`, where the gradient
