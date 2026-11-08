@@ -1,0 +1,3 @@
+p_theta = elementof(cartpow(reals, 13))
+inputs = p_theta
+outputs = logdensityof(Pi_post, record(theta = p_theta))
