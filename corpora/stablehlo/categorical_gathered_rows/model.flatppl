@@ -1,0 +1,6 @@
+flatppl_compat = "0.1"
+rows = elementof(cartpow(cartpow(reals, 3), 4))
+idx = elementof(cartpow(integers, 5))
+w = elementof(cartpow(integers, 5))
+fixed = [3, 1, 2, 3, 1]
+lp = logdensityof(Categorical.(rows[idx]), w) + logdensityof(Categorical.(rows[fixed]), w)
