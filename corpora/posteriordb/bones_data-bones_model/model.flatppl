@@ -1,0 +1,42 @@
+%%%
+# Skeletal maturity from graded bone indicators
+
+PosteriorDB's `bones_data-bones_model`, the OpenBUGS Bones example. 13
+children have a skeletal age theta with a Normal(0, 36) prior. Indicator j
+has ncat[j] ordered grades, and grade k or above has probability
+invlogit(delta[j] * (theta - gamma[j, k])), so grade k has the difference of
+two neighbouring cumulative probabilities. A grade of -1 is missing and
+contributes nothing, as in Stan, so only the 422 observed grades are scored.
+Each grade's probability vector is padded to five categories with zeros,
+which leaves its density unchanged.
+%%%
+flatppl_compat = "0.1"
+
+nChild = 13
+nInd = 34
+data = load_data("data/bones_data.json", cartprod(
+    nChild = posintegers, nInd = posintegers, ncat = cartpow(posintegers, nInd),
+    gamma = cartpow(reals, [nInd, 4]), delta = cartpow(reals, nInd), grade = cartpow(integers, [nChild, nInd])))
+% Cell c holds child div(c - 1, nInd) + 1 and indicator mod(c - 1, nInd) + 1. Only observed grades are kept.
+child_of(c) = div(c - 1, nInd) + 1
+item_of(c) = mod(c - 1, nInd) + 1
+observed(c) = data.grade[child_of(c), item_of(c)] != -1
+cells = filter(observed, indicesof(zeros(nChild * nInd)))
+child = child_of.(cells)
+item = item_of.(cells)
+grade_at(c) = data.grade[child_of(c), item_of(c)]
+
+theta ~ iid(Normal(0, 36), nChild)
+% upper[k] is the probability of a grade above k, and zero for k >= n.
+upper(t, d, g1, g2, g3, g4, n) = ifelse.([1, 2, 3, 4] .< n, invlogit.(d .* (t .- [g1, g2, g3, g4])), 0.0)
+step_down(q) = cat([1.0], q) - cat(q, [0.0])
+grade_probs(t, d, g1, g2, g3, g4, n) = step_down(upper(t, d, g1, g2, g3, g4, n))
+grade ~ Categorical.(grade_probs.(theta[child], data.delta[item], data.gamma[item, 1], data.gamma[item, 2],
+    data.gamma[item, 3], data.gamma[item, 4], data.ncat[item]))
+
+Pi_prior = lawof(record(theta = theta))
+K_model = kernelof(record(grade = grade), theta = theta)
+L = likelihoodof(K_model, record(grade = grade_at.(cells)))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = cartpow(reals, 13))
+Pi_post_input = record(theta = [0.229, 1.57, 1.88, 3.33, 5.21, 6.37, 6.55, 10.3, 7.91, 11.1, 10.9, 16.1, 17.0])

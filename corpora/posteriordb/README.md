@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred and fourteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and sixteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -53,6 +53,9 @@ fixed finite intervals add `-log(40) - 3*log(20)` for `GLM_Poisson_model` and
 `election88_full`. `seeds_stanified_model`, `seeds_centered_model` and
 `lsat_model` add `log(2)` for one half-Cauchy or half-Normal prior, and
 `low_dim_gauss_mix_collapse` and `ecdc0401-covid19imperial_v2` add
+`2*log(2)`. `multi_occupancy` adds `log(2)`:
+Stan states `(rho_uv + 1) / 2 ~ beta(2, 2)` without the Jacobian of the half,
+which the normalized prior adds as `-log(2)`, and its two half-Cauchy scales add
 `2*log(2)`. The uniform five-component simplex of `normal_mixture_k` has
 density 24 and its Uniform(0, 10) scales add
 `-5*log(10)`. The ordered mixture adds `3*log(2)`. Stan starts the
@@ -77,8 +80,10 @@ for the next 15, `1.17e-9` for the following 45, `3.68e-9` for the next 39,
 27, `1.72e-10` for the three `logearn_interaction` points, `2.6e-10` for
 the three `hierarchical_gp` points, `9.2e-9` for the nine points of
 `science_irt-grsm_latent_reg_irt`, `timssAusTwn_irt-gpcm_latent_reg_irt` and
-`mnist_100-nn_rbm1bJ10`, and `4.5e-10` for the three
-`state_space_stochastic_level_stochastic_seasonal` points. Rows without reference draws take their
+`mnist_100-nn_rbm1bJ10`, `4.5e-10` for the three
+`state_space_stochastic_level_stochastic_seasonal` points, `1.6e-10` for the
+three `bones_data-bones_model` points, and `1.11e-9` for the three
+`multi_occupancy` points. Rows without reference draws take their
 second and third points from a short adaptive HMC run on Stan's own density.
 The rate model also matched an analytic Beta-Binomial calculation. These are
 density and differentiation checks, not convergence claims.

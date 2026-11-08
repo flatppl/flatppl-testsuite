@@ -1,0 +1,40 @@
+%%%
+# Multi-species occupancy of butterflies
+
+PosteriorDB's `butterfly-multi_occupancy`. 28 observed butterfly species are
+counted on up to 18 visits at 20 sites, and the data are augmented to 50
+species. Each species is available with probability Omega. An available
+species occupies each site with probability psi and is detected on each
+visit with probability theta. Species effects on the logit scales of psi and
+theta are bivariate Normal with scales sigma_uv and correlation rho_uv. Stan
+states (rho_uv + 1) / 2 ~ Beta(2, 2) without the Jacobian of 1/2, so the
+normalized prior adds -log(2), and the two half-Cauchy scales add 2 log(2).
+%%%
+flatppl_compat = "0.1"
+
+n = 28
+J = 20
+K = 18
+S = 50
+data = load_data("data/butterfly.json", cartprod(X = cartpow(nonnegintegers, [n, J])))
+observed(i) = data.X[i, :]
+counts = cat(observed.(indicesof(zeros(n))), fill(fill(0, J), S - n))
+
+alpha ~ Cauchy(0, 2.5)
+beta ~ Cauchy(0, 2.5)
+Omega ~ Beta(2, 2)
+rho_uv ~ pushfwd(fn(2 * _ - 1), Beta(2, 2))
+sigma_uv ~ iid(normalize(truncate(Cauchy(0, 2.5), interval(0, inf))), 2)
+uv1 ~ iid(Normal(0, sigma_uv[1]), S)
+uv2 ~ Normal.(rho_uv * sigma_uv[2] / sigma_uv[1] .* uv1, sigma_uv[2] * sqrt(1 - rho_uv^2))
+site(psi, theta) = normalize(superpose(weighted(psi, Binomial(K, theta)), weighted(1 - psi, Dirac(0))))
+species(psi, theta, omega) = normalize(superpose(weighted(omega, iid(site(psi, theta), J)),
+    weighted(1 - omega, Dirac(fill(0, J)))))
+y ~ species.(invlogit.(uv1 .+ alpha), invlogit.(uv2 .+ beta), Omega)
+
+Pi_prior = lawof(record(alpha = alpha, beta = beta, Omega = Omega, rho_uv = rho_uv, sigma_uv = sigma_uv, uv1 = uv1, uv2 = uv2))
+K_model = kernelof(record(y = y), alpha = alpha, beta = beta, Omega = Omega, rho_uv = rho_uv, sigma_uv = sigma_uv, uv1 = uv1, uv2 = uv2)
+L = likelihoodof(K_model, record(y = counts))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(alpha = reals, beta = reals, Omega = interval(0.0, 1.0), rho_uv = interval(-1.0, 1.0), sigma_uv = cartpow(posreals, 2), uv1 = cartpow(reals, 50), uv2 = cartpow(reals, 50))
+Pi_post_input = record(alpha = 1.19, beta = -1.79, Omega = 0.551, rho_uv = 0.826, sigma_uv = [1.19, 1.17], uv1 = fill(0.0, 50), uv2 = fill(0.0, 50))
