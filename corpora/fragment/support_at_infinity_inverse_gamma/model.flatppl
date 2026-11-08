@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+k = elementof(posreals)
+value = logdensityof(InverseGamma(shape = k, scale = 1.5), inf)

@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+k = elementof(posreals)
+value = logdensityof(Logistic(mu = 0.0, s = k), -inf)
