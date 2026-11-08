@@ -13,7 +13,7 @@ model's closed-form structural moments.
 
 ## Contents
 
-One directory per sample-path model (one so far: `hier_normal`), a unified test dir:
+One directory per sample-path model (`hier_normal`, and `markovchain_ar1`, whose `test.py` describes it), a unified test dir:
 
 | Path | What |
 |------|------|
