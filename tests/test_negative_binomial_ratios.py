@@ -41,6 +41,6 @@ def test_negative_binomial_slope_where_logs_cancel(tmp_path, family, precision, 
     source = ex.emit(query, "logdensity", dtype=precision)
     np.testing.assert_allclose(ex.gradient(source, list(point), [argnum])[0], slope(*point),
                                rtol=slope_rtol, atol=0)
-    # The value keeps lgamma's own float32 rounding at these large arguments.
-    value_atol = 2e-2 if precision == "f32" else 1e-8
+    # The count coefficient is a log-beta form, so no large lgammas cancel.
+    value_atol = 1e-4 if precision == "f32" else 1e-8
     np.testing.assert_allclose(ex.value(source, list(point)), value(*point), rtol=0, atol=value_atol)
