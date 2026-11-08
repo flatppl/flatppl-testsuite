@@ -149,14 +149,28 @@ def test_det_js_scores_a_conjugate_continuous_kchain(tmp_path):
 
 
 def test_det_js_refuses_a_kchain_point_outside_its_domain(tmp_path):
-    # The marginal is over reals, so a record point is not in its domain.
+    # The marginal is over reals, so a record point is not one of its variates.
+    # Inference refuses it statically (spec §06 `densityof`).
     model = tmp_path / "k.flatppl"
     model.write_text(
         "mu = draw(Normal(mu = 0.0, sigma = 1.0))\n"
         "pp = kchain(lawof(record(mu = mu)), x -> Normal(mu = get(x, \"mu\"), sigma = 1.0))\n"
     )
-    with pytest.raises(DeterminizeRefused, match="does not match the measure's domain"):
+    with pytest.raises(RuntimeError, match="a density is evaluated at a variate of its measure"):
         get_engine("det-js").log_density(model, "pp", {"mu": 0.0})
+
+
+@pytest.mark.parametrize("expr", [
+    "logdensityof(Poisson.([2.0, 5.0, 25.0]), 7)",
+    "logdensityof.(Poisson.([2.0, 5.0, 25.0]), [1, 7, 30])",
+])
+def test_det_js_refuses_a_point_of_another_shape(tmp_path, expr):
+    # The measure's variate is a 3-vector, so a lone count is not one of its variates.
+    # These used to score the count broadcast to all three cells (spec §06 `densityof`).
+    model = tmp_path / "p.flatppl"
+    model.write_text(f"lp = {expr}\n")
+    with pytest.raises(RuntimeError, match="but the measure has variates of type array of integer"):
+        score_binding(model, "lp")
 
 
 def test_det_js_refuses_a_continuous_kchain_without_a_closed_form(tmp_path):

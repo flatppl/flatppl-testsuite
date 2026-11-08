@@ -42,12 +42,13 @@ def test_runtime_status_keeps_the_sample_key_in_its_abi_position(tmp_path):
         "inputs = k\noutputs = draws\n"
     )
     source = ex.emit(query, "sample", restrict_enzyme_compatible=False)
-    value, next_key = ex.sample_call(source, (1729, 0), [1])
+    key = ex.rng_state(1729)
+    value, next_key = ex.sample_call(source, key, [1])
     assert np.isfinite(value)
-    np.testing.assert_array_equal(next_key, [1729, 1])
-    assert ex.samples(source, 3, [1], key=(1729, 0)).shape == (3,)
+    np.testing.assert_array_equal(next_key, [key[0], key[1] + 1])
+    assert ex.samples(source, 3, [1], key=key).shape == (3,)
     with pytest.raises(checkify.JaxRuntimeError, match="FlatPPL index out of range"):
-        ex.sample_call(source, (1729, 0), [3])
+        ex.sample_call(source, key, [3])
 
 
 @pytest.mark.stablehlo_only
