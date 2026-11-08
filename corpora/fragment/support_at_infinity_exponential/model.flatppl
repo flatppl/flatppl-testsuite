@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+k = elementof(posreals)
+value = logdensityof(Exponential(rate = k), inf)
