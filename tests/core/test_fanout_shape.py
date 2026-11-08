@@ -18,6 +18,7 @@ def test_normal_fanout_requires_the_declared_batch(monkeypatch, shape, status):
         **spec.body, "checks": ["fanout_distribution"], "draws": 10000,
     })
     monkeypatch.setattr(runner.ex, "emit_concat", lambda *args, **kwargs: "executor double")
+    monkeypatch.setattr(runner.ex, "rng_state", lambda seed: np.array([seed, 0], dtype=np.uint64))
 
     def sample_call(src, key, args):
         rng = np.random.default_rng(int(key[0]))

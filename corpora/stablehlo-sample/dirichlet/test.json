@@ -15,10 +15,7 @@
   ],
   "draws": 100000,
   "fanout_shape": [20000, 3],
-  "key": [
-    0,
-    0
-  ],
+  "seed": 0,
   "checks": [
     "fanout_distribution",
     "independence",
