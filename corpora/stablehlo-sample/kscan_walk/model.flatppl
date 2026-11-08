@@ -1,0 +1,4 @@
+D = elementof(posreals)
+dts = [0.01, 0.02, 0.015, 0.018, 0.012]
+traj ~ kscan((x, dt, D) -> Normal(x, sqrt(2.0 * D * dt)), 0.5, dts, D)
+x = traj[5]

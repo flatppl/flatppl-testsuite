@@ -1,0 +1,3 @@
+rho = elementof(interval(-1.0, 1.0))
+traj ~ markovchain((x, rho) -> Normal(rho * x, 1.0), 2.0, 6, rho)
+x = traj[6]
