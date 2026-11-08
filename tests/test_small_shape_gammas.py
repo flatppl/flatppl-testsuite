@@ -14,7 +14,7 @@ from scipy import stats
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
 
-KEY = np.random.default_rng(20261107).integers(0, 2**63, 2).astype(np.uint64)
+SEED = 20261107
 M = 20000
 
 
@@ -23,7 +23,8 @@ def _draws(tmp_path, body, precision):
     query.write_text(f"outputs = rand(iid({body}, {M}), rnginit(0))\n")
     module = ex.emit(query, "sample", dtype=precision, restrict_enzyme_compatible=False)
     jax, jnp, _ = ex._jax()
-    values, _ = ex.expect_valid(jax.jit(ex.call_with_status(module))(jnp.asarray(KEY)))
+    state = jnp.asarray(ex.rng_state(SEED))
+    values, _ = ex.expect_valid(jax.jit(ex.call_with_status(module))(state))
     return np.asarray(values, dtype=np.float64)
 
 

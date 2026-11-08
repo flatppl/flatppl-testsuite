@@ -8,7 +8,7 @@ from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
 
 N = 20000
-KEY = [0x123456789ABCDEF, 0]
+SEED = 0x123456789ABCDEF
 
 
 def _sampler(tmp_path, source, precision):
@@ -28,7 +28,7 @@ def _draw(tmp_path, source, precision, *inputs, integer=False):
     _, jnp, _ = ex._jax()
     dtype = np.float32 if precision == "f32" else np.float64
     draw = _sampler(tmp_path, source, precision)
-    key = jnp.asarray(KEY, dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(SEED))
     values = draw(key, *[jnp.asarray(x, dtype=dtype) for x in inputs])[0]
     # Section 08: a discrete variate is an integer, at the dtype's width.
     assert values.dtype == (_integer(precision) if integer else dtype)
@@ -131,7 +131,7 @@ def test_invalid_runtime_mass_reports_a_status(tmp_path, precision, lanes):
     assert ex._runtime_status_index(module) is not None
     jax, _, _ = ex._jax()
     draw = jax.jit(ex.call_with_status(module))
-    key = jnp.asarray(KEY, dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(SEED))
     # Zero mass, a negative weight, infinite mass and a NaN weight leave the
     # normalized weights outside the simplex: status 7, not a draw.
     for weights in ([0.0, 0.0], [-1.0, 2.0], [1.0, np.inf], [np.nan, 1.0]):
@@ -153,7 +153,7 @@ def test_mixture_draws_thread_the_rng(tmp_path, precision):
         f"x, state = rand({mixture}, rnginit(0))\n"
         f"y, advanced = rand({mixture}, state)\n"
         "outputs = (x, y, advanced)\n", precision)
-    key = jnp.asarray(KEY, dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(SEED))
     value, state = single(key)[:2]
     next_value, advanced = single(state)[:2]
     together = chain(key)

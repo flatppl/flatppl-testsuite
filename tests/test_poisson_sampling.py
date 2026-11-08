@@ -69,7 +69,7 @@ def test_poisson_iid_small_large_and_switch_rates(tmp_path, precision):
         "rate = external(nonnegreals)\ninputs = rate\n"
         "outputs = rand(iid(Poisson(rate), 4096), rnginit(0))\n", precision)
     collect = _batches(draw)
-    key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(0x123456789ABCDEF))
     for rate in (0, 4, 9.999, 10, 400, 1000, 1e6):
         _, values = collect(key, jnp.asarray(rate, dtype=dtype))
         assert values.dtype == _integer(precision)
@@ -87,7 +87,7 @@ def test_poisson_stage_preserves_negative_binomial_law(tmp_path, precision, meas
     _, jnp, _ = ex._jax()
     draw = _sampler(tmp_path,
         f"outputs = rand(iid({measure}, 4096), rnginit(0))\n", precision)
-    key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(0x123456789ABCDEF))
     _, values = _batches(draw)(key)
     variance = mean + mean**2 / shape
     fourth_moment = (3 + 6 / shape) * variance**2 + variance
@@ -108,7 +108,7 @@ def test_poisson_rejection_threads_complete_successor_state(tmp_path, precision)
         + "x, state = rand(Poisson(rate), rnginit(0))\n"
         + "y, advanced = rand(Poisson(rate), state)\n"
         + "outputs = (x, y, advanced)\n", precision))
-    key = jnp.asarray([0x123456789abcdef, 0], dtype=jnp.uint64)
+    key = jnp.asarray(ex.rng_state(0x123456789ABCDEF))
     for rate in (0, 4, 10, 400, 1000):
         parameter = jnp.asarray(rate, dtype=dtype)
         value, state = ex.expect_valid(single(key, parameter))
