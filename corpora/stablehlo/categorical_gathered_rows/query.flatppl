@@ -1,0 +1,2 @@
+inputs = (rows, idx, w)
+outputs = (lp)
