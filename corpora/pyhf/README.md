@@ -139,32 +139,28 @@ The named fixtures: `one_bin`, `many_bins`, `two_channels`,
 ### The fractional observed count
 
 `asimov_fractional_counts` is the corpus's only workspace whose observations are
-not all whole numbers, and the only row that scores
-`hepphys.ContinuedPoisson` as the count likelihood. Its two channels are Asimov
-data at `mu = 1` with every systematic at nominal, so each bin's observation is
-the per-bin total of the sample nominals:
+not all whole numbers. Its two channels are Asimov data at `mu = 1` with every
+systematic at nominal, so each bin's observation is the per-bin total of the
+sample nominals:
 
 | Channel | Observed | Count likelihood |
 |---|---|---|
-| `ca` | `[70.0, 70.0]` | `Poisson` |
+| `ca` | `[70.0, 70.0]` | `hepphys.ContinuedPoisson` |
 | `cb` | `[34.0, 22.75]` | `hepphys.ContinuedPoisson` |
 
-The rule the converter applies is **per channel, not per bin** (rust
-`78e0b03`, `validate_observed_counts`): a channel whose counts are all
-nonnegative integers keeps `Poisson`, and a channel holding any finite
-nonnegative non-integer count scores `hepphys.ContinuedPoisson` for every bin.
-`cb` mixes `34.0` with `22.75` inside one channel precisely to pin that, and
-`ca` beside it pins that a fractional channel does not drag its neighbour off
-`Poisson`.
+The converter scores every channel with `hepphys.ContinuedPoisson`, whatever its
+counts (decided 2026-11-08). Before that it chose per channel (rust `78e0b03`):
+an all-integer channel kept `Poisson` and a channel holding any non-integer
+count took the continued form. `cb` mixes `34.0` with `22.75` to pin a
+fractional channel, and `ca` beside it pins an integer one.
 
 Both distributions carry the same log-density on a whole number
 (§09: `ContinuedPoisson`'s density is `rate^x e^-rate / Gamma(x+1)`, the Poisson
 density with the factorial continued by the gamma function), which is why pyhf
-scores the whole workspace through one `lgamma` form and the two channels still
-agree with it. §08 gives `Poisson` the support `nonnegintegers`, so the
-pre-`78e0b03` lowering is not merely different but unscoreable: the emitted
-source with `Poisson.(cb_expected)` in place of the continued form evaluates to
-`-inf` on this fixture, against a frozen `-17.317288936632934`.
+scores the whole workspace through one `lgamma` form. §08 gives `Poisson` the
+domain `integers`, so `Poisson` on `cb` is not merely different but unscoreable:
+the emitted source with `Poisson.(cb_expected)` in place of the continued form
+evaluates to `-inf` on this fixture, against a frozen `-17.317288936632934`.
 
 The independent oracle is the closed form summed by hand in Julia
 (`SpecialFunctions.loggamma`), which reaches pyhf and the engine from neither
