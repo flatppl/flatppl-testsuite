@@ -30,8 +30,8 @@ model_channel1_background2_expected = mul.(
 )
 % Total expected counts per bin (sum over samples).
 model_channel1_expected[.col] := rowstack([model_channel1_signal_expected, model_channel1_background1_expected, model_channel1_background2_expected])[.row, .col]
-% Per-bin Poisson observation model for channel "model_channel1".
-model_channel1_model = functionof(Poisson.(model_channel1_expected))
+% Per-bin continued-Poisson observation model for channel "model_channel1".
+model_channel1_model = functionof(hepphys.ContinuedPoisson.(model_channel1_expected))
 % Observation likelihood term for channel "model_channel1".
 model_channel1_likelihood = likelihoodof(model_channel1_model, model_channel1_observed)
 % Auxiliary Gaussian constraint on the nuisance parameter.

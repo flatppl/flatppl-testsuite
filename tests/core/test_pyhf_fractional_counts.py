@@ -1,17 +1,15 @@
-"""The fractional-count rule is PER CHANNEL, and the numeric row only half sees it.
+"""Every pyhf channel scores `hepphys.ContinuedPoisson`, integer or fractional.
 
 `corpora/pyhf/asimov_fractional_counts` holds an integer channel `ca` beside a
-mixed integer/fractional channel `cb`, so the converter must emit `Poisson` for
-one and `hepphys.ContinuedPoisson` for the other from a single workspace.
+mixed integer/fractional channel `cb`. The converter emits
+`hepphys.ContinuedPoisson` for both: pyhf and ROOT score every count with the
+continuous lgamma extension, which spec 09 defines, while spec 08 gives core
+`Poisson` the domain `integers`.
 
-Its frozen `logpdf_points` row catches one direction only. Flipping `cb` back to
-`Poisson` makes the density `-inf` (spec 08 gives `Poisson` the support
-`nonnegintegers`), so that regression fails the row. Flipping `ca` to
-`ContinuedPoisson` moves NO number: the two densities agree on a whole number
-(spec 09 continues the Poisson factorial with the gamma function), so a converter
-that scored every channel with the continued form would pass the numeric gate
-while dropping `Poisson` from the emitted corpus entirely. That direction needs a
-structural check.
+Its frozen `logpdf_points` row catches one direction only. Emitting `Poisson`
+for `cb` makes the density `-inf`, so that regression fails the row. Emitting
+`Poisson` for `ca` moves NO number: the two densities agree on a whole number.
+That direction needs this structural check.
 """
 from __future__ import annotations
 
@@ -31,9 +29,9 @@ _MODEL = re.compile(
 )
 
 
-def test_the_count_distribution_is_chosen_per_channel():
+def test_every_channel_scores_the_continued_poisson():
     heads = dict(_MODEL.findall(convert(_FIXTURE, source_format="pyhf")))
     assert heads == {
-        "ca": "Poisson",
+        "ca": "hepphys.ContinuedPoisson",
         "cb": "hepphys.ContinuedPoisson",
     }
