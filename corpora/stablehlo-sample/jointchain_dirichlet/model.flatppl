@@ -1,0 +1,5 @@
+alpha = elementof(cartpow(posreals, 3))
+prior = jointchain(joint(v = Dirichlet(alpha)), r -> joint(y = Normal(0.0, r.v[1])))
+d ~ prior
+z = d.y / d.v[1]
+u = z * z * d.v[1]

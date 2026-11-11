@@ -1,0 +1,5 @@
+rate = elementof(posreals)
+prior = jointchain(joint(a = Exponential(rate)), r -> joint(b = Normal(0.0, sqrt(r.a))), r -> joint(c = Normal(0.0, sqrt(r.a))))
+d ~ prior
+c = d.c
+u = d.b * d.c

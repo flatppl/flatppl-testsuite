@@ -1,0 +1,4 @@
+seed = rnginit([0])
+draws = rand(lawof(v1), seed)
+inputs = (alpha)
+outputs = (draws)

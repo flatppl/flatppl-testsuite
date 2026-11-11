@@ -1,0 +1,38 @@
+{
+  "test_type": "sample",
+  "engines": [
+    "stablehlo"
+  ],
+  "params": {
+    "rate": 1.0
+  },
+  "inputs": [
+    "rate"
+  ],
+  "draws": 100000,
+  "seed": 0,
+  "checks": [
+    "distribution",
+    "key_reproducibility",
+    "key_advance",
+    "moment"
+  ],
+  "stat": {
+    "distribution": {
+      "family": "laplace",
+      "kwargs": {
+        "loc": 0.0,
+        "scale": 0.7071067811865475
+      }
+    },
+    "discrete": false,
+    "moment": {
+      "mean": 0.0
+    }
+  },
+  "tolerance": {
+    "ks_stat_max": 0.02,
+    "moment_rel_tol": 0.03,
+    "independence_abs_corr_max": 0.05
+  }
+}

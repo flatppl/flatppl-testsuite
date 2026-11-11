@@ -1,0 +1,5 @@
+a = elementof(posreals)
+prior = jointchain(joint(v = iid(Gamma(a, 1.0), [2, 3])), r -> joint(y = Normal(0.0, 1.0)))
+d ~ prior
+w = d.v[2, 3]
+u = d.y * d.y * d.v[2, 3]
