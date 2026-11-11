@@ -1,0 +1,5 @@
+rate = elementof(posreals)
+a ~ Exponential(rate)
+b ~ Gamma(3.0, 1.0)
+v = [a, b]
+y ~ Normal(0.0, sqrt(v[1]))
