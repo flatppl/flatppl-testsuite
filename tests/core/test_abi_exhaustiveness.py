@@ -58,10 +58,11 @@ _FIELD_PIN = re.compile(
 )
 _IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 # Keep strings and punctuation intact so their contents cannot become arguments.
+# A `#` line comment and a `%` doc line run to the end of the line (spec §05).
 _TOKENS = re.compile(
     r'\#\#\#[ \t]*\n[\s\S]*?^[ \t]*\#\#\#[ \t]*(?=\n|$)'
     r'|%%%[^\n]*\n[\s\S]*?^[ \t]*%%%[ \t]*(?=\n|$)'
-    r'|[\#%][^\n;]*|"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z0-9_]*|\S',
+    r'|[\#%][^\n]*|"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z0-9_]*|\S',
     re.M,
 )
 
@@ -173,7 +174,9 @@ def test_inputs_lists_every_parametric_param(dir: Path):
      '%%%md\nAn inline %%% is not a fence.\nkernelof(body, d=d)\n%%%\n'
      'label="functionof(body, e=e)"\nf=functionof(body, x=x)', {"x"}),
     ("### a line comment; f=functionof(body, x=x)\r"
-     "% another comment; k=kernelof(body, y=y)", {"x", "y"}),
+     "g=functionof(body, z=z)\r"
+     "% another comment; k=kernelof(body, y=y)\r"
+     "h=kernelof(body, w=w)", {"z", "w"}),
     ("f = model.functionof(body, x=x)", set()),
     ("dead = elementof(reals)\nf = functionof(body, x=x)", {"x"}),
 ])
