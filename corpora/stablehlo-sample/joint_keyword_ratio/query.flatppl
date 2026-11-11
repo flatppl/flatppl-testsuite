@@ -1,0 +1,4 @@
+s = rnginit([0])
+draws = rand(lawof(r), s)
+inputs = (a)
+outputs = (draws)

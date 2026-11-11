@@ -1,0 +1,3 @@
+a = elementof(posreals)
+v ~ joint(Gamma(a, 1.0), Gamma(3.0, 1.0))
+r = v[2] / (v[1] + v[2])
