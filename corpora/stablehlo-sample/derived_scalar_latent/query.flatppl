@@ -1,0 +1,4 @@
+s = rnginit([0])
+draws = rand(lawof(y), s)
+inputs = (rate)
+outputs = (draws)
