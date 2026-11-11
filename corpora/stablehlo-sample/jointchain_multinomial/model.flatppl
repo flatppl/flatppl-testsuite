@@ -1,0 +1,5 @@
+p = elementof(stdsimplex(3))
+prior = jointchain(joint(n = Multinomial(10, p)), r -> joint(y = Normal(r.n[1], 1.0)))
+d ~ prior
+z = d.y - d.n[1]
+u = z * z * d.n[1]

@@ -1,0 +1,5 @@
+a = elementof(posreals)
+prior = jointchain(joint(s = Beta(a, 3.0)), r -> joint(y = MvNormal([0.0, 0.0], diagmat([1.0, r.s]))))
+d ~ prior
+z = d.y[2] / sqrt(d.s)
+u = z * z * d.s

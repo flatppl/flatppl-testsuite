@@ -1,0 +1,4 @@
+seed = rnginit([0])
+draws = rand(lawof(b), seed)
+inputs = (rate)
+outputs = (draws)

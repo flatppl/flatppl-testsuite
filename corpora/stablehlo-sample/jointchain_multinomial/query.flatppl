@@ -1,0 +1,4 @@
+seed = rnginit([0])
+draws = rand(lawof(z), seed)
+inputs = (p)
+outputs = (draws)

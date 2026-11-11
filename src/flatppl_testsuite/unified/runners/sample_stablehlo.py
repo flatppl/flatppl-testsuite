@@ -5,7 +5,8 @@ Concatenate model.flatppl + query.flatppl into one module, emit StableHLO
 dispatch to `sample_checks` for whichever checks `test.json` lists. The chain
 starts from `rnginit(seed)` for the manifest's `seed`. The
 fan-out check instead concatenates model.flatppl + query_iid.flatppl (the
-`iid(K, m)`-batched query). ABI param order comes from `inputs` (defaults to
+`iid(K, m)`-batched query), and the moment check model.flatppl +
+query_moment.flatppl (a scalar statistic whose mean `stat["moment"]` freezes). ABI param order comes from `inputs` (defaults to
 `params`' dict order, mirroring `logdensity_stablehlo.py`'s `inputs` usage).
 """
 from __future__ import annotations
@@ -72,6 +73,17 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
             _, cur = ex.sample_call(src, cur, arg_values)
             keys.append(np.asarray(cur))
         results.append(checks.check_key_advance(tid, keys))
+
+    # --- moment `@sample` (model.flatppl + query_moment.flatppl) ---
+    if "moment" in active:
+        try:
+            moment_src = _emit(dir, "query_moment.flatppl")
+        except ex.EmitRefused as e:
+            results.append(CheckResult(tid, "moment", "failed", UNSCOREABLE,
+                                       f"emit refused: {e}"))
+        else:
+            xs = ex.samples(moment_src, n_draws, arg_values, key)
+            results.append(checks.check_moment(tid, xs, stat["moment"]))
 
     # --- fanout `@sample` (model.flatppl + query_iid.flatppl) ---
     if "fanout_distribution" in active:

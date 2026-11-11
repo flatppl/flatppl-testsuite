@@ -175,6 +175,24 @@ def check_independence(
 
 
 # ---------------------------------------------------------------------------
+# moment — the mean of a scalar statistic u against a frozen closed-form E[u].
+# For a law with no closed-form marginal, u is a cross moment that holds only
+# under the model's independence (E[z^2 v] = E[v] for z ~ N(0, 1) independent of
+# v), so a draw that reuses or misthreads a key moves the mean.
+# ---------------------------------------------------------------------------
+def check_moment(test_id: str, xs: np.ndarray, moment: dict, *, se_max: float = 6.0) -> CheckResult:
+    xs = np.asarray(xs, dtype=np.float64).reshape(-1)
+    want = float(moment["mean"])
+    mean = float(xs.mean())
+    se = float(xs.std(ddof=1) / math.sqrt(len(xs)))
+    z = (mean - want) / se if se > 0 else (0.0 if mean == want else math.inf)
+    ok = abs(z) <= se_max
+    detail = f"mean {mean:.5f} vs {want:.5f} (SE {se:.5f}, z {z:+.2f}, max {se_max})"
+    return CheckResult(test_id, "moment", "passed" if ok else "failed",
+                       "" if ok else NUMERIC_MISMATCH, detail)
+
+
+# ---------------------------------------------------------------------------
 # key_reproducibility — ports gate.py's check_sample_key_reproducibility: same
 # key -> bit-identical (value, new_key). No oracle/stat needed.
 # ---------------------------------------------------------------------------
