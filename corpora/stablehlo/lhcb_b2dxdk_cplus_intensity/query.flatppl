@@ -1,0 +1,3 @@
+% The intensity |amplitude|^2 as a function of the four-momenta in the B+ rest frame.
+inputs = (p1, p2, p3, p4)
+outputs = (intensity)
