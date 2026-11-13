@@ -146,6 +146,9 @@ FAMILIES: tuple[Family, ...] = (
            ("logistic", (1.0, 2.0), {}), fourth=(7 * math.pi ** 4 / 15) * 2.0 ** 4),
     Family("weibull", "Weibull(shape = 2.0, scale = 1.5)", _WEI_MEAN, _WEI_VAR, False,
            ("weibull_min", (2.0,), {"scale": 1.5}), fourth=0.756586447403),
+    Family("rayleigh", "Rayleigh(scale = 1.5)", 1.5 * math.sqrt(math.pi / 2),
+           (4 - math.pi) / 2 * 1.5 ** 2, False,
+           ("rayleigh", (), {"scale": 1.5}), fourth=3.026345789613843),
     Family("pareto", "Pareto(shape = 4.0, scale = 1.0)", 4 / 3, 4 / 18, False,
            ("pareto", (4.0,), {"scale": 1.0}),
            note="shape = 4: variance finite (needs > 2), fourth moment DIVERGES "
