@@ -1,0 +1,79 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "../_lhcb/lb2pkg-lhcb-2765817.flatppl",
+  "source": {
+    "repository": "https://github.com/Democratizing-Models/statsmodel-rosetta-stone",
+    "revision": "31c309d593018c04b14c06c58940548c4bfcd566",
+    "path": "src/physics/hadron/amplitude-serialization/lb2pkg-lhcb-2765817.flatppl",
+    "sha256": "622ed839c88902904d8ee834d742ce475deb2776fdc943c83eca23b74368f1fc"
+  },
+  "precisions": [
+    "f64"
+  ],
+  "measure": "q_part",
+  "inputs": [
+    "q_s",
+    "q_imaginary"
+  ],
+  "points": [
+    {
+      "q_s": 3.2,
+      "q_imaginary": false
+    },
+    {
+      "q_s": 3.2,
+      "q_imaginary": true
+    },
+    {
+      "q_s": 2.2,
+      "q_imaginary": false
+    },
+    {
+      "q_s": 2.2,
+      "q_imaginary": true
+    },
+    {
+      "q_s": 2.9,
+      "q_imaginary": false
+    },
+    {
+      "q_s": 2.9,
+      "q_imaginary": true
+    },
+    {
+      "q_s": 3.7,
+      "q_imaginary": false
+    },
+    {
+      "q_s": 3.7,
+      "q_imaginary": true
+    },
+    {
+      "q_s": 4.6,
+      "q_imaginary": false
+    },
+    {
+      "q_s": 4.6,
+      "q_imaginary": true
+    }
+  ],
+  "expected": [
+    0.8540683809737195,
+    0.0415635681035755,
+    0.4612333376200551,
+    1.225491890857722e-05,
+    0.6810134201742825,
+    0.009732526389940092,
+    1.3936274753166191,
+    0.3791554651368638,
+    -0.43027469083640923,
+    1.2923992160724442
+  ],
+  "tolerance": {
+    "atol": 1e-12,
+    "rtol": 1e-11
+  }
+}

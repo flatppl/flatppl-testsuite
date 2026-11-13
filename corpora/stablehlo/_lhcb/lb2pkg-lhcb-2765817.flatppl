@@ -1,0 +1,1350 @@
+%%%
+# Λb0 → p K− γ (LHCb, arXiv:2403.03710)
+
+Ported from the amplitude-serialization file `lb2pkg-lhcb-2765817.json` (distribution `default_model`) by
+`json2flatppl.py`, following the decay model `CASCADEDECAYS` of EvtGen
+(gitlab.cern.ch/evtgen/evtgen merge request 74).
+
+The amplitude is the Dalitz-plot decomposition (Mikhasenko et al., PRD 101
+(2020) 034033) as in ThreeBodyDecays.jl and THREEBODYDECAYS: a function of the
+invariants σ1 = m²(23), σ2 = m²(31), σ3 = m²(12), with the final-state spins
+aligned to the reference topology by the Wigner angles ζ. The decay rate is
+this intensity times the phase-space density in the decay coordinates of the
+reference topology, from which the four-momenta are built.
+
+Parent: Lb (spin 1/2, unpolarised). Final state: 1 = p (spin 1/2), 2 = K (spin 0), 3 = g (spin 1).
+All masses in GeV. The intensity is summed over the helicities of all
+particles, as in the validation values of the JSON file.
+%%%
+flatppl_compat = "0.1"
+
+hep = standard_module("particle-physics", "0.1")
+
+# ----------------------------------------------------------------------------
+# Masses
+# ----------------------------------------------------------------------------
+
+m0 = 5.62  % Lb
+m1 = 0.938  % p
+m2 = 0.493  % K
+m3 = 0.0  % g
+s0 = m0^2
+ms1 = m1^2
+ms2 = m2^2
+ms3 = m3^2
+
+# ----------------------------------------------------------------------------
+# Lineshapes of the resonances, as functions of the mass squared s
+# ----------------------------------------------------------------------------
+
+% L1405_Flatte (MultichannelBreitWigner)
+ls_L1405_Flatte(s) = 1 / (1.405^2 - s - im * (0.3504277764790773 * 2 * hep.breakup_momentum(sqrt(s), 0.938, 0.493) / sqrt(s) + 0.3504277764790773 * 2 * hep.breakup_momentum(sqrt(s), 1.197, 0.14) / sqrt(s)))
+% L1520_BW (BreitWigner)
+ls_L1520_BW(s) = hep.resonance_breitwigner(s, 1.519, 0.016, 0.938, 0.493, 2, 1.5)
+% L1600_BW (BreitWigner)
+ls_L1600_BW(s) = hep.resonance_breitwigner(s, 1.6, 0.2, 0.938, 0.493, 1, 1.5)
+% L1680_BW (BreitWigner)
+ls_L1680_BW(s) = hep.resonance_breitwigner(s, 1.674, 0.03, 0.938, 0.493, 0, 1.5)
+% L1690_BW (BreitWigner)
+ls_L1690_BW(s) = hep.resonance_breitwigner(s, 1.69, 0.07, 0.938, 0.493, 2, 1.5)
+% L1800_BW (BreitWigner)
+ls_L1800_BW(s) = hep.resonance_breitwigner(s, 1.8, 0.2, 0.938, 0.493, 0, 1.5)
+% L1810_BW (BreitWigner)
+ls_L1810_BW(s) = hep.resonance_breitwigner(s, 1.79, 0.11, 0.938, 0.493, 1, 1.5)
+% L1820_BW (BreitWigner)
+ls_L1820_BW(s) = hep.resonance_breitwigner(s, 1.82, 0.08, 0.938, 0.493, 3, 1.5)
+% L1830_BW (BreitWigner)
+ls_L1830_BW(s) = hep.resonance_breitwigner(s, 1.825, 0.09, 0.938, 0.493, 2, 1.5)
+% L1890_BW (BreitWigner)
+ls_L1890_BW(s) = hep.resonance_breitwigner(s, 1.89, 0.12, 0.938, 0.493, 1, 1.5)
+% L2100_BW (BreitWigner)
+ls_L2100_BW(s) = hep.resonance_breitwigner(s, 2.1, 0.2, 0.938, 0.493, 4, 1.5)
+% L2110_BW (BreitWigner)
+ls_L2110_BW(s) = hep.resonance_breitwigner(s, 2.09, 0.25, 0.938, 0.493, 3, 1.5)
+% L2350_BW (BreitWigner)
+ls_L2350_BW(s) = hep.resonance_breitwigner(s, 2.35, 0.15, 0.938, 0.493, 5, 1.5)
+% LNR30_NR (Polynomial)
+ls_LNR30_NR(s) = polynomial(coefficients = [1.0], x = s)
+
+# ----------------------------------------------------------------------------
+# Kinematics of the Dalitz-plot decomposition
+# ----------------------------------------------------------------------------
+
+# cos(θ) or cos(ζ) from numerator and denominator, at the edge of the Dalitz
+# plot, where the denominator vanishes, the angle is set to zero
+clamp_cos(num, den) = ifelse(den > 0.0, min(max(num / den, -1.0), 1.0), 1.0)
+sqrt0(x) = sqrt(max(x, 0.0))
+# Helicity angle of chain k with (i, j, k) cyclic: angle between i and k in the
+# rest frame of (i j)
+cos_theta_dpd(sk, sj, msi, msj, msk) = clamp_cos(
+    2 * sk * (sj - msk - msi) - (sk + msi - msj) * (s0 - sk - msk),
+    sqrt0(hep.kallen(sk, msi, msj) * hep.kallen(s0, sk, msk)))
+# Wigner angles between the frames of two chains for the parent, for the
+# spectator of one of the chains, and for the third particle
+cos_zeta_parent(si, sj, sk, msi, msk) = clamp_cos(
+    (s0 + msi - si) * (s0 + msk - sk) - 2 * s0 * (sj - msi - msk),
+    sqrt0(hep.kallen(s0, msi, si) * hep.kallen(s0, msk, sk)))
+cos_zeta_spectator(si, sj, sk, msj, msk) = ifelse(msk < 1e-10, 1.0, clamp_cos(
+    2 * msk * (sj - s0 - msj) + (s0 + msk - sk) * (si - msk - msj),
+    sqrt0(hep.kallen(s0, msk, sk) * hep.kallen(msk, msj, si))))
+cos_zeta_third(si, sj, sk, msi, msj, msk) = ifelse(msk < 1e-10, 1.0, clamp_cos(
+    2 * msk * (msi + msj - sk) + (si - msj - msk) * (sj - msk - msi),
+    sqrt0(hep.kallen(si, msj, msk) * hep.kallen(sj, msk, msi))))
+
+# ----------------------------------------------------------------------------
+# Invariants and helicity angles of the three chains
+# ----------------------------------------------------------------------------
+
+# The amplitude is a function of the invariants, reified as decay_intensity below
+sigma1 = elementof(posreals)  % m²(23)
+sigma2 = elementof(posreals)  % m²(31)
+sigma3 = elementof(posreals)  % m²(12)
+cos_theta3 = cos_theta_dpd(sigma3, sigma2, ms1, ms2, ms3)  % chain (12)3
+q3 = hep.breakup_momentum(m0, sqrt(sigma3), m3)  % momentum of 3 in the parent frame
+p3 = hep.breakup_momentum(sqrt(sigma3), m1, m2)  % momentum in the (12) frame
+
+# ----------------------------------------------------------------------------
+# Decay chains: weight × sqrt(2J+1) × lineshape × form factors
+# ----------------------------------------------------------------------------
+
+% c01_L1405: L1405_Flatte, J = 1/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 0, S = 1/2
+c01_L1405 = (2.2615419999999995 - 1.7992479999999997 * im) * sqrt(2.0) * ls_L1405_Flatte(sigma3)
+% c02_L1405: L1405_Flatte, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 0, S = 1/2
+c02_L1405 = (-1.8715784466594079 - 1.0439686414131668 * im) * sqrt(2.0) * ls_L1405_Flatte(sigma3) * hep.blatt_weisskopf(1, q3, 5.0)
+% c03_L1405: L1405_Flatte, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 0, S = 1/2
+c03_L1405 = (1.3234058111554519 + 0.7381973056893572 * im) * sqrt(2.0) * ls_L1405_Flatte(sigma3) * hep.blatt_weisskopf(1, q3, 5.0)
+% c04_L1405: L1405_Flatte, J = 1/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 0, S = 1/2
+c04_L1405 = (-1.6131550895688382 + 1.283401355622205 * im) * sqrt(2.0) * ls_L1405_Flatte(sigma3) * hep.blatt_weisskopf(2, q3, 5.0)
+% c05_L1520: L1520_BW, J = 3/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 2, S = 1/2
+c05_L1520 = (4.108357043622831 - 0.0668483592242114 * im) * sqrt(4.0) * ls_L1520_BW(sigma3) * hep.blatt_weisskopf(2, p3, 1.5)
+% c06_L1520: L1520_BW, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 2, S = 1/2
+c06_L1520 = (5.529490890260219 + 0.8175133786512758 * im) * sqrt(4.0) * ls_L1520_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c07_L1520: L1520_BW, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c07_L1520 = (-1.669745451910645 + 21.202140697865232 * im) * sqrt(4.0) * ls_L1520_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c08_L1520: L1520_BW, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c08_L1520 = (-5.803165988479272 + 10.325839240068499 * im) * sqrt(4.0) * ls_L1520_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c09_L1520: L1520_BW, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c09_L1520 = (5.0240140735133085 - 3.4922186723465236 * im) * sqrt(4.0) * ls_L1520_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c10_L1520: L1520_BW, J = 3/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c10_L1520 = (4.749762166036306 - 6.557080951190571 * im) * sqrt(4.0) * ls_L1520_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c11_L1600: L1600_BW, J = 1/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 1, S = 1/2
+c11_L1600 = (-4.984604534495612 - 7.275774343593705 * im) * sqrt(2.0) * ls_L1600_BW(sigma3) * hep.blatt_weisskopf(1, p3, 1.5)
+% c12_L1600: L1600_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 1, S = 1/2
+c12_L1600 = (5.195985372142845 - 0.4417798231845672 * im) * sqrt(2.0) * ls_L1600_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c13_L1600: L1600_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 1, S = 1/2
+c13_L1600 = (-3.6741164915883107 + 0.3123855087652013 * im) * sqrt(2.0) * ls_L1600_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c14_L1600: L1600_BW, J = 1/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 1, S = 1/2
+c14_L1600 = (3.5567875127680906 + 5.1916622777038715 * im) * sqrt(2.0) * ls_L1600_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c15_L1670: L1680_BW, J = 1/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 0, S = 1/2
+c15_L1670 = (-0.16420699999999996 + 0.07874799999999998 * im) * sqrt(2.0) * ls_L1680_BW(sigma3)
+% c16_L1670: L1680_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 0, S = 1/2
+c16_L1670 = (0.3371436476130202 + 0.2063535379997733 * im) * sqrt(2.0) * ls_L1680_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0)
+% c17_L1670: L1680_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 0, S = 1/2
+c17_L1670 = (-0.23839655946113422 - 0.14591398604147554 * im) * sqrt(2.0) * ls_L1680_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0)
+% c18_L1670: L1680_BW, J = 1/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 0, S = 1/2
+c18_L1670 = (0.1171887985742462 - 0.05619969617692755 * im) * sqrt(2.0) * ls_L1680_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0)
+% c19_L1690: L1690_BW, J = 3/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 2, S = 1/2
+c19_L1690 = (-1.2515408516146889 - 0.20807601551425958 * im) * sqrt(4.0) * ls_L1690_BW(sigma3) * hep.blatt_weisskopf(2, p3, 1.5)
+% c20_L1690: L1690_BW, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 2, S = 1/2
+c20_L1690 = (6.390591891759433 + 5.314838910034677 * im) * sqrt(4.0) * ls_L1690_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c21_L1690: L1690_BW, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c21_L1690 = (4.392938701500898 + 1.1832477556172771 * im) * sqrt(4.0) * ls_L1690_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c22_L1690: L1690_BW, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c22_L1690 = (8.02152561159109 + 6.075105479215116 * im) * sqrt(4.0) * ls_L1690_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c23_L1690: L1690_BW, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c23_L1690 = (-3.615370170843966 - 2.1815697682335045 * im) * sqrt(4.0) * ls_L1690_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c24_L1690: L1690_BW, J = 3/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c24_L1690 = (3.351576416899477 + 3.6239307230788382 * im) * sqrt(4.0) * ls_L1690_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c25_L1800: L1800_BW, J = 1/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 0, S = 1/2
+c25_L1800 = 0.9999999999999999 * sqrt(2.0) * ls_L1800_BW(sigma3)
+% c26_L1800: L1800_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 0, S = 1/2
+c26_L1800 = (0.32174415383329497 - 4.420345983044671 * im) * sqrt(2.0) * ls_L1800_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0)
+% c27_L1800: L1800_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 0, S = 1/2
+c27_L1800 = (-0.22750747298265048 + 3.1256566198016014 * im) * sqrt(2.0) * ls_L1800_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0)
+% c28_L1800: L1800_BW, J = 1/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 0, S = 1/2
+c28_L1800 = -0.7138719815230252 * sqrt(2.0) * ls_L1800_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0)
+% c29_L1810: L1810_BW, J = 1/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 1, S = 1/2
+c29_L1810 = (1.2329512295731921 + 0.5797348113863545 * im) * sqrt(2.0) * ls_L1810_BW(sigma3) * hep.blatt_weisskopf(1, p3, 1.5)
+% c30_L1810: L1810_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 1, S = 1/2
+c30_L1810 = (-0.15041712217563452 + 0.31809866486267147 * im) * sqrt(2.0) * ls_L1810_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c31_L1810: L1810_BW, J = 1/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 1, S = 1/2
+c31_L1810 = (0.10636096709695654 - 0.22492972301078187 * im) * sqrt(2.0) * ls_L1810_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c32_L1810: L1810_BW, J = 1/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 1, S = 1/2
+c32_L1810 = (-0.8801479601319633 - 0.4138463869619736 * im) * sqrt(2.0) * ls_L1810_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c33_L1820: L1820_BW, J = 5/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 3, S = 1/2
+c33_L1820 = (7.590027925605289 + 1.351485280203232 * im) * sqrt(6.0) * ls_L1820_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c34_L1820: L1820_BW, J = 5/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 3, S = 1/2
+c34_L1820 = (12.6978984716254 + 33.13909642765735 * im) * sqrt(6.0) * ls_L1820_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c35_L1820: L1820_BW, J = 5/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 3, S = 1/2
+c35_L1820 = (4.086834167925889 + 24.975212258662644 * im) * sqrt(6.0) * ls_L1820_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c36_L1820: L1820_BW, J = 5/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 3, S = 1/2
+c36_L1820 = (-9.182639071211478 + 32.96932660214078 * im) * sqrt(6.0) * ls_L1820_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c37_L1820: L1820_BW, J = 5/2, chain (12)3, production: LS coupling, L = 3, S = 7/2, decay: LS coupling, L = 3, S = 1/2
+c37_L1820 = (8.508305899110448 - 6.222783113391748 * im) * sqrt(6.0) * ls_L1820_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c38_L1820: L1820_BW, J = 5/2, chain (12)3, production: LS coupling, L = 4, S = 7/2, decay: LS coupling, L = 3, S = 1/2
+c38_L1820 = (9.94392149899061 + 22.674983152315246 * im) * sqrt(6.0) * ls_L1820_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c39_L1830: L1830_BW, J = 5/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c39_L1830 = (-1.0036485528418424 + 1.0430833903661603 * im) * sqrt(6.0) * ls_L1830_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c40_L1830: L1830_BW, J = 5/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c40_L1830 = (-1.8458695010259276 - 0.7346836306540477 * im) * sqrt(6.0) * ls_L1830_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c41_L1830: L1830_BW, J = 5/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c41_L1830 = (1.6142828743499704 + 1.2089369146899427 * im) * sqrt(6.0) * ls_L1830_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c42_L1830: L1830_BW, J = 5/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c42_L1830 = (-1.454215075121507 - 0.9561291141558163 * im) * sqrt(6.0) * ls_L1830_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c43_L1830: L1830_BW, J = 5/2, chain (12)3, production: LS coupling, L = 3, S = 7/2, decay: LS coupling, L = 2, S = 1/2
+c43_L1830 = (-0.5284079103486713 + 1.100915689156118 * im) * sqrt(6.0) * ls_L1830_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c44_L1830: L1830_BW, J = 5/2, chain (12)3, production: LS coupling, L = 4, S = 7/2, decay: LS coupling, L = 2, S = 1/2
+c44_L1830 = (-1.9512990733056674 - 0.9063591893327532 * im) * sqrt(6.0) * ls_L1830_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(2, p3, 1.5)
+% c45_L1890: L1890_BW, J = 3/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 1, S = 1/2
+c45_L1890 = (-0.8056899642094871 + 1.594995260820461 * im) * sqrt(4.0) * ls_L1890_BW(sigma3) * hep.blatt_weisskopf(1, p3, 1.5)
+% c46_L1890: L1890_BW, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 1, S = 1/2
+c46_L1890 = (-1.1187921784182446 - 0.19731651443448214 * im) * sqrt(4.0) * ls_L1890_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c47_L1890: L1890_BW, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 1, S = 1/2
+c47_L1890 = (1.254387267694874 - 0.02961475092130131 * im) * sqrt(4.0) * ls_L1890_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c48_L1890: L1890_BW, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 1, S = 1/2
+c48_L1890 = (-0.44068377083734417 - 3.386298247036518 * im) * sqrt(4.0) * ls_L1890_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c49_L1890: L1890_BW, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 1, S = 1/2
+c49_L1890 = (-0.4595157065063295 + 2.3292545983400124 * im) * sqrt(4.0) * ls_L1890_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c50_L1890: L1890_BW, J = 3/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 1, S = 1/2
+c50_L1890 = (-1.2730779559824494 - 0.13950620539243158 * im) * sqrt(4.0) * ls_L1890_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(1, p3, 1.5)
+% c51_L2100: L2100_BW, J = 7/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 4, S = 1/2
+c51_L2100 = (49.218173237760695 - 29.272299895852452 * im) * sqrt(8.0) * ls_L2100_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(4, p3, 1.5)
+% c52_L2100: L2100_BW, J = 7/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 4, S = 1/2
+c52_L2100 = (51.79177222101752 + 112.49297256009743 * im) * sqrt(8.0) * ls_L2100_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(4, p3, 1.5)
+% c53_L2100: L2100_BW, J = 7/2, chain (12)3, production: LS coupling, L = 3, S = 7/2, decay: LS coupling, L = 4, S = 1/2
+c53_L2100 = (14.467132844964842 + 76.34331465657102 * im) * sqrt(8.0) * ls_L2100_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(4, p3, 1.5)
+% c54_L2100: L2100_BW, J = 7/2, chain (12)3, production: LS coupling, L = 4, S = 7/2, decay: LS coupling, L = 4, S = 1/2
+c54_L2100 = (-59.296784189872376 + 160.73881774317323 * im) * sqrt(8.0) * ls_L2100_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(4, p3, 1.5)
+% c55_L2100: L2100_BW, J = 7/2, chain (12)3, production: LS coupling, L = 4, S = 9/2, decay: LS coupling, L = 4, S = 1/2
+c55_L2100 = (54.38718320352659 - 53.55523743422298 * im) * sqrt(8.0) * ls_L2100_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(4, p3, 1.5)
+% c56_L2100: L2100_BW, J = 7/2, chain (12)3, production: LS coupling, L = 5, S = 9/2, decay: LS coupling, L = 4, S = 1/2
+c56_L2100 = (44.59238847485171 + 88.989649321906 * im) * sqrt(8.0) * ls_L2100_BW(sigma3) * hep.blatt_weisskopf(5, q3, 5.0) * hep.blatt_weisskopf(4, p3, 1.5)
+% c57_L2110: L2110_BW, J = 5/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 3, S = 1/2
+c57_L2110 = (7.0777507748244615 - 6.718928308295796 * im) * sqrt(6.0) * ls_L2110_BW(sigma3) * hep.blatt_weisskopf(1, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c58_L2110: L2110_BW, J = 5/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 3, S = 1/2
+c58_L2110 = (20.666121772608257 + 20.610990545268972 * im) * sqrt(6.0) * ls_L2110_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c59_L2110: L2110_BW, J = 5/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 3, S = 1/2
+c59_L2110 = (1.0221059150313465 + 10.97293097970227 * im) * sqrt(6.0) * ls_L2110_BW(sigma3) * hep.blatt_weisskopf(2, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c60_L2110: L2110_BW, J = 5/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 3, S = 1/2
+c60_L2110 = (-0.8039914494040608 + 32.728514478798054 * im) * sqrt(6.0) * ls_L2110_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c61_L2110: L2110_BW, J = 5/2, chain (12)3, production: LS coupling, L = 3, S = 7/2, decay: LS coupling, L = 3, S = 1/2
+c61_L2110 = (6.207189601628342 - 13.040156799647997 * im) * sqrt(6.0) * ls_L2110_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c62_L2110: L2110_BW, J = 5/2, chain (12)3, production: LS coupling, L = 4, S = 7/2, decay: LS coupling, L = 3, S = 1/2
+c62_L2110 = (17.508583975005255 + 15.177934637395214 * im) * sqrt(6.0) * ls_L2110_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(3, p3, 1.5)
+% c63_L2350: L2350_BW, J = 9/2, chain (12)3, production: LS coupling, L = 3, S = 7/2, decay: LS coupling, L = 5, S = 1/2
+c63_L2350 = (8.633355975060676 + 32.74590935567872 * im) * sqrt(10.0) * ls_L2350_BW(sigma3) * hep.blatt_weisskopf(3, q3, 5.0) * hep.blatt_weisskopf(5, p3, 1.5)
+% c64_L2350: L2350_BW, J = 9/2, chain (12)3, production: LS coupling, L = 4, S = 7/2, decay: LS coupling, L = 5, S = 1/2
+c64_L2350 = (-26.4986029240209 + 36.770502872109034 * im) * sqrt(10.0) * ls_L2350_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(5, p3, 1.5)
+% c65_L2350: L2350_BW, J = 9/2, chain (12)3, production: LS coupling, L = 4, S = 9/2, decay: LS coupling, L = 5, S = 1/2
+c65_L2350 = (-26.681900472924337 + 115.3793814748836 * im) * sqrt(10.0) * ls_L2350_BW(sigma3) * hep.blatt_weisskopf(4, q3, 5.0) * hep.blatt_weisskopf(5, p3, 1.5)
+% c66_L2350: L2350_BW, J = 9/2, chain (12)3, production: LS coupling, L = 5, S = 9/2, decay: LS coupling, L = 5, S = 1/2
+c66_L2350 = (-56.25554547348509 + 16.55083422280756 * im) * sqrt(10.0) * ls_L2350_BW(sigma3) * hep.blatt_weisskopf(5, q3, 5.0) * hep.blatt_weisskopf(5, p3, 1.5)
+% c67_L2350: L2350_BW, J = 9/2, chain (12)3, production: LS coupling, L = 5, S = 11/2, decay: LS coupling, L = 5, S = 1/2
+c67_L2350 = (15.75763657303104 + 28.47907714973581 * im) * sqrt(10.0) * ls_L2350_BW(sigma3) * hep.blatt_weisskopf(5, q3, 5.0) * hep.blatt_weisskopf(5, p3, 1.5)
+% c68_L2350: L2350_BW, J = 9/2, chain (12)3, production: LS coupling, L = 6, S = 11/2, decay: LS coupling, L = 5, S = 1/2
+c68_L2350 = (-21.36666536366439 + 18.419929714546964 * im) * sqrt(10.0) * ls_L2350_BW(sigma3) * hep.blatt_weisskopf(6, q3, 5.0) * hep.blatt_weisskopf(5, p3, 1.5)
+% c69_LNR3O: LNR30_NR, J = 3/2, chain (12)3, production: LS coupling, L = 0, S = 1/2, decay: LS coupling, L = 2, S = 1/2
+c69_LNR3O = (0.2014761778704208 + 0.1373786839543982 * im) * sqrt(4.0) * ls_LNR30_NR(sigma3) * p3^2
+% c70_LNR3O: LNR30_NR, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 1/2, decay: LS coupling, L = 2, S = 1/2
+c70_LNR3O = (-0.912800424869022 + 0.009663096700249658 * im) * sqrt(4.0) * ls_LNR30_NR(sigma3) * q3^1 * p3^2
+% c71_LNR3O: LNR30_NR, J = 3/2, chain (12)3, production: LS coupling, L = 1, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c71_LNR3O = (0.7796215552309834 - 0.004829994231255104 * im) * sqrt(4.0) * ls_LNR30_NR(sigma3) * q3^1 * p3^2
+% c72_LNR3O: LNR30_NR, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 3/2, decay: LS coupling, L = 2, S = 1/2
+c72_LNR3O = (-0.3239760701193479 - 0.11244089269832912 * im) * sqrt(4.0) * ls_LNR30_NR(sigma3) * q3^2 * p3^2
+% c73_LNR3O: LNR30_NR, J = 3/2, chain (12)3, production: LS coupling, L = 2, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c73_LNR3O = (0.1587446676919606 + 0.07208653021070943 * im) * sqrt(4.0) * ls_LNR30_NR(sigma3) * q3^2 * p3^2
+% c74_LNR3O: LNR30_NR, J = 3/2, chain (12)3, production: LS coupling, L = 3, S = 5/2, decay: LS coupling, L = 2, S = 1/2
+c74_LNR3O = (-0.31776619398253025 + 0.0029782945639327254 * im) * sqrt(4.0) * ls_LNR30_NR(sigma3) * q3^3 * p3^2
+
+# ----------------------------------------------------------------------------
+# Wigner d-functions of the helicity angles
+# ----------------------------------------------------------------------------
+
+d3_1_m1_m1 = hep.wignerd_doublearg(1, -1, -1, cos_theta3)
+d3_1_m1_p1 = hep.wignerd_doublearg(1, -1, 1, cos_theta3)
+d3_1_p1_m1 = hep.wignerd_doublearg(1, 1, -1, cos_theta3)
+d3_1_p1_p1 = hep.wignerd_doublearg(1, 1, 1, cos_theta3)
+d3_3_m1_m1 = hep.wignerd_doublearg(3, -1, -1, cos_theta3)
+d3_3_m1_p1 = hep.wignerd_doublearg(3, -1, 1, cos_theta3)
+d3_3_m3_m1 = hep.wignerd_doublearg(3, -3, -1, cos_theta3)
+d3_3_m3_p1 = hep.wignerd_doublearg(3, -3, 1, cos_theta3)
+d3_3_p1_m1 = hep.wignerd_doublearg(3, 1, -1, cos_theta3)
+d3_3_p1_p1 = hep.wignerd_doublearg(3, 1, 1, cos_theta3)
+d3_3_p3_m1 = hep.wignerd_doublearg(3, 3, -1, cos_theta3)
+d3_3_p3_p1 = hep.wignerd_doublearg(3, 3, 1, cos_theta3)
+d3_5_m1_m1 = hep.wignerd_doublearg(5, -1, -1, cos_theta3)
+d3_5_m1_p1 = hep.wignerd_doublearg(5, -1, 1, cos_theta3)
+d3_5_m3_m1 = hep.wignerd_doublearg(5, -3, -1, cos_theta3)
+d3_5_m3_p1 = hep.wignerd_doublearg(5, -3, 1, cos_theta3)
+d3_5_p1_m1 = hep.wignerd_doublearg(5, 1, -1, cos_theta3)
+d3_5_p1_p1 = hep.wignerd_doublearg(5, 1, 1, cos_theta3)
+d3_5_p3_m1 = hep.wignerd_doublearg(5, 3, -1, cos_theta3)
+d3_5_p3_p1 = hep.wignerd_doublearg(5, 3, 1, cos_theta3)
+d3_7_m1_m1 = hep.wignerd_doublearg(7, -1, -1, cos_theta3)
+d3_7_m1_p1 = hep.wignerd_doublearg(7, -1, 1, cos_theta3)
+d3_7_m3_m1 = hep.wignerd_doublearg(7, -3, -1, cos_theta3)
+d3_7_m3_p1 = hep.wignerd_doublearg(7, -3, 1, cos_theta3)
+d3_7_p1_m1 = hep.wignerd_doublearg(7, 1, -1, cos_theta3)
+d3_7_p1_p1 = hep.wignerd_doublearg(7, 1, 1, cos_theta3)
+d3_7_p3_m1 = hep.wignerd_doublearg(7, 3, -1, cos_theta3)
+d3_7_p3_p1 = hep.wignerd_doublearg(7, 3, 1, cos_theta3)
+d3_9_m1_m1 = hep.wignerd_doublearg(9, -1, -1, cos_theta3)
+d3_9_m1_p1 = hep.wignerd_doublearg(9, -1, 1, cos_theta3)
+d3_9_m3_m1 = hep.wignerd_doublearg(9, -3, -1, cos_theta3)
+d3_9_m3_p1 = hep.wignerd_doublearg(9, -3, 1, cos_theta3)
+d3_9_p1_m1 = hep.wignerd_doublearg(9, 1, -1, cos_theta3)
+d3_9_p1_p1 = hep.wignerd_doublearg(9, 1, 1, cos_theta3)
+d3_9_p3_m1 = hep.wignerd_doublearg(9, 3, -1, cos_theta3)
+d3_9_p3_p1 = hep.wignerd_doublearg(9, 3, 1, cos_theta3)
+
+# ----------------------------------------------------------------------------
+# Amplitudes of each chain group in its own frames
+# ----------------------------------------------------------------------------
+
+% A<k>_<particle>_<2λ>...: chains with spectator k, p1 = +1/2, m1 = -1/2, p2 = +1, ...
+A3_p_m1_g_m2_Lb_m1 = (
+    0.35355339059327 * c05_L1520 * d3_3_m3_m1
+    + 0.35355339059327 * c06_L1520 * d3_3_m3_m1
+    + 0.31622776601684 * c07_L1520 * d3_3_m3_m1
+    + 0.31622776601684 * c08_L1520 * d3_3_m3_m1
+    + 0.15811388300842 * c09_L1520 * d3_3_m3_m1
+    + 0.15811388300842 * c10_L1520 * d3_3_m3_m1
+    + 0.35355339059327 * c19_L1690 * d3_3_m3_m1
+    + 0.35355339059327 * c20_L1690 * d3_3_m3_m1
+    + 0.31622776601684 * c21_L1690 * d3_3_m3_m1
+    + 0.31622776601684 * c22_L1690 * d3_3_m3_m1
+    + 0.15811388300842 * c23_L1690 * d3_3_m3_m1
+    + 0.15811388300842 * c24_L1690 * d3_3_m3_m1
+    - 0.31622776601684 * c33_L1820 * d3_5_m3_m1
+    - 0.31622776601684 * c34_L1820 * d3_5_m3_m1
+    - 0.33806170189141 * c35_L1820 * d3_5_m3_m1
+    - 0.33806170189141 * c36_L1820 * d3_5_m3_m1
+    - 0.18898223650461 * c37_L1820 * d3_5_m3_m1
+    - 0.18898223650461 * c38_L1820 * d3_5_m3_m1
+    - 0.31622776601684 * c39_L1830 * d3_5_m3_m1
+    - 0.31622776601684 * c40_L1830 * d3_5_m3_m1
+    - 0.33806170189141 * c41_L1830 * d3_5_m3_m1
+    - 0.33806170189141 * c42_L1830 * d3_5_m3_m1
+    - 0.18898223650461 * c43_L1830 * d3_5_m3_m1
+    - 0.18898223650461 * c44_L1830 * d3_5_m3_m1
+    + 0.35355339059327 * c45_L1890 * d3_3_m3_m1
+    + 0.35355339059327 * c46_L1890 * d3_3_m3_m1
+    + 0.31622776601684 * c47_L1890 * d3_3_m3_m1
+    + 0.31622776601684 * c48_L1890 * d3_3_m3_m1
+    + 0.15811388300842 * c49_L1890 * d3_3_m3_m1
+    + 0.15811388300842 * c50_L1890 * d3_3_m3_m1
+    + 0.2988071523336 * c51_L2100 * d3_7_m3_m1
+    + 0.2988071523336 * c52_L2100 * d3_7_m3_m1
+    + 0.34503277967118 * c53_L2100 * d3_7_m3_m1
+    + 0.34503277967118 * c54_L2100 * d3_7_m3_m1
+    + 0.20412414523193 * c55_L2100 * d3_7_m3_m1
+    + 0.20412414523193 * c56_L2100 * d3_7_m3_m1
+    - 0.31622776601684 * c57_L2110 * d3_5_m3_m1
+    - 0.31622776601684 * c58_L2110 * d3_5_m3_m1
+    - 0.33806170189141 * c59_L2110 * d3_5_m3_m1
+    - 0.33806170189141 * c60_L2110 * d3_5_m3_m1
+    - 0.18898223650461 * c61_L2110 * d3_5_m3_m1
+    - 0.18898223650461 * c62_L2110 * d3_5_m3_m1
+    - 0.28867513459481 * c63_L2350 * d3_9_m3_m1
+    - 0.28867513459481 * c64_L2350 * d3_9_m3_m1
+    - 0.3481553119114 * c65_L2350 * d3_9_m3_m1
+    - 0.3481553119114 * c66_L2350 * d3_9_m3_m1
+    - 0.21320071635561 * c67_L2350 * d3_9_m3_m1
+    - 0.21320071635561 * c68_L2350 * d3_9_m3_m1
+    + 0.35355339059327 * c69_LNR3O * d3_3_m3_m1
+    + 0.35355339059327 * c70_LNR3O * d3_3_m3_m1
+    + 0.31622776601684 * c71_LNR3O * d3_3_m3_m1
+    + 0.31622776601684 * c72_LNR3O * d3_3_m3_m1
+    + 0.15811388300842 * c73_LNR3O * d3_3_m3_m1
+    + 0.15811388300842 * c74_LNR3O * d3_3_m3_m1
+)
+A3_p_m1_g_m2_Lb_p1 = (
+    -0.40824829046386 * c01_L1405 * d3_1_m1_m1
+    + 0.40824829046386 * c02_L1405 * d3_1_m1_m1
+    - 0.28867513459481 * c03_L1405 * d3_1_m1_m1
+    + 0.28867513459481 * c04_L1405 * d3_1_m1_m1
+    + 0.20412414523193 * c05_L1520 * d3_3_m1_m1
+    - 0.20412414523193 * c06_L1520 * d3_3_m1_m1
+    + 0.36514837167011 * c07_L1520 * d3_3_m1_m1
+    - 0.36514837167011 * c08_L1520 * d3_3_m1_m1
+    + 0.27386127875258 * c09_L1520 * d3_3_m1_m1
+    - 0.27386127875258 * c10_L1520 * d3_3_m1_m1
+    - 0.40824829046386 * c11_L1600 * d3_1_m1_m1
+    + 0.40824829046386 * c12_L1600 * d3_1_m1_m1
+    - 0.28867513459481 * c13_L1600 * d3_1_m1_m1
+    + 0.28867513459481 * c14_L1600 * d3_1_m1_m1
+    - 0.40824829046386 * c15_L1670 * d3_1_m1_m1
+    + 0.40824829046386 * c16_L1670 * d3_1_m1_m1
+    - 0.28867513459481 * c17_L1670 * d3_1_m1_m1
+    + 0.28867513459481 * c18_L1670 * d3_1_m1_m1
+    + 0.20412414523193 * c19_L1690 * d3_3_m1_m1
+    - 0.20412414523193 * c20_L1690 * d3_3_m1_m1
+    + 0.36514837167011 * c21_L1690 * d3_3_m1_m1
+    - 0.36514837167011 * c22_L1690 * d3_3_m1_m1
+    + 0.27386127875258 * c23_L1690 * d3_3_m1_m1
+    - 0.27386127875258 * c24_L1690 * d3_3_m1_m1
+    - 0.40824829046386 * c25_L1800 * d3_1_m1_m1
+    + 0.40824829046386 * c26_L1800 * d3_1_m1_m1
+    - 0.28867513459481 * c27_L1800 * d3_1_m1_m1
+    + 0.28867513459481 * c28_L1800 * d3_1_m1_m1
+    - 0.40824829046386 * c29_L1810 * d3_1_m1_m1
+    + 0.40824829046386 * c30_L1810 * d3_1_m1_m1
+    - 0.28867513459481 * c31_L1810 * d3_1_m1_m1
+    + 0.28867513459481 * c32_L1810 * d3_1_m1_m1
+    - 0.22360679774998 * c33_L1820 * d3_5_m1_m1
+    + 0.22360679774998 * c34_L1820 * d3_5_m1_m1
+    - 0.35856858280032 * c35_L1820 * d3_5_m1_m1
+    + 0.35856858280032 * c36_L1820 * d3_5_m1_m1
+    - 0.26726124191242 * c37_L1820 * d3_5_m1_m1
+    + 0.26726124191242 * c38_L1820 * d3_5_m1_m1
+    - 0.22360679774998 * c39_L1830 * d3_5_m1_m1
+    + 0.22360679774998 * c40_L1830 * d3_5_m1_m1
+    - 0.35856858280032 * c41_L1830 * d3_5_m1_m1
+    + 0.35856858280032 * c42_L1830 * d3_5_m1_m1
+    - 0.26726124191242 * c43_L1830 * d3_5_m1_m1
+    + 0.26726124191242 * c44_L1830 * d3_5_m1_m1
+    + 0.20412414523193 * c45_L1890 * d3_3_m1_m1
+    - 0.20412414523193 * c46_L1890 * d3_3_m1_m1
+    + 0.36514837167011 * c47_L1890 * d3_3_m1_m1
+    - 0.36514837167011 * c48_L1890 * d3_3_m1_m1
+    + 0.27386127875258 * c49_L1890 * d3_3_m1_m1
+    - 0.27386127875258 * c50_L1890 * d3_3_m1_m1
+    + 0.23145502494314 * c51_L2100 * d3_7_m1_m1
+    - 0.23145502494314 * c52_L2100 * d3_7_m1_m1
+    + 0.3563483225499 * c53_L2100 * d3_7_m1_m1
+    - 0.3563483225499 * c54_L2100 * d3_7_m1_m1
+    + 0.26352313834736 * c55_L2100 * d3_7_m1_m1
+    - 0.26352313834736 * c56_L2100 * d3_7_m1_m1
+    - 0.22360679774998 * c57_L2110 * d3_5_m1_m1
+    + 0.22360679774998 * c58_L2110 * d3_5_m1_m1
+    - 0.35856858280032 * c59_L2110 * d3_5_m1_m1
+    + 0.35856858280032 * c60_L2110 * d3_5_m1_m1
+    - 0.26726124191242 * c61_L2110 * d3_5_m1_m1
+    + 0.26726124191242 * c62_L2110 * d3_5_m1_m1
+    - 0.23570226039552 * c63_L2350 * d3_9_m1_m1
+    + 0.23570226039552 * c64_L2350 * d3_9_m1_m1
+    - 0.35533452725935 * c65_L2350 * d3_9_m1_m1
+    + 0.35533452725935 * c66_L2350 * d3_9_m1_m1
+    - 0.26111648393355 * c67_L2350 * d3_9_m1_m1
+    + 0.26111648393355 * c68_L2350 * d3_9_m1_m1
+    + 0.20412414523193 * c69_LNR3O * d3_3_m1_m1
+    - 0.20412414523193 * c70_LNR3O * d3_3_m1_m1
+    + 0.36514837167011 * c71_LNR3O * d3_3_m1_m1
+    - 0.36514837167011 * c72_LNR3O * d3_3_m1_m1
+    + 0.27386127875258 * c73_LNR3O * d3_3_m1_m1
+    - 0.27386127875258 * c74_LNR3O * d3_3_m1_m1
+)
+A3_p_m1_g_0_Lb_m1 = (
+    0.28867513459481 * c01_L1405 * d3_1_m1_m1
+    + 0.28867513459481 * c02_L1405 * d3_1_m1_m1
+    + 0.40824829046386 * c03_L1405 * d3_1_m1_m1
+    + 0.40824829046386 * c04_L1405 * d3_1_m1_m1
+    + 0.28867513459481 * c05_L1520 * d3_3_m1_m1
+    + 0.28867513459481 * c06_L1520 * d3_3_m1_m1
+    - 0.12909944487358 * c07_L1520 * d3_3_m1_m1
+    - 0.12909944487358 * c08_L1520 * d3_3_m1_m1
+    - 0.38729833462074 * c09_L1520 * d3_3_m1_m1
+    - 0.38729833462074 * c10_L1520 * d3_3_m1_m1
+    + 0.28867513459481 * c11_L1600 * d3_1_m1_m1
+    + 0.28867513459481 * c12_L1600 * d3_1_m1_m1
+    + 0.40824829046386 * c13_L1600 * d3_1_m1_m1
+    + 0.40824829046386 * c14_L1600 * d3_1_m1_m1
+    + 0.28867513459481 * c15_L1670 * d3_1_m1_m1
+    + 0.28867513459481 * c16_L1670 * d3_1_m1_m1
+    + 0.40824829046386 * c17_L1670 * d3_1_m1_m1
+    + 0.40824829046386 * c18_L1670 * d3_1_m1_m1
+    + 0.28867513459481 * c19_L1690 * d3_3_m1_m1
+    + 0.28867513459481 * c20_L1690 * d3_3_m1_m1
+    - 0.12909944487358 * c21_L1690 * d3_3_m1_m1
+    - 0.12909944487358 * c22_L1690 * d3_3_m1_m1
+    - 0.38729833462074 * c23_L1690 * d3_3_m1_m1
+    - 0.38729833462074 * c24_L1690 * d3_3_m1_m1
+    + 0.28867513459481 * c25_L1800 * d3_1_m1_m1
+    + 0.28867513459481 * c26_L1800 * d3_1_m1_m1
+    + 0.40824829046386 * c27_L1800 * d3_1_m1_m1
+    + 0.40824829046386 * c28_L1800 * d3_1_m1_m1
+    + 0.28867513459481 * c29_L1810 * d3_1_m1_m1
+    + 0.28867513459481 * c30_L1810 * d3_1_m1_m1
+    + 0.40824829046386 * c31_L1810 * d3_1_m1_m1
+    + 0.40824829046386 * c32_L1810 * d3_1_m1_m1
+    - 0.31622776601684 * c33_L1820 * d3_5_m1_m1
+    - 0.31622776601684 * c34_L1820 * d3_5_m1_m1
+    + 0.08451542547285 * c35_L1820 * d3_5_m1_m1
+    + 0.08451542547285 * c36_L1820 * d3_5_m1_m1
+    + 0.37796447300923 * c37_L1820 * d3_5_m1_m1
+    + 0.37796447300923 * c38_L1820 * d3_5_m1_m1
+    - 0.31622776601684 * c39_L1830 * d3_5_m1_m1
+    - 0.31622776601684 * c40_L1830 * d3_5_m1_m1
+    + 0.08451542547285 * c41_L1830 * d3_5_m1_m1
+    + 0.08451542547285 * c42_L1830 * d3_5_m1_m1
+    + 0.37796447300923 * c43_L1830 * d3_5_m1_m1
+    + 0.37796447300923 * c44_L1830 * d3_5_m1_m1
+    + 0.28867513459481 * c45_L1890 * d3_3_m1_m1
+    + 0.28867513459481 * c46_L1890 * d3_3_m1_m1
+    - 0.12909944487358 * c47_L1890 * d3_3_m1_m1
+    - 0.12909944487358 * c48_L1890 * d3_3_m1_m1
+    - 0.38729833462074 * c49_L1890 * d3_3_m1_m1
+    - 0.38729833462074 * c50_L1890 * d3_3_m1_m1
+    + 0.32732683535399 * c51_L2100 * d3_7_m1_m1
+    + 0.32732683535399 * c52_L2100 * d3_7_m1_m1
+    - 0.06299407883487 * c53_L2100 * d3_7_m1_m1
+    - 0.06299407883487 * c54_L2100 * d3_7_m1_m1
+    - 0.37267799624996 * c55_L2100 * d3_7_m1_m1
+    - 0.37267799624996 * c56_L2100 * d3_7_m1_m1
+    - 0.31622776601684 * c57_L2110 * d3_5_m1_m1
+    - 0.31622776601684 * c58_L2110 * d3_5_m1_m1
+    + 0.08451542547285 * c59_L2110 * d3_5_m1_m1
+    + 0.08451542547285 * c60_L2110 * d3_5_m1_m1
+    + 0.37796447300923 * c61_L2110 * d3_5_m1_m1
+    + 0.37796447300923 * c62_L2110 * d3_5_m1_m1
+    - 0.33333333333333 * c63_L2350 * d3_9_m1_m1
+    - 0.33333333333333 * c64_L2350 * d3_9_m1_m1
+    + 0.05025189076296 * c65_L2350 * d3_9_m1_m1
+    + 0.05025189076296 * c66_L2350 * d3_9_m1_m1
+    + 0.369274472938 * c67_L2350 * d3_9_m1_m1
+    + 0.369274472938 * c68_L2350 * d3_9_m1_m1
+    + 0.28867513459481 * c69_LNR3O * d3_3_m1_m1
+    + 0.28867513459481 * c70_LNR3O * d3_3_m1_m1
+    - 0.12909944487358 * c71_LNR3O * d3_3_m1_m1
+    - 0.12909944487358 * c72_LNR3O * d3_3_m1_m1
+    - 0.38729833462074 * c73_LNR3O * d3_3_m1_m1
+    - 0.38729833462074 * c74_LNR3O * d3_3_m1_m1
+)
+A3_p_m1_g_0_Lb_p1 = (
+    -0.28867513459481 * c01_L1405 * d3_1_p1_m1
+    + 0.28867513459481 * c02_L1405 * d3_1_p1_m1
+    + 0.40824829046386 * c03_L1405 * d3_1_p1_m1
+    - 0.40824829046386 * c04_L1405 * d3_1_p1_m1
+    + 0.28867513459481 * c05_L1520 * d3_3_p1_m1
+    - 0.28867513459481 * c06_L1520 * d3_3_p1_m1
+    + 0.12909944487358 * c07_L1520 * d3_3_p1_m1
+    - 0.12909944487358 * c08_L1520 * d3_3_p1_m1
+    - 0.38729833462074 * c09_L1520 * d3_3_p1_m1
+    + 0.38729833462074 * c10_L1520 * d3_3_p1_m1
+    - 0.28867513459481 * c11_L1600 * d3_1_p1_m1
+    + 0.28867513459481 * c12_L1600 * d3_1_p1_m1
+    + 0.40824829046386 * c13_L1600 * d3_1_p1_m1
+    - 0.40824829046386 * c14_L1600 * d3_1_p1_m1
+    - 0.28867513459481 * c15_L1670 * d3_1_p1_m1
+    + 0.28867513459481 * c16_L1670 * d3_1_p1_m1
+    + 0.40824829046386 * c17_L1670 * d3_1_p1_m1
+    - 0.40824829046386 * c18_L1670 * d3_1_p1_m1
+    + 0.28867513459481 * c19_L1690 * d3_3_p1_m1
+    - 0.28867513459481 * c20_L1690 * d3_3_p1_m1
+    + 0.12909944487358 * c21_L1690 * d3_3_p1_m1
+    - 0.12909944487358 * c22_L1690 * d3_3_p1_m1
+    - 0.38729833462074 * c23_L1690 * d3_3_p1_m1
+    + 0.38729833462074 * c24_L1690 * d3_3_p1_m1
+    - 0.28867513459481 * c25_L1800 * d3_1_p1_m1
+    + 0.28867513459481 * c26_L1800 * d3_1_p1_m1
+    + 0.40824829046386 * c27_L1800 * d3_1_p1_m1
+    - 0.40824829046386 * c28_L1800 * d3_1_p1_m1
+    - 0.28867513459481 * c29_L1810 * d3_1_p1_m1
+    + 0.28867513459481 * c30_L1810 * d3_1_p1_m1
+    + 0.40824829046386 * c31_L1810 * d3_1_p1_m1
+    - 0.40824829046386 * c32_L1810 * d3_1_p1_m1
+    - 0.31622776601684 * c33_L1820 * d3_5_p1_m1
+    + 0.31622776601684 * c34_L1820 * d3_5_p1_m1
+    - 0.08451542547285 * c35_L1820 * d3_5_p1_m1
+    + 0.08451542547285 * c36_L1820 * d3_5_p1_m1
+    + 0.37796447300923 * c37_L1820 * d3_5_p1_m1
+    - 0.37796447300923 * c38_L1820 * d3_5_p1_m1
+    - 0.31622776601684 * c39_L1830 * d3_5_p1_m1
+    + 0.31622776601684 * c40_L1830 * d3_5_p1_m1
+    - 0.08451542547285 * c41_L1830 * d3_5_p1_m1
+    + 0.08451542547285 * c42_L1830 * d3_5_p1_m1
+    + 0.37796447300923 * c43_L1830 * d3_5_p1_m1
+    - 0.37796447300923 * c44_L1830 * d3_5_p1_m1
+    + 0.28867513459481 * c45_L1890 * d3_3_p1_m1
+    - 0.28867513459481 * c46_L1890 * d3_3_p1_m1
+    + 0.12909944487358 * c47_L1890 * d3_3_p1_m1
+    - 0.12909944487358 * c48_L1890 * d3_3_p1_m1
+    - 0.38729833462074 * c49_L1890 * d3_3_p1_m1
+    + 0.38729833462074 * c50_L1890 * d3_3_p1_m1
+    + 0.32732683535399 * c51_L2100 * d3_7_p1_m1
+    - 0.32732683535399 * c52_L2100 * d3_7_p1_m1
+    + 0.06299407883487 * c53_L2100 * d3_7_p1_m1
+    - 0.06299407883487 * c54_L2100 * d3_7_p1_m1
+    - 0.37267799624996 * c55_L2100 * d3_7_p1_m1
+    + 0.37267799624996 * c56_L2100 * d3_7_p1_m1
+    - 0.31622776601684 * c57_L2110 * d3_5_p1_m1
+    + 0.31622776601684 * c58_L2110 * d3_5_p1_m1
+    - 0.08451542547285 * c59_L2110 * d3_5_p1_m1
+    + 0.08451542547285 * c60_L2110 * d3_5_p1_m1
+    + 0.37796447300923 * c61_L2110 * d3_5_p1_m1
+    - 0.37796447300923 * c62_L2110 * d3_5_p1_m1
+    - 0.33333333333333 * c63_L2350 * d3_9_p1_m1
+    + 0.33333333333333 * c64_L2350 * d3_9_p1_m1
+    - 0.05025189076296 * c65_L2350 * d3_9_p1_m1
+    + 0.05025189076296 * c66_L2350 * d3_9_p1_m1
+    + 0.369274472938 * c67_L2350 * d3_9_p1_m1
+    - 0.369274472938 * c68_L2350 * d3_9_p1_m1
+    + 0.28867513459481 * c69_LNR3O * d3_3_p1_m1
+    - 0.28867513459481 * c70_LNR3O * d3_3_p1_m1
+    + 0.12909944487358 * c71_LNR3O * d3_3_p1_m1
+    - 0.12909944487358 * c72_LNR3O * d3_3_p1_m1
+    - 0.38729833462074 * c73_LNR3O * d3_3_p1_m1
+    + 0.38729833462074 * c74_LNR3O * d3_3_p1_m1
+)
+A3_p_m1_g_p2_Lb_m1 = (
+    0.40824829046386 * c01_L1405 * d3_1_p1_m1
+    + 0.40824829046386 * c02_L1405 * d3_1_p1_m1
+    - 0.28867513459481 * c03_L1405 * d3_1_p1_m1
+    - 0.28867513459481 * c04_L1405 * d3_1_p1_m1
+    + 0.20412414523193 * c05_L1520 * d3_3_p1_m1
+    + 0.20412414523193 * c06_L1520 * d3_3_p1_m1
+    - 0.36514837167011 * c07_L1520 * d3_3_p1_m1
+    - 0.36514837167011 * c08_L1520 * d3_3_p1_m1
+    + 0.27386127875258 * c09_L1520 * d3_3_p1_m1
+    + 0.27386127875258 * c10_L1520 * d3_3_p1_m1
+    + 0.40824829046386 * c11_L1600 * d3_1_p1_m1
+    + 0.40824829046386 * c12_L1600 * d3_1_p1_m1
+    - 0.28867513459481 * c13_L1600 * d3_1_p1_m1
+    - 0.28867513459481 * c14_L1600 * d3_1_p1_m1
+    + 0.40824829046386 * c15_L1670 * d3_1_p1_m1
+    + 0.40824829046386 * c16_L1670 * d3_1_p1_m1
+    - 0.28867513459481 * c17_L1670 * d3_1_p1_m1
+    - 0.28867513459481 * c18_L1670 * d3_1_p1_m1
+    + 0.20412414523193 * c19_L1690 * d3_3_p1_m1
+    + 0.20412414523193 * c20_L1690 * d3_3_p1_m1
+    - 0.36514837167011 * c21_L1690 * d3_3_p1_m1
+    - 0.36514837167011 * c22_L1690 * d3_3_p1_m1
+    + 0.27386127875258 * c23_L1690 * d3_3_p1_m1
+    + 0.27386127875258 * c24_L1690 * d3_3_p1_m1
+    + 0.40824829046386 * c25_L1800 * d3_1_p1_m1
+    + 0.40824829046386 * c26_L1800 * d3_1_p1_m1
+    - 0.28867513459481 * c27_L1800 * d3_1_p1_m1
+    - 0.28867513459481 * c28_L1800 * d3_1_p1_m1
+    + 0.40824829046386 * c29_L1810 * d3_1_p1_m1
+    + 0.40824829046386 * c30_L1810 * d3_1_p1_m1
+    - 0.28867513459481 * c31_L1810 * d3_1_p1_m1
+    - 0.28867513459481 * c32_L1810 * d3_1_p1_m1
+    - 0.22360679774998 * c33_L1820 * d3_5_p1_m1
+    - 0.22360679774998 * c34_L1820 * d3_5_p1_m1
+    + 0.35856858280032 * c35_L1820 * d3_5_p1_m1
+    + 0.35856858280032 * c36_L1820 * d3_5_p1_m1
+    - 0.26726124191242 * c37_L1820 * d3_5_p1_m1
+    - 0.26726124191242 * c38_L1820 * d3_5_p1_m1
+    - 0.22360679774998 * c39_L1830 * d3_5_p1_m1
+    - 0.22360679774998 * c40_L1830 * d3_5_p1_m1
+    + 0.35856858280032 * c41_L1830 * d3_5_p1_m1
+    + 0.35856858280032 * c42_L1830 * d3_5_p1_m1
+    - 0.26726124191242 * c43_L1830 * d3_5_p1_m1
+    - 0.26726124191242 * c44_L1830 * d3_5_p1_m1
+    + 0.20412414523193 * c45_L1890 * d3_3_p1_m1
+    + 0.20412414523193 * c46_L1890 * d3_3_p1_m1
+    - 0.36514837167011 * c47_L1890 * d3_3_p1_m1
+    - 0.36514837167011 * c48_L1890 * d3_3_p1_m1
+    + 0.27386127875258 * c49_L1890 * d3_3_p1_m1
+    + 0.27386127875258 * c50_L1890 * d3_3_p1_m1
+    + 0.23145502494314 * c51_L2100 * d3_7_p1_m1
+    + 0.23145502494314 * c52_L2100 * d3_7_p1_m1
+    - 0.3563483225499 * c53_L2100 * d3_7_p1_m1
+    - 0.3563483225499 * c54_L2100 * d3_7_p1_m1
+    + 0.26352313834736 * c55_L2100 * d3_7_p1_m1
+    + 0.26352313834736 * c56_L2100 * d3_7_p1_m1
+    - 0.22360679774998 * c57_L2110 * d3_5_p1_m1
+    - 0.22360679774998 * c58_L2110 * d3_5_p1_m1
+    + 0.35856858280032 * c59_L2110 * d3_5_p1_m1
+    + 0.35856858280032 * c60_L2110 * d3_5_p1_m1
+    - 0.26726124191242 * c61_L2110 * d3_5_p1_m1
+    - 0.26726124191242 * c62_L2110 * d3_5_p1_m1
+    - 0.23570226039552 * c63_L2350 * d3_9_p1_m1
+    - 0.23570226039552 * c64_L2350 * d3_9_p1_m1
+    + 0.35533452725935 * c65_L2350 * d3_9_p1_m1
+    + 0.35533452725935 * c66_L2350 * d3_9_p1_m1
+    - 0.26111648393355 * c67_L2350 * d3_9_p1_m1
+    - 0.26111648393355 * c68_L2350 * d3_9_p1_m1
+    + 0.20412414523193 * c69_LNR3O * d3_3_p1_m1
+    + 0.20412414523193 * c70_LNR3O * d3_3_p1_m1
+    - 0.36514837167011 * c71_LNR3O * d3_3_p1_m1
+    - 0.36514837167011 * c72_LNR3O * d3_3_p1_m1
+    + 0.27386127875258 * c73_LNR3O * d3_3_p1_m1
+    + 0.27386127875258 * c74_LNR3O * d3_3_p1_m1
+)
+A3_p_m1_g_p2_Lb_p1 = (
+    0.35355339059327 * c05_L1520 * d3_3_p3_m1
+    - 0.35355339059327 * c06_L1520 * d3_3_p3_m1
+    - 0.31622776601684 * c07_L1520 * d3_3_p3_m1
+    + 0.31622776601684 * c08_L1520 * d3_3_p3_m1
+    + 0.15811388300842 * c09_L1520 * d3_3_p3_m1
+    - 0.15811388300842 * c10_L1520 * d3_3_p3_m1
+    + 0.35355339059327 * c19_L1690 * d3_3_p3_m1
+    - 0.35355339059327 * c20_L1690 * d3_3_p3_m1
+    - 0.31622776601684 * c21_L1690 * d3_3_p3_m1
+    + 0.31622776601684 * c22_L1690 * d3_3_p3_m1
+    + 0.15811388300842 * c23_L1690 * d3_3_p3_m1
+    - 0.15811388300842 * c24_L1690 * d3_3_p3_m1
+    - 0.31622776601684 * c33_L1820 * d3_5_p3_m1
+    + 0.31622776601684 * c34_L1820 * d3_5_p3_m1
+    + 0.33806170189141 * c35_L1820 * d3_5_p3_m1
+    - 0.33806170189141 * c36_L1820 * d3_5_p3_m1
+    - 0.18898223650461 * c37_L1820 * d3_5_p3_m1
+    + 0.18898223650461 * c38_L1820 * d3_5_p3_m1
+    - 0.31622776601684 * c39_L1830 * d3_5_p3_m1
+    + 0.31622776601684 * c40_L1830 * d3_5_p3_m1
+    + 0.33806170189141 * c41_L1830 * d3_5_p3_m1
+    - 0.33806170189141 * c42_L1830 * d3_5_p3_m1
+    - 0.18898223650461 * c43_L1830 * d3_5_p3_m1
+    + 0.18898223650461 * c44_L1830 * d3_5_p3_m1
+    + 0.35355339059327 * c45_L1890 * d3_3_p3_m1
+    - 0.35355339059327 * c46_L1890 * d3_3_p3_m1
+    - 0.31622776601684 * c47_L1890 * d3_3_p3_m1
+    + 0.31622776601684 * c48_L1890 * d3_3_p3_m1
+    + 0.15811388300842 * c49_L1890 * d3_3_p3_m1
+    - 0.15811388300842 * c50_L1890 * d3_3_p3_m1
+    + 0.2988071523336 * c51_L2100 * d3_7_p3_m1
+    - 0.2988071523336 * c52_L2100 * d3_7_p3_m1
+    - 0.34503277967118 * c53_L2100 * d3_7_p3_m1
+    + 0.34503277967118 * c54_L2100 * d3_7_p3_m1
+    + 0.20412414523193 * c55_L2100 * d3_7_p3_m1
+    - 0.20412414523193 * c56_L2100 * d3_7_p3_m1
+    - 0.31622776601684 * c57_L2110 * d3_5_p3_m1
+    + 0.31622776601684 * c58_L2110 * d3_5_p3_m1
+    + 0.33806170189141 * c59_L2110 * d3_5_p3_m1
+    - 0.33806170189141 * c60_L2110 * d3_5_p3_m1
+    - 0.18898223650461 * c61_L2110 * d3_5_p3_m1
+    + 0.18898223650461 * c62_L2110 * d3_5_p3_m1
+    - 0.28867513459481 * c63_L2350 * d3_9_p3_m1
+    + 0.28867513459481 * c64_L2350 * d3_9_p3_m1
+    + 0.3481553119114 * c65_L2350 * d3_9_p3_m1
+    - 0.3481553119114 * c66_L2350 * d3_9_p3_m1
+    - 0.21320071635561 * c67_L2350 * d3_9_p3_m1
+    + 0.21320071635561 * c68_L2350 * d3_9_p3_m1
+    + 0.35355339059327 * c69_LNR3O * d3_3_p3_m1
+    - 0.35355339059327 * c70_LNR3O * d3_3_p3_m1
+    - 0.31622776601684 * c71_LNR3O * d3_3_p3_m1
+    + 0.31622776601684 * c72_LNR3O * d3_3_p3_m1
+    + 0.15811388300842 * c73_LNR3O * d3_3_p3_m1
+    - 0.15811388300842 * c74_LNR3O * d3_3_p3_m1
+)
+A3_p_p1_g_m2_Lb_m1 = (
+    -0.35355339059327 * c05_L1520 * d3_3_m3_p1
+    - 0.35355339059327 * c06_L1520 * d3_3_m3_p1
+    - 0.31622776601684 * c07_L1520 * d3_3_m3_p1
+    - 0.31622776601684 * c08_L1520 * d3_3_m3_p1
+    - 0.15811388300842 * c09_L1520 * d3_3_m3_p1
+    - 0.15811388300842 * c10_L1520 * d3_3_m3_p1
+    - 0.35355339059327 * c19_L1690 * d3_3_m3_p1
+    - 0.35355339059327 * c20_L1690 * d3_3_m3_p1
+    - 0.31622776601684 * c21_L1690 * d3_3_m3_p1
+    - 0.31622776601684 * c22_L1690 * d3_3_m3_p1
+    - 0.15811388300842 * c23_L1690 * d3_3_m3_p1
+    - 0.15811388300842 * c24_L1690 * d3_3_m3_p1
+    + 0.31622776601684 * c33_L1820 * d3_5_m3_p1
+    + 0.31622776601684 * c34_L1820 * d3_5_m3_p1
+    + 0.33806170189141 * c35_L1820 * d3_5_m3_p1
+    + 0.33806170189141 * c36_L1820 * d3_5_m3_p1
+    + 0.18898223650461 * c37_L1820 * d3_5_m3_p1
+    + 0.18898223650461 * c38_L1820 * d3_5_m3_p1
+    - 0.31622776601684 * c39_L1830 * d3_5_m3_p1
+    - 0.31622776601684 * c40_L1830 * d3_5_m3_p1
+    - 0.33806170189141 * c41_L1830 * d3_5_m3_p1
+    - 0.33806170189141 * c42_L1830 * d3_5_m3_p1
+    - 0.18898223650461 * c43_L1830 * d3_5_m3_p1
+    - 0.18898223650461 * c44_L1830 * d3_5_m3_p1
+    + 0.35355339059327 * c45_L1890 * d3_3_m3_p1
+    + 0.35355339059327 * c46_L1890 * d3_3_m3_p1
+    + 0.31622776601684 * c47_L1890 * d3_3_m3_p1
+    + 0.31622776601684 * c48_L1890 * d3_3_m3_p1
+    + 0.15811388300842 * c49_L1890 * d3_3_m3_p1
+    + 0.15811388300842 * c50_L1890 * d3_3_m3_p1
+    - 0.2988071523336 * c51_L2100 * d3_7_m3_p1
+    - 0.2988071523336 * c52_L2100 * d3_7_m3_p1
+    - 0.34503277967118 * c53_L2100 * d3_7_m3_p1
+    - 0.34503277967118 * c54_L2100 * d3_7_m3_p1
+    - 0.20412414523193 * c55_L2100 * d3_7_m3_p1
+    - 0.20412414523193 * c56_L2100 * d3_7_m3_p1
+    + 0.31622776601684 * c57_L2110 * d3_5_m3_p1
+    + 0.31622776601684 * c58_L2110 * d3_5_m3_p1
+    + 0.33806170189141 * c59_L2110 * d3_5_m3_p1
+    + 0.33806170189141 * c60_L2110 * d3_5_m3_p1
+    + 0.18898223650461 * c61_L2110 * d3_5_m3_p1
+    + 0.18898223650461 * c62_L2110 * d3_5_m3_p1
+    + 0.28867513459481 * c63_L2350 * d3_9_m3_p1
+    + 0.28867513459481 * c64_L2350 * d3_9_m3_p1
+    + 0.3481553119114 * c65_L2350 * d3_9_m3_p1
+    + 0.3481553119114 * c66_L2350 * d3_9_m3_p1
+    + 0.21320071635561 * c67_L2350 * d3_9_m3_p1
+    + 0.21320071635561 * c68_L2350 * d3_9_m3_p1
+    - 0.35355339059327 * c69_LNR3O * d3_3_m3_p1
+    - 0.35355339059327 * c70_LNR3O * d3_3_m3_p1
+    - 0.31622776601684 * c71_LNR3O * d3_3_m3_p1
+    - 0.31622776601684 * c72_LNR3O * d3_3_m3_p1
+    - 0.15811388300842 * c73_LNR3O * d3_3_m3_p1
+    - 0.15811388300842 * c74_LNR3O * d3_3_m3_p1
+)
+A3_p_p1_g_m2_Lb_p1 = (
+    -0.40824829046386 * c01_L1405 * d3_1_m1_p1
+    + 0.40824829046386 * c02_L1405 * d3_1_m1_p1
+    - 0.28867513459481 * c03_L1405 * d3_1_m1_p1
+    + 0.28867513459481 * c04_L1405 * d3_1_m1_p1
+    - 0.20412414523193 * c05_L1520 * d3_3_m1_p1
+    + 0.20412414523193 * c06_L1520 * d3_3_m1_p1
+    - 0.36514837167011 * c07_L1520 * d3_3_m1_p1
+    + 0.36514837167011 * c08_L1520 * d3_3_m1_p1
+    - 0.27386127875258 * c09_L1520 * d3_3_m1_p1
+    + 0.27386127875258 * c10_L1520 * d3_3_m1_p1
+    + 0.40824829046386 * c11_L1600 * d3_1_m1_p1
+    - 0.40824829046386 * c12_L1600 * d3_1_m1_p1
+    + 0.28867513459481 * c13_L1600 * d3_1_m1_p1
+    - 0.28867513459481 * c14_L1600 * d3_1_m1_p1
+    - 0.40824829046386 * c15_L1670 * d3_1_m1_p1
+    + 0.40824829046386 * c16_L1670 * d3_1_m1_p1
+    - 0.28867513459481 * c17_L1670 * d3_1_m1_p1
+    + 0.28867513459481 * c18_L1670 * d3_1_m1_p1
+    - 0.20412414523193 * c19_L1690 * d3_3_m1_p1
+    + 0.20412414523193 * c20_L1690 * d3_3_m1_p1
+    - 0.36514837167011 * c21_L1690 * d3_3_m1_p1
+    + 0.36514837167011 * c22_L1690 * d3_3_m1_p1
+    - 0.27386127875258 * c23_L1690 * d3_3_m1_p1
+    + 0.27386127875258 * c24_L1690 * d3_3_m1_p1
+    - 0.40824829046386 * c25_L1800 * d3_1_m1_p1
+    + 0.40824829046386 * c26_L1800 * d3_1_m1_p1
+    - 0.28867513459481 * c27_L1800 * d3_1_m1_p1
+    + 0.28867513459481 * c28_L1800 * d3_1_m1_p1
+    + 0.40824829046386 * c29_L1810 * d3_1_m1_p1
+    - 0.40824829046386 * c30_L1810 * d3_1_m1_p1
+    + 0.28867513459481 * c31_L1810 * d3_1_m1_p1
+    - 0.28867513459481 * c32_L1810 * d3_1_m1_p1
+    + 0.22360679774998 * c33_L1820 * d3_5_m1_p1
+    - 0.22360679774998 * c34_L1820 * d3_5_m1_p1
+    + 0.35856858280032 * c35_L1820 * d3_5_m1_p1
+    - 0.35856858280032 * c36_L1820 * d3_5_m1_p1
+    + 0.26726124191242 * c37_L1820 * d3_5_m1_p1
+    - 0.26726124191242 * c38_L1820 * d3_5_m1_p1
+    - 0.22360679774998 * c39_L1830 * d3_5_m1_p1
+    + 0.22360679774998 * c40_L1830 * d3_5_m1_p1
+    - 0.35856858280032 * c41_L1830 * d3_5_m1_p1
+    + 0.35856858280032 * c42_L1830 * d3_5_m1_p1
+    - 0.26726124191242 * c43_L1830 * d3_5_m1_p1
+    + 0.26726124191242 * c44_L1830 * d3_5_m1_p1
+    + 0.20412414523193 * c45_L1890 * d3_3_m1_p1
+    - 0.20412414523193 * c46_L1890 * d3_3_m1_p1
+    + 0.36514837167011 * c47_L1890 * d3_3_m1_p1
+    - 0.36514837167011 * c48_L1890 * d3_3_m1_p1
+    + 0.27386127875258 * c49_L1890 * d3_3_m1_p1
+    - 0.27386127875258 * c50_L1890 * d3_3_m1_p1
+    - 0.23145502494314 * c51_L2100 * d3_7_m1_p1
+    + 0.23145502494314 * c52_L2100 * d3_7_m1_p1
+    - 0.3563483225499 * c53_L2100 * d3_7_m1_p1
+    + 0.3563483225499 * c54_L2100 * d3_7_m1_p1
+    - 0.26352313834736 * c55_L2100 * d3_7_m1_p1
+    + 0.26352313834736 * c56_L2100 * d3_7_m1_p1
+    + 0.22360679774998 * c57_L2110 * d3_5_m1_p1
+    - 0.22360679774998 * c58_L2110 * d3_5_m1_p1
+    + 0.35856858280032 * c59_L2110 * d3_5_m1_p1
+    - 0.35856858280032 * c60_L2110 * d3_5_m1_p1
+    + 0.26726124191242 * c61_L2110 * d3_5_m1_p1
+    - 0.26726124191242 * c62_L2110 * d3_5_m1_p1
+    + 0.23570226039552 * c63_L2350 * d3_9_m1_p1
+    - 0.23570226039552 * c64_L2350 * d3_9_m1_p1
+    + 0.35533452725935 * c65_L2350 * d3_9_m1_p1
+    - 0.35533452725935 * c66_L2350 * d3_9_m1_p1
+    + 0.26111648393355 * c67_L2350 * d3_9_m1_p1
+    - 0.26111648393355 * c68_L2350 * d3_9_m1_p1
+    - 0.20412414523193 * c69_LNR3O * d3_3_m1_p1
+    + 0.20412414523193 * c70_LNR3O * d3_3_m1_p1
+    - 0.36514837167011 * c71_LNR3O * d3_3_m1_p1
+    + 0.36514837167011 * c72_LNR3O * d3_3_m1_p1
+    - 0.27386127875258 * c73_LNR3O * d3_3_m1_p1
+    + 0.27386127875258 * c74_LNR3O * d3_3_m1_p1
+)
+A3_p_p1_g_0_Lb_m1 = (
+    0.28867513459481 * c01_L1405 * d3_1_m1_p1
+    + 0.28867513459481 * c02_L1405 * d3_1_m1_p1
+    + 0.40824829046386 * c03_L1405 * d3_1_m1_p1
+    + 0.40824829046386 * c04_L1405 * d3_1_m1_p1
+    - 0.28867513459481 * c05_L1520 * d3_3_m1_p1
+    - 0.28867513459481 * c06_L1520 * d3_3_m1_p1
+    + 0.12909944487358 * c07_L1520 * d3_3_m1_p1
+    + 0.12909944487358 * c08_L1520 * d3_3_m1_p1
+    + 0.38729833462074 * c09_L1520 * d3_3_m1_p1
+    + 0.38729833462074 * c10_L1520 * d3_3_m1_p1
+    - 0.28867513459481 * c11_L1600 * d3_1_m1_p1
+    - 0.28867513459481 * c12_L1600 * d3_1_m1_p1
+    - 0.40824829046386 * c13_L1600 * d3_1_m1_p1
+    - 0.40824829046386 * c14_L1600 * d3_1_m1_p1
+    + 0.28867513459481 * c15_L1670 * d3_1_m1_p1
+    + 0.28867513459481 * c16_L1670 * d3_1_m1_p1
+    + 0.40824829046386 * c17_L1670 * d3_1_m1_p1
+    + 0.40824829046386 * c18_L1670 * d3_1_m1_p1
+    - 0.28867513459481 * c19_L1690 * d3_3_m1_p1
+    - 0.28867513459481 * c20_L1690 * d3_3_m1_p1
+    + 0.12909944487358 * c21_L1690 * d3_3_m1_p1
+    + 0.12909944487358 * c22_L1690 * d3_3_m1_p1
+    + 0.38729833462074 * c23_L1690 * d3_3_m1_p1
+    + 0.38729833462074 * c24_L1690 * d3_3_m1_p1
+    + 0.28867513459481 * c25_L1800 * d3_1_m1_p1
+    + 0.28867513459481 * c26_L1800 * d3_1_m1_p1
+    + 0.40824829046386 * c27_L1800 * d3_1_m1_p1
+    + 0.40824829046386 * c28_L1800 * d3_1_m1_p1
+    - 0.28867513459481 * c29_L1810 * d3_1_m1_p1
+    - 0.28867513459481 * c30_L1810 * d3_1_m1_p1
+    - 0.40824829046386 * c31_L1810 * d3_1_m1_p1
+    - 0.40824829046386 * c32_L1810 * d3_1_m1_p1
+    + 0.31622776601684 * c33_L1820 * d3_5_m1_p1
+    + 0.31622776601684 * c34_L1820 * d3_5_m1_p1
+    - 0.08451542547285 * c35_L1820 * d3_5_m1_p1
+    - 0.08451542547285 * c36_L1820 * d3_5_m1_p1
+    - 0.37796447300923 * c37_L1820 * d3_5_m1_p1
+    - 0.37796447300923 * c38_L1820 * d3_5_m1_p1
+    - 0.31622776601684 * c39_L1830 * d3_5_m1_p1
+    - 0.31622776601684 * c40_L1830 * d3_5_m1_p1
+    + 0.08451542547285 * c41_L1830 * d3_5_m1_p1
+    + 0.08451542547285 * c42_L1830 * d3_5_m1_p1
+    + 0.37796447300923 * c43_L1830 * d3_5_m1_p1
+    + 0.37796447300923 * c44_L1830 * d3_5_m1_p1
+    + 0.28867513459481 * c45_L1890 * d3_3_m1_p1
+    + 0.28867513459481 * c46_L1890 * d3_3_m1_p1
+    - 0.12909944487358 * c47_L1890 * d3_3_m1_p1
+    - 0.12909944487358 * c48_L1890 * d3_3_m1_p1
+    - 0.38729833462074 * c49_L1890 * d3_3_m1_p1
+    - 0.38729833462074 * c50_L1890 * d3_3_m1_p1
+    - 0.32732683535399 * c51_L2100 * d3_7_m1_p1
+    - 0.32732683535399 * c52_L2100 * d3_7_m1_p1
+    + 0.06299407883487 * c53_L2100 * d3_7_m1_p1
+    + 0.06299407883487 * c54_L2100 * d3_7_m1_p1
+    + 0.37267799624996 * c55_L2100 * d3_7_m1_p1
+    + 0.37267799624996 * c56_L2100 * d3_7_m1_p1
+    + 0.31622776601684 * c57_L2110 * d3_5_m1_p1
+    + 0.31622776601684 * c58_L2110 * d3_5_m1_p1
+    - 0.08451542547285 * c59_L2110 * d3_5_m1_p1
+    - 0.08451542547285 * c60_L2110 * d3_5_m1_p1
+    - 0.37796447300923 * c61_L2110 * d3_5_m1_p1
+    - 0.37796447300923 * c62_L2110 * d3_5_m1_p1
+    + 0.33333333333333 * c63_L2350 * d3_9_m1_p1
+    + 0.33333333333333 * c64_L2350 * d3_9_m1_p1
+    - 0.05025189076296 * c65_L2350 * d3_9_m1_p1
+    - 0.05025189076296 * c66_L2350 * d3_9_m1_p1
+    - 0.369274472938 * c67_L2350 * d3_9_m1_p1
+    - 0.369274472938 * c68_L2350 * d3_9_m1_p1
+    - 0.28867513459481 * c69_LNR3O * d3_3_m1_p1
+    - 0.28867513459481 * c70_LNR3O * d3_3_m1_p1
+    + 0.12909944487358 * c71_LNR3O * d3_3_m1_p1
+    + 0.12909944487358 * c72_LNR3O * d3_3_m1_p1
+    + 0.38729833462074 * c73_LNR3O * d3_3_m1_p1
+    + 0.38729833462074 * c74_LNR3O * d3_3_m1_p1
+)
+A3_p_p1_g_0_Lb_p1 = (
+    -0.28867513459481 * c01_L1405 * d3_1_p1_p1
+    + 0.28867513459481 * c02_L1405 * d3_1_p1_p1
+    + 0.40824829046386 * c03_L1405 * d3_1_p1_p1
+    - 0.40824829046386 * c04_L1405 * d3_1_p1_p1
+    - 0.28867513459481 * c05_L1520 * d3_3_p1_p1
+    + 0.28867513459481 * c06_L1520 * d3_3_p1_p1
+    - 0.12909944487358 * c07_L1520 * d3_3_p1_p1
+    + 0.12909944487358 * c08_L1520 * d3_3_p1_p1
+    + 0.38729833462074 * c09_L1520 * d3_3_p1_p1
+    - 0.38729833462074 * c10_L1520 * d3_3_p1_p1
+    + 0.28867513459481 * c11_L1600 * d3_1_p1_p1
+    - 0.28867513459481 * c12_L1600 * d3_1_p1_p1
+    - 0.40824829046386 * c13_L1600 * d3_1_p1_p1
+    + 0.40824829046386 * c14_L1600 * d3_1_p1_p1
+    - 0.28867513459481 * c15_L1670 * d3_1_p1_p1
+    + 0.28867513459481 * c16_L1670 * d3_1_p1_p1
+    + 0.40824829046386 * c17_L1670 * d3_1_p1_p1
+    - 0.40824829046386 * c18_L1670 * d3_1_p1_p1
+    - 0.28867513459481 * c19_L1690 * d3_3_p1_p1
+    + 0.28867513459481 * c20_L1690 * d3_3_p1_p1
+    - 0.12909944487358 * c21_L1690 * d3_3_p1_p1
+    + 0.12909944487358 * c22_L1690 * d3_3_p1_p1
+    + 0.38729833462074 * c23_L1690 * d3_3_p1_p1
+    - 0.38729833462074 * c24_L1690 * d3_3_p1_p1
+    - 0.28867513459481 * c25_L1800 * d3_1_p1_p1
+    + 0.28867513459481 * c26_L1800 * d3_1_p1_p1
+    + 0.40824829046386 * c27_L1800 * d3_1_p1_p1
+    - 0.40824829046386 * c28_L1800 * d3_1_p1_p1
+    + 0.28867513459481 * c29_L1810 * d3_1_p1_p1
+    - 0.28867513459481 * c30_L1810 * d3_1_p1_p1
+    - 0.40824829046386 * c31_L1810 * d3_1_p1_p1
+    + 0.40824829046386 * c32_L1810 * d3_1_p1_p1
+    + 0.31622776601684 * c33_L1820 * d3_5_p1_p1
+    - 0.31622776601684 * c34_L1820 * d3_5_p1_p1
+    + 0.08451542547285 * c35_L1820 * d3_5_p1_p1
+    - 0.08451542547285 * c36_L1820 * d3_5_p1_p1
+    - 0.37796447300923 * c37_L1820 * d3_5_p1_p1
+    + 0.37796447300923 * c38_L1820 * d3_5_p1_p1
+    - 0.31622776601684 * c39_L1830 * d3_5_p1_p1
+    + 0.31622776601684 * c40_L1830 * d3_5_p1_p1
+    - 0.08451542547285 * c41_L1830 * d3_5_p1_p1
+    + 0.08451542547285 * c42_L1830 * d3_5_p1_p1
+    + 0.37796447300923 * c43_L1830 * d3_5_p1_p1
+    - 0.37796447300923 * c44_L1830 * d3_5_p1_p1
+    + 0.28867513459481 * c45_L1890 * d3_3_p1_p1
+    - 0.28867513459481 * c46_L1890 * d3_3_p1_p1
+    + 0.12909944487358 * c47_L1890 * d3_3_p1_p1
+    - 0.12909944487358 * c48_L1890 * d3_3_p1_p1
+    - 0.38729833462074 * c49_L1890 * d3_3_p1_p1
+    + 0.38729833462074 * c50_L1890 * d3_3_p1_p1
+    - 0.32732683535399 * c51_L2100 * d3_7_p1_p1
+    + 0.32732683535399 * c52_L2100 * d3_7_p1_p1
+    - 0.06299407883487 * c53_L2100 * d3_7_p1_p1
+    + 0.06299407883487 * c54_L2100 * d3_7_p1_p1
+    + 0.37267799624996 * c55_L2100 * d3_7_p1_p1
+    - 0.37267799624996 * c56_L2100 * d3_7_p1_p1
+    + 0.31622776601684 * c57_L2110 * d3_5_p1_p1
+    - 0.31622776601684 * c58_L2110 * d3_5_p1_p1
+    + 0.08451542547285 * c59_L2110 * d3_5_p1_p1
+    - 0.08451542547285 * c60_L2110 * d3_5_p1_p1
+    - 0.37796447300923 * c61_L2110 * d3_5_p1_p1
+    + 0.37796447300923 * c62_L2110 * d3_5_p1_p1
+    + 0.33333333333333 * c63_L2350 * d3_9_p1_p1
+    - 0.33333333333333 * c64_L2350 * d3_9_p1_p1
+    + 0.05025189076296 * c65_L2350 * d3_9_p1_p1
+    - 0.05025189076296 * c66_L2350 * d3_9_p1_p1
+    - 0.369274472938 * c67_L2350 * d3_9_p1_p1
+    + 0.369274472938 * c68_L2350 * d3_9_p1_p1
+    - 0.28867513459481 * c69_LNR3O * d3_3_p1_p1
+    + 0.28867513459481 * c70_LNR3O * d3_3_p1_p1
+    - 0.12909944487358 * c71_LNR3O * d3_3_p1_p1
+    + 0.12909944487358 * c72_LNR3O * d3_3_p1_p1
+    + 0.38729833462074 * c73_LNR3O * d3_3_p1_p1
+    - 0.38729833462074 * c74_LNR3O * d3_3_p1_p1
+)
+A3_p_p1_g_p2_Lb_m1 = (
+    0.40824829046386 * c01_L1405 * d3_1_p1_p1
+    + 0.40824829046386 * c02_L1405 * d3_1_p1_p1
+    - 0.28867513459481 * c03_L1405 * d3_1_p1_p1
+    - 0.28867513459481 * c04_L1405 * d3_1_p1_p1
+    - 0.20412414523193 * c05_L1520 * d3_3_p1_p1
+    - 0.20412414523193 * c06_L1520 * d3_3_p1_p1
+    + 0.36514837167011 * c07_L1520 * d3_3_p1_p1
+    + 0.36514837167011 * c08_L1520 * d3_3_p1_p1
+    - 0.27386127875258 * c09_L1520 * d3_3_p1_p1
+    - 0.27386127875258 * c10_L1520 * d3_3_p1_p1
+    - 0.40824829046386 * c11_L1600 * d3_1_p1_p1
+    - 0.40824829046386 * c12_L1600 * d3_1_p1_p1
+    + 0.28867513459481 * c13_L1600 * d3_1_p1_p1
+    + 0.28867513459481 * c14_L1600 * d3_1_p1_p1
+    + 0.40824829046386 * c15_L1670 * d3_1_p1_p1
+    + 0.40824829046386 * c16_L1670 * d3_1_p1_p1
+    - 0.28867513459481 * c17_L1670 * d3_1_p1_p1
+    - 0.28867513459481 * c18_L1670 * d3_1_p1_p1
+    - 0.20412414523193 * c19_L1690 * d3_3_p1_p1
+    - 0.20412414523193 * c20_L1690 * d3_3_p1_p1
+    + 0.36514837167011 * c21_L1690 * d3_3_p1_p1
+    + 0.36514837167011 * c22_L1690 * d3_3_p1_p1
+    - 0.27386127875258 * c23_L1690 * d3_3_p1_p1
+    - 0.27386127875258 * c24_L1690 * d3_3_p1_p1
+    + 0.40824829046386 * c25_L1800 * d3_1_p1_p1
+    + 0.40824829046386 * c26_L1800 * d3_1_p1_p1
+    - 0.28867513459481 * c27_L1800 * d3_1_p1_p1
+    - 0.28867513459481 * c28_L1800 * d3_1_p1_p1
+    - 0.40824829046386 * c29_L1810 * d3_1_p1_p1
+    - 0.40824829046386 * c30_L1810 * d3_1_p1_p1
+    + 0.28867513459481 * c31_L1810 * d3_1_p1_p1
+    + 0.28867513459481 * c32_L1810 * d3_1_p1_p1
+    + 0.22360679774998 * c33_L1820 * d3_5_p1_p1
+    + 0.22360679774998 * c34_L1820 * d3_5_p1_p1
+    - 0.35856858280032 * c35_L1820 * d3_5_p1_p1
+    - 0.35856858280032 * c36_L1820 * d3_5_p1_p1
+    + 0.26726124191242 * c37_L1820 * d3_5_p1_p1
+    + 0.26726124191242 * c38_L1820 * d3_5_p1_p1
+    - 0.22360679774998 * c39_L1830 * d3_5_p1_p1
+    - 0.22360679774998 * c40_L1830 * d3_5_p1_p1
+    + 0.35856858280032 * c41_L1830 * d3_5_p1_p1
+    + 0.35856858280032 * c42_L1830 * d3_5_p1_p1
+    - 0.26726124191242 * c43_L1830 * d3_5_p1_p1
+    - 0.26726124191242 * c44_L1830 * d3_5_p1_p1
+    + 0.20412414523193 * c45_L1890 * d3_3_p1_p1
+    + 0.20412414523193 * c46_L1890 * d3_3_p1_p1
+    - 0.36514837167011 * c47_L1890 * d3_3_p1_p1
+    - 0.36514837167011 * c48_L1890 * d3_3_p1_p1
+    + 0.27386127875258 * c49_L1890 * d3_3_p1_p1
+    + 0.27386127875258 * c50_L1890 * d3_3_p1_p1
+    - 0.23145502494314 * c51_L2100 * d3_7_p1_p1
+    - 0.23145502494314 * c52_L2100 * d3_7_p1_p1
+    + 0.3563483225499 * c53_L2100 * d3_7_p1_p1
+    + 0.3563483225499 * c54_L2100 * d3_7_p1_p1
+    - 0.26352313834736 * c55_L2100 * d3_7_p1_p1
+    - 0.26352313834736 * c56_L2100 * d3_7_p1_p1
+    + 0.22360679774998 * c57_L2110 * d3_5_p1_p1
+    + 0.22360679774998 * c58_L2110 * d3_5_p1_p1
+    - 0.35856858280032 * c59_L2110 * d3_5_p1_p1
+    - 0.35856858280032 * c60_L2110 * d3_5_p1_p1
+    + 0.26726124191242 * c61_L2110 * d3_5_p1_p1
+    + 0.26726124191242 * c62_L2110 * d3_5_p1_p1
+    + 0.23570226039552 * c63_L2350 * d3_9_p1_p1
+    + 0.23570226039552 * c64_L2350 * d3_9_p1_p1
+    - 0.35533452725935 * c65_L2350 * d3_9_p1_p1
+    - 0.35533452725935 * c66_L2350 * d3_9_p1_p1
+    + 0.26111648393355 * c67_L2350 * d3_9_p1_p1
+    + 0.26111648393355 * c68_L2350 * d3_9_p1_p1
+    - 0.20412414523193 * c69_LNR3O * d3_3_p1_p1
+    - 0.20412414523193 * c70_LNR3O * d3_3_p1_p1
+    + 0.36514837167011 * c71_LNR3O * d3_3_p1_p1
+    + 0.36514837167011 * c72_LNR3O * d3_3_p1_p1
+    - 0.27386127875258 * c73_LNR3O * d3_3_p1_p1
+    - 0.27386127875258 * c74_LNR3O * d3_3_p1_p1
+)
+A3_p_p1_g_p2_Lb_p1 = (
+    -0.35355339059327 * c05_L1520 * d3_3_p3_p1
+    + 0.35355339059327 * c06_L1520 * d3_3_p3_p1
+    + 0.31622776601684 * c07_L1520 * d3_3_p3_p1
+    - 0.31622776601684 * c08_L1520 * d3_3_p3_p1
+    - 0.15811388300842 * c09_L1520 * d3_3_p3_p1
+    + 0.15811388300842 * c10_L1520 * d3_3_p3_p1
+    - 0.35355339059327 * c19_L1690 * d3_3_p3_p1
+    + 0.35355339059327 * c20_L1690 * d3_3_p3_p1
+    + 0.31622776601684 * c21_L1690 * d3_3_p3_p1
+    - 0.31622776601684 * c22_L1690 * d3_3_p3_p1
+    - 0.15811388300842 * c23_L1690 * d3_3_p3_p1
+    + 0.15811388300842 * c24_L1690 * d3_3_p3_p1
+    + 0.31622776601684 * c33_L1820 * d3_5_p3_p1
+    - 0.31622776601684 * c34_L1820 * d3_5_p3_p1
+    - 0.33806170189141 * c35_L1820 * d3_5_p3_p1
+    + 0.33806170189141 * c36_L1820 * d3_5_p3_p1
+    + 0.18898223650461 * c37_L1820 * d3_5_p3_p1
+    - 0.18898223650461 * c38_L1820 * d3_5_p3_p1
+    - 0.31622776601684 * c39_L1830 * d3_5_p3_p1
+    + 0.31622776601684 * c40_L1830 * d3_5_p3_p1
+    + 0.33806170189141 * c41_L1830 * d3_5_p3_p1
+    - 0.33806170189141 * c42_L1830 * d3_5_p3_p1
+    - 0.18898223650461 * c43_L1830 * d3_5_p3_p1
+    + 0.18898223650461 * c44_L1830 * d3_5_p3_p1
+    + 0.35355339059327 * c45_L1890 * d3_3_p3_p1
+    - 0.35355339059327 * c46_L1890 * d3_3_p3_p1
+    - 0.31622776601684 * c47_L1890 * d3_3_p3_p1
+    + 0.31622776601684 * c48_L1890 * d3_3_p3_p1
+    + 0.15811388300842 * c49_L1890 * d3_3_p3_p1
+    - 0.15811388300842 * c50_L1890 * d3_3_p3_p1
+    - 0.2988071523336 * c51_L2100 * d3_7_p3_p1
+    + 0.2988071523336 * c52_L2100 * d3_7_p3_p1
+    + 0.34503277967118 * c53_L2100 * d3_7_p3_p1
+    - 0.34503277967118 * c54_L2100 * d3_7_p3_p1
+    - 0.20412414523193 * c55_L2100 * d3_7_p3_p1
+    + 0.20412414523193 * c56_L2100 * d3_7_p3_p1
+    + 0.31622776601684 * c57_L2110 * d3_5_p3_p1
+    - 0.31622776601684 * c58_L2110 * d3_5_p3_p1
+    - 0.33806170189141 * c59_L2110 * d3_5_p3_p1
+    + 0.33806170189141 * c60_L2110 * d3_5_p3_p1
+    + 0.18898223650461 * c61_L2110 * d3_5_p3_p1
+    - 0.18898223650461 * c62_L2110 * d3_5_p3_p1
+    + 0.28867513459481 * c63_L2350 * d3_9_p3_p1
+    - 0.28867513459481 * c64_L2350 * d3_9_p3_p1
+    - 0.3481553119114 * c65_L2350 * d3_9_p3_p1
+    + 0.3481553119114 * c66_L2350 * d3_9_p3_p1
+    + 0.21320071635561 * c67_L2350 * d3_9_p3_p1
+    - 0.21320071635561 * c68_L2350 * d3_9_p3_p1
+    - 0.35355339059327 * c69_LNR3O * d3_3_p3_p1
+    + 0.35355339059327 * c70_LNR3O * d3_3_p3_p1
+    + 0.31622776601684 * c71_LNR3O * d3_3_p3_p1
+    - 0.31622776601684 * c72_LNR3O * d3_3_p3_p1
+    - 0.15811388300842 * c73_LNR3O * d3_3_p3_p1
+    + 0.15811388300842 * c74_LNR3O * d3_3_p3_p1
+)
+
+# ----------------------------------------------------------------------------
+# Alignment of the spins to the frames of the reference chain 3
+# ----------------------------------------------------------------------------
+
+# A particle with spin is rotated by its Wigner angle ζ between the frames of
+# chain k and the reference chain (THREEBODYDECAYS, ThreeBodyDecays.jl).
+cos_zeta3_Lb = cos_zeta_parent(sigma1, sigma2, sigma3, ms1, ms3)
+dz3_Lb_m1_m1 = hep.wignerd_doublearg(1, -1, -1, cos_zeta3_Lb)
+dz3_Lb_m1_p1 = hep.wignerd_doublearg(1, -1, 1, cos_zeta3_Lb)
+dz3_Lb_p1_m1 = hep.wignerd_doublearg(1, 1, -1, cos_zeta3_Lb)
+dz3_Lb_p1_p1 = hep.wignerd_doublearg(1, 1, 1, cos_zeta3_Lb)
+
+# ----------------------------------------------------------------------------
+# Amplitudes in the frames of the reference chain and the intensity
+# ----------------------------------------------------------------------------
+
+A_p_m1_g_m2_Lb_m1 = (
+    dz3_Lb_m1_m1 * A3_p_m1_g_m2_Lb_m1
+    + dz3_Lb_m1_p1 * A3_p_m1_g_m2_Lb_p1
+)
+A_p_m1_g_m2_Lb_p1 = (
+    dz3_Lb_p1_m1 * A3_p_m1_g_m2_Lb_m1
+    + dz3_Lb_p1_p1 * A3_p_m1_g_m2_Lb_p1
+)
+A_p_m1_g_0_Lb_m1 = (
+    dz3_Lb_m1_m1 * A3_p_m1_g_0_Lb_m1
+    + dz3_Lb_m1_p1 * A3_p_m1_g_0_Lb_p1
+)
+A_p_m1_g_0_Lb_p1 = (
+    dz3_Lb_p1_m1 * A3_p_m1_g_0_Lb_m1
+    + dz3_Lb_p1_p1 * A3_p_m1_g_0_Lb_p1
+)
+A_p_m1_g_p2_Lb_m1 = (
+    dz3_Lb_m1_m1 * A3_p_m1_g_p2_Lb_m1
+    + dz3_Lb_m1_p1 * A3_p_m1_g_p2_Lb_p1
+)
+A_p_m1_g_p2_Lb_p1 = (
+    dz3_Lb_p1_m1 * A3_p_m1_g_p2_Lb_m1
+    + dz3_Lb_p1_p1 * A3_p_m1_g_p2_Lb_p1
+)
+A_p_p1_g_m2_Lb_m1 = (
+    dz3_Lb_m1_m1 * A3_p_p1_g_m2_Lb_m1
+    + dz3_Lb_m1_p1 * A3_p_p1_g_m2_Lb_p1
+)
+A_p_p1_g_m2_Lb_p1 = (
+    dz3_Lb_p1_m1 * A3_p_p1_g_m2_Lb_m1
+    + dz3_Lb_p1_p1 * A3_p_p1_g_m2_Lb_p1
+)
+A_p_p1_g_0_Lb_m1 = (
+    dz3_Lb_m1_m1 * A3_p_p1_g_0_Lb_m1
+    + dz3_Lb_m1_p1 * A3_p_p1_g_0_Lb_p1
+)
+A_p_p1_g_0_Lb_p1 = (
+    dz3_Lb_p1_m1 * A3_p_p1_g_0_Lb_m1
+    + dz3_Lb_p1_p1 * A3_p_p1_g_0_Lb_p1
+)
+A_p_p1_g_p2_Lb_m1 = (
+    dz3_Lb_m1_m1 * A3_p_p1_g_p2_Lb_m1
+    + dz3_Lb_m1_p1 * A3_p_p1_g_p2_Lb_p1
+)
+A_p_p1_g_p2_Lb_p1 = (
+    dz3_Lb_p1_m1 * A3_p_p1_g_p2_Lb_m1
+    + dz3_Lb_p1_p1 * A3_p_p1_g_p2_Lb_p1
+)
+
+intensity = (
+    abs2(A_p_m1_g_m2_Lb_m1)
+    + abs2(A_p_m1_g_m2_Lb_p1)
+    + abs2(A_p_m1_g_0_Lb_m1)
+    + abs2(A_p_m1_g_0_Lb_p1)
+    + abs2(A_p_m1_g_p2_Lb_m1)
+    + abs2(A_p_m1_g_p2_Lb_p1)
+    + abs2(A_p_p1_g_m2_Lb_m1)
+    + abs2(A_p_p1_g_m2_Lb_p1)
+    + abs2(A_p_p1_g_0_Lb_m1)
+    + abs2(A_p_p1_g_0_Lb_p1)
+    + abs2(A_p_p1_g_p2_Lb_m1)
+    + abs2(A_p_p1_g_p2_Lb_p1)
+)
+
+% The intensity as a function of the invariants
+intensity_of_sigmas = functionof(intensity, sigma1, sigma2, sigma3)
+
+# ----------------------------------------------------------------------------
+# Four-vectors [E, px, py, pz] and the frames of the decay cascade
+# ----------------------------------------------------------------------------
+
+% Invariant mass squared
+mass2(p) = p[1]^2 - p[2]^2 - p[3]^2 - p[4]^2
+abs3(p) = sqrt(p[2]^2 + p[3]^2 + p[4]^2)
+% Momentum of magnitude q in the direction (cos θ, φ), and the momentum opposite to p
+momentum(q, cos_t, phi, m) = [sqrt(q^2 + m^2), q * sqrt(max(1 - cos_t^2, 0.0)) * cos(phi),
+    q * sqrt(max(1 - cos_t^2, 0.0)) * sin(phi), q * cos_t]
+opposite(p, m) = [sqrt(abs3(p)^2 + m^2), -p[2], -p[3], -p[4]]
+% Active rotations about z and y and a boost along z
+rot_z(p, a) = [p[1], p[2] * cos(a) - p[3] * sin(a), p[2] * sin(a) + p[3] * cos(a), p[4]]
+rot_y(p, a) = [p[1], p[4] * sin(a) + p[2] * cos(a), p[3], p[4] * cos(a) - p[2] * sin(a)]
+boost_z(p, g, bg) = [g * p[1] + bg * p[4], p[2], p[3], g * p[4] + bg * p[1]]
+# Angles of the momentum P of a line in the frame of its parent, sgn = -1 for the
+# second child of a vertex, whose frame is reached along -z (Jacob-Wick convention)
+phi_of(P, sgn) = atan2(sgn * P[3], sgn * P[2])
+theta_of(P, sgn) = atan2(sqrt(P[2]^2 + P[3]^2), sgn * P[4])
+second_turn(sgn) = ifelse(sgn < 0, pi, 0.0)
+% Momentum p in the helicity frame of the line with momentum P, and back
+to_frame(p, P, sgn) = boost_z(rot_y(rot_y(rot_z(p, -phi_of(P, sgn)), -theta_of(P, sgn)),
+    -second_turn(sgn)), P[1] / sqrt(mass2(P)), -abs3(P) / sqrt(mass2(P)))
+from_frame(p, P, sgn) = rot_z(rot_y(rot_y(boost_z(p, P[1] / sqrt(mass2(P)),
+    abs3(P) / sqrt(mass2(P))), second_turn(sgn)), theta_of(P, sgn)), phi_of(P, sgn))
+% Helicity angles of a momentum in the current frame
+cos_theta_dir(p) = p[4] / abs3(p)
+phi_dir(p) = atan2(p[3], p[2])
+
+# ----------------------------------------------------------------------------
+# Decay coordinates of the reference topology [[1, 2], 3] and the four-momenta
+# ----------------------------------------------------------------------------
+
+# The coordinates of a node are the invariant mass m_<node> of the line and the
+# helicity angles cos_theta_<node>, phi_<node> of its first child in its helicity
+# frame, as the variables of the JSON file.
+cos_theta_12_3 = elementof(interval(-1.0, 1.0))
+phi_12_3 = elementof(interval(-pi, pi))
+m_12 = elementof(interval(m1 + m2, m0 - m3))
+cos_theta_12 = elementof(interval(-1.0, 1.0))
+phi_12 = elementof(interval(-pi, pi))
+
+q_12_3 = hep.breakup_momentum(m0, m_12, m3)
+e_12_in_12_3 = momentum(q_12_3, cos_theta_12_3, phi_12_3, m_12)
+e_3_in_12_3 = opposite(e_12_in_12_3, m3)
+q_12 = hep.breakup_momentum(m_12, m1, m2)
+e_1_in_12 = momentum(q_12, cos_theta_12, phi_12, m1)
+e_2_in_12 = opposite(e_1_in_12, m2)
+e1_12 = e_1_in_12
+e2_12 = e_2_in_12
+e1_12_3 = from_frame(e1_12, e_12_in_12_3, 1.0)
+e2_12_3 = from_frame(e2_12, e_12_in_12_3, 1.0)
+e3_12_3 = e_3_in_12_3
+
+% Four-momenta in the rest frame of the parent
+e1 = e1_12_3
+e2 = e2_12_3
+e3 = e3_12_3
+
+% Invariants of the event and its intensity
+sigma1_event = mass2(e2 + e3)
+sigma2_event = mass2(e3 + e1)
+sigma3_event = mass2(e1 + e2)
+intensity_event = intensity_of_sigmas(sigma1_event, sigma2_event, sigma3_event)
+
+# ----------------------------------------------------------------------------
+# Decay rate, decay distribution and generated events
+# ----------------------------------------------------------------------------
+
+% Phase-space density in the decay coordinates: dΦ3 ∝ q p dm dΩ dΩ
+phase_space_density = q_12_3 * q_12
+rate = phase_space_density * intensity_event
+decay_intensity = functionof(intensity_event, cos_theta_12_3, phi_12_3, m_12, cos_theta_12, phi_12)
+rate_fn = functionof(rate, cos_theta_12_3, phi_12_3, m_12, cos_theta_12, phi_12)
+decay_space = cartprod(cos_theta_12_3 = interval(-1.0, 1.0), phi_12_3 = interval(-pi, pi), m_12 = interval(m1 + m2, m0 - m3), cos_theta_12 = interval(-1.0, 1.0), phi_12 = interval(-pi, pi))
+decay_rate = weighted(rate_fn, Lebesgue(support = decay_space))
+decay_distribution = normalize(decay_rate)
+
+% Four-momenta in the rest frame of the parent
+momenta_fn = functionof(record(p = e1, K = e2, g = e3), cos_theta_12_3, phi_12_3, m_12, cos_theta_12, phi_12)
+event_distribution = pushfwd(momenta_fn, decay_distribution)
+n_events = 1000
+events ~ iid(event_distribution, n_events)
+
+# ----------------------------------------------------------------------------
+# Validation values of the JSON file
+# ----------------------------------------------------------------------------
+
+# checked(value, condition) fails at load time if a value differs by more
+# than 1e-6 (relative) from the reference value of the JSON file.
+validation_point1 = record(cos_theta_12_3 = 0.0, phi_12_3 = 0.0, m_12 = 1.797004885914337, cos_theta_12 = -0.2260000000000005, phi_12 = 0.0)
+intensity_validation_point1 = decay_intensity(validation_point1)
+check_validation_point1 = checked(intensity_validation_point1,
+    abs(intensity_validation_point1 - 645.6877782510138) <= 1e-6 * 645.6877782510138)
+validation_point2 = record(cos_theta_12_3 = 0.0, phi_12_3 = 0.0, m_12 = 4.889261075050094, cos_theta_12 = -0.6259999999999996, phi_12 = 0.0)
+intensity_validation_point2 = decay_intensity(validation_point2)
+check_validation_point2 = checked(intensity_validation_point2,
+    abs(intensity_validation_point2 - 33.3131321180587) <= 1e-6 * 33.3131321180587)
+validation_point3 = record(cos_theta_12_3 = 0.0, phi_12_3 = 0.0, m_12 = 3.477099115642233, cos_theta_12 = 0.5739999999999997, phi_12 = 0.0)
+intensity_validation_point3 = decay_intensity(validation_point3)
+check_validation_point3 = checked(intensity_validation_point3,
+    abs(intensity_validation_point3 - 38.286728742769384) <= 1e-6 * 38.286728742769384)
+check_ls_L1405_Flatte = checked(ls_L1405_Flatte(3.2),
+    abs(ls_L1405_Flatte(3.2) - (-0.740197550450631 + 0.23636822774611727 * im)) <= 1e-6 * max(1.0, abs((-0.740197550450631 + 0.23636822774611727 * im))))
+check_ls_L1890_BW = checked(ls_L1890_BW(3.2),
+    abs(ls_L1890_BW(3.2) - (2.198693289424333 + 1.0366413279995204 * im)) <= 1e-6 * max(1.0, abs((2.198693289424333 + 1.0366413279995204 * im))))
+check_ls_L1800_BW = checked(ls_L1800_BW(3.2),
+    abs(ls_L1800_BW(3.2) - (0.3117344649326182 + 2.7741995686483376 * im)) <= 1e-6 * max(1.0, abs((0.3117344649326182 + 2.7741995686483376 * im))))
+check_ls_L1520_BW = checked(ls_L1520_BW(3.2),
+    abs(ls_L1520_BW(3.2) - (-0.6431712763866598 + 0.5539481728042333 * im)) <= 1e-6 * max(1.0, abs((-0.6431712763866598 + 0.5539481728042333 * im))))
+check_ls_L2110_BW = checked(ls_L2110_BW(3.2),
+    abs(ls_L2110_BW(3.2) - (0.8540683809737195 + 0.0415635681035755 * im)) <= 1e-6 * max(1.0, abs((0.8540683809737195 + 0.0415635681035755 * im))))
+check_ls_L1680_BW = checked(ls_L1680_BW(3.2),
+    abs(ls_L1680_BW(3.2) - (-2.4613302416589518 + 0.36109808787606623 * im)) <= 1e-6 * max(1.0, abs((-2.4613302416589518 + 0.36109808787606623 * im))))
+check_ls_L2350_BW = checked(ls_L2350_BW(3.2),
+    abs(ls_L2350_BW(3.2) - (0.43057041569422266 + 0.00019710073244917788 * im)) <= 1e-6 * max(1.0, abs((0.43057041569422266 + 0.00019710073244917788 * im))))
+check_ls_L1600_BW = checked(ls_L1600_BW(3.2),
+    abs(ls_L1600_BW(3.2) - (-0.6293313194817324 + 0.7663369213404696 * im)) <= 1e-6 * max(1.0, abs((-0.6293313194817324 + 0.7663369213404696 * im))))
+check_ls_L1810_BW = checked(ls_L1810_BW(3.2),
+    abs(ls_L1810_BW(3.2) - (0.1064360891979254 + 5.093985975099388 * im)) <= 1e-6 * max(1.0, abs((0.1064360891979254 + 5.093985975099388 * im))))
+check_ls_L1820_BW = checked(ls_L1820_BW(3.2),
+    abs(ls_L1820_BW(3.2) - (4.647408096395898 + 4.443944768616481 * im)) <= 1e-6 * max(1.0, abs((4.647408096395898 + 4.443944768616481 * im))))
+check_ls_L1830_BW = checked(ls_L1830_BW(3.2),
+    abs(ls_L1830_BW(3.2) - (3.824528421578999 + 3.827749839464702 * im)) <= 1e-6 * max(1.0, abs((3.824528421578999 + 3.827749839464702 * im))))
+check_ls_L2100_BW = checked(ls_L2100_BW(3.2),
+    abs(ls_L2100_BW(3.2) - (0.8262246387007841 + 0.013532417439695257 * im)) <= 1e-6 * max(1.0, abs((0.8262246387007841 + 0.013532417439695257 * im))))
+check_ls_L1690_BW = checked(ls_L1690_BW(3.2),
+    abs(ls_L1690_BW(3.2) - (-1.8597288296334098 + 1.396126484908448 * im)) <= 1e-6 * max(1.0, abs((-1.8597288296334098 + 1.396126484908448 * im))))
+check_ls_LNR30_NR = checked(ls_LNR30_NR(3.2),
+    abs(ls_LNR30_NR(3.2) - 1.0) <= 1e-6 * max(1.0, abs(1.0)))

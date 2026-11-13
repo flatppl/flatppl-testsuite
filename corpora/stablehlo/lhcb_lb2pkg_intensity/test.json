@@ -1,0 +1,56 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "model": "../_lhcb/lb2pkg-lhcb-2765817.flatppl",
+  "source": {
+    "repository": "https://github.com/Democratizing-Models/statsmodel-rosetta-stone",
+    "revision": "31c309d593018c04b14c06c58940548c4bfcd566",
+    "path": "src/physics/hadron/amplitude-serialization/lb2pkg-lhcb-2765817.flatppl",
+    "sha256": "622ed839c88902904d8ee834d742ce475deb2776fdc943c83eca23b74368f1fc"
+  },
+  "precisions": [
+    "f64"
+  ],
+  "measure": "intensity_event",
+  "inputs": [
+    "cos_theta_12_3",
+    "phi_12_3",
+    "m_12",
+    "cos_theta_12",
+    "phi_12"
+  ],
+  "points": [
+    {
+      "cos_theta_12_3": 0.0,
+      "phi_12_3": 0.0,
+      "m_12": 1.797004885914337,
+      "cos_theta_12": -0.2260000000000005,
+      "phi_12": 0.0
+    },
+    {
+      "cos_theta_12_3": 0.0,
+      "phi_12_3": 0.0,
+      "m_12": 4.889261075050094,
+      "cos_theta_12": -0.6259999999999996,
+      "phi_12": 0.0
+    },
+    {
+      "cos_theta_12_3": 0.0,
+      "phi_12_3": 0.0,
+      "m_12": 3.477099115642233,
+      "cos_theta_12": 0.5739999999999997,
+      "phi_12": 0.0
+    }
+  ],
+  "expected": [
+    645.6877782510138,
+    33.3131321180587,
+    38.286728742769384
+  ],
+  "tolerance": {
+    "atol": 1e-12,
+    "rtol": 1e-11
+  }
+}

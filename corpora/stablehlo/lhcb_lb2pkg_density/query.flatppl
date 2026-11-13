@@ -1,0 +1,8 @@
+q_cos_theta_12_3 = elementof(reals)
+q_phi_12_3 = elementof(reals)
+q_m_12 = elementof(reals)
+q_cos_theta_12 = elementof(reals)
+q_phi_12 = elementof(reals)
+lp_q = logdensityof(decay_rate, record(cos_theta_12_3 = q_cos_theta_12_3, phi_12_3 = q_phi_12_3, m_12 = q_m_12, cos_theta_12 = q_cos_theta_12, phi_12 = q_phi_12))
+inputs = (q_cos_theta_12_3, q_phi_12_3, q_m_12, q_cos_theta_12, q_phi_12)
+outputs = (lp_q)

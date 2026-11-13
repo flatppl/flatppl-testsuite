@@ -1,0 +1,16 @@
+"""Lineshape `ls_D1232_BW` of the Λc+ → p π+ K− (LHCb, arXiv:2208.03262) model, real and imaginary part.
+
+At sigma = 3.2 the oracle is the JSON checksum of `D1232_BW` (amplitude-serialization
+7f01d66). At the other sigma it is spec §09
+`resonance_breitwigner` with the JSON parameters (mass 1.232, width 0.117, ma 0.938272046, mb 0.13957018, l 1, d 1.5),
+evaluated from the §09 text in _lhcb/oracle.py.
+"""
+import runpy
+from pathlib import Path
+
+_ORACLE = runpy.run_path(str(Path(__file__).resolve().parent.parent / "_lhcb" / "oracle.py"))
+MODEL = "lc2ppik-lhcb-2683025"
+
+
+def oracle(point):
+    return _ORACLE["lineshape"](MODEL, "D1232_BW", {"s": point["q_s"], "imaginary": point["q_imaginary"]})

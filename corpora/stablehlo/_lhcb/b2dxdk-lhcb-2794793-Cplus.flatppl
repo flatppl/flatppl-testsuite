@@ -1,0 +1,378 @@
+%%%
+# B+ → D0 π+ D− K+, C = + (LHCb, arXiv:2406.03156)
+
+Ported from the amplitude-serialization file `b2dxdk-lhcb-2794793-Cplus.json` (distribution `Bplus_to_antiD0_piminus_Dplus_Kplus_Cplus`) by
+`json2flatppl.py`, following the decay model `CASCADEDECAYS` of EvtGen
+(gitlab.cern.ch/evtgen/evtgen merge request 74).
+
+The amplitude of each decay chain is the product of the vertex functions
+D^{j*}_{λ, λ1-λ2}(φ, θ, 0) H_{λ1 λ2} F(q) and the propagators sqrt(2j+1) X(m²)
+of the cascade of two-body decays (CascadeDecays.jl, CASCADEDECAYS), with the
+helicity angles of each topology computed from the four-momenta. All particles
+are spinless, so the chains of different topologies add without Wigner
+rotations.
+
+Parent: B+ (spin 0, unpolarised). Final state: 1 = anti-D0 (spin 0), 2 = pi- (spin 0), 3 = D+ (spin 0), 4 = K+ (spin 0).
+All masses in GeV. The intensity is summed over the helicities of all
+particles, as in the validation values of the JSON file.
+%%%
+flatppl_compat = "0.1"
+
+hep = standard_module("particle-physics", "0.1")
+
+# ----------------------------------------------------------------------------
+# Masses
+# ----------------------------------------------------------------------------
+
+m0 = 5.27934  % B+
+m1 = 1.86483  % anti-D0
+m2 = 0.13957039  % pi-
+m3 = 1.86965  % D+
+m4 = 0.493677  % K+
+s0 = m0^2
+ms1 = m1^2
+ms2 = m2^2
+ms3 = m3^2
+ms4 = m4^2
+
+# ----------------------------------------------------------------------------
+# Lineshapes of the resonances, as functions of the mass squared s
+# ----------------------------------------------------------------------------
+
+% lineshape_Dst (generic_function)
+ls_Dst(s) = exp(-0.5 * ((sqrt(s) - 2.01026) / 1.0e-6)^16)
+% lineshape_X(3872) (generic_function)
+ls_X_3872(s) = 1 / (3.87165^2 - s - im * (0.00015918785632281445 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * 1 + 0.0015221150006828033 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2 / (9 + 3 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^1 + 1 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2)))
+% lineshape_X(3915)(0-) (BreitWigner)
+ls_X_3915_0(s) = hep.resonance_breitwigner(s, 3.944541826791121, 0.12967347104307578, 2.01026, 1.86965, 1, 3.0)
+% lineshape_chi(c2)(3930) (BreitWigner)
+ls_chi_c2_3930(s) = hep.resonance_breitwigner(s, 3.9272, 0.024, 2.01026, 1.86965, 2, 3.0)
+% lineshape_X(3940)(1.) (generic_function)
+ls_X_3940_1(s) = 1 / (4.000356038444546^2 - s - im * (0.09197174317593033 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * 1 + 0.42581168301131467 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2 / (9 + 3 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^1 + 1 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2)))
+% lineshape_X(3993) (generic_function)
+ls_X_3993(s) = 1 / (4.012482696497617^2 - s - im * (0.04879117475081541 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * 1 + 0.04911172900765339 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2 / (9 + 3 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^1 + 1 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2)))
+% lineshape_Psi(4040) (BreitWigner)
+ls_Psi_4040(s) = hep.resonance_breitwigner(s, 4.039, 0.08, 2.01026, 1.86965, 1, 3.0)
+% lineshape_X(4300) (generic_function)
+ls_X_4300(s) = 1 / (4.307256285732596^2 - s - im * (0.008519656138455888 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * 1 + 0.0347237677616316 * sqrt((s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2)) * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2 / (9 + 3 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^1 + 1 * (3.0^2 * (s - (2.01026 + 1.86965)^2) * (s - (2.01026 - 1.86965)^2) / (4 * s))^2)))
+% lineshape_NR(0-)SPp (generic_function)
+ls_NR_0_SPp(s) = exp(-(-0.11261265753519498 + 0.3362692520521029 * im) * (s - 4.35^2))
+% lineshape_NR(1.)PSp (Polynomial)
+ls_NR_1_PSp(s) = polynomial(coefficients = [1.0], x = s)
+% lineshape_NR(0-)SPm (Polynomial)
+ls_NR_0_SPm(s) = polynomial(coefficients = [1.0], x = s)
+% lineshape_NR(1-)PPm (Polynomial)
+ls_NR_1_PPm(s) = polynomial(coefficients = [1.0], x = s)
+
+# ----------------------------------------------------------------------------
+# Four-vectors [E, px, py, pz] and the frames of the decay cascade
+# ----------------------------------------------------------------------------
+
+% Invariant mass squared
+mass2(p) = p[1]^2 - p[2]^2 - p[3]^2 - p[4]^2
+abs3(p) = sqrt(p[2]^2 + p[3]^2 + p[4]^2)
+% Momentum of magnitude q in the direction (cos θ, φ), and the momentum opposite to p
+momentum(q, cos_t, phi, m) = [sqrt(q^2 + m^2), q * sqrt(max(1 - cos_t^2, 0.0)) * cos(phi),
+    q * sqrt(max(1 - cos_t^2, 0.0)) * sin(phi), q * cos_t]
+opposite(p, m) = [sqrt(abs3(p)^2 + m^2), -p[2], -p[3], -p[4]]
+% Active rotations about z and y and a boost along z
+rot_z(p, a) = [p[1], p[2] * cos(a) - p[3] * sin(a), p[2] * sin(a) + p[3] * cos(a), p[4]]
+rot_y(p, a) = [p[1], p[4] * sin(a) + p[2] * cos(a), p[3], p[4] * cos(a) - p[2] * sin(a)]
+boost_z(p, g, bg) = [g * p[1] + bg * p[4], p[2], p[3], g * p[4] + bg * p[1]]
+# Angles of the momentum P of a line in the frame of its parent, sgn = -1 for the
+# second child of a vertex, whose frame is reached along -z (Jacob-Wick convention)
+phi_of(P, sgn) = atan2(sgn * P[3], sgn * P[2])
+theta_of(P, sgn) = atan2(sqrt(P[2]^2 + P[3]^2), sgn * P[4])
+second_turn(sgn) = ifelse(sgn < 0, pi, 0.0)
+% Momentum p in the helicity frame of the line with momentum P, and back
+to_frame(p, P, sgn) = boost_z(rot_y(rot_y(rot_z(p, -phi_of(P, sgn)), -theta_of(P, sgn)),
+    -second_turn(sgn)), P[1] / sqrt(mass2(P)), -abs3(P) / sqrt(mass2(P)))
+from_frame(p, P, sgn) = rot_z(rot_y(rot_y(boost_z(p, P[1] / sqrt(mass2(P)),
+    abs3(P) / sqrt(mass2(P))), second_turn(sgn)), theta_of(P, sgn)), phi_of(P, sgn))
+% Helicity angles of a momentum in the current frame
+cos_theta_dir(p) = p[4] / abs3(p)
+phi_dir(p) = atan2(p[3], p[2])
+
+# ----------------------------------------------------------------------------
+# Four-momenta of the final-state particles in the parent rest frame
+# ----------------------------------------------------------------------------
+
+p1 = elementof(cartpow(reals, 4))  % anti-D0
+p2 = elementof(cartpow(reals, 4))  % pi-
+p3 = elementof(cartpow(reals, 4))  % D+
+p4 = elementof(cartpow(reals, 4))  % K+
+% Invariant masses of all lines
+minv_12 = sqrt(mass2(p1 + p2))
+minv_12_3 = sqrt(mass2(p1 + p2 + p3))
+
+# ----------------------------------------------------------------------------
+# Helicity frames and angles of topology 1, [[[1, 2], 3], 4]
+# ----------------------------------------------------------------------------
+
+t1_dir_12_3_4 = p1 + p2 + p3  % first child in the frame of 12_3_4
+t1_cos_theta_12_3_4 = cos_theta_dir(t1_dir_12_3_4)
+t1_phi_12_3_4 = phi_dir(t1_dir_12_3_4)
+t1_P_12_3 = p1 + p2 + p3
+t1_p1_12_3 = to_frame(p1, t1_P_12_3, 1.0)
+t1_p2_12_3 = to_frame(p2, t1_P_12_3, 1.0)
+t1_p3_12_3 = to_frame(p3, t1_P_12_3, 1.0)
+t1_dir_12_3 = t1_p1_12_3 + t1_p2_12_3  % first child in the frame of 12_3
+t1_cos_theta_12_3 = cos_theta_dir(t1_dir_12_3)
+t1_phi_12_3 = phi_dir(t1_dir_12_3)
+t1_P_12 = t1_p1_12_3 + t1_p2_12_3
+t1_p1_12 = to_frame(t1_p1_12_3, t1_P_12, 1.0)
+t1_p2_12 = to_frame(t1_p2_12_3, t1_P_12, 1.0)
+t1_dir_12 = t1_p1_12  % first child in the frame of 12
+t1_cos_theta_12 = cos_theta_dir(t1_dir_12)
+t1_phi_12 = phi_dir(t1_dir_12)
+
+# ----------------------------------------------------------------------------
+# Decay chains
+# ----------------------------------------------------------------------------
+
+# Line amplitudes a<chain>_<line>_<2λ> for the helicity λ of the line, written
+# once and used by the later chains with the same line amplitudes
+# c01_X_3872_l1_l0: [[[1, 2], 3], 4], weight -0.1495245549758687 - 0.0i
+# vertex 12: LS coupling, L = 1, S = 0
+a01_12_m2 = conj(hep.wignerD_doublearg(2, -2, 0, t1_phi_12, t1_cos_theta_12, 0.0)) * sqrt(3.0) * ls_Dst(minv_12^2)
+a01_12_0 = conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12, t1_cos_theta_12, 0.0)) * sqrt(3.0) * ls_Dst(minv_12^2)
+a01_12_p2 = conj(hep.wignerD_doublearg(2, 2, 0, t1_phi_12, t1_cos_theta_12, 0.0)) * sqrt(3.0) * ls_Dst(minv_12^2)
+% vertex 12_3: LS coupling, L = 0, S = 1
+a01_12_3_0 = ((
+    0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_3872(minv_12_3^2)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a01_12_3_4_0 = -a01_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c01_X_3872_l1_l0 = -0.1495245549758687 * a01_12_3_4_0
+# c02_X_3872_l1_l2: [[[1, 2], 3], 4], weight -0.11974831471312643 + 0.44658495720177055i
+# vertex 12_3: LS coupling, L = 2, S = 1
+a02_12_3_0 = ((
+    0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.81649658092773 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_3872(minv_12_3^2) * hep.blatt_weisskopf(2, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a02_12_3_4_0 = -a02_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c02_X_3872_l1_l2 = (-0.11974831471312643 + 0.44658495720177055 * im) * a02_12_3_4_0
+# c03_X_3915_0_l0_l1: [[[1, 2], 3], 4], weight -0.13461137661404168 + 0.1428154768213997i
+# vertex 12_3: LS coupling, L = 1, S = 1
+a03_12_3_0 = -a01_12_0 * sqrt(1.0) * ls_X_3915_0(minv_12_3^2) * hep.blatt_weisskopf(1, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 0, S = 0
+a03_12_3_4_0 = a03_12_3_0
+c03_X_3915_0_l0_l1 = (-0.13461137661404168 + 0.1428154768213997 * im) * a03_12_3_4_0
+# c04_chi_c2_3930_l2_l2: [[[1, 2], 3], 4], weight -0.06309647933299936 - 0.18924645907846138i
+# vertex 12_3: LS coupling, L = 2, S = 1
+a04_12_3_0 = ((
+    0.70710678118655 * conj(hep.wignerD_doublearg(4, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.70710678118655 * conj(hep.wignerD_doublearg(4, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(5.0) * ls_chi_c2_3930(minv_12_3^2) * hep.blatt_weisskopf(2, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 2, S = 2
+a04_12_3_4_0 = a04_12_3_0 * hep.blatt_weisskopf(2, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c04_chi_c2_3930_l2_l2 = (-0.06309647933299936 - 0.18924645907846138 * im) * a04_12_3_4_0
+# c05_X_3940_1_l1_l0: [[[1, 2], 3], 4], weight 0.13375014295364962 - 0.04961261344347765i
+# vertex 12_3: LS coupling, L = 0, S = 1
+a05_12_3_0 = ((
+    0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_3940_1(minv_12_3^2)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a05_12_3_4_0 = -a05_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c05_X_3940_1_l1_l0 = (0.13375014295364962 - 0.04961261344347765 * im) * a05_12_3_4_0
+# c06_X_3940_1_l1_l2: [[[1, 2], 3], 4], weight 0.1767494469201216 - 0.25095544375280776i
+# vertex 12_3: LS coupling, L = 2, S = 1
+a06_12_3_0 = ((
+    0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.81649658092773 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_3940_1(minv_12_3^2) * hep.blatt_weisskopf(2, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a06_12_3_4_0 = -a06_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c06_X_3940_1_l1_l2 = (0.1767494469201216 - 0.25095544375280776 * im) * a06_12_3_4_0
+# c07_X_3993_l1_l0: [[[1, 2], 3], 4], weight 0.11311689207634776 + 0.058610160222914355i
+# vertex 12_3: LS coupling, L = 0, S = 1
+a07_12_3_0 = ((
+    0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_3993(minv_12_3^2)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a07_12_3_4_0 = -a07_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c07_X_3993_l1_l0 = (0.11311689207634776 + 0.058610160222914355 * im) * a07_12_3_4_0
+# c08_X_3993_l1_l2: [[[1, 2], 3], 4], weight -0.12220446316404435 - 0.037460445949112506i
+# vertex 12_3: LS coupling, L = 2, S = 1
+a08_12_3_0 = ((
+    0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.81649658092773 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_3993(minv_12_3^2) * hep.blatt_weisskopf(2, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a08_12_3_4_0 = -a08_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c08_X_3993_l1_l2 = (-0.12220446316404435 - 0.037460445949112506 * im) * a08_12_3_4_0
+# c09_Psi_4040_l1_l1: [[[1, 2], 3], 4], weight -0.025518820441784378 + 0.09494812637584671i
+# vertex 12_3: LS coupling, L = 1, S = 1
+a09_12_3_0 = ((
+    0.70710678118655 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.70710678118655 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_Psi_4040(minv_12_3^2) * hep.blatt_weisskopf(1, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a09_12_3_4_0 = -a09_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c09_Psi_4040_l1_l1 = (-0.025518820441784378 + 0.09494812637584671 * im) * a09_12_3_4_0
+# c10_X_4300_l1_l0: [[[1, 2], 3], 4], weight 0.021459742321468064 + 0.008721545981870306i
+# vertex 12_3: LS coupling, L = 0, S = 1
+a10_12_3_0 = ((
+    0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_4300(minv_12_3^2)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a10_12_3_4_0 = -a10_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c10_X_4300_l1_l0 = (0.021459742321468064 + 0.008721545981870306 * im) * a10_12_3_4_0
+# c11_X_4300_l1_l2: [[[1, 2], 3], 4], weight 0.04457769688591634 + 0.01413524102881604i
+# vertex 12_3: LS coupling, L = 2, S = 1
+a11_12_3_0 = ((
+    0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.81649658092773 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.40824829046386 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_X_4300(minv_12_3^2) * hep.blatt_weisskopf(2, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a11_12_3_4_0 = -a11_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c11_X_4300_l1_l2 = (0.04457769688591634 + 0.01413524102881604 * im) * a11_12_3_4_0
+# c12_NR_0_SPp_l0_l1: [[[1, 2], 3], 4], weight -0.20348743585639592 + 0.06780037305088235i
+# vertex 12_3: LS coupling, L = 1, S = 1
+a12_12_3_0 = -a01_12_0 * sqrt(1.0) * ls_NR_0_SPp(minv_12_3^2) * hep.blatt_weisskopf(1, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 0, S = 0
+a12_12_3_4_0 = a12_12_3_0
+c12_NR_0_SPp_l0_l1 = (-0.20348743585639592 + 0.06780037305088235 * im) * a12_12_3_4_0
+# c13_NR_1_PSp_l1_l0: [[[1, 2], 3], 4], weight 0.24754106467242393 + 0.012744229872991595i
+# vertex 12_3: LS coupling, L = 0, S = 1
+a13_12_3_0 = ((
+    0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 0, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_0
+    + 0.57735026918963 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_NR_1_PSp(minv_12_3^2)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a13_12_3_4_0 = -a13_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c13_NR_1_PSp_l1_l0 = (0.24754106467242393 + 0.012744229872991595 * im) * a13_12_3_4_0
+# c14_NR_0_SPm_l0_l1: [[[1, 2], 3], 4], weight -0.06105297853824829 - 0.00033682493310431506i
+# vertex 12_3: LS coupling, L = 1, S = 1
+a14_12_3_0 = -a01_12_0 * sqrt(1.0) * ls_NR_0_SPm(minv_12_3^2) * hep.blatt_weisskopf(1, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 0, S = 0
+a14_12_3_4_0 = a14_12_3_0
+c14_NR_0_SPm_l0_l1 = (-0.06105297853824829 - 0.00033682493310431506 * im) * a14_12_3_4_0
+# c15_NR_1_PPm_l1_l1: [[[1, 2], 3], 4], weight -0.27105481959409794 + 0.10529561959141219i
+# vertex 12_3: LS coupling, L = 1, S = 1
+a15_12_3_0 = ((
+    0.70710678118655 * conj(hep.wignerD_doublearg(2, 0, -2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_m2
+    - 0.70710678118655 * conj(hep.wignerD_doublearg(2, 0, 2, t1_phi_12_3, t1_cos_theta_12_3, 0.0)) * a01_12_p2
+)) * sqrt(3.0) * ls_NR_1_PPm(minv_12_3^2) * hep.blatt_weisskopf(1, hep.breakup_momentum(minv_12_3, minv_12, m3), 3.0)
+% vertex 12_3_4: LS coupling, L = 1, S = 1
+a15_12_3_4_0 = -a15_12_3_0 * hep.blatt_weisskopf(1, hep.breakup_momentum(m0, minv_12_3, m4), 3.0)
+c15_NR_1_PPm_l1_l1 = (-0.27105481959409794 + 0.10529561959141219 * im) * a15_12_3_4_0
+
+amplitude = (
+    c01_X_3872_l1_l0
+    + c02_X_3872_l1_l2
+    + c03_X_3915_0_l0_l1
+    + c04_chi_c2_3930_l2_l2
+    + c05_X_3940_1_l1_l0
+    + c06_X_3940_1_l1_l2
+    + c07_X_3993_l1_l0
+    + c08_X_3993_l1_l2
+    + c09_Psi_4040_l1_l1
+    + c10_X_4300_l1_l0
+    + c11_X_4300_l1_l2
+    + c12_NR_0_SPp_l0_l1
+    + c13_NR_1_PSp_l1_l0
+    + c14_NR_0_SPm_l0_l1
+    + c15_NR_1_PPm_l1_l1
+)
+intensity = abs2(amplitude)
+
+% The intensity as a function of the four-momenta in the parent rest frame
+intensity_of_momenta = functionof(intensity, p1, p2, p3, p4)
+
+# ----------------------------------------------------------------------------
+# Decay coordinates of the reference topology [[[1, 2], 3], 4] and the four-momenta
+# ----------------------------------------------------------------------------
+
+# The coordinates of a node are the invariant mass m_<node> of the line and the
+# helicity angles cos_theta_<node>, phi_<node> of its first child in its helicity
+# frame, as the variables of the JSON file.
+cos_theta_12_3_4 = elementof(interval(-1.0, 1.0))
+phi_12_3_4 = elementof(interval(-pi, pi))
+m_12_3 = elementof(interval(m_12 + m3, m0 - m4))
+cos_theta_12_3 = elementof(interval(-1.0, 1.0))
+phi_12_3 = elementof(interval(-pi, pi))
+m_12 = 2.01026  % fixed mass of a narrow lineshape, see below
+cos_theta_12 = elementof(interval(-1.0, 1.0))
+phi_12 = elementof(interval(-pi, pi))
+
+q_12_3_4 = hep.breakup_momentum(m0, m_12_3, m4)
+e_12_3_in_12_3_4 = momentum(q_12_3_4, cos_theta_12_3_4, phi_12_3_4, m_12_3)
+e_4_in_12_3_4 = opposite(e_12_3_in_12_3_4, m4)
+q_12_3 = hep.breakup_momentum(m_12_3, m_12, m3)
+e_12_in_12_3 = momentum(q_12_3, cos_theta_12_3, phi_12_3, m_12)
+e_3_in_12_3 = opposite(e_12_in_12_3, m3)
+q_12 = hep.breakup_momentum(m_12, m1, m2)
+e_1_in_12 = momentum(q_12, cos_theta_12, phi_12, m1)
+e_2_in_12 = opposite(e_1_in_12, m2)
+e1_12 = e_1_in_12
+e2_12 = e_2_in_12
+e1_12_3 = from_frame(e1_12, e_12_in_12_3, 1.0)
+e2_12_3 = from_frame(e2_12, e_12_in_12_3, 1.0)
+e3_12_3 = e_3_in_12_3
+e1_12_3_4 = from_frame(e1_12_3, e_12_3_in_12_3_4, 1.0)
+e2_12_3_4 = from_frame(e2_12_3, e_12_3_in_12_3_4, 1.0)
+e3_12_3_4 = from_frame(e3_12_3, e_12_3_in_12_3_4, 1.0)
+e4_12_3_4 = e_4_in_12_3_4
+
+% Four-momenta in the rest frame of the parent
+e1 = e1_12_3_4
+e2 = e2_12_3_4
+e3 = e3_12_3_4
+e4 = e4_12_3_4
+
+# ----------------------------------------------------------------------------
+# Decay rate, decay distribution and generated events
+# ----------------------------------------------------------------------------
+
+# Phase-space density in the decay coordinates: dΦ ∝ Π q dm dΩ (the breakup
+# momenta of all vertices)
+phase_space_density = q_12_3_4 * q_12_3 * q_12
+intensity_event = intensity_of_momenta(e1, e2, e3, e4)
+rate = phase_space_density * intensity_event
+rate_fn = functionof(rate, cos_theta_12_3_4, phi_12_3_4, m_12_3, cos_theta_12_3, phi_12_3, cos_theta_12, phi_12)
+decay_space = cartprod(cos_theta_12_3_4 = interval(-1.0, 1.0), phi_12_3_4 = interval(-pi, pi), m_12_3 = interval(m_12 + m3, m0 - m4), cos_theta_12_3 = interval(-1.0, 1.0), phi_12_3 = interval(-pi, pi), cos_theta_12 = interval(-1.0, 1.0), phi_12 = interval(-pi, pi))
+# The narrow lineshapes above, exp(-((m - m_peak)/w)^n / 2) with w = 1e-6 GeV, are
+# the way the JSON file states that these lines have a fixed mass. The masses
+# are fixed above (as in CASCADEDECAYS), the rate is the density w.r.t. the
+# remaining coordinates, and the lineshapes are 1 at their peaks.
+decay_rate = weighted(rate_fn, Lebesgue(support = decay_space))
+decay_distribution = normalize(decay_rate)
+
+momenta_fn = functionof(record(antimD0 = e1, pim = e2, Dp = e3, Kp = e4), cos_theta_12_3_4, phi_12_3_4, m_12_3, cos_theta_12_3, phi_12_3, cos_theta_12, phi_12)
+event_distribution = pushfwd(momenta_fn, decay_distribution)
+n_events = 1000
+events ~ iid(event_distribution, n_events)
+
+# ----------------------------------------------------------------------------
+# Validation values of the JSON file
+# ----------------------------------------------------------------------------
+
+# checked(value, condition) fails at load time if a value differs by more
+# than 1e-6 (relative) from the reference value of the JSON file.
+validation_point1 = record(p1 = [2.06667558149628, 0.5389820277788282, -0.6766786471431948, 0.21251214667605858], p2 = [0.1649826270091039, 0.040438376710926656, -0.051089604330932514, 0.05910975781008532], p3 = [2.026287918722412, -0.7698502842759127, -0.05225102943204546, 0.12186868664259985], p4 = [1.0213938727722043, 0.1904298797861579, 0.7800192809061728, -0.39349059112874374])
+intensity_validation_point1 = intensity_of_momenta(validation_point1)
+check_validation_point1 = checked(intensity_validation_point1,
+    abs(intensity_validation_point1 - 0.26336981730681525) <= 1e-6 * 0.26336981730681525)
+validation_point2 = record(p1 = [1.953046721813072, 0.11149640374964198, 0.22562003217616447, -0.5229385448755065], p2 = [0.14081848553569912, -0.002293574295070637, 0.018481207484286607, 0.0017710422613664706], p3 = [1.9510205535299352, 0.25418991171509414, 0.23039906821323364, -0.43953820760543916], p4 = [1.2344542391212932, -0.3633927411696654, -0.47450030787368463, 0.9607057102195791])
+intensity_validation_point2 = intensity_of_momenta(validation_point2)
+check_validation_point2 = checked(intensity_validation_point2,
+    abs(intensity_validation_point2 - 10.38798933935605) <= 1e-6 * 10.38798933935605)
+validation_point3 = record(p1 = [2.1485455634717594, -0.3828144484554088, 0.9212810032220727, 0.37861790841175835], p2 = [0.16051261321917962, -0.014733006402349568, 0.047590490897776595, 0.06166432466308885], p3 = [1.9828957876912467, 0.6143938553905492, -0.19831735238833698, -0.13955285931756256], p4 = [0.9873860356178142, -0.21684640053279083, -0.7705541417315123, -0.3007293737572846])
+intensity_validation_point3 = intensity_of_momenta(validation_point3)
+check_validation_point3 = checked(intensity_validation_point3,
+    abs(intensity_validation_point3 - 0.2098884398615489) <= 1e-6 * 0.2098884398615489)

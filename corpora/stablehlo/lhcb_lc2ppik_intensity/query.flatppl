@@ -1,0 +1,3 @@
+% The intensity summed over all helicities, as a function of the decay coordinates.
+inputs = (cos_theta_31_2, phi_31_2, m_31, cos_theta_31, phi_31)
+outputs = (intensity_event)

@@ -1,0 +1,7 @@
+% One part of the complex lineshape: `q_imaginary` selects the imaginary part.
+q_s = elementof(posreals)
+q_imaginary = elementof(booleans)
+q_ls = ls_L1680_BW(q_s)
+q_part = ifelse(q_imaginary, imag(q_ls), real(q_ls))
+inputs = (q_s, q_imaginary)
+outputs = (q_part)
