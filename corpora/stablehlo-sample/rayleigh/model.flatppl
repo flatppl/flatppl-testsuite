@@ -1,0 +1,2 @@
+scale = elementof(posreals)
+x = draw(Rayleigh(scale = scale))

@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+scale = elementof(posreals)
+a ~ Rayleigh(scale = scale)

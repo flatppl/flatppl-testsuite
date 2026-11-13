@@ -1,0 +1,69 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "stablehlo"
+  ],
+  "measure": "lawof(record(a=a))",
+  "inputs": [
+    "scale",
+    "xobs"
+  ],
+  "points": [
+    {
+      "scale": 2.0,
+      "xobs": -1.0
+    },
+    {
+      "scale": 2.0,
+      "xobs": 0.0
+    },
+    {
+      "scale": 2.0,
+      "xobs": 0.5
+    },
+    {
+      "scale": 2.0,
+      "xobs": 1.5
+    },
+    {
+      "scale": 2.0,
+      "xobs": 4.0
+    },
+    {
+      "scale": 2.0,
+      "xobs": 50.0
+    },
+    {
+      "scale": 0.5,
+      "xobs": 0.7
+    },
+    {
+      "scale": 0.5,
+      "xobs": 3.0
+    },
+    {
+      "scale": 1.3,
+      "xobs": 3.0
+    },
+    {
+      "scale": 1.0,
+      "xobs": 2.5
+    }
+  ],
+  "expected": [
+    "-inf",
+    "-inf",
+    -2.1106915416798357,
+    -1.2620792530117262,
+    -2.0,
+    -309.97427135569177,
+    0.049619417181158254,
+    -15.515093350212,
+    -2.088838133757996,
+    -2.208709268125845
+  ],
+  "tolerance": {
+    "value_atol_f32": 1e-05,
+    "value_rtol_f32": 2e-06
+  }
+}

@@ -1,0 +1,3 @@
+flatppl_compat = "0.1"
+k = elementof(posreals)
+value = logdensityof(Rayleigh(scale = k), inf)
