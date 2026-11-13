@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-11-08T17:23:15+00:00",
-  "engine_commit": "757530afbe57788e5b53d1a72c37d7641862cc1f",
+  "generated_at": "2026-11-13T17:20:28+00:00",
+  "engine_commit": "d6bb3373cabaa2f959ea0c09ecc13ae9ac265f92",
   "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 94,
+  "probe_count": 95,
   "outcome_counts": {
-   "DRAWS": 91,
+   "DRAWS": 92,
    "REFUSES": 3
   },
   "failing_rows": []
@@ -255,6 +255,59 @@
      "want": 0.48285413235574215,
      "band": 0.008088868387095188,
      "sigma": 1.2228660385519448,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005129 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005128668030351391,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "rayleigh.identity",
+   "family": "rayleigh",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.879428 vs 1.879971 (|d|=0.000543, band 0.011 = 5 SE, 0.25 sigma)",
+     "got": 1.8794282051956628,
+     "want": 1.8799712059732503,
+     "band": 0.010986971060712562,
+     "sigma": 0.2471112259179345,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.961752 vs 0.965708 (|d|=0.00396, band 0.0162 = 5 SE, 1.22 sigma)",
+     "got": 0.961751623735176,
+     "want": 0.9657082647114827,
+     "band": 0.01617773677419751,
+     "sigma": 1.222866038535553,
      "fallback": false
     },
     {
