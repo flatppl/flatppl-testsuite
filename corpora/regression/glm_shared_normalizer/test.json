@@ -1,0 +1,39 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "js",
+    "det-js",
+    "stablehlo"
+  ],
+  "inputs": [
+    "phi"
+  ],
+  "points": [
+    {
+      "phi": 12
+    }
+  ],
+  "oracle": "Beta(6,6) density at 1/2 is 693/256; its precision derivative is H11-H5-log(2). Both scale by 16384 rows.",
+  "expected": [
+    16316.048256374223
+  ],
+  "tolerance": {
+    "atol": 2e-8,
+    "rtol": 0
+  },
+  "stablehlo": {
+    "test_type": "gradient",
+    "grad_params": [
+      "phi"
+    ],
+    "expected_grad": [
+      {
+        "phi": 711.0136788429409
+      }
+    ],
+    "tolerance": {
+      "grad_atol": 0.001,
+      "grad_rtol": 0.002
+    }
+  }
+}
