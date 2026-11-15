@@ -1,0 +1,35 @@
+%%%
+Ten regression laws at rational-density points.
+%%%
+flatppl_compat = "0.1"
+reg = standard_module("regression", "0.1")
+theta = elementof(cartpow(reals, 19))
+case_id = elementof(reals)
+x = rowstack([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+alpha = theta[1]
+beta = [theta[2], theta[3]]
+sigma = theta[4]
+nu = theta[5]
+psi = theta[6]
+shape = theta[7]
+precision = theta[8]
+cutpoints = [theta[9], theta[10]]
+class_alpha = [theta[11], theta[12], theta[13]]
+class_beta = rowstack([[theta[14], theta[15], theta[16]], [theta[17], theta[18], theta[19]]])
+scores = [
+    logdensityof(reg.BernoulliLogitGLM(x, alpha, beta), [1, 0, 1]),
+    logdensityof(reg.BinomialLogitGLM(x, 3, alpha, beta), [2, 1, 0]),
+    logdensityof(reg.NormalGLM(x, alpha, beta, sigma), [1.0, 2.0, 0.5]),
+    logdensityof(reg.PoissonLogGLM(x, alpha, beta), [0, 2, 3]),
+    logdensityof(reg.NegativeBinomial2LogGLM(x, alpha, beta, psi), [0, 2, 3]),
+    logdensityof(reg.StudentTGLM(x, nu, alpha, beta, sigma), [1.0, 2.0, 0.5]),
+    logdensityof(reg.GammaLogGLM(x, alpha, beta, shape), [1.0, 2.0, 0.5]),
+    logdensityof(reg.OrderedLogitGLM(x, beta, cutpoints), [1, 2, 3]),
+    logdensityof(reg.BetaLogitGLM(x, alpha, beta, precision), [0.25, 0.75, 0.5]),
+    logdensityof(reg.CategoricalLogitGLM(x, class_alpha, class_beta), [1, 2, 3])
+]
+lp = ifelse(case_id < 1.5, scores[1], ifelse(case_id < 2.5, scores[2],
+    ifelse(case_id < 3.5, scores[3], ifelse(case_id < 4.5, scores[4],
+    ifelse(case_id < 5.5, scores[5], ifelse(case_id < 6.5, scores[6],
+    ifelse(case_id < 7.5, scores[7], ifelse(case_id < 8.5, scores[8],
+    ifelse(case_id < 9.5, scores[9], scores[10])))))))))

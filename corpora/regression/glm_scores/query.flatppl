@@ -1,0 +1,2 @@
+inputs = (theta, case_id)
+outputs = lp

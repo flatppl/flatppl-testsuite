@@ -1,0 +1,36 @@
+{
+  "test_type": "gradient",
+  "engines": ["stablehlo"],
+  "inputs": ["log_concentration", "eta", "case_id"],
+  "points": [
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 1},
+    {"log_concentration": 9.210340371976184, "eta": -20, "case_id": 1},
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 2},
+    {"log_concentration": 9.210340371976184, "eta": -20, "case_id": 2},
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 3},
+    {"log_concentration": 9.210340371976184, "eta": -20, "case_id": 3},
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 4},
+    {"log_concentration": 6.907755278982137, "eta": -40, "case_id": 4},
+    {"log_concentration": 6.907755278982137, "eta": -40, "case_id": 5},
+    {"log_concentration": 6.907755278982137, "eta": 40, "case_id": 5},
+    {"log_concentration": 6.907755278982137, "eta": -40, "case_id": 6},
+    {"log_concentration": 6.907755278982137, "eta": 40, "case_id": 6}
+  ],
+  "oracle": "Decimal(65) exact integer factorial/binomial identities and harmonic sums; NB zero-count identity -3*log1p(exp(eta)/3), scaled by exp(-eta). Ordered logistic interval masses use Decimal65. Beta logit tails use the gamma reflection identity at precision=2, response=0.5.",
+  "grad_params": ["log_concentration", "eta"],
+  "expected_grad": [
+    {"log_concentration": 0.00024999987500025, "eta": 0.0},
+    {"log_concentration": 2.4999999875000002e-05, "eta": 0.0},
+    {"log_concentration": 0.5002499998750003, "eta": 0.0},
+    {"log_concentration": 0.500024999999875, "eta": 0.0},
+    {"log_concentration": 0.500083333325, "eta": 0.0},
+    {"log_concentration": 0.500008333333325, "eta": 0.0},
+    {"log_concentration": 0.0, "eta": 3.4352560342506674e-10},
+    {"log_concentration": 0.0, "eta": 7.080590425485981e-19},
+    {"log_concentration": 0.0, "eta": 1.0},
+    {"log_concentration": 0.0, "eta": -1.0},
+    {"log_concentration": 0.0, "eta": 1.0},
+    {"log_concentration": 0.0, "eta": -1.0}
+  ],
+  "tolerance": {"grad_atol": 1e-07, "grad_rtol": 0.002}
+}
