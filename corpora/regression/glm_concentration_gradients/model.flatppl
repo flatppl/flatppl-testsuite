@@ -1,0 +1,20 @@
+%%%
+Concentrated continuous laws and a scaled rare-count log probability.
+The tail score divides by exp(eta), so lost tiny terms remain visible.
+%%%
+flatppl_compat = "0.1"
+reg = standard_module("regression", "0.1")
+log_concentration = elementof(reals)
+eta = elementof(reals)
+case_id = elementof(reals)
+concentration = exp(log_concentration)
+x = rowstack([[0.0]])
+student = logdensityof(reg.StudentTGLM(x, concentration, 0.0, [0.0], 1.0), [0.0])
+beta = logdensityof(reg.BetaLogitGLM(x, 0.0, [0.0], concentration), [0.5])
+gamma = logdensityof(reg.GammaLogGLM(x, 0.0, [0.0], concentration), [1.0])
+tail = exp(-eta) * logdensityof(reg.NegativeBinomial2LogGLM(x, eta, [0.0], 3.0), [0])
+tail_x = rowstack([[1.0]])
+ordered_tail = logdensityof(reg.OrderedLogitGLM(tail_x, [eta], [0.0, 1.0]), [2])
+beta_tail = logdensityof(reg.BetaLogitGLM(x, eta, [0.0], 2.0), [0.5])
+lp = ifelse(case_id < 1.5, student, ifelse(case_id < 2.5, beta, ifelse(case_id < 3.5, gamma,
+    ifelse(case_id < 4.5, tail, ifelse(case_id < 5.5, ordered_tail, beta_tail)))))

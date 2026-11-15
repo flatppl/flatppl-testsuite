@@ -1,0 +1,23 @@
+{
+  "test_type": "logdensity",
+  "engines": ["js", "det-js", "stablehlo"],
+  "model": "../glm_concentration_gradients/model.flatppl",
+  "inputs": ["log_concentration", "eta", "case_id"],
+  "points": [
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 1},
+    {"log_concentration": 9.210340371976184, "eta": -20, "case_id": 1},
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 2},
+    {"log_concentration": 9.210340371976184, "eta": -20, "case_id": 2},
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 3},
+    {"log_concentration": 9.210340371976184, "eta": -20, "case_id": 3},
+    {"log_concentration": 6.907755278982137, "eta": -20, "case_id": 4},
+    {"log_concentration": 6.907755278982137, "eta": -40, "case_id": 4},
+    {"log_concentration": 6.907755278982137, "eta": -40, "case_id": 5},
+    {"log_concentration": 6.907755278982137, "eta": 40, "case_id": 5},
+    {"log_concentration": 6.907755278982137, "eta": -40, "case_id": 6},
+    {"log_concentration": 6.907755278982137, "eta": 40, "case_id": 6}
+  ],
+  "oracle": "Decimal(65) exact integer factorial/binomial identities and harmonic sums; NB zero-count identity -3*log1p(exp(eta)/3), scaled by exp(-eta). Ordered logistic interval masses use Decimal65. Beta logit tails use the gamma reflection identity at precision=2, response=0.5.",
+  "expected": [-0.9191885331630061, -0.9189635332046311, 3.2278362868880075, 4.379353833343406, 2.53485577295584, 3.686223319450088, -0.9999999996564743, -1.0, -40.45867514538708, -39.45867514538708, -39.30685281944005, -39.30685281944005],
+  "tolerance": {"atol": 2e-10, "rtol": 0, "value_atol_f32": 5e-06}
+}

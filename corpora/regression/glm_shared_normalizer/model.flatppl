@@ -1,0 +1,8 @@
+%%%
+Beta(6,6) has density 693/256 at its mean. Check a shared shape over 16384 responses.
+%%%
+flatppl_compat = "0.1"
+reg = standard_module("regression", "0.1")
+phi = elementof(posreals)
+x = colstack([ones(16384)])
+lp = logdensityof(reg.BetaLogitGLM(x, 0.0, [0.0], phi), fill(0.5,16384))

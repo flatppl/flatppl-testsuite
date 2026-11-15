@@ -1,0 +1,8 @@
+%%%
+Beta(8,8) has density 51480*y^7*(1-y)^7, including tiny positive responses.
+%%%
+flatppl_compat = "0.1"
+reg = standard_module("regression", "0.1")
+eta = elementof(reals)
+x = rowstack([[0.0]])
+lp = logdensityof(reg.BetaLogitGLM(x, 0.0, [0.0], 16.0), [exp(eta)])

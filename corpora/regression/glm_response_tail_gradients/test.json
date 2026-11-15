@@ -1,0 +1,10 @@
+{
+  "test_type": "gradient",
+  "engines": ["stablehlo"],
+  "inputs": ["eta"],
+  "grad_params": ["eta"],
+  "points": [{"eta": -40}],
+  "oracle": "For y=exp(eta), the Beta(8,8) log-density derivative is 7-7*y/(1-y).",
+  "expected_grad": [{"eta": 7.0}],
+  "tolerance": {"grad_atol": 1e-06, "grad_rtol": 1e-06}
+}
