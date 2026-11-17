@@ -88,6 +88,18 @@ def _gate_engine(engine: str) -> None:
                 engine,
                 "FLATPPL_BIN must point at a `flatppl` built with the `stablehlo` feature",
             )
+    elif engine == "stan":
+        try:
+            importlib.import_module("bridgestan")
+        except ImportError:
+            _unavailable(engine, "the stan runner needs `bridgestan` (the `bridge` env)")
+        from flatppl_testsuite.unified.runners import logdensity_stan
+
+        if not logdensity_stan.binary_supports_stan():
+            _unavailable(
+                engine,
+                "FLATPPL_BIN must point at a `flatppl` built with the `stan` feature",
+            )
     elif engine == "js":
         from flatppl_testsuite.unified.runners import logdensity_js
 
