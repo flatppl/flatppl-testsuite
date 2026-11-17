@@ -225,3 +225,15 @@ def test_rejected_special_iteration_reports_nonconvergence(tmp_path, precision):
     values, status = jax.jit(ex.call_with_status(source))(jnp.asarray(1e20, dtype=dtype))
     assert int(status) == 10
     assert np.isnan(values[0])
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,tol", [("f32", 3e-4), ("f64", 3e-9)])
+def test_integer_beta_shape_preserves_the_nonterminating_tangent(tmp_path, precision, tol):
+    source = _emit(tmp_path,
+        's = standard_module("special-functions", "0.1")\n'
+        'b = external(posreals)\ninputs = b\noutputs = s.log_betaincc(1e-12, b, .25)\n', precision)
+    # Independent 70-digit differentiation. The primal series terminates at
+    # integer b, while the b derivative still has nonzero later terms.
+    derivative = ex.gradient(source, [2.], [0])[0]
+    assert derivative == pytest.approx(-.6467444921278945, rel=tol, abs=tol)
