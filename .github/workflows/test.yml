@@ -62,3 +62,6 @@ jobs:
       # 3.15 / enzyme pins), so a separate step.
       - name: Run StableHLO numeric-execution gate (Enzyme-JAX)
         run: FLATPPL_REQUIRE_ENGINES=stablehlo FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo unified
+
+      - name: Execute standard-module extension regressions
+        run: FLATPPL_REQUIRE_ENGINES=stablehlo FLATPPL_BIN="$PWD/.pixi-bin/bin/flatppl" PYTHONPATH="$PWD/src" pixi run -e stablehlo python -m pytest tests/test_standard_module_extensions.py -m stablehlo_only -q
