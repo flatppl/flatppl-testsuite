@@ -1,7 +1,7 @@
 """Closed-form sampling oracles, and the record of how each was verified.
 
-ORACLE PROVENANCE. Every mean/variance below was checked THREE ways before it
-was frozen here, and the three agreed to 1e-7 or better:
+ORACLE PROVENANCE. The base-language means/variances below were checked THREE
+ways before freezing, and the three agreed to 1e-7 or better:
 
 1. the closed form written out by hand (the expressions in this file),
 2. numerical quadrature of the distribution's density AS TRANSCRIBED BY HAND
@@ -55,11 +55,19 @@ WHAT HAS NO CLOSED-FORM MOMENT. `Cauchy` has no mean and no variance (§08
 "Cauchy" is the standard Lorentzian), so its moment check is skipped by
 construction and only its KS test runs. That is a property of the distribution,
 not a coverage gap.
+
+The §09 HEP rows add independent density-integral references in
+`test_hep_sampler_oracles.py`. Their finite moments were integrated with each
+piecewise join split explicitly. Voigt and Landau have no finite moments;
+their distribution checks remain active. RelativisticBreitWigner has finite
+variance but no fourth moment, so its variance check uses the existing relative
+band. The Landau stable-law recipe includes the scale-dependent S1 location
+shift, fixing the convention to the spec's integral density.
 """
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field as dc_field
+from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
 # Gamma-function values used by the Weibull and GeneralizedNormal moments.
@@ -95,7 +103,8 @@ class Family:
     not a frozen number for the same reason `unified/sample_checks.py` keeps one:
     a KS test needs a callable `.cdf`, and rebuilding a scipy frozen
     distribution from a recipe is a deterministic library call, not an oracle
-    computation."""
+    computation. Names prefixed `hep:` select the independently derived CDFs
+    in `hep_cdf.py` when SciPy has no corresponding frozen distribution."""
 
     fourth: float | None = None
     """`E[(X - mean)^4]`, the central fourth moment, when it is finite. It sets
@@ -109,17 +118,16 @@ class Family:
     support: tuple[int, int | None] | None = None
     """Inclusive integer support bounds; None as upper bound means unbounded."""
 
+    module: str | None = None
+    """Standard-module namespace; None for a base-language constructor."""
+
 
 # ---------------------------------------------------------------------------
 # BASE FAMILIES — every entry of flatppl-js's `sampler-registry.ts` REGISTRY
 # that has a sampler, i.e. every entry NOT marked `densityOnly: true`.
 #
-# The eight density-only REGISTRY entries have no sampler at all and are
-# therefore out of this sweep by construction, not by omission:
-#   ContinuedPoisson, CrystalBall, DoubleSidedCrystalBall, Argus,
-#   RelativisticBreitWigner, Voigtian, Landau, BifurcatedNormal
-# (`sampler-registry.ts` gives each `randFn: { factory: _hepDensityOnly(...) }`
-# or `_continuedPoissonNonGenerative`, which throw when called).
+# ContinuedPoisson is unnormalized, so it remains density-only. The seven
+# normalized HEP families use their standard-module constructor namespace.
 #
 # Parameters are chosen so the tails are light enough that a 200k-draw variance
 # lands inside a 5-sigma band. Where a moment needs a parameter constraint the
@@ -194,6 +202,37 @@ FAMILIES: tuple[Family, ...] = (
     Family("dirac", "Dirac(value = 3.0)", 3.0, 0.0, False, None, fourth=0.0,
            note="degenerate: variance exactly 0, so the variance band is absolute"),
 
+    # §09 HEP moments were independently integrated from the written densities,
+    # splitting at each tail join; SciPy mappings were checked against those
+    # densities. Voigt/Landau have no finite mean/variance: KS remains active.
+    Family("crystalball", "CrystalBall(m0 = 0.5, sigma = 1.2, alpha = 1.5, n = 8.0)",
+           .3764753252849731, 1.9541285638958898, False,
+           ("crystalball", (1.5, 8.0), {"loc": .5, "scale": 1.2}),
+           fourth=30.31104894304808, module="particle-physics"),
+    Family("doublecrystalball", "DoubleSidedCrystalBall(m0 = 0.5, sigmaL = 0.8, sigmaR = 1.3, "
+           "alphaL = 1.4, alphaR = 1.8, nL = 8.0, nR = 9.0)",
+           .8697423045606432, 1.6800078592331245, False,
+           ("hep:double_crystalball", (), {"peak": .5, "left_scale": .8, "right_scale": 1.3,
+            "left_alpha": 1.4, "right_alpha": 1.8, "left_power": 8., "right_power": 9.}),
+           fourth=20.899614787060322, module="particle-physics"),
+    Family("argus", "Argus(resonance = 3.0, slope = -2.0, power = 0.5)",
+           2.1169755465091096, .4002092434914791, False,
+           ("argus", (2.,), {"scale": 3.}), fourth=.48660331520878713, module="particle-physics"),
+    Family("relbreitwigner", "RelativisticBreitWigner(mean = 2.0, width = 0.5)",
+           1.8863364621387049, .5648403772236943, False,
+           ("rel_breitwigner", (4.,), {"scale": .5}), module="particle-physics",
+           note="positive support; x^-4 tail has finite variance but no fourth moment"),
+    Family("voigtian", "Voigtian(mean = 0.5, width = 1.2, sigma = 0.8)",
+           None, None, False, ("hep:voigt", (), {"peak": .5, "width": 1.2, "sigma": .8}),
+           module="particle-physics", note="Cauchy tails: no mean or variance, KS only"),
+    Family("landau", "Landau(loc = 0.5, scale = 1.2)", None, None, False,
+           ("levy_stable", (1., 1.), {"loc": .5 - 1.2 * math.log(1.2), "scale": 1.2 * math.pi / 2}),
+           module="particle-physics", note="standard CERN Landau convention, no mean or variance, KS only"),
+    Family("bifurcatednormal", "BifurcatedNormal(mean = 0.5, sigmaL = 0.8, sigmaR = 1.3)",
+           .8989422804014318, 1.130845056908105, False,
+           ("hep:bifurcated_normal", (), {"peak": .5, "left_scale": .8, "right_scale": 1.3}),
+           fourth=3.96152023256659, module="particle-physics"),
+
     # --- discrete: exact support and moments; no continuous-null KS test
     Family("bernoulli", "Bernoulli(p = 0.3)", 0.3, 0.3 * 0.7, True,
            ("bernoulli", (0.3,), {}), fourth=0.0777, support=(0, 1)),
@@ -221,11 +260,4 @@ FAMILIES: tuple[Family, ...] = (
 # COMPLETE against `sampler-registry.ts` rather than merely long.
 DENSITY_ONLY: tuple[tuple[str, str], ...] = (
     ("ContinuedPoisson", "density-only per §09; sampler stub throws (not generative)"),
-    ("CrystalBall", "density-only HEP shape; `_hepDensityOnly` stub throws"),
-    ("DoubleSidedCrystalBall", "density-only HEP shape; `_hepDensityOnly` stub throws"),
-    ("Argus", "density-only HEP shape; `_hepDensityOnly` stub throws"),
-    ("RelativisticBreitWigner", "density-only HEP shape; `_hepDensityOnly` stub throws"),
-    ("Voigtian", "density-only HEP shape; `_hepDensityOnly` stub throws"),
-    ("Landau", "density-only HEP shape; `_hepDensityOnly` stub throws"),
-    ("BifurcatedNormal", "density-only HEP shape; `_hepDensityOnly` stub throws"),
 )

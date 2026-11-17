@@ -1155,8 +1155,10 @@ def enumerate_probes() -> list[Probe]:
 
     # Axis 1 — every sampleable family, identity wrap.
     for fam in FAMILIES:
+        prefix = f'h=standard_module("{fam.module}","0.1")\n' if fam.module else ""
+        measure = f"h.{fam.measure}" if fam.module else fam.measure
         out.append(Probe(
-            id=f"{fam.slug}.identity", source=f"x ~ {fam.measure}\n", binding="x",
+            id=f"{fam.slug}.identity", source=prefix + f"x ~ {measure}\n", binding="x",
             k=1, field=None, mean=fam.mean, var=fam.var, fourth=fam.fourth,
             cov=None, logtotalmass=0.0, ks=_ks_for(fam, "identity"),
             family=fam.slug, wrap="identity", note=fam.note,

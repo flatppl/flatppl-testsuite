@@ -226,24 +226,31 @@ def build_cdf(spec):
     """
     from scipy import stats
 
+    def distribution_cdf(name, args, kwargs):
+        if name.startswith("hep:"):
+            from flatppl_testsuite.sampler_sweep.hep_cdf import cdf
+
+            return cdf(name[4:], dict(kwargs))
+        return getattr(stats, name)(*args, **dict(kwargs)).cdf
+
     kind = spec[0]
     if kind == "dist":
         _, name, args, kwargs = spec
-        return getattr(stats, name)(*args, **dict(kwargs)).cdf
+        return distribution_cdf(name, args, kwargs)
     if kind == "affine":
         _, a, b, name, args, kwargs = spec
-        base = getattr(stats, name)(*args, **dict(kwargs))
+        base = distribution_cdf(name, args, kwargs)
         # y = a x + b, a > 0  =>  F_Y(y) = F_X((y - b) / a)
         if a <= 0:
             raise ValueError("affine KS reference assumes a > 0 (orientation-preserving)")
-        return lambda y: base.cdf((y - b) / a)
+        return lambda y: base((y - b) / a)
     if kind == "mix":
         _, weights, comps = spec
-        frozen = [getattr(stats, n)(*a, **dict(k)) for n, a, k in comps]
+        frozen = [distribution_cdf(n, a, k) for n, a, k in comps]
         ws = list(weights)
         if abs(sum(ws) - 1.0) > 1e-12:
             raise ValueError(f"mixture KS reference weights sum to {sum(ws)}, not 1")
-        return lambda y: sum(w * f.cdf(y) for w, f in zip(ws, frozen))
+        return lambda y: sum(w * f(y) for w, f in zip(ws, frozen))
     raise ValueError(f"unknown KS reference kind {kind!r}")
 
 
