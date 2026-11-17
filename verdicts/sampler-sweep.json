@@ -1,15 +1,15 @@
 {
  "metadata": {
-  "generated_at": "2026-11-13T17:20:28+00:00",
-  "engine_commit": "d6bb3373cabaa2f959ea0c09ecc13ae9ac265f92",
+  "generated_at": "2026-11-17T13:18:32+00:00",
+  "engine_commit": "b9cd11e69103082cfa86b83b997414ca4c6b111f",
   "engine_resolved_by": "FLATPPL_JS_DIR override",
   "seed": 47710,
   "n_draws": 200000,
   "ks_subsample": 20000,
   "sigma": 5.0,
-  "probe_count": 95,
+  "probe_count": 102,
   "outcome_counts": {
-   "DRAWS": 92,
+   "DRAWS": 99,
    "REFUSES": 3
   },
   "failing_rows": []
@@ -1021,6 +1021,377 @@
     }
    ],
    "note": "degenerate: variance exactly 0, so the variance band is absolute"
+  },
+  {
+   "probe_id": "crystalball.identity",
+   "family": "crystalball",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.375340 vs 0.376475 (|d|=0.00114, band 0.0156 = 5 SE, 0.36 sigma)",
+     "got": 0.37534023801277994,
+     "want": 0.3764753252849731,
+     "band": 0.015629013740060062,
+     "sigma": 0.3631346453051278,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.967634 vs 1.954129 (|d|=0.0135, band 0.0575 = 5 SE, 1.17 sigma)",
+     "got": 1.96763391774532,
+     "want": 1.9541285638958898,
+     "band": 0.05754610162601619,
+     "sigma": 1.1734377714410114,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005129 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0051286680303514465,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "doublecrystalball.identity",
+   "family": "doublecrystalball",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.868450 vs 0.869742 (|d|=0.00129, band 0.0145 = 5 SE, 0.45 sigma)",
+     "got": 0.8684498474472869,
+     "want": 0.8697423045606432,
+     "band": 0.014491410642312933,
+     "sigma": 0.4459390273512919,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.659695 vs 1.680008 (|d|=0.0203, band 0.0475 = 5 SE, 2.14 sigma)",
+     "got": 1.65969464157028,
+     "want": 1.6800078592331245,
+     "band": 0.047535760722816955,
+     "sigma": 2.1366248645195434,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.004421 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.004421318856455109,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "argus.identity",
+   "family": "argus",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "2.117094 vs 2.116976 (|d|=0.000118, band 0.00707 = 5 SE, 0.08 sigma)",
+     "got": 2.1170937757540154,
+     "want": 2.1169755465091096,
+     "band": 0.007072917038707219,
+     "sigma": 0.08357884325432255,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.398798 vs 0.400209 (|d|=0.00141, band 0.00639 = 5 SE, 1.10 sigma)",
+     "got": 0.3987982455770842,
+     "want": 0.4002092434914791,
+     "band": 0.006387838803468324,
+     "sigma": 1.1044407645578083,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005129 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.005128668030351169,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
+  },
+  {
+   "probe_id": "relbreitwigner.identity",
+   "family": "relbreitwigner",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "1.884507 vs 1.886336 (|d|=0.00183, band 0.0084 = 5 SE, 1.09 sigma)",
+     "got": 1.8845074345787618,
+     "want": 1.8863364621387049,
+     "band": 0.008402680950325425,
+     "sigma": 1.0883595192747615,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "0.565824 vs 0.564840 (|d|=0.000983, band 0.0169 = 3% rel; fourth moment diverges, so no sigma band)",
+     "got": 0.5658235809756946,
+     "want": 0.5648403772236943,
+     "band": 0.01694521131671083,
+     "sigma": null,
+     "fallback": true
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005129 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0051286680303514465,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "positive support; x^-4 tail has finite variance but no fourth moment"
+  },
+  {
+   "probe_id": "voigtian.identity",
+   "family": "voigtian",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "skipped",
+     "detail": "distribution has no mean (Cauchy)",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "skipped",
+     "detail": "distribution has no variance (Cauchy)",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.003679 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.003678791714285423,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "Cauchy tails: no mean or variance, KS only"
+  },
+  {
+   "probe_id": "landau.identity",
+   "family": "landau",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "skipped",
+     "detail": "distribution has no mean (Cauchy)",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "skipped",
+     "detail": "distribution has no variance (Cauchy)",
+     "got": null,
+     "want": null,
+     "band": null,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.005766 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.0057664285665938175,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": "standard CERN Landau convention, no mean or variance, KS only"
+  },
+  {
+   "probe_id": "bifurcatednormal.identity",
+   "family": "bifurcatednormal",
+   "wrap": "identity",
+   "outcome": "DRAWS",
+   "n": 200000,
+   "k": 1,
+   "marker": null,
+   "error": null,
+   "checks": [
+    {
+     "name": "mean[0]",
+     "status": "passed",
+     "detail": "0.900323 vs 0.898942 (|d|=0.00138, band 0.0119 = 5 SE, 0.58 sigma)",
+     "got": 0.9003226547734432,
+     "want": 0.8989422804014318,
+     "band": 0.011889307469887098,
+     "sigma": 0.5805108394696715,
+     "fallback": false
+    },
+    {
+     "name": "var[0]",
+     "status": "passed",
+     "detail": "1.124858 vs 1.130845 (|d|=0.00599, band 0.0183 = 5 SE, 1.63 sigma)",
+     "got": 1.1248575374978547,
+     "want": 1.130845056908105,
+     "band": 0.01831225576571977,
+     "sigma": 1.6348393903111778,
+     "fallback": false
+    },
+    {
+     "name": "ks",
+     "status": "passed",
+     "detail": "D=0.004924 vs critical 0.019398 (5 sigma, n=20000)",
+     "got": 0.004923606826347182,
+     "want": 0.0,
+     "band": 0.019397791904131653,
+     "sigma": null,
+     "fallback": false
+    },
+    {
+     "name": "totalmass",
+     "status": "passed",
+     "detail": "log mass 0 vs 0 (|d|=0, band 1e-12)",
+     "got": 0.0,
+     "want": 0.0,
+     "band": 1e-12,
+     "sigma": null,
+     "fallback": false
+    }
+   ],
+   "note": ""
   },
   {
    "probe_id": "bernoulli.identity",
