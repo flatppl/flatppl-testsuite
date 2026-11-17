@@ -139,7 +139,7 @@ polars = ">=1.43.2,<2"
 [feature.stablehlo.pypi-dependencies]
 # enzyme_ad.jax.hlo_call imports emitted StableHLO (@main) as a jit-able +
 # differentiable jax callable — the executor for value AND gradient checks.
-# The FlatPPL Enzyme fork's alpha 17 wheels, pinned per platform below, support
+# The FlatPPL Enzyme fork's alpha 18 wheels, pinned per platform below, support
 # native matrix derivatives and preserve shared inputs and compact residuals.
 # pixi 0.81 does not verify the #sha256 fragment. Check downloads against
 # the release's SHA256SUMS.
@@ -148,10 +148,10 @@ jaxlib = "==0.12.0.1"
 pytest = ">=8"
 
 [feature.stablehlo.target.osx-arm64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.17/enzyme_ad-0.0.15%2Bflatppl.17-cp315-cp315-macosx_14_0_arm64.whl#sha256=4e033ed0377cf0db582bbbe57d160aadb23ed498a567480af8a93313ae43b913" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.18/enzyme_ad-0.0.15%2Bflatppl.18-cp315-cp315-macosx_14_0_arm64.whl#sha256=f23afca6adc8e452af7adcfd040b712a761fd6adb69a627ca37692c1af7211e0" }
 
 [feature.stablehlo.target.linux-64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.17/enzyme_ad-0.0.15%2Bflatppl.17-cp315-cp315-manylinux_2_28_x86_64.whl#sha256=eea7c3e5e6a849cbebbf6794a66297f03c79efe5131ab5110d14b3e9459ac0ba" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.18/enzyme_ad-0.0.15%2Bflatppl.18-cp315-cp315-manylinux_2_28_x86_64.whl#sha256=c984447198a6799a2a8b21569c6be7b6c3cfaa62f94014416b381dd6f9ad3af3" }
 
 # The stablehlo-feature tasks live here (the `stablehlo` env is
 # no-default-feature, so the base `[tasks]` are not in scope). Point
@@ -195,10 +195,10 @@ pytest = ">=8"
 bridgestan = "==2.9.0"
 
 [feature.bridge.target.osx-arm64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.17/enzyme_ad-0.0.15%2Bflatppl.17-cp312-cp312-macosx_14_0_arm64.whl#sha256=6df8749484f2bc6816a286fa0be9b5825f0f6116f39e9f16703aa826353d638f" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.18/enzyme_ad-0.0.15%2Bflatppl.18-cp312-cp312-macosx_14_0_arm64.whl#sha256=d2e926be012af369e8f7adb6209b3320faa3dfd8d91c2f1fdf6b5b1d6e2fdd76" }
 
 [feature.bridge.target.linux-64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.17/enzyme_ad-0.0.15%2Bflatppl.17-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=55f84602a0e301ce324149f0c23ee9a7a954c211238ef3151f96c89f881d0a09" }
+enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.18/enzyme_ad-0.0.15%2Bflatppl.18-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=977a5a80c5fd423038e283a785b80356bbdca64bd4d0822a4795baba2561c925" }
 
 [feature.bridge.tasks]
 bridge-setup = "bash scripts/setup_bridge.sh"
