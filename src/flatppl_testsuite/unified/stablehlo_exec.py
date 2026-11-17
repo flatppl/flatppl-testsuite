@@ -279,7 +279,8 @@ def _outputs(src: str, *args):
     checkify.check(jnp.all(status != 7), "FlatPPL categorical probabilities are not a valid law")
     checkify.check(jnp.all(status != 9),
                    "FlatPPL distribution parameter is outside its declared value set")
-    checkify.check(jnp.all((status >= 0) & (status <= 7) | (status == 9)),
+    checkify.check(jnp.all(status != 10), "FlatPPL numerical algorithm did not converge")
+    checkify.check(jnp.all((status >= 0) & (status <= 7) | (status == 9) | (status == 10)),
                    "Unknown FlatPPL runtime error")
     return result
 
