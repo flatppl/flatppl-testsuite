@@ -281,7 +281,8 @@ def _outputs(src: str, *args):
                    "FlatPPL distribution parameter is outside its declared value set")
     checkify.check(jnp.all(status != 10), "FlatPPL numerical algorithm did not converge")
     checkify.check(jnp.all(status != 11), "FlatPPL eigenvalue extrema require a nonempty real spectrum")
-    checkify.check(jnp.all((status >= 0) & (status <= 7) | (status >= 9) & (status <= 11)),
+    checkify.check(jnp.all(status != 12), "FlatPPL numeric function arguments are outside their declared domain")
+    checkify.check(jnp.all((status >= 0) & (status <= 7) | (status >= 9) & (status <= 12)),
                    "Unknown FlatPPL runtime error")
     return result
 
