@@ -116,11 +116,6 @@ FLATPPL_BIN=/path/to/flatppl PYTHONPATH=$PWD/src pixi run -e stablehlo unified
 # Regenerate a test dir's frozen expected/stat from its test.py oracle:
 pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 
-# Black-box row: a BridgeStan box served by flatppl-bridge, queried through
-# flatppl-python (builds both from sibling checkouts; needs a C++17 compiler):
-pixi run -e bridge bridge-setup
-pixi run -e bridge bridge
-
 # Stan emitter round trip over corpora/posteriordb (needs a `flatppl` built with
 # --features stan and a C++17 compiler; compiled programs cache in .stan-cache/):
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-posteriordb
