@@ -57,5 +57,5 @@ htmlcov/
 .tox/
 .nox/
 
-# black-box row builds (scripts/setup_bridge.sh)
+# Local bridge build artifacts
 /.bridge/

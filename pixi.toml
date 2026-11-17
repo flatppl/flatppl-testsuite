@@ -174,35 +174,17 @@ regen = "python -m flatppl_testsuite.unified.regen"
 unified = "python -m pytest tests -q -m stablehlo_only"
 
 # ---------------------------------------------------------------------------
-# Black-box row: a BridgeStan box served by flatppl-bridge, queried from FlatPPL
-# through flatppl-python (tests/test_bridge_box.py). `bridge-setup` builds
-# flatppl-python and flatppl-bridge from sibling checkouts (FLATPPL_PYTHON_DIR,
-# FLATPPL_BRIDGE_DIR) and the Stan model; BridgeStan needs a C++17 compiler.
-#   pixi run -e bridge bridge-setup && pixi run -e bridge bridge
+# BridgeStan compiles emitted Stan programs for the posteriorDB round trip.
 [feature.bridge.dependencies]
 python = "3.12.*"
 scipy = ">=1.11"
 numpy = ">=2.0"
-pyarrow = ">=25"
-pip = "*"
-maturin = ">=1.9,<2"
-rust = ">=1.96"
 
 [feature.bridge.pypi-dependencies]
-jax = "==0.12.0.1"
-jaxlib = "==0.12.0.1"
 pytest = ">=8"
 bridgestan = "==2.9.0"
 
-[feature.bridge.target.osx-arm64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.21/enzyme_ad-0.0.15%2Bflatppl.21-cp312-cp312-macosx_14_0_arm64.whl#sha256=f6e3aa7ad008a1b34c8e163ea3a309d8cea092e3ace9c01bb8d8dedc0014def5" }
-
-[feature.bridge.target.linux-64.pypi-dependencies]
-enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flatppl-alpha.21/enzyme_ad-0.0.15%2Bflatppl.21-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=ccab2fe85ba2f292cbe2258c648c4f84ea0dac440de6e27a98cbca2e51f4bfd4" }
-
 [feature.bridge.tasks]
-bridge-setup = "bash scripts/setup_bridge.sh"
-bridge = "python -m pytest tests/test_bridge_box.py -q -m bridge_only"
 # The Stan emitter's round trip: `flatppl stan` on every posteriorDB case,
 # scored by BridgeStan against the frozen `expected`. FLATPPL_BIN must be a
 # binary built with `--features stan`.
