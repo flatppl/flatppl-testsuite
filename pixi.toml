@@ -203,6 +203,10 @@ enzyme-ad = { url = "https://github.com/BJMCox/Enzyme-JAX/releases/download/flat
 [feature.bridge.tasks]
 bridge-setup = "bash scripts/setup_bridge.sh"
 bridge = "python -m pytest tests/test_bridge_box.py -q -m bridge_only"
+# The Stan emitter's round trip: `flatppl stan` on every posteriorDB case,
+# scored by BridgeStan against the frozen `expected`. FLATPPL_BIN must be a
+# binary built with `--features stan`.
+stan-posteriordb = "python -m pytest tests/test_stan_posteriordb.py -q -m stan_only -rs"
 
 [environments]
 root = ["root"]

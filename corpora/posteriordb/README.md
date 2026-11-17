@@ -91,7 +91,9 @@ density and differentiation checks, not convergence claims.
 The unified tests check densities through Rust-to-JS and StableHLO.
 `tests/test_posteriordb.py` checks JS's own measure/data path and full
 StableHLO gradients in float32 and float64. No Stan installation is needed
-to run these checks. To refresh the oracles, evaluate `reference.stan` with
+to run these checks. `tests/test_stan_posteriordb.py` scores the program
+`flatppl stan` writes for each case with BridgeStan against the same
+`expected`, in the `bridge` environment. To refresh the oracles, evaluate `reference.stan` with
 the adjacent native data and the recorded BridgeStan flags, then apply the
 coordinate and constant conventions above. Never generate expected values
 with FlatPPL.

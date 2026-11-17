@@ -2,6 +2,8 @@
 /.pixi/
 /pixi.lock
 /.pixi-bin/
+# compiled Stan programs of the stan runner
+/.stan-cache/
 
 # node
 node_modules/
