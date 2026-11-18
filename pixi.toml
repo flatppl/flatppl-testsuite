@@ -189,6 +189,10 @@ bridgestan = "==2.9.0"
 # scored by BridgeStan against the frozen `expected`. FLATPPL_BIN must be a
 # binary built with `--features stan`.
 stan-posteriordb = "python -m pytest tests/test_stan_posteriordb.py -q -m stan_only -rs"
+# The same round trip over every other logdensity case, and over the pyhf
+# convert cases against pyhf's `Model.logpdf`. An emitter refusal skips and
+# names the construct.
+stan-corpora = "python -m pytest tests/test_stan_corpora.py -q -m stan_only -rs"
 
 [environments]
 root = ["root"]

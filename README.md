@@ -119,6 +119,9 @@ pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 # Stan emitter round trip over corpora/posteriordb (needs a `flatppl` built with
 # --features stan and a C++17 compiler; compiled programs cache in .stan-cache/):
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-posteriordb
+# The same round trip over the other logdensity corpora and the pyhf cases;
+# an emitter refusal skips with its message:
+FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-corpora
 ```
 
 ## Engine pins
