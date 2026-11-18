@@ -193,6 +193,9 @@ stan-posteriordb = "python -m pytest tests/test_stan_posteriordb.py -q -m stan_o
 # convert cases against pyhf's `Model.logpdf`. An emitter refusal skips and
 # names the construct.
 stan-corpora = "python -m pytest tests/test_stan_corpora.py -q -m stan_only -rs"
+# Which Stan `_lccdf`/`_lcdf` functions stay exact far in the tail, against
+# closed-form and scipy oracles. Needs no flatppl binary.
+stan-tail = "python -m pytest tests/test_stan_tail.py -q -m stan_only"
 
 [environments]
 root = ["root"]
