@@ -771,18 +771,13 @@ LITERAL_PROBES: tuple[LiteralProbe, ...] = (
     # which is what identified it as a missing divisor rather than a mis-scored
     # component.
     #
-    # THIS ROW READS `REFUSES` TODAY, AND IT IS THE DETERMINISER THAT REFUSES:
-    #     determinize: refuse normalize (node NodeId(16)): normalize of an
-    #     unnormalized measure needs a closed-form mass rule; `totalmass` is not
-    #     FlatPDL
-    # The same table drives `flatppl determinize` before the JS engine, so the
-    # engine's own density number never reaches it — flatppl-js scores this
-    # source at -2.1478775514485413 directly, and that check lives in
-    # flatppl-js's `normalize-pooled-divisor.test.ts`. So a green verdict here
-    # does NOT pin the engine fix; it pins the determiniser gap, and the row
-    # flips to LOWERS with a value check the moment that gap closes. With
-    # `weighted(w, <leaf>)` components the determiniser lowers instead, and
-    # rightly emits no divisor at all, since Sigma w = 1 there.
+    # THIS ROW LOWERS. flatppl-rust #652 gave the determiniser a closed-form
+    # total mass for `truncate(Normal, interval)` (Z_t = Phi(b) - Phi(a)), so
+    # `normalize` of the superposition lowers and the divisor is 0.3*Z_t + 0.7.
+    # The determiniser value matches the scipy oracle to 1 ulp. The engine
+    # fix itself is also pinned in flatppl-js's `normalize-pooled-divisor.test.ts`.
+    # With `weighted(w, <leaf>)` components the determiniser emits no divisor,
+    # since Sigma w = 1 there.
     LiteralProbe(
         id="superpose.component_mass_truncate.direct.single.noconsumer",
         source="m = normalize(superpose(weighted(0.3, truncate("
@@ -792,8 +787,8 @@ LITERAL_PROBES: tuple[LiteralProbe, ...] = (
         binding="lp",
         oracle=-2.147877551448541081,
         note="a truncated superposition component enters at w*Z_t; the mass-"
-             "ignored divisor of 1 scores -2.2479113375 instead. REFUSES today "
-             "in the DETERMINISER, not the engine",
+             "ignored divisor of 1 scores -2.2479113375 instead. Lowers via the "
+             "closed-form mass of a truncated Normal",
         refusal_spec_justified=False,
     ),
     # ------------------------------- a weighted probability leaf's normalizer
