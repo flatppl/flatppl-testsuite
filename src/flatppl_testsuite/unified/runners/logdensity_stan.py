@@ -14,7 +14,10 @@ half-priors as `T[L, U]`.
 logdensity has the two point modes of `logdensity_detjs`:
 
 * Mode ABI (`points`): model + query is one module, and the target is the
-  dir's `binding`, else the ABI `outputs`. Each ABI input of the point goes to
+  dir's `binding`, else the ABI `outputs`. The frozen value is that of
+  `outputs`, so a `binding` must be what `outputs` scores. All points have
+  the same fields, and an ABI input outside them must be a `load_data`
+  source, which the emitter writes into the data. Each ABI input of the point goes to
   the Stan parameter the manifest binds to it (its `input`, or its `field` for
   a kernel input), or to the Stan data entry of the same name (a §13 fixed
   input the program reads as data). The dir's `inputs` name the point fields
@@ -36,6 +39,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -47,8 +51,9 @@ from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.scoring.result import (
     CheckResult, EMIT_REFUSED, NUMERIC_MISMATCH, UNSCOREABLE,
 )
-from flatppl_testsuite.unified.detjs_exec import abi_input_names, parse_expected
+from flatppl_testsuite.unified.detjs_exec import _input_rhs, abi_input_names, parse_expected
 from flatppl_testsuite.unified.loader import TestSpec
+from flatppl_testsuite.unified.stablehlo_exec import load_data_bindings
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -159,6 +164,35 @@ class _Unmappable(ValueError):
     """The program cannot receive a point: a mapping defect, reported as failed."""
 
 
+def _tolerance(body: dict) -> dict[str, float]:
+    tol = body.get("tolerance", {})
+    return {"atol": tol.get("atol", 1e-9), "rtol": tol.get("rtol", 1e-9)}
+
+
+def _check_scores_binding(src: str, binding: str) -> None:
+    """Fail unless the ABI `outputs` scores `binding`.
+
+    The frozen value is that of `outputs`, but the emitter takes the density
+    target (`binding`) and does not yet take a literal record point as target."""
+    if binding == "outputs":
+        return
+    rhs = _rhs(src, "outputs")
+    alias = re.fullmatch(r"\(?\s*(\w+)\s*\)?", rhs)
+    if alias and alias.group(1) == binding:
+        return
+    if alias:
+        rhs = _rhs(src, alias.group(1))
+    if not re.match(rf"logdensityof\(\s*{re.escape(binding)}\s*,", rhs):
+        raise _Unmappable(f"`outputs` does not score `logdensityof({binding}, …)`")
+
+
+def _rhs(src: str, name: str) -> str:
+    m = _input_rhs([name]).search(src)
+    if m is None:
+        raise _Unmappable(f"the module has no binding `{name}`")
+    return m.group(2).strip()
+
+
 def _routes(manifest: dict, data: dict, names: list[str], key_of: dict[str, str],
             name_of_param) -> tuple[dict[str, str], dict[str, str]]:
     """Split the point fields into Stan parameters and Stan data entries.
@@ -224,8 +258,7 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     tid = dir.name
     body = spec.body
     model_name = body.get("model", "model.flatppl")
-    tol = body.get("tolerance", {})
-    tol = {"atol": tol.get("atol", 1e-9), "rtol": tol.get("rtol", 1e-9)}
+    tol = _tolerance(body)
     points = body.get("points")
     expected = body["expected"]
     if not isinstance(expected, list):
@@ -236,7 +269,10 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     if len(expected) != len(points):
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
                             f"{len(points)} points but {len(expected)} expected values")]
-    query = "query.flatppl" if abi_mode and (dir / "query.flatppl").exists() else None
+    query = "query.flatppl" if abi_mode else None
+    if abi_mode and not (dir / query).exists():
+        return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
+                            "`points` without query.flatppl")]
     try:
         code, data, manifest = emit(
             dir, body.get("binding", "outputs"), model_name=model_name, query_name=query
@@ -248,23 +284,31 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
 
     try:
         if abi_mode:
-            src = (dir / model_name).read_text()
-            if query is not None:
-                src += "\n" + (dir / query).read_text()
+            src = (dir / model_name).read_text() + "\n" + (dir / query).read_text()
+            if "binding" in body:
+                _check_scores_binding(src, body["binding"])
             names = abi_input_names(src)
             keys = body.get("inputs") or names
             if len(keys) != len(names):
                 raise _Unmappable(f"test.json `inputs` {keys} do not match the ABI {names}")
-            # An input absent from the point is a `load_data` source, which the
-            # emitter already wrote into the data.
-            key_of = {n: k for n, k in zip(names, keys) if k in points[0]}
+            fields = set(points[0])
+            if any(set(pt) != fields for pt in points):
+                raise _Unmappable("the points do not all have the same fields")
+            # The emitter writes a `load_data` source into the data itself.
+            sources = load_data_bindings(dir, model_name=model_name)
+            dropped = [n for n, k in zip(names, keys) if k not in fields]
+            unknown = [n for n in dropped if n not in sources]
+            if unknown:
+                raise _Unmappable(f"ABI input(s) {unknown} are neither in the point "
+                                  "nor a `load_data` source")
+            key_of = {n: k for n, k in zip(names, keys) if k in fields}
             routes = _routes(
                 manifest, data, list(key_of), key_of,
                 lambda p: p.get("input") or (p["field"] if p["field"] in key_of else None),
             )
         else:
             routes = _routes(manifest, data, [], {}, lambda p: None)
-    except _Unmappable as e:
+    except ValueError as e:  # _Unmappable, or a module with no ABI `inputs`
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, str(e))]
     return _score_points(tid, "logdensity", code, data, routes, points, expected, tol)
 
@@ -305,5 +349,5 @@ def run_convert(spec: TestSpec, dir: Path) -> list[CheckResult]:
             results.append(CheckResult(tid, cid, "failed", UNSCOREABLE, str(e)))
             continue
         results.extend(_score_points(tid, cid, code, data, routes, points,
-                                     check["expected"], check["tolerance"]))
+                                     check["expected"], _tolerance(check)))
     return results

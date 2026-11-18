@@ -21,7 +21,7 @@ import pytest
 from flatppl_testsuite.unified.harness import run_test_dir
 from flatppl_testsuite.unified.loader import discover_test_dirs, merged_body
 from flatppl_testsuite.unified.runners.logdensity_stan import NOT_YET
-from tests.test_stan_posteriordb import stan_verdict
+from tests.stan_verdict import stan_verdict
 from tests.test_unified import _gate_engine
 
 pytestmark = [
