@@ -1,12 +1,12 @@
 {
   "metadata": {
-    "generated_at": "2026-11-08T17:23:28.218193+00:00",
-    "determinizer_commit": "109efb3163ad91a06e7e1c2a7f201e4c0bc9d774",
-    "engine_commit": "757530afbe57788e5b53d1a72c37d7641862cc1f",
+    "generated_at": "2026-11-18T11:39:36.601851+00:00",
+    "determinizer_commit": "a7f4d45643667b04fdee48c4b18019c2d5b97d7d",
+    "engine_commit": "88e627fd4c9d5ca009aba99a0fc6f2133e9884a0",
     "probe_count": 859,
     "outcome_counts": {
-      "LOWERS": 677,
-      "REFUSES": 182,
+      "LOWERS": 678,
+      "REFUSES": 181,
       "MALFORMED": 0
     },
     "ci_slice": {
@@ -9462,11 +9462,11 @@
     },
     {
       "probe_id": "superpose.component_mass_truncate.direct.single.noconsumer",
-      "outcome": "REFUSES",
+      "outcome": "LOWERS",
       "oracle": -2.147877551448541,
-      "value": null,
-      "marker": "NumericalIntegral::refuse-numericalintegral-closed-form-covers-this",
-      "spec_justified": false,
+      "value": -2.1478775514485413,
+      "marker": null,
+      "spec_justified": null,
       "oracle_unvalidated": false,
       "known_defect": false,
       "known_defect_reason": null
