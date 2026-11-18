@@ -17,11 +17,13 @@ logdensity has the two point modes of `logdensity_detjs`:
   dir's `binding`, else the ABI `outputs`. The frozen value is that of
   `outputs`, so a `binding` must be what `outputs` scores. All points have
   the same fields, and an ABI input outside them must be a `load_data`
-  source, which the emitter writes into the data. Each ABI input of the point goes to
-  the Stan parameter the manifest binds to it (its `input`, or its `field` for
-  a kernel input), or to the Stan data entry of the same name (a §13 fixed
-  input the program reads as data). The dir's `inputs` name the point fields
-  in ABI order where they differ from the ABI names.
+  source, which the emitter writes into the data. Each ABI input of the point
+  goes to the Stan parameters whose manifest `input` names it, whole or as
+  the `index` part of it. A parameter with no `input` is a latent with no
+  point field, so it cannot be scored.
+  Otherwise it goes to the Stan data entry the manifest's `data` list names
+  for it (a §13 fixed input the program reads as data). The dir's `inputs`
+  name the point fields in ABI order where they differ from the ABI names.
 * Mode A (no `points`): the model alone ends in the scored binding at a fixed
   point, so the program has no parameters and one value.
 
@@ -193,27 +195,43 @@ def _rhs(src: str, name: str) -> str:
     return m.group(2).strip()
 
 
-def _routes(manifest: dict, data: dict, names: list[str], key_of: dict[str, str],
-            name_of_param) -> tuple[dict[str, str], dict[str, str]]:
+def _routes(manifest: dict, names: list[str], key_of: dict[str, str], name_of_param):
     """Split the point fields into Stan parameters and Stan data entries.
 
-    Returns ({stan parameter: point key}, {data entry: point key})."""
-    params: dict[str, str] = {}
+    A parameter may be an index or a slice of a point field (manifest
+    `index`). A fixed input reaches the data only through the manifest's
+    `data` list. Returns ({stan parameter: (point key, index)},
+    {Stan data name: point key})."""
+    params: dict[str, tuple[str, int | list[int] | None]] = {}
     unmapped = []
     for p in manifest["parameters"]:
         name = name_of_param(p)
         if name is None or name not in key_of:
             unmapped.append(p["stan"])
         else:
-            params[p["stan"]] = key_of[name]
+            params[p["stan"]] = (key_of[name], p.get("index"))
     if unmapped:
         raise _Unmappable(f"no point input bound to Stan parameter(s) {unmapped}")
-    bound = set(params.values())
-    as_data = {n: key_of[n] for n in names if key_of[n] not in bound and n in data}
-    missing = [n for n in names if key_of[n] not in bound and n not in data]
+    # A data entry outside the point (a `load_data` source) keeps its emitted value.
+    as_data = {d["stan"]: key_of[d["input"]]
+               for d in manifest.get("data", []) if d["input"] in key_of}
+    bound = {k for k, _ in params.values()} | set(as_data.values())
+    missing = [n for n in names if key_of[n] not in bound]
     if missing:
-        raise _Unmappable(f"point input(s) {missing} reach neither a Stan parameter nor data")
+        raise _Unmappable(f"point input(s) {missing} reach neither a Stan parameter "
+                          "nor a manifest data entry")
     return params, as_data
+
+
+def _project(value, index):
+    """The part of a point value a parameter takes: all of it, `value[k]`, or
+    the vector `value[[k, …]]` (FlatPPL indices are 1-based)."""
+    if index is None:
+        return value
+    ks = [index] if isinstance(index, int) else index
+    if not isinstance(value, list) or any(not 1 <= k <= len(value) for k in ks):
+        raise _Unmappable(f"index {index} is outside the point value {value!r}")
+    return value[index - 1] if isinstance(index, int) else [value[k - 1] for k in ks]
 
 
 def _score_points(tid: str, check: str, code: str, data: dict, routes, points: list[dict],
@@ -233,7 +251,7 @@ def _score_points(tid: str, check: str, code: str, data: dict, routes, points: l
         want = parse_expected(raw)
         try:
             point_data = {**data, **{n: _stan_value(pt[k]) for n, k in as_data.items()}}
-            constrained = {s: _stan_value(pt[k]) for s, k in params.items()}
+            constrained = {s: _stan_value(_project(pt[k], ix)) for s, (k, ix) in params.items()}
             data_json = json.dumps(point_data)
             if data_json not in models:
                 models[data_json] = bridgestan.StanModel(str(so), data_json)
@@ -303,11 +321,11 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                                   "nor a `load_data` source")
             key_of = {n: k for n, k in zip(names, keys) if k in fields}
             routes = _routes(
-                manifest, data, list(key_of), key_of,
-                lambda p: p.get("input") or (p["field"] if p["field"] in key_of else None),
+                manifest, list(key_of), key_of,
+                lambda p: p.get("input"),
             )
         else:
-            routes = _routes(manifest, data, [], {}, lambda p: None)
+            routes = _routes(manifest, [], {}, lambda p: None)
     except ValueError as e:  # _Unmappable, or a module with no ABI `inputs`
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, str(e))]
     return _score_points(tid, "logdensity", code, data, routes, points, expected, tol)
@@ -343,7 +361,7 @@ def run_convert(spec: TestSpec, dir: Path) -> list[CheckResult]:
         points = check["points"]
         names = list(points[0])
         try:
-            routes = _routes(manifest, data, names, {n: n for n in names},
+            routes = _routes(manifest, names, {n: n for n in names},
                              lambda p: p["field"] if p["field"] in names else None)
         except _Unmappable as e:
             results.append(CheckResult(tid, cid, "failed", UNSCOREABLE, str(e)))
