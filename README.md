@@ -122,6 +122,8 @@ FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-posteriordb
 # The same round trip over the other logdensity corpora and the pyhf cases;
 # an emitter refusal skips with its message:
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-corpora
+# Which Stan tail functions stay exact (pins the emitter's `tail` flags):
+pixi run -e bridge stan-tail
 ```
 
 ## Engine pins
