@@ -19,8 +19,9 @@ from pathlib import Path
 
 import pytest
 
-from flatppl_testsuite.scoring.result import EMIT_REFUSED
 from flatppl_testsuite.unified.harness import run_test_dir
+from flatppl_testsuite.unified.runners.logdensity_stan import NOT_YET
+from tests.stan_verdict import stan_verdict
 from tests.test_unified import _gate_engine
 
 pytestmark = [
@@ -38,11 +39,5 @@ CASES = sorted(
 @pytest.mark.parametrize("case", CASES, ids=[c.name for c in CASES])
 def test_stan_matches_expected(case: Path):
     _gate_engine("stan")
-    results = run_test_dir(case, engines=["stan"])
-    assert results, "no results"
-    bad = [r for r in results if r.status == "failed"
-           or (r.status == "skipped" and r.tag != EMIT_REFUSED)]
-    assert not bad, "\n".join(f"{r.check_id}: {r.tag} {r.message}" for r in bad)
-    refused = [r for r in results if r.status == "skipped"]
-    if refused:
-        pytest.skip(refused[0].message)
+    # Every posteriorDB model has a Stan source, so "no Stan form" is a defect.
+    stan_verdict(run_test_dir(case, engines=["stan"]), skips=(NOT_YET,))

@@ -26,6 +26,7 @@ _RUNNERS = {
     ("logdensity", "stan"): logdensity_stan.run,
     ("sample", "det-js"): sample_detjs.run,
     ("convert", "det-js"): convert_detjs.run,
+    ("convert", "stan"): logdensity_stan.run_convert,
 }
 
 
