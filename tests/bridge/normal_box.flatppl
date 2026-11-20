@@ -1,3 +1,0 @@
-# Normalized Python-callable members with their own samplers and gradients.
-std = external(anything)
-K = external(anything)
