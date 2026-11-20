@@ -121,7 +121,9 @@ pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-posteriordb
 # The same round trip over the other logdensity corpora and the pyhf cases;
 # an emitter refusal skips with its message. A point frozen at -inf or as an
-# error passes when Stan rejects it with the matching law or index error:
+# error passes when Stan rejects it with the matching law or index error.
+# When no point input binds a parameter of the `binding` program, the
+# `outputs` program is scored instead (tag STAN_OUTPUTS):
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-corpora
 # Which Stan tail functions stay exact (pins the emitter's `tail` flags):
 pixi run -e bridge stan-tail
