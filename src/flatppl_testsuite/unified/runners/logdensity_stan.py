@@ -32,6 +32,13 @@ each `logpdf_points` check's binding, map each point field to the Stan
 parameter whose manifest `field` it is, and compare with pyhf's absolute
 `Model.logpdf`.
 
+A point frozen at -inf or as an error record (`{"error": text}`) passes when
+`log_density` itself raises the Stan rejection that the frozen value names:
+Stan rejects where a law has no density, which is density 0. The result is
+`passed` with tag STAN_REJECTED, and its message holds the rejection class
+and the Stan message. `_REJECTIONS` holds the classes and the pass table. Any
+other exception fails the point.
+
 Exit 3 that names "not yet supported" or "no Stan form" is a refusal
 (EMIT_REFUSED, a skip). Every other exit, a compile or data error, and an
 input the program cannot receive are failures.
@@ -40,6 +47,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -51,7 +59,7 @@ from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.formats.hs3.importer import convert
 from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.scoring.result import (
-    CheckResult, EMIT_REFUSED, NUMERIC_MISMATCH, UNSCOREABLE,
+    CheckResult, EMIT_REFUSED, NUMERIC_MISMATCH, STAN_REJECTED, UNSCOREABLE,
 )
 from flatppl_testsuite.unified.detjs_exec import _input_rhs, abi_input_names, parse_expected
 from flatppl_testsuite.unified.loader import TestSpec
@@ -65,6 +73,25 @@ CACHE = Path(os.environ.get("FLATPPL_STAN_CACHE", _REPO_ROOT / ".stan-cache"))
 
 NOT_YET = "not yet supported"
 _REFUSALS = (NOT_YET, "no Stan form")
+
+# Stan rejections that meet a frozen -inf or error record. BridgeStan 2.9.0
+# reports every `log_density` exception as RuntimeError("log_density() failed
+# with exception: Exception: <what()>"), so the class comes from the Stan Math
+# message form. The forms were measured on BridgeStan 2.9.0 and its Stan Math;
+# tests/test_stan_reject.py pins each one.
+LAW_REJECTION = re.compile(
+    # A law's support or parameter check, not its size or NaN checks.
+    r"Exception: \w+_(?:lpdf|lpmf|lcdf|lccdf|cdf): .*?"
+    r"(?: is (?!nan,)[^,]+, but must be | is not (?:a valid|positive definite|symmetric))"
+)
+INDEX_REJECTION = re.compile(r"index -?\d+ out of range; expecting index to be between")
+# Frozen value -> the rejection class that meets it. The error texts are the
+# StableHLO runtime statuses the corpora freeze.
+_REJECTIONS = {
+    "-inf": ("law", LAW_REJECTION),
+    "outside its declared value set": ("law", LAW_REJECTION),
+    "index out of range": ("index", INDEX_REJECTION),
+}
 
 
 def binary_supports_stan() -> bool:
@@ -248,7 +275,8 @@ def _score_points(tid: str, check: str, code: str, data: dict, routes, points: l
     results: list[CheckResult] = []
     for i, (pt, raw) in enumerate(zip(points, expected)):
         cid = f"{check}[{i}]"
-        want = parse_expected(raw)
+        error = raw.get("error") if isinstance(raw, dict) else None
+        want = None if error is not None else parse_expected(raw)
         try:
             point_data = {**data, **{n: _stan_value(pt[k]) for n, k in as_data.items()}}
             constrained = {s: _stan_value(_project(pt[k], ix)) for s, (k, ix) in params.items()}
@@ -257,9 +285,19 @@ def _score_points(tid: str, check: str, code: str, data: dict, routes, points: l
                 models[data_json] = bridgestan.StanModel(str(so), data_json)
             model = models[data_json]
             theta = model.param_unconstrain_json(json.dumps(constrained))
-            got = model.log_density(theta, propto=False, jacobian=False)
-        except Exception as e:  # a data or evaluation error of the emitted program
+        except Exception as e:  # a data or constraint error of the emitted program
             results.append(CheckResult(tid, cid, "failed", UNSCOREABLE, f"point {pt}: {e}"))
+            continue
+        try:
+            got = model.log_density(theta, propto=False, jacobian=False)
+        except Exception as e:
+            results.append(_rejection(tid, cid, pt, str(e).strip(), want, error))
+            continue
+        if error is not None:
+            results.append(CheckResult(
+                tid, cid, "failed", NUMERIC_MISMATCH,
+                f"point {pt}: Stan {got!r} vs expected an error containing {error!r}",
+            ))
             continue
         try:
             compare_scalar(got, want, tol)
@@ -270,6 +308,24 @@ def _score_points(tid: str, check: str, code: str, data: dict, routes, points: l
             continue
         results.append(CheckResult(tid, cid, "passed"))
     return results
+
+
+def _rejection(tid: str, cid: str, pt: dict, message: str, want: float | None,
+               error: str | None) -> CheckResult:
+    """The verdict for a point where `log_density` raised ``message``."""
+    key = error if error is not None else ("-inf" if want == -math.inf else None)
+    if key is None:
+        return CheckResult(tid, cid, "failed", UNSCOREABLE, f"point {pt}: {message}")
+    if key not in _REJECTIONS:
+        return CheckResult(tid, cid, "failed", UNSCOREABLE,
+                           f"point {pt}: no Stan rejection class meets the frozen error "
+                           f"{error!r}; Stan raised: {message}")
+    name, pattern = _REJECTIONS[key]
+    if pattern.search(message):
+        return CheckResult(tid, cid, "passed", STAN_REJECTED, f"rejected ({name}): {message}")
+    return CheckResult(tid, cid, "failed", UNSCOREABLE,
+                       f"point {pt}: the frozen {key!r} needs a {name} rejection; "
+                       f"Stan raised: {message}")
 
 
 def run(spec: TestSpec, dir: Path) -> list[CheckResult]:

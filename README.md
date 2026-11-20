@@ -120,10 +120,13 @@ pixi run -e stablehlo regen corpora/stablehlo/linear_regression
 # --features stan and a C++17 compiler; compiled programs cache in .stan-cache/):
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-posteriordb
 # The same round trip over the other logdensity corpora and the pyhf cases;
-# an emitter refusal skips with its message:
+# an emitter refusal skips with its message. A point frozen at -inf or as an
+# error passes when Stan rejects it with the matching law or index error:
 FLATPPL_BIN=/path/to/flatppl pixi run -e bridge stan-corpora
 # Which Stan tail functions stay exact (pins the emitter's `tail` flags):
 pixi run -e bridge stan-tail
+# The rejection rule and the Stan Math message forms it reads:
+pixi run -e bridge stan-reject
 ```
 
 ## Engine pins
