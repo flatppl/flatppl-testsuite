@@ -196,9 +196,10 @@ stan-corpora = "python -m pytest tests/test_stan_corpora.py -q -m stan_only -rs"
 # Which Stan `_lccdf`/`_lcdf` functions stay exact far in the tail, against
 # closed-form and scipy oracles. Needs no flatppl binary.
 stan-tail = "python -m pytest tests/test_stan_tail.py -q -m stan_only"
-# The runner's rule for a point Stan rejects, on hand-written programs, and
-# the Stan Math message forms it reads. Needs no flatppl binary.
-stan-reject = "python -m pytest tests/test_stan_reject.py -q -m stan_only"
+# The runner's rule for a point Stan rejects and its switch to the `outputs`
+# program, on hand-written programs, and the Stan Math message forms it
+# reads. Needs no flatppl binary.
+stan-reject = "python -m pytest tests/test_stan_reject.py tests/test_stan_outputs.py -q -m stan_only"
 
 [environments]
 root = ["root"]

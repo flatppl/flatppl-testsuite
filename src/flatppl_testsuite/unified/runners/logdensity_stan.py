@@ -19,8 +19,11 @@ logdensity has the two point modes of `logdensity_detjs`:
   the same fields, and an ABI input outside them must be a `load_data`
   source, which the emitter writes into the data. Each ABI input of the point
   goes to the Stan parameters whose manifest `input` names it, whole or as
-  the `index` part of it. A parameter with no `input` is a latent with no
-  point field, so it cannot be scored.
+  the `index` part of it. When a parameter of the `binding` program has no
+  `input` (the query builds it from the inputs, for example with `rowstack`),
+  the runner scores the `outputs` program instead, whose parameters are the
+  ABI inputs. A point passed this way has tag STAN_OUTPUTS, and a refusal of
+  `outputs` counts as any refusal. Any other mapping error fails.
   Otherwise it goes to the Stan data entry the manifest's `data` list names
   for it (a §13 fixed input the program reads as data). The dir's `inputs`
   name the point fields in ABI order where they differ from the ABI names.
@@ -59,7 +62,7 @@ from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.formats.hs3.importer import convert
 from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.scoring.result import (
-    CheckResult, EMIT_REFUSED, NUMERIC_MISMATCH, STAN_REJECTED, UNSCOREABLE,
+    CheckResult, EMIT_REFUSED, NUMERIC_MISMATCH, STAN_OUTPUTS, STAN_REJECTED, UNSCOREABLE,
 )
 from flatppl_testsuite.unified.detjs_exec import _input_rhs, abi_input_names, parse_expected
 from flatppl_testsuite.unified.loader import TestSpec
@@ -193,6 +196,14 @@ class _Unmappable(ValueError):
     """The program cannot receive a point: a mapping defect, reported as failed."""
 
 
+class _UnboundParameter(_Unmappable):
+    """A Stan parameter that no point input binds."""
+
+    def __init__(self, params: list[str]):
+        super().__init__(f"no point input bound to Stan parameter(s) {params}")
+        self.params = params
+
+
 def _tolerance(body: dict) -> dict[str, float]:
     tol = body.get("tolerance", {})
     return {"atol": tol.get("atol", 1e-9), "rtol": tol.get("rtol", 1e-9)}
@@ -238,7 +249,7 @@ def _routes(manifest: dict, names: list[str], key_of: dict[str, str], name_of_pa
         else:
             params[p["stan"]] = (key_of[name], p.get("index"))
     if unmapped:
-        raise _Unmappable(f"no point input bound to Stan parameter(s) {unmapped}")
+        raise _UnboundParameter(unmapped)
     # A data entry outside the point (a `load_data` source) keeps its emitted value.
     as_data = {d["stan"]: key_of[d["input"]]
                for d in manifest.get("data", []) if d["input"] in key_of}
@@ -347,15 +358,15 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
     if abi_mode and not (dir / query).exists():
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
                             "`points` without query.flatppl")]
+    target = body.get("binding", "outputs")
     try:
-        code, data, manifest = emit(
-            dir, body.get("binding", "outputs"), model_name=model_name, query_name=query
-        )
+        code, data, manifest = emit(dir, target, model_name=model_name, query_name=query)
     except StanRefused as e:
         return [CheckResult(tid, "logdensity", "skipped", EMIT_REFUSED, str(e))]
     except StanEmitError as e:
         return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, str(e))]
 
+    note = None
     try:
         if abi_mode:
             src = (dir / model_name).read_text() + "\n" + (dir / query).read_text()
@@ -376,15 +387,38 @@ def run(spec: TestSpec, dir: Path) -> list[CheckResult]:
                 raise _Unmappable(f"ABI input(s) {unknown} are neither in the point "
                                   "nor a `load_data` source")
             key_of = {n: k for n, k in zip(names, keys) if k in fields}
-            routes = _routes(
-                manifest, list(key_of), key_of,
-                lambda p: p.get("input"),
-            )
+            try:
+                routes = _routes(manifest, list(key_of), key_of, lambda p: p.get("input"))
+            except _UnboundParameter as e:
+                if target == "outputs":
+                    raise
+                # The query builds the target's point from its inputs, so the
+                # `outputs` program takes exactly those inputs as parameters.
+                note = f"outputs program: no point input binds binding parameter(s) {e.params}"
+                try:
+                    code, data, manifest = emit(
+                        dir, "outputs", model_name=model_name, query_name=query
+                    )
+                except StanRefused as r:
+                    return [CheckResult(tid, "logdensity", "skipped", EMIT_REFUSED,
+                                        f"{note}; {r}")]
+                except StanEmitError as r:
+                    return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE,
+                                        f"{note}; {r}")]
+                routes = _routes(manifest, list(key_of), key_of, lambda p: p.get("input"))
         else:
             routes = _routes(manifest, [], {}, lambda p: None)
     except ValueError as e:  # _Unmappable, or a module with no ABI `inputs`
-        return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, str(e))]
-    return _score_points(tid, "logdensity", code, data, routes, points, expected, tol)
+        msg = str(e) if note is None else f"{note}; {e}"
+        return [CheckResult(tid, "logdensity", "failed", UNSCOREABLE, msg)]
+    results = _score_points(tid, "logdensity", code, data, routes, points, expected, tol)
+    if note is not None:
+        for r in results:
+            if r.status == "passed" and not r.tag:
+                r.tag, r.message = STAN_OUTPUTS, note
+            else:  # a rejection keeps STAN_REJECTED, a failure its own tag
+                r.message = f"{note}; {r.message}"
+    return results
 
 
 def run_convert(spec: TestSpec, dir: Path) -> list[CheckResult]:
