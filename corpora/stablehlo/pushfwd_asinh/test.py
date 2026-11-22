@@ -19,15 +19,16 @@ and `y = 90` returned NaN before #134 and are the reason this directory exists.
 finite, and pins that the respell did not move the finite region — measured
 identical before and after, so it is a correctness pin rather than a witness.
 
-## The f32 rounding is part of the oracle, not a fudge
+## The f32 overflow is part of the oracle, not a fudge
 
-The executor evaluates in f32, so the closed form is evaluated in f64 at the
-f32-rounded query point and the RESULT is then rounded to f32 — one rule for
-every point, no per-point casework. At `y = 50` and `y = 90` the f64 truth
-(-3.4e42 and -1.9e77) is below f32's range, so the correctly rounded f32 value
-IS `-inf`; that is the frozen value on its own terms, not a placeholder.
-`compare_scalar` matches an infinite expected exactly and never matches NaN, so
-those two points fail against a pre-#134 binary.
+Every query point is exact in f32, so an f32 and an f64 executor see the same
+point. `oracle_f64` is the closed form in f64. The top-level `expected` is for
+the f32 executor: at `y = 50` and `y = 90` the f64 truth (-3.4e42 and -1.9e77)
+is below f32's range, so the correctly rounded f32 value IS `-inf`; that is the
+frozen value on its own terms, not a placeholder. `compare_scalar` matches an
+infinite expected exactly and never matches NaN, so those two points fail
+against a pre-#134 binary. The `stan` block's `expected` is `oracle_f64` at
+every point, the value an f64 engine returns.
 
 Freezing `-inf` is possible HERE and not in the `log` family, which is worth
 knowing before copying either. `tests/sweep/test_oracle.py` cross-checks every
@@ -45,11 +46,6 @@ closed form by 3e-6 relative.
 import math
 
 import numpy as np
-
-
-def _f32(v: float) -> float:
-    """The query point as the f32 executor actually receives it."""
-    return float(np.float32(v))
 
 
 def _frozen(v: float) -> float:
@@ -72,6 +68,11 @@ def _log_phi(x: float) -> float:
     return -0.5 * x * x - 0.5 * math.log(2.0 * math.pi)
 
 
+def oracle_f64(point: dict) -> float:
+    """The closed form in f64: the `stan` block's frozen value."""
+    y = point["y"]
+    return _log_phi(math.sinh(y)) + math.log(math.cosh(y))
+
+
 def oracle(point: dict) -> float:
-    y = _f32(point["y"])
-    return _frozen(_log_phi(math.sinh(y)) + math.log(math.cosh(y)))
+    return _frozen(oracle_f64(point))

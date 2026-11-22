@@ -50,7 +50,8 @@ def _dirs_with_own_expected():
         body = json.loads(tj.read_text())
         for engine in body["engines"]:
             block = body.get(engine)
-            if isinstance(block, dict) and "expected" in block:
+            # A `stan` block has its own check below.
+            if engine != "stan" and isinstance(block, dict) and "expected" in block:
                 yield pytest.param(tj.parent, engine, block,
                                    id=f"{tj.parent.relative_to(_CORPORA)}::{engine}")
 
@@ -67,3 +68,37 @@ def test_a_block_expected_still_matches_the_dirs_own_oracle(dir, engine, block):
         f"{dir.name}: the {engine!r} block's frozen `expected` no longer matches "
         "test.py's oracle -- regen does not refreeze a block, so update it by hand"
     )
+
+
+def _dirs_with_stan_expected():
+    for tj in sorted(_CORPORA.rglob("test.json")):
+        body = json.loads(tj.read_text())
+        block = body.get("stan")
+        if isinstance(block, dict) and "expected" in block:
+            yield pytest.param(tj.parent, body, id=str(tj.parent.relative_to(_CORPORA)))
+
+
+@pytest.mark.parametrize("dir,body", list(_dirs_with_stan_expected()))
+def test_a_stan_block_expected_matches_the_dirs_f64_oracle(dir, body):
+    """A `stan` block carries its own `expected` where a top-level value is the
+    f32 executor's (an overflow to -inf) and an f64 engine returns a finite
+    value. The Stan runner scores the block, so each row is compared with
+    test.py's `oracle_f64` as the runner compares: the runner's tolerance and
+    its comparator."""
+    from flatppl_testsuite.scoring.compare import compare_scalar
+    from flatppl_testsuite.unified.detjs_exec import parse_expected
+    from flatppl_testsuite.unified.runners.logdensity_stan import _tolerance
+
+    mod = load_test_module(dir)
+    merged = merged_body(body, "stan")
+    points, expected = merged["points"], merged["expected"]
+    assert len(points) == len(expected), f"{dir.name}: {len(points)} points, {len(expected)} values"
+    tol = _tolerance(merged)
+    for pt, want in zip(points, expected):
+        try:
+            compare_scalar(mod.oracle_f64(pt), parse_expected(want), tol)
+        except AssertionError as e:
+            raise AssertionError(
+                f"{dir.name}: the 'stan' block's frozen value at {pt} no longer matches "
+                f"test.py's oracle_f64 ({e}) -- regen does not refreeze a block"
+            ) from None

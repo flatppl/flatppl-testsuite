@@ -7,8 +7,10 @@
 
     log p(y) = log phi(atanh y) - log1p(-y**2)
 
-which is what this file computes, in f64 at the f32-rounded query point, with
-the result rounded to f32 because the executor is f32.
+which is what this file computes, in f64 at the query point. Each point is
+written as its exact f32 value, so an f32 and an f64 executor see the same
+point; a result past f32's range freezes as the infinity the f32 executor
+returns (`_frozen`).
 
 ## What the boundary points regress against
 
@@ -27,11 +29,6 @@ as the interior witness.
 import math
 
 import numpy as np
-
-
-def _f32(v: float) -> float:
-    """The query point as the f32 executor actually receives it."""
-    return float(np.float32(v))
 
 
 def _frozen(v: float) -> float:
@@ -55,5 +52,5 @@ def _log_phi(x: float) -> float:
 
 
 def oracle(point: dict) -> float:
-    y = _f32(point["y"])
+    y = point["y"]
     return _frozen(_log_phi(math.atanh(y)) - math.log1p(-y * y))
