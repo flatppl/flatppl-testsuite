@@ -38,7 +38,9 @@ def merged_body(body: dict, engine: str) -> dict:
 
     `expected` deliberately stays at the top level in the dirs that use this:
     ONE frozen oracle value gates both paths, which is the whole point of
-    scoring the same query on both."""
+    scoring the same query on both. The exception is a `stan` block's own
+    `expected` where a top-level value overflowed to an infinity in the f32
+    executor and the f64 engine has a finite value (`stablehlo/pushfwd_asinh`)."""
     override = body.get(engine)
     if not isinstance(override, dict):
         return body

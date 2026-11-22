@@ -7,8 +7,10 @@
 
     log p(y) = -exp(y) + y
 
-which is what this file computes, in f64 at the f32-rounded query point, with
-the result rounded to f32 because the executor is f32.
+which is what this file computes, in f64 at the query point. Each point is
+written as its exact f32 value, so an f32 and an f64 executor see the same
+point; a result past f32's range freezes as the infinity the f32 executor
+returns (`_frozen`).
 
 ## Interior points only, and this directory does not witness #134
 
@@ -51,11 +53,6 @@ import math
 import numpy as np
 
 
-def _f32(v: float) -> float:
-    """The query point as the f32 executor actually receives it."""
-    return float(np.float32(v))
-
-
 def _frozen(v: float) -> float:
     """The f64 closed form, or the infinity it overflows to in the executor's f32.
 
@@ -73,5 +70,5 @@ def _frozen(v: float) -> float:
 
 
 def oracle(point: dict) -> float:
-    y = _f32(point["y"])
+    y = point["y"]
     return _frozen(-math.exp(y) + y)
