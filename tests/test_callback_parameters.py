@@ -10,6 +10,7 @@ import math
 
 import numpy as np
 import pytest
+from scipy.stats import norm
 
 from flatppl_testsuite.unified import stablehlo_exec as ex
 from tests.test_unified import _gate_engine
@@ -70,6 +71,36 @@ def test_scan_passes_a_record_parameter_whole(tmp_path, precision, rtol):
     # s = 2: 2 * 0 + 1 = 1, 2 * 1 + 2 = 4, 2 * 4 + 3 = 11.
     out = vector_value(source, [[1.0, 2.0, 3.0], 2.0])
     np.testing.assert_allclose(out, [1.0, 4.0, 11.0], rtol=rtol)
+
+
+@pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision,tol", [("f32", 2e-6), ("f64", 1e-12)])
+@pytest.mark.parametrize("mean", ["mat", "mat[1,1]"])
+def test_scan_callback_density_uses_each_matrix_cell(tmp_path, precision, tol, mean):
+    _gate_engine("stablehlo")
+    source = emit(tmp_path, f"""s = external(cartpow(posreals, 2))
+step(y, t, n) = y .+ [t, n*t]
+apply(u, t, p) = record(y=p[1](u.y, t, p[2]))
+series(f, y, p) = scan(apply, record(y=y), [1.0, 2.0], (f, p)).y
+mat = rowstack(series(step, s, 2.0))
+scale = tile(addaxes(s, 1, 0), [2,1])
+obs = rowstack([[1.0,2.0],[3.0,4.0]])
+inputs = s
+outputs = logdensityof(Normal.({mean}, scale), obs)
+""", precision)
+    s = np.array([1.25, 2.5])
+    matrix = s + np.array([[1.0, 2.0], [3.0, 6.0]])
+    mu = matrix if mean == "mat" else matrix[0, 0]
+    obs = np.array([[1.0, 2.0], [3.0, 4.0]])
+    expected = norm.logpdf(obs, loc=mu, scale=s).sum()
+    residual = obs - mu
+    grad = (residual**2 / s**3 - 1 / s).sum(axis=0)
+    if mean == "mat":
+        grad += (residual / s**2).sum(axis=0)
+    else:
+        grad[0] += (residual / s**2).sum()
+    assert ex.value(source, [s]) == pytest.approx(expected, rel=tol)
+    np.testing.assert_allclose(ex.gradient(source, [s], [0])[0], grad, atol=tol, rtol=tol)
 
 
 @pytest.mark.stablehlo_only
