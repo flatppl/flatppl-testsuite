@@ -1,0 +1,43 @@
+%%%
+# Hudson's Bay hare and lynx populations
+
+PosteriorDB's `hudson_lynx_hare-lotka_volterra`. Hares and lynx follow the
+Lotka–Volterra equations. Annual pelt returns (in thousands) from 1900 to
+1920 have species-specific lognormal measurement errors. The four rates
+retain Stan's Normal densities on the positive half-line.
+%%%
+flatppl_compat = "0.1"
+ode = load_module("../_modules/flatppl-numerics-ode-8f9536f.zip")
+
+N = 20
+data = load_data("data/hudson_lynx_hare.json", cartprod(
+    ts = cartpow(reals, N), y_init = cartpow(posreals, 2), y = cartpow(posreals, [N, 2])))
+
+substeps = 16
+knots = cat([0.0], data.ts)
+fractions = indicesof(zeros(substeps)) ./ substeps
+subgrid(start, stop) = start .+ (stop - start) .* fractions
+grid = cat([0.0], joinblocks(subgrid.(knots[indicesof(data.ts)], data.ts)))
+observations = 1 .+ substeps .* indicesof(data.ts)
+
+theta = elementof(cartpow(posreals, 4))
+z_init ~ iid(LogNormal(log(10), 1), 2)
+sigma ~ iid(LogNormal(-1, 1), 2)
+rate_prior = truncate(Normal.([1.0, 0.05, 1.0, 0.05], [0.5, 0.05, 0.5, 0.05]), cartpow(posreals, 4))
+Pi_prior = joint(joint(theta = rate_prior), lawof(record(z_init = z_init, sigma = sigma)))
+
+# Per-capita growth is alpha - beta * lynx for hares and -gamma + delta * hares for lynx.
+predator_prey(t, z, p) = z .* (p.growth .+ p.interaction .* z[[2, 1]])
+trajectory(rates, initial) = rowstack(ode.vern7(predator_prey, initial, grid,
+    record(growth = [rates[1], -rates[3]], interaction = [-rates[2], rates[4]])))
+z = trajectory(theta, z_init)
+y_init ~ LogNormal.(log.(z_init), sigma)
+hares ~ LogNormal.(log.(z[observations, 1]), sigma[1])
+lynx ~ LogNormal.(log.(z[observations, 2]), sigma[2])
+
+K_model = kernelof(record(y_init = y_init, hares = hares, lynx = lynx),
+    theta = theta, z_init = z_init, sigma = sigma)
+L = likelihoodof(K_model, record(y_init = data.y_init, hares = data.y[:, 1], lynx = data.y[:, 2]))
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(theta = cartpow(posreals, 4), z_init = cartpow(posreals, 2), sigma = cartpow(posreals, 2))
+Pi_post_input = record(theta = [0.55, 0.028, 0.8, 0.024], z_init = [30.0, 4.0], sigma = [0.2, 0.25])

@@ -1,0 +1,99 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "det-js",
+    "stablehlo"
+  ],
+  "model": "model.flatppl",
+  "binding": "Pi_post",
+  "inputs": [
+    "p_k_a",
+    "p_K_m",
+    "p_V_m",
+    "p_sigma"
+  ],
+  "points": [
+    {
+      "p_k_a": 1.0,
+      "p_K_m": 1.0,
+      "p_V_m": 1.0,
+      "p_sigma": 0.2
+    },
+    {
+      "p_k_a": 0.87149444400937,
+      "p_K_m": 0.281726741298786,
+      "p_V_m": 0.901070839334823,
+      "p_sigma": 0.125940523719882
+    },
+    {
+      "p_k_a": 0.761172794087426,
+      "p_K_m": 8.61159391990388,
+      "p_V_m": 1.58580014629687,
+      "p_sigma": 0.148625413172152
+    }
+  ],
+  "expected": [
+    -45.4632533182243,
+    -39.7407577913306,
+    -44.73659794275306
+  ],
+  "expected_grad": [
+    {
+      "p_k_a": -10.477162601570283,
+      "p_K_m": -0.971841073533752,
+      "p_V_m": -2.237025763325803,
+      "p_sigma": -52.807764017381125
+    },
+    {
+      "p_k_a": -16.137572664067072,
+      "p_K_m": -0.5089054396150483,
+      "p_V_m": -3.420401497855535,
+      "p_sigma": -13.707207077668286
+    },
+    {
+      "p_k_a": -3.575224267704634,
+      "p_K_m": -0.11775641689267696,
+      "p_V_m": -2.3862976649475005,
+      "p_sigma": -53.686975785008165
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-08,
+    "rtol": 1e-10,
+    "value_atol_f32": 2e-05,
+    "value_rtol_f32": 3e-06,
+    "grad_atol": 0.0003,
+    "grad_rtol": 3e-05
+  },
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "one_comp_mm_elim_abs",
+    "dataset": "one_comp_mm_elim_abs",
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "ode_tolerances": {
+      "relative": 1e-13,
+      "absolute": 1e-14,
+      "max_steps": 100000
+    },
+    "stan_log_density": [
+      -45.4632533182243,
+      -39.7407577913306,
+      -44.73659794275306
+    ],
+    "log_density_offset": 0.0,
+    "original_stan_log_density": [
+      -45.46325331414073,
+      -39.740757794753875,
+      -44.73659795333693
+    ],
+    "original_stan_log_density_with_gradient": [
+      -45.463253316602206,
+      -39.74075779352809,
+      -44.73659794828107
+    ]
+  }
+}
