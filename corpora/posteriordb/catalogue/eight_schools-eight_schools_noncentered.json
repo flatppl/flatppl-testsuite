@@ -1,0 +1,144 @@
+{
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "eight_schools_noncentered",
+    "dataset": "eight_schools",
+    "stan_sha256": "b28d5326b1936cce0014c98c2591d1ba5c1d21987ea5a5d0d9c074c6d6ce9253",
+    "data_sha256": "f06889e8cae3755c00a4a44f002d5fc3acf3263ff9ae8ffe5655b1907bcadd80",
+    "flatppl_sha256": "0f4efdbe784cab95dbbd31c9d600b58c0033558ae04b174e3bbad4b7e1d439b3",
+    "query_sha256": "26b9bf073f7298357cba33565a9a746e1fab317897c9ce667ee78edc5da0749b",
+    "point_hashes": [
+      {
+        "mu": "8d400f2cd9534f4f68f42bc6300ddf77838692fa83114e53c314e741a41f438b",
+        "tau": "b2b8a224f7e7bc792f4f8d48adeb9eba1348149d4c21a1003ebdf585c59d55c9",
+        "theta_trans": "5af5e1d6a6819621ec7c10cb4689a35e1bf89ccba28a2eefebe54509eddbb076"
+      },
+      {
+        "mu": "40950556cb4c2196e81fcba7f4dc0faab0dbbae74942704c5be3ce0a48bebef4",
+        "tau": "b2b8a224f7e7bc792f4f8d48adeb9eba1348149d4c21a1003ebdf585c59d55c9",
+        "theta_trans": "5af5e1d6a6819621ec7c10cb4689a35e1bf89ccba28a2eefebe54509eddbb076"
+      },
+      {
+        "mu": "9fc2fa1ccbaae1c7bae8b72b0e9a5f324053355553c5fac167d0690b492f6aa7",
+        "tau": "b2b8a224f7e7bc792f4f8d48adeb9eba1348149d4c21a1003ebdf585c59d55c9",
+        "theta_trans": "5af5e1d6a6819621ec7c10cb4689a35e1bf89ccba28a2eefebe54509eddbb076"
+      }
+    ],
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "positive_parameters": [
+      "tau"
+    ],
+    "unit_interval_parameters": [],
+    "normalized_half_priors": [
+      "tau"
+    ],
+    "stan_log_density": [
+      -44.78271092511474,
+      -44.78271138864754,
+      -44.782710461582035
+    ],
+    "stan_log_density_with_gradient": [
+      -44.78271092511474,
+      -44.78271138864754,
+      -44.782710461582035
+    ],
+    "log_density_offset": 0.6931471805599453
+  },
+  "points": [
+    {
+      "theta_trans": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mu": 0.0,
+      "tau": 5.0
+    },
+    {
+      "theta_trans": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mu": -1.0000000000000002e-06,
+      "tau": 5.0
+    },
+    {
+      "theta_trans": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mu": 1.0000000000000002e-06,
+      "tau": 5.0
+    }
+  ],
+  "expected": [
+    -44.089563744554795,
+    -44.089564208087594,
+    -44.08956328102209
+  ],
+  "expected_grad": [
+    {
+      "theta_trans": [
+        0.6222222222222221,
+        0.4,
+        -0.058593749999999986,
+        0.2892561983471074,
+        -0.06172839506172838,
+        0.04132231404958677,
+        0.8999999999999999,
+        0.18518518518518515
+      ],
+      "mu": 0.4635327549484747,
+      "tau": -0.19999999999999996
+    },
+    {
+      "theta_trans": [
+        0.6222222444444444,
+        0.40000005,
+        -0.05859373046874999,
+        0.28925623966942143,
+        -0.06172833333333331,
+        0.04132235537190082,
+        0.9000000499999999,
+        0.18518520061728386
+      ],
+      "mu": 0.4635328552601935,
+      "tau": -0.19999999999999996
+    },
+    {
+      "theta_trans": [
+        0.6222221999999998,
+        0.39999994999999994,
+        -0.05859376953124999,
+        0.28925615702479335,
+        -0.06172845679012343,
+        0.04132227272727272,
+        0.8999999499999999,
+        0.18518516975308638
+      ],
+      "mu": 0.46353265463675586,
+      "tau": -0.19999999999999996
+    }
+  ]
+}

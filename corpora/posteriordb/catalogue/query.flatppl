@@ -1,0 +1,4 @@
+m = load_module("model.flatppl")
+point = elementof(m.Pi_post_domain)
+inputs = point
+outputs = logdensityof(m.Pi_post, point)

@@ -1,0 +1,171 @@
+{
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "soil_incubation",
+    "dataset": "soil_carbon",
+    "stan_sha256": "6c845fcee0e9e5a49508c5b3395bb09613495b2773d93dbeef9f72664ce10e57",
+    "data_sha256": "4e5506af4aaeaf3ae44b163d6ea3dfbe9954e844d9cd4aeaca8fced27e1d1c2e",
+    "flatppl_sha256": "fcc450cd22b01373d5fc396e869f29ec52352b8520bcc307c66c88454b044c98",
+    "query_sha256": "26b9bf073f7298357cba33565a9a746e1fab317897c9ce667ee78edc5da0749b",
+    "point_hashes": [
+      {
+        "alpha12": "41ccdea1fa18c66eb2b832115fe1d6d0dbb8b8b8a8b15d3b8771efab946cae8d",
+        "alpha21": "47a589e1575e72511f6f0f9cdfb807081491e47385acd98f147e70a0200d9df6",
+        "gamma": "cda1675e5a90eb32ee53f195ef365d11a4518a1e2ecc466891e8df12d527afe5",
+        "k1": "a2ee18ce7c42d0ea9a3e4327d38baf7070e27642681754e4f7f734d0786b2d40",
+        "k2": "8ff75a3ebc90ec3926e4d1319d2d031684d30d49e50346592953ab447f0abc3a",
+        "sigma": "df54a204ee5b9a35d2837337158eab53c1336a7e142e35f93bacca127a5b3860"
+      },
+      {
+        "alpha12": "bb290b93db14967341ee5a7d508f5de63e1de3bf13baa18edff5c0909bf70fe4",
+        "alpha21": "47a589e1575e72511f6f0f9cdfb807081491e47385acd98f147e70a0200d9df6",
+        "gamma": "cda1675e5a90eb32ee53f195ef365d11a4518a1e2ecc466891e8df12d527afe5",
+        "k1": "a2ee18ce7c42d0ea9a3e4327d38baf7070e27642681754e4f7f734d0786b2d40",
+        "k2": "8ff75a3ebc90ec3926e4d1319d2d031684d30d49e50346592953ab447f0abc3a",
+        "sigma": "df54a204ee5b9a35d2837337158eab53c1336a7e142e35f93bacca127a5b3860"
+      },
+      {
+        "alpha12": "615d97eb6615c89b395fd32491794ef392b8735461e38086d3485c60cd93f175",
+        "alpha21": "47a589e1575e72511f6f0f9cdfb807081491e47385acd98f147e70a0200d9df6",
+        "gamma": "cda1675e5a90eb32ee53f195ef365d11a4518a1e2ecc466891e8df12d527afe5",
+        "k1": "a2ee18ce7c42d0ea9a3e4327d38baf7070e27642681754e4f7f734d0786b2d40",
+        "k2": "8ff75a3ebc90ec3926e4d1319d2d031684d30d49e50346592953ab447f0abc3a",
+        "sigma": "df54a204ee5b9a35d2837337158eab53c1336a7e142e35f93bacca127a5b3860"
+      }
+    ],
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "positive_parameters": [
+      "k1",
+      "k2",
+      "alpha21",
+      "alpha12",
+      "sigma"
+    ],
+    "unit_interval_parameters": [
+      "gamma"
+    ],
+    "normalized_half_priors": [
+      "k1",
+      "k2",
+      "alpha21",
+      "alpha12",
+      "sigma"
+    ],
+    "stan_log_density": [
+      -813.7189576891822,
+      -813.7003251139705,
+      -813.7375905062311
+    ],
+    "stan_log_density_with_gradient": [
+      -813.7189576891674,
+      -813.7003251139622,
+      -813.7375905062186
+    ],
+    "log_density_offset": 3.4657359027997265,
+    "ode_rk45": {
+      "relative_tolerance": 1e-12,
+      "absolute_tolerance": 1e-14,
+      "max_steps": 1000000,
+      "source_sha256": "fe2359ea85863857853358e2a4aadd3be1936a6dfd6e402da1de004af4eaf7ad"
+    },
+    "original_solver": {
+      "stan_log_density": [
+        -813.7189838201579,
+        -813.7003512464562,
+        -813.737616635704
+      ],
+      "stan_log_density_with_gradient": [
+        -813.7189588501965,
+        -813.7003262750519,
+        -813.7375916671848
+      ],
+      "expected_grad": [
+        {
+          "k1": 39128.467875778035,
+          "k2": 1420.3857035645135,
+          "alpha21": -200.52796095690627,
+          "alpha12": -465.8174015220971,
+          "gamma": -1102.2817475188294,
+          "sigma": 3161.986490381048
+        },
+        {
+          "k1": 39128.10630984874,
+          "k2": 1420.4478621100084,
+          "alpha21": -200.51732543007452,
+          "alpha12": -465.8113554752426,
+          "gamma": -1102.349345518642,
+          "sigma": 3161.912024077269
+        },
+        {
+          "k1": 39128.82943656851,
+          "k2": 1420.3235428479297,
+          "alpha21": -200.53859676012223,
+          "alpha12": -465.823447588972,
+          "gamma": -1102.214147541014,
+          "sigma": 3162.0609576458005
+        }
+      ]
+    }
+  },
+  "points": [
+    {
+      "k1": 0.006,
+      "k2": 0.08,
+      "alpha21": 0.3,
+      "alpha12": 0.4,
+      "gamma": 0.8,
+      "sigma": 0.5
+    },
+    {
+      "k1": 0.006,
+      "k2": 0.08,
+      "alpha21": 0.3,
+      "alpha12": 0.39996000000000004,
+      "gamma": 0.8,
+      "sigma": 0.5
+    },
+    {
+      "k1": 0.006,
+      "k2": 0.08,
+      "alpha21": 0.3,
+      "alpha12": 0.40004,
+      "gamma": 0.8,
+      "sigma": 0.5
+    }
+  ],
+  "expected": [
+    -810.2532217863825,
+    -810.2345892111708,
+    -810.2718546034314
+  ],
+  "expected_grad": [
+    {
+      "k1": 39128.46781330396,
+      "k2": 1420.3857859498103,
+      "alpha21": -200.52796100496772,
+      "alpha12": -465.81740324028743,
+      "gamma": -1102.281753460597,
+      "sigma": 3161.9864857369334
+    },
+    {
+      "k1": 39128.106247371456,
+      "k2": 1420.447944500104,
+      "alpha21": -200.51732547817144,
+      "alpha12": -465.8113571933686,
+      "gamma": -1102.34935146068,
+      "sigma": 3161.912019432911
+    },
+    {
+      "k1": 39128.82937409772,
+      "k2": 1420.3236252284307,
+      "alpha21": -200.53859680814887,
+      "alpha12": -465.8234493072273,
+      "gamma": -1102.21415348251,
+      "sigma": 3162.060953001937
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "blr",
+    "dataset": "sblrc",
+    "stan_sha256": "e6407c4391ab11c0b59f17f3a04132df87aa69b7dae459e173036f16f9e8b161",
+    "data_sha256": "d78239c2ff72fb578461d3ed4494f8c5d46e9089c61b4275d7c2f530452e3e9e",
+    "flatppl_sha256": "7e5389ffa554cb29ab7eb0a38477249d20a30f95ea2caef701c9071fe100c958",
+    "query_sha256": "26b9bf073f7298357cba33565a9a746e1fab317897c9ce667ee78edc5da0749b",
+    "point_hashes": [
+      {
+        "beta": "93e1eaf02d1e5c257a342519e28428378f7c2f2b12299b2c56aa00bd92e60d1d",
+        "sigma": "846b7d720e93f804c51d57057115b8b9f43743850d0b7d4ab7c3879466f04a26"
+      },
+      {
+        "beta": "93e1eaf02d1e5c257a342519e28428378f7c2f2b12299b2c56aa00bd92e60d1d",
+        "sigma": "c1a5bd1edbf89b0744b5dd5b6e376feab60faedbc264da16f6574d8a5385bffa"
+      },
+      {
+        "beta": "93e1eaf02d1e5c257a342519e28428378f7c2f2b12299b2c56aa00bd92e60d1d",
+        "sigma": "bf7674dea2597a6ad1473eef9282ea0146c2642639c5ff362b89c97591ee745a"
+      }
+    ],
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "positive_parameters": [
+      "sigma"
+    ],
+    "unit_interval_parameters": [],
+    "normalized_half_priors": [
+      "sigma"
+    ],
+    "stan_log_density": [
+      -653513.871636215,
+      -653644.5617681362,
+      -653383.2207074526
+    ],
+    "stan_log_density_with_gradient": [
+      -653513.871636215,
+      -653644.5617681362,
+      -653383.2207074526
+    ],
+    "log_density_offset": 0.6931471805599453
+  },
+  "points": [
+    {
+      "beta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sigma": 1.0
+    },
+    {
+      "beta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sigma": 0.9999
+    },
+    {
+      "beta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sigma": 1.0001
+    }
+  ],
+  "expected": [
+    -653513.1784890344,
+    -653643.8686209556,
+    -653382.527560272
+  ],
+  "expected_grad": [
+    {
+      "beta": [
+        394726.44465315074,
+        325489.86506644415,
+        -6158.553221381066,
+        173832.31819652556,
+        420151.6008212397
+      ],
+      "sigma": 1306705.2772822746
+    },
+    {
+      "beta": [
+        394805.40178545355,
+        325554.97280545544,
+        -6159.785116806619,
+        173867.08987582978,
+        420235.64374763286
+      ],
+      "sigma": 1307097.3872898456
+    },
+    {
+      "beta": [
+        394647.5112044346,
+        325424.776856825,
+        -6157.321695468752,
+        173797.55694716048,
+        420067.58310394327
+      ],
+      "sigma": 1306313.3240893409
+    }
+  ]
+}

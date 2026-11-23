@@ -1,0 +1,109 @@
+{
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "logearn_interaction_z",
+    "dataset": "earnings",
+    "stan_sha256": "37e04ae7ae7e92d3d4fffc6720298a56d0a13d87f376ae34b19d3ba731551749",
+    "data_sha256": "a3c1192078b1e08b68bed1c075ebb3072c84db7dc031b678ab66293d3691504c",
+    "flatppl_sha256": "7c890243003cd6b876bd1b49b4c8f86ee7ab4a5d742e1934799dad7239971e4a",
+    "query_sha256": "26b9bf073f7298357cba33565a9a746e1fab317897c9ce667ee78edc5da0749b",
+    "point_hashes": [
+      {
+        "beta": "365bdefcb21978fcfa99d107ac8c77f74cef77a22e65774d8965531929ec80cb",
+        "sigma": "7336265c040577a917e06d0fdc80155a26d61d1d2e50f2a716f0c69d8ab949fe"
+      },
+      {
+        "beta": "365bdefcb21978fcfa99d107ac8c77f74cef77a22e65774d8965531929ec80cb",
+        "sigma": "0cc2f18eecc91f97ec99e634361ff2809a0d6128ba7f525bc42fa2dae5c10632"
+      },
+      {
+        "beta": "365bdefcb21978fcfa99d107ac8c77f74cef77a22e65774d8965531929ec80cb",
+        "sigma": "273870c6db25ecbb085a110d27f190c60f7fad2e504f1f6bd2b417b459320866"
+      }
+    ],
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "positive_parameters": [
+      "sigma"
+    ],
+    "unit_interval_parameters": [],
+    "normalized_half_priors": [],
+    "stan_log_density": [
+      -1540.7622061297457,
+      -1540.7572127427911,
+      -1540.7672218553328
+    ],
+    "stan_log_density_with_gradient": [
+      -1540.7622061297457,
+      -1540.7572127427911,
+      -1540.7672218553328
+    ],
+    "log_density_offset": 0.0
+  },
+  "points": [
+    {
+      "beta": [
+        9.5,
+        0.1,
+        0.4,
+        0.03
+      ],
+      "sigma": 0.9
+    },
+    {
+      "beta": [
+        9.5,
+        0.1,
+        0.4,
+        0.03
+      ],
+      "sigma": 0.89991
+    },
+    {
+      "beta": [
+        9.5,
+        0.1,
+        0.4,
+        0.03
+      ],
+      "sigma": 0.9000900000000001
+    }
+  ],
+  "expected": [
+    -1540.7622061297457,
+    -1540.7572127427911,
+    -1540.7672218553328
+  ],
+  "expected_grad": [
+    {
+      "beta": [
+        50.75595841225337,
+        -41.84912886852849,
+        10.555130124893019,
+        -4.515636318344576
+      ],
+      "sigma": -55.6062017468792
+    },
+    {
+      "beta": [
+        50.766111126817755,
+        -41.8574999499435,
+        10.557241467614169,
+        -4.5165395810954045
+      ],
+      "sigma": -55.35793182129861
+    },
+    {
+      "beta": [
+        50.74580874304651,
+        -41.84076029806123,
+        10.55301941547973,
+        -4.514733326531948
+      ],
+      "sigma": -55.85434590075633
+    }
+  ]
+}
