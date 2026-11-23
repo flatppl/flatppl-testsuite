@@ -1,0 +1,101 @@
+{
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "wells_interaction_c_model",
+    "dataset": "wells_data",
+    "stan_sha256": "6e288f00a6d9acc05a2eaeb3f298797a3afd36800f8500928aaf3f23a1e6fee0",
+    "data_sha256": "dfa61ec04d9785a0b811553d1366221fd75f509b0c308275cd314df2cc2b879c",
+    "flatppl_sha256": "19b50d3cbf902100f6fdd71603052afab3e8196241aef9f2a6cdd255c5fc074f",
+    "query_sha256": "26b9bf073f7298357cba33565a9a746e1fab317897c9ce667ee78edc5da0749b",
+    "point_hashes": [
+      {
+        "alpha": "9912f5e6cad7bd94c5221c72c67167474e0dfcf868e077690c0f4f3e3cc01a07",
+        "beta": "08f3db895b27294101b6c5e97cae75c8d5055b3bccab6989378ccdbe2826cb4e"
+      },
+      {
+        "alpha": "0b057156bea5eddfae104ee0eb1aef8d4cd883a4dde452f7e07e511a03c7fe05",
+        "beta": "08f3db895b27294101b6c5e97cae75c8d5055b3bccab6989378ccdbe2826cb4e"
+      },
+      {
+        "alpha": "b25e8eee85ea0dd522254c9c0e6bc5f1cef26895e1548bd02eda0e1721ff5cc3",
+        "beta": "08f3db895b27294101b6c5e97cae75c8d5055b3bccab6989378ccdbe2826cb4e"
+      }
+    ],
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "positive_parameters": [],
+    "unit_interval_parameters": [],
+    "normalized_half_priors": [],
+    "stan_log_density": [
+      -1976.6854802062978,
+      -1976.6876071270444,
+      -1976.6833535680767
+    ],
+    "stan_log_density_with_gradient": [
+      -1976.6854802062978,
+      -1976.6876071270444,
+      -1976.6833535680767
+    ],
+    "log_density_offset": 0.0
+  },
+  "points": [
+    {
+      "alpha": 0.2,
+      "beta": [
+        -0.6,
+        0.5,
+        -0.15
+      ]
+    },
+    {
+      "alpha": 0.19998000000000002,
+      "beta": [
+        -0.6,
+        0.5,
+        -0.15
+      ]
+    },
+    {
+      "alpha": 0.20002,
+      "beta": [
+        -0.6,
+        0.5,
+        -0.15
+      ]
+    }
+  ],
+  "expected": [
+    -1976.6854802062978,
+    -1976.6876071270444,
+    -1976.6833535680767
+  ],
+  "expected_grad": [
+    {
+      "alpha": 106.33897417477989,
+      "beta": [
+        -30.05875169061638,
+        -52.30211864376202,
+        1.633322946509478
+      ]
+    },
+    {
+      "alpha": 106.35310083854324,
+      "beta": [
+        -30.058733358880993,
+        -52.30381306063188,
+        1.6346299260341235
+      ]
+    },
+    {
+      "alpha": 106.32484752658627,
+      "beta": [
+        -30.05877002823839,
+        -52.30042417981634,
+        1.63201596776016
+      ]
+    }
+  ]
+}

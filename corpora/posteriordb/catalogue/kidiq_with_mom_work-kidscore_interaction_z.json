@@ -1,0 +1,109 @@
+{
+  "provenance": {
+    "repository": "stan-dev/posteriordb",
+    "revision": "91027f9cdd13b7e76283fec3f2898f59d4b83ec4",
+    "model": "kidscore_interaction_z",
+    "dataset": "kidiq_with_mom_work",
+    "stan_sha256": "af2ebd6cd04a66deaf879899b548cb6401c7d250dd6cae7f55c726a8e7f734d6",
+    "data_sha256": "dbf64ae3f0960af11dacdbe5e5f37e0cd7808996a248f277cbea04f0c0705369",
+    "flatppl_sha256": "3a5809ffbbb43bab6f17dc0ffc11d40ddf59b806b24c7c14d7d2820ec5a235bc",
+    "query_sha256": "26b9bf073f7298357cba33565a9a746e1fab317897c9ce667ee78edc5da0749b",
+    "point_hashes": [
+      {
+        "beta": "ba5dfbacb14994f64feba881503a3920808f85128bc5d0397cadf6c8d1cb452e",
+        "sigma": "aedc6a6ece1edc7286f3b8cc04148e670048a88ba3a3c53909c2447c5bac7abd"
+      },
+      {
+        "beta": "ba5dfbacb14994f64feba881503a3920808f85128bc5d0397cadf6c8d1cb452e",
+        "sigma": "bda5a11eb446d10a2447e49d8a4f72c58cc526f59ea8a069dd9d8789e6d078ed"
+      },
+      {
+        "beta": "ba5dfbacb14994f64feba881503a3920808f85128bc5d0397cadf6c8d1cb452e",
+        "sigma": "d1ad86d912ec4d0ffa06298aee5f1a8f5af4853ad020dc28783f553ce69f5b00"
+      }
+    ],
+    "oracle": "BridgeStan 2.9.0",
+    "propto": false,
+    "jacobian": false,
+    "gradient_coordinates": "constrained",
+    "positive_parameters": [
+      "sigma"
+    ],
+    "unit_interval_parameters": [],
+    "normalized_half_priors": [],
+    "stan_log_density": [
+      -1920.5756308325301,
+      -1920.5857036764028,
+      -1920.5655696887554
+    ],
+    "stan_log_density_with_gradient": [
+      -1920.5756308325301,
+      -1920.5857036764028,
+      -1920.5655696887554
+    ],
+    "log_density_offset": 0.0
+  },
+  "points": [
+    {
+      "beta": [
+        85.0,
+        4.0,
+        0.5,
+        -0.2
+      ],
+      "sigma": 18.0
+    },
+    {
+      "beta": [
+        85.0,
+        4.0,
+        0.5,
+        -0.2
+      ],
+      "sigma": 17.9982
+    },
+    {
+      "beta": [
+        85.0,
+        4.0,
+        0.5,
+        -0.2
+      ],
+      "sigma": 18.0018
+    }
+  ],
+  "expected": [
+    -1920.5756308325301,
+    -1920.5857036764028,
+    -1920.5655696887554
+  ],
+  "expected_grad": [
+    {
+      "beta": [
+        2.42629832603362,
+        1.834428230297149,
+        5.569063102977707,
+        -0.6106671522242232
+      ],
+      "sigma": 5.5927738327518535
+    },
+    {
+      "beta": [
+        2.426783658497477,
+        1.8347951709833914,
+        5.570177082692478,
+        -0.6107893039771256
+      ],
+      "sigma": 5.599275428518854
+    },
+    {
+      "beta": [
+        2.42581313914766,
+        1.834061399676599,
+        5.5679494574067325,
+        -0.6105450371113504
+      ],
+      "sigma": 5.586275319228903
+    }
+  ]
+}

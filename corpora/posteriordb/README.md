@@ -8,6 +8,9 @@ role also live in
 [`flatppl-examples/posteriordb`](https://github.com/flatppl/flatppl-examples/tree/main/posteriordb).
 The others exist only here, as engine tests.
 
+The [matched catalogue references](catalogue/README.md) supply three further
+points and complete constrained gradients for each of 24 additional posteriors.
+
 BridgeStan 2.9.0 evaluated the original Stan models with `propto=false` and
 `jacobian=false`. Stan differentiates in its free coordinates even with that
 flag. Divide each derivative by the scalar forward-chart derivative to obtain
