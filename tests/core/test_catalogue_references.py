@@ -16,7 +16,7 @@ CATALOGUE = Path(__file__).resolve().parents[2] / "corpora/posteriordb/catalogue
 
 
 def test_catalogue_coordinates_and_gradients():
-    query = (CATALOGUE / "query.flatppl").read_bytes()
+    query = (CATALOGUE / "score.flatppl").read_bytes()
     fixtures = sorted(CATALOGUE.glob("*.json"))
     assert len(fixtures) == 24
     for path in fixtures:

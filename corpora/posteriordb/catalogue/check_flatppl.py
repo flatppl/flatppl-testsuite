@@ -29,7 +29,7 @@ def main():
     if jax.default_backend() != args.target:
         raise RuntimeError(f"select the {args.target} JAX backend to score this target")
     catalogue = json.loads(args.measurements.read_bytes())["catalogue"]
-    query = Path(__file__).with_name("query.flatppl").read_bytes()
+    query = Path(__file__).with_name("score.flatppl").read_bytes()
     for fixture in args.fixtures:
         spec = json.loads(fixture.read_text())
         p = spec["provenance"]

@@ -12,7 +12,7 @@ The soil model has a linear two-pool ODE. Its fixture retains both values and th
 
 ## Reproduce the values
 
-The Stan programs and zipped JSON observations come from [posteriorDB at 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4/posterior_database). The FlatPPL source strings come from catalogue revision `79fbd188c3c1dcd0bbda8b93d2f8a1a25a0ffecf`. The [published measurements file](https://ppl.bench.siccha.de/data/measurements.json) has SHA-256 `f0233f8695b0ed9868cea3f0ee36522173205444f270e445ef5e5f97726a24d0`. Its 24 embedded models use `data.json` and the accompanying [record query](query.flatppl).
+The Stan programs and zipped JSON observations come from [posteriorDB at 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4/posterior_database). The FlatPPL source strings come from catalogue revision `79fbd188c3c1dcd0bbda8b93d2f8a1a25a0ffecf`. The [published measurements file](https://ppl.bench.siccha.de/data/measurements.json) has SHA-256 `f0233f8695b0ed9868cea3f0ee36522173205444f270e445ef5e5f97726a24d0`. Its 24 embedded models use `data.json` and the accompanying [record query](score.flatppl).
 
 With a posteriorDB checkout at the specified revision, run the following from the testsuite root. `DB` is its `posterior_database` directory. The first command regenerates and compares each reference using the existing `bridge` environment. Pass `--write` to replace the frozen numerical values.
 
