@@ -140,6 +140,43 @@ def test_factor_solves_hermitian_spectrum_and_shared_rank_cutoff(tmp_path, preci
 
 
 @pytest.mark.stablehlo_only
+@pytest.mark.parametrize("precision", ["f32", "f64"])
+def test_hermitian_cluster_projector_gradient(tmp_path, precision):
+    source = _emit(tmp_path,
+        'e = standard_module("ext-linear-algebra", "0.1")\n'
+        'A = external(cartpow(reals, [3, 3]))\ninputs = A\noutputs = e.eigh(A).vectors\n',
+        precision)
+    jax, jnp, _ = ex._jax()
+    call = ex.call_with_status(source)
+    dtype = np.float32 if precision == "f32" else np.float64
+    eps = np.finfo(dtype).eps
+    x = np.array([1., 2., -1.], dtype=dtype)
+
+    def projected_norms(a):
+        (v,), _ = call(a)
+        coordinates = v.T @ x
+        return jnp.stack([jnp.vdot(coordinates[:2], coordinates[:2]),
+                          jnp.vdot(x, x) - coordinates[2] ** 2])
+
+    derivatives = jax.jit(jax.jacrev(projected_norms))
+    # The top eigenvalue is 3. Its fixed projector is Q even when the two
+    # lower eigenvalues coincide. R is its reduced resolvent on that subspace.
+    q = np.array([[.5, .5, 0.], [.5, .5, 0.], [0., 0., 0.]])
+    third = np.diag([0., 0., 1.])
+    for gap in (0., np.sqrt(eps)):
+        a = np.array([[2., 1., 0.], [1., 2., 0.], [0., 0., 1. + gap]], dtype=dtype)
+        r = (np.eye(3) - q - third) / 2. + third / (3. - float(a[2, 2]))
+        cluster, exterior = derivatives(jnp.asarray(a))
+        cross = np.outer(r @ x, q @ x)
+        expected = -cross - cross.T
+        np.testing.assert_allclose(exterior, expected, rtol=32*eps, atol=32*eps)
+        # Summing two simple-vector contributions cancels terms proportional
+        # to 1/gap. The exterior formula depends only on the gap to eigenvalue 3.
+        atol = 32*eps if gap == 0 else eps * 3 * np.vdot(x, x) / gap
+        np.testing.assert_allclose(cluster, expected, rtol=32*eps, atol=atol)
+
+
+@pytest.mark.stablehlo_only
 @pytest.mark.parametrize("module,expression,shape,invalid", [
     ("special-functions", "m.log_ndtr(x)", "reals", np.nan),
     ("splines", 'm.interp_linear(x, [0., 1.], [0., 2.], "error")', "reals", 2.),
