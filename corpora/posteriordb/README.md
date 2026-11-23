@@ -1,6 +1,6 @@
 # posteriorDB targets
 
-One hundred and sixteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
+One hundred and eighteen posteriors from [posteriorDB revision 91027f9](https://github.com/stan-dev/posteriordb/tree/91027f9cdd13b7e76283fec3f2898f59d4b83ec4).
 Each directory contains the FlatPPL model, native JSON data, original Stan source,
 a query, and three frozen density/gradient points. The seven `radon_all-*` rows
 share one copy of their data in `_data/radon_all.json`. Models with a worked-example
@@ -98,6 +98,33 @@ the adjacent native data and the recorded BridgeStan flags, then apply the
 coordinate and constant conventions above. Never generate expected values
 with FlatPPL.
 
+## ODE references
+
+`lotka_volterra` and `one_comp_mm_elim_abs` use the community Verner solver
+with 16 substeps per observation interval. Both preserve Stan's positive
+parameter restrictions and density constants. The three points are the
+example's starting point and posteriorDB draws 1 of chain 1 and 250 of
+chain 2 (one-based).
+
+The original RK45 tolerances in `lotka_volterra` move the value-only score
+by up to 0.0116 at these points. The corresponding BDF difference for
+`one_comp_mm_elim_abs` is below 1.1e-8. The manifests retain both the
+value-only and the AD scores from the original sources. To reproduce
+`expected` and `expected_grad`, pass relative tolerance `1e-13`, absolute
+tolerance `1e-14` and maximum step count `100000` to the original ODE
+call, then evaluate BridgeStan's `log_density_gradient`. Independent DOP853
+trajectories and complex-step derivatives check these tighter references.
+
+The shared offline module in [`_modules/`](_modules) contains the original
+source and license notices from [flatppl-numerics-ode at 8f9536f](https://github.com/flatppl-community/flatppl-numerics-ode/tree/8f9536fcc6724e14912575dc77e2bd95b95d6f3a).
+Recreate its ZIP in that checkout with the following command. Its SHA-256 is
+`7424a790d27221a40856289fad7ce69d46481f02fc2d5e0cd958bf2b0d6155f4`.
+
+```sh
+TZ=UTC git archive --format=zip -0 -o flatppl-numerics-ode-8f9536f.zip \
+  8f9536fcc6724e14912575dc77e2bd95b95d6f3a LICENSE THIRD-PARTY-NOTICES.md main.flatppl src
+```
+
 ## Float64-only rows
 
 A manifest may list `"precisions": ["f64"]`. `tests/test_posteriordb.py` and
@@ -114,6 +141,13 @@ recursion over 50 orders of the four input columns. For
 `state_space_stochastic_level_stochastic_seasonal` it is a JAX float32
 gradient of the Stan formula, which sums the eleven previous seasonal effects
 directly, as the FlatPPL model does.
+
+For `lotka_volterra` all three float32 scores passed on CPU and GPU.
+At the third point the gradient of `theta[4]` is -103.04671034. Its absolute
+error was 0.00896 on a Grace CPU and 0.00414 on a GH200 GPU, against a
+tolerance of 0.00339. An independent NumPy float32 DOP853 integration of
+the population and forward sensitivity equations missed the same component
+by 0.0468 at 16 steps per year.
 
 | Row | Point, component | Engine float32 error (M4; CI) | NumPy float32 error (median, max) | Tolerance |
 |---|---|---:|---:|---:|
@@ -164,8 +198,7 @@ the jitter, which comes from the Stan source. The JS densities match Stan.
 
 These posteriors have no row by design. Posteriors held on engine findings land later.
 
-- ODE models: `lotka_volterra`, `one_comp_mm_elim_abs`, `sir`, `soil_incubation`.
-  FlatPPL has no ODE solver.
+- The ODE models `sir` and `soil_incubation` have no fixtures here.
 - Cholesky correlation factors: `dogs_nonhierarchical`, `hier_2pl`,
   `kronecker_gp`. FlatPPL has no set or chart for them.
 - A second parameterization of a ported model on the same data: the centered

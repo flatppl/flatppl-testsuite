@@ -1,0 +1,5 @@
+p_theta = elementof(cartpow(posreals, 4))
+p_z_init = elementof(cartpow(posreals, 2))
+p_sigma = elementof(cartpow(posreals, 2))
+inputs = (p_theta, p_z_init, p_sigma)
+outputs = logdensityof(Pi_post, record(theta = p_theta, z_init = p_z_init, sigma = p_sigma))

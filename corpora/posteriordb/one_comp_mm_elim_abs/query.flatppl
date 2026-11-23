@@ -1,0 +1,6 @@
+p_k_a = elementof(posreals)
+p_K_m = elementof(posreals)
+p_V_m = elementof(posreals)
+p_sigma = elementof(posreals)
+inputs = (p_k_a, p_K_m, p_V_m, p_sigma)
+outputs = logdensityof(Pi_post, record(k_a = p_k_a, K_m = p_K_m, V_m = p_V_m, sigma = p_sigma))

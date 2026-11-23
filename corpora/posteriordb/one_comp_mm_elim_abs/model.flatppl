@@ -1,0 +1,42 @@
+%%%
+# One-compartment absorption with saturating elimination
+
+PosteriorDB's `one_comp_mm_elim_abs-one_comp_mm_elim_abs`. A single dose
+enters a compartment at an exponentially declining rate. Elimination
+follows Michaelis–Menten kinetics. Twenty concentration measurements have
+lognormal errors. The four positive parameters retain Stan's Cauchy densities.
+%%%
+flatppl_compat = "0.1"
+ode = load_module("../_modules/flatppl-numerics-ode-8f9536f.zip")
+
+N = 20
+data = load_data("data/one_comp_mm_elim_abs.json", cartprod(t0 = reals, D = reals, V = reals,
+    times = cartpow(reals, N), C_hat = cartpow(posreals, N)))
+
+substeps = 16
+knots = cat([data.t0], data.times)
+fractions = indicesof(zeros(substeps)) ./ substeps
+# Use shorter steps just after dosing, when the concentration changes fastest.
+subgrid(i) = knots[i] .+ (data.times[i] - knots[i]) .* ifelse(i == 1, fractions.^2, fractions)
+grid = cat([data.t0], joinblocks(subgrid.(indicesof(data.times))))
+observations = 1 .+ substeps .* indicesof(data.times)
+
+k_a = elementof(posreals)
+K_m = elementof(posreals)
+V_m = elementof(posreals)
+sigma = elementof(posreals)
+positive_cauchy = truncate(Cauchy(0, 1), posreals)
+Pi_prior = joint(k_a = positive_cauchy, K_m = positive_cauchy, V_m = positive_cauchy, sigma = positive_cauchy)
+
+# At the initial time zero, the first forward step uses the post-dose right limit.
+rate(t, c, p) = [(ifelse(t >= 0, data.D * p.k_a * exp(-p.k_a * t), 0.0) -
+    p.V_m * c[1] / (p.K_m + c[1])) / data.V]
+trajectory(ka, km, vm) = rowstack(ode.vern7(rate, [0.0], grid, record(k_a = ka, K_m = km, V_m = vm)))
+C = trajectory(k_a, K_m, V_m)
+concentration ~ LogNormal.(log.(C[observations, 1]), sigma)
+
+K_model = kernelof(concentration, k_a = k_a, K_m = K_m, V_m = V_m, sigma = sigma)
+L = likelihoodof(K_model, data.C_hat)
+Pi_post = bayesupdate(L, Pi_prior)
+Pi_post_domain = cartprod(k_a = posreals, K_m = posreals, V_m = posreals, sigma = posreals)
+Pi_post_input = record(k_a = 1.0, K_m = 1.0, V_m = 1.0, sigma = 0.2)
