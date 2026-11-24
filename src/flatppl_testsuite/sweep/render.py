@@ -40,6 +40,9 @@ _CTOR = {
     # an integer literal (`n = 5`), not `5.0`.
     "multinomial": "Multinomial(n = {0}, p = {1})",
     "dirichlet": "Dirichlet(alpha = {0})",
+    # §08 `MvNormal(mu, cov)`. A nested literal is a vector of vectors (§03), so
+    # the covariance is written as the matrix `rowstack(...)`.
+    "mvnormal": "MvNormal(mu = {0}, cov = rowstack({1}))",
 }
 
 

@@ -510,6 +510,8 @@ def test_every_wrapped_measure_carries_the_mass_the_algebra_requires(probe):
 
 _MULTINOMIAL = Base("multinomial", (5, (0.2, 0.3, 0.5)))
 _DIRICHLET = Base("dirichlet", ((2.0, 3.0, 4.0),))
+_MVNORMAL = Base("mvnormal", ((0.1, -0.2, 0.3),
+                              ((1.0, 0.3, 0.0), (0.3, 2.0, 0.4), (0.0, 0.4, 1.5))))
 
 
 def _lgamma_multinomial(n, p, x):
@@ -606,6 +608,25 @@ def test_the_surface_measure_sec03_rules_out_is_larger_by_exactly_sqrt_n():
     assert chart == pytest.approx(2.0228711901914425, abs=1e-12)
     assert chart - simplex_chart_to_hausdorff_offset(n) == pytest.approx(
         1.4735650458573875, abs=1e-12)
+
+
+def test_the_mvnormal_base_matches_scipy_and_its_closed_form():
+    """§08 `MvNormal(mu, cov)` over `cartpow(reals, 3)`. At the mean the density is
+    −(3/2)·log 2π − ½·log det Σ, with det Σ = 1·(2·1.5 − 0.4²) − 0.3·(0.3·1.5) = 2.705
+    by hand. Off the mean, scipy 1.18.1 gives −3.303072655578398 at (0.4, −0.1, 0.2).
+    Under `exp` the per-cell volume Σ log y is subtracted: −3.303072655578398 − 0.5."""
+    at_mu = -1.5 * math.log(2 * math.pi) - 0.5 * math.log(2.705)
+    assert true_logpdf(_probe(_MVNORMAL, Wrap("identity", ()), [0.1, -0.2, 0.3])) == pytest.approx(at_mu, abs=1e-12)
+    x = [0.4, -0.1, 0.2]
+    assert true_logpdf(_probe(_MVNORMAL, Wrap("identity", ()), x)) == pytest.approx(-3.303072655578398, abs=1e-12)
+    y = [math.exp(c) for c in x]
+    assert true_logpdf(_probe(_MVNORMAL, Wrap("pushfwd", ("exp",)), y)) == pytest.approx(
+        -3.303072655578398 - 0.5, abs=1e-12)
+    # `neg` is volume preserving.
+    assert true_logpdf(_probe(_MVNORMAL, Wrap("pushfwd", ("neg",)), [-c for c in x])) == pytest.approx(
+        -3.303072655578398, abs=1e-12)
+    # A cell outside exp's image has no preimage.
+    assert true_logpdf(_probe(_MVNORMAL, Wrap("pushfwd", ("exp",)), [1.0, -1.0, 1.0])) == -math.inf
 
 
 def test_every_vector_base_declares_its_support_geometry():
@@ -769,16 +790,14 @@ def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
 
     **What this does NOT catch, stated because the earlier wording overclaimed it.**
     "A sign error in a per-cell volume term cannot survive the mass invariant" is
-    FALSE for this family: every shape it reaches has a log-volume that is identically
+    FALSE for the shapes it reaches: each has a log-volume that is identically
     zero (`pushfwd(neg)`'s per-cell term is 0; `pushfwd(exp, Multinomial)` is
     counting-referenced so takes no term; `pushfwd(exp, Dirichlet)` has no density), and
     a sign error on 0 is invisible. What these rows DO establish is that the inverse
     map is applied at all — a missing inversion evaluates Dirichlet off the simplex
-    and gives -inf. The per-cell log-volume MAGNITUDE has no oracle-checked row
-    anywhere in the family; an `MvNormal` base would make it checkable, since its §08
-    reference is `iid(Lebesgue(reals), n)` over a full-dimensional support so the
-    volume term is nonzero. Recorded as a follow-up in
-    `flatppl-dev/density-sweep-notes.md`.
+    and gives -inf. The per-cell log-volume MAGNITUDE is checked on the MvNormal
+    base instead, whose `exp` row has a nonzero volume (Σ log y = 0.5) pinned
+    against scipy (`test_the_mvnormal_base_matches_scipy_and_its_closed_form`).
 
     The mass invariant is also blind to the `log sqrt(n)` reference-measure question
     on the Dirichlet base: it integrates against the same chart §08's formula
@@ -792,6 +811,10 @@ def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
             and wrap.args[0] not in _MANIFOLD_SAFE_FORWARDS):
         pytest.skip("a non-affine map of a simplex law has no density to integrate "
                     "(test_a_vector_pushfwd_over_a_manifold_support_withholds_a_value)")
+    if base.kind == "mvnormal":
+        pytest.skip("a mass check over R^3 by quadrature is too slow for the suite; "
+                    "the MvNormal rows are pinned against scipy and a closed form "
+                    "(test_the_mvnormal_base_matches_scipy_and_its_closed_form)")
 
     fwd = {"exp": math.exp, "neg": lambda x: -x}.get(
         wrap.args[0] if wrap.kind == "pushfwd" else None, lambda x: x)

@@ -92,6 +92,19 @@ def _corpus_ctor_keywords() -> dict[str, tuple[str, ...]]:
     return out
 
 
+def test_the_mvnormal_base_renders_its_covariance_as_a_matrix():
+    """§08 `MvNormal(mu, cov)` takes a covariance matrix, so it renders as
+    `rowstack(...)`; a bare nested literal would be a vector of vectors (§03). The
+    keywords are checked against §08 and the corpus in
+    `test_vector_base_constructors_use_sec08s_parameter_names`."""
+    base = next(b for b in VECTOR_BASES if b.kind == "mvnormal")
+    p = Probe(id="t", base=base, wraps=(Wrap("identity", ()),), spelling="direct",
+              ordering="single", consumer=False, point=VECTOR_INNER["mvnormal"])
+    rhs = render(p).source.splitlines()[0].split("=", 1)[1].strip()
+    assert rhs == ("MvNormal(mu = [0.1, -0.2, 0.3], cov = rowstack([[1.0, 0.3, 0.0], "
+                   "[0.3, 2.0, 0.4], [0.0, 0.4, 1.5]]))")
+
+
 def test_base_constructors_use_the_parameter_names_the_corpus_uses():
     """A wrong distribution parameter name is caught by NOTHING else in the
     toolchain: `Poisson(lambda = 3.0)` parses, converts to `(%kwarg lambda 3.0)`,
@@ -134,6 +147,7 @@ def test_base_constructors_use_the_parameter_names_the_corpus_uses():
 _VECTOR_CTOR_KEYWORDS = {
     "Dirichlet": ("alpha",),
     "Multinomial": ("n", "p"),
+    "MvNormal": ("mu", "cov"),
 }
 
 

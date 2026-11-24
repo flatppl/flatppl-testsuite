@@ -19,10 +19,11 @@ No hold-out remains. `dirichlet + pushfwd(exp)` was held out while no §06 rule
 said which measure its number was a density against. By §03 and §06 a law
 on `stdsimplex(n)` keeps a density only under a uniform affine map. `exp`'s image
 of the simplex is curved, so the law has no density, the determiniser refuses,
-and the shape is a generated row with a conformant refusal. It was the family's
-only probe of the `in cartpow(posreals, n)` image gate, so that arm now has no
-probe here: Multinomial's support tightens `exp`'s image to `ge(1.0)`.
+and the shape is a generated row with a conformant refusal. The
+`in cartpow(posreals, n)` image gate is probed through the full-dimensional
+`MvNormal` base instead: Multinomial's support tightens `exp`'s image to `ge(1.0)`.
 """
+import math
 import re
 import subprocess
 import tempfile
@@ -120,10 +121,16 @@ def test_the_image_gate_fires_where_it_is_claimed(spelling):
     image gate. Asserted over every spelling in the family, because the emitted-text
     invariant should not be pinned for only the rows that happen to use `direct`.
 
-    Multinomial's resolved support tightens exp's image to ge(y, 1.0), emitted as a
-    minimum-reduce (determinizer 48899b0), so the `cartpow` spelling does not fire.
-    Dirichlet used to carry that spelling; its map now has no density and refuses
+    MvNormal's support is `cartpow(reals, n)` (§08), so exp's image is the set
+    `cartpow(posreals, n)` and the membership gate fires. Multinomial's resolved
+    support tightens exp's image to ge(y, 1.0), emitted as a minimum-reduce
+    (determinizer 48899b0), so the `cartpow` spelling does not fire there.
+    Dirichlet's map has no density and refuses
     (`test_a_non_affine_map_of_a_simplex_law_refuses`)."""
+    text = _emitted(_probe("mvnormal", Wrap("pushfwd", ("exp",)), spelling))
+    assert _cartpow_gate("mvnormal") in text, (
+        f"mvnormal + pushfwd(exp) [{spelling}]: the cartpow membership gate did not "
+        f"fire, so nothing here covers it:\n{text}")
     text = _emitted(_probe("multinomial", Wrap("pushfwd", ("exp",)), spelling))
     for part in _GE_ONE_GATE:
         assert part in text, (
@@ -166,9 +173,9 @@ def test_the_bare_vector_laws_emit_a_gateless_builtin_density(spelling):
     """The family's oracle-checked baseline: no gate, one `builtin_logdensityof`
     against the §08 constructor. A gate appearing here would mean the row's value is
     a gated arm's, not the base density's."""
-    for kind in ("dirichlet", "multinomial"):
+    ctors = {"dirichlet": "Dirichlet", "multinomial": "Multinomial", "mvnormal": "MvNormal"}
+    for kind, ctor in ctors.items():
         text = _emitted(_probe(kind, Wrap("identity", ()), spelling))
-        ctor = "Dirichlet" if kind == "dirichlet" else "Multinomial"
         assert f"builtin_logdensityof({ctor}," in text, f"{kind}:\n{text}"
         assert "ifelse(" not in text, f"{kind}: unexpected gate:\n{text}"
 
@@ -208,6 +215,28 @@ def test_a_multinomial_pushfwd_scores_the_counting_reference_value(op, spelling)
     assert verdict.value == pytest.approx(_MULTINOMIAL_LOGPMF, abs=1e-12)
     # And the oracle agrees, derived from §08 rather than from the engine.
     assert true_logpdf(probe) == pytest.approx(_MULTINOMIAL_LOGPMF, abs=1e-12)
+
+
+# scipy 1.18.1 `multivariate_normal([0.1, -0.2, 0.3], cov).logpdf([0.4, -0.1, 0.2])`
+# for the family's MvNormal base.
+_MVNORMAL_LOGPDF = -3.303072655578398
+
+
+@pytest.mark.parametrize("spelling", VECTOR_SPELLINGS)
+def test_the_mvnormal_exp_row_carries_a_nonzero_cell_wise_volume(spelling):
+    """§08 gives MvNormal's support as `cartpow(reals, n)`, so `fn(exp.(_))` has
+    the per-cell volume Σ log y, subtracted. At y = exp(0.4, −0.1, 0.2) that is 0.5,
+    nonzero, so a sign error or a per-cell/whole-vector confusion in the sum
+    changes the value. Both the determiniser's value and the oracle must equal
+    log MvNormal(log y) − Σ log y."""
+    probe = _probe("mvnormal", Wrap("pushfwd", ("exp",)), spelling)
+    volume = sum(math.log(c) for c in probe.point)
+    assert abs(volume - 0.5) < 1e-12
+    expected = _MVNORMAL_LOGPDF - volume
+    assert true_logpdf(probe) == pytest.approx(expected, abs=1e-12)
+    verdict = classify(probe)
+    assert verdict.outcome == Outcome.LOWERS, f"{verdict.outcome} (marker={verdict.marker})"
+    assert verdict.value == pytest.approx(expected, abs=1e-12)
 
 
 def test_the_reinstated_arms_are_in_the_generated_family():

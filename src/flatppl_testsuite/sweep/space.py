@@ -197,6 +197,11 @@ ORDERINGS = ["single", "pinned_earlier", "pinned_later"]
 VECTOR_BASES = [
     Base("multinomial", (5, (0.2, 0.3, 0.5))),   # §08 order: (n, p)
     Base("dirichlet", ((2.0, 3.0, 4.0),)),        # §08: (alpha)
+    # §08: (mu, cov), support `cartpow(reals, n)`: the family's full-dimensional
+    # member, so a cell-wise map's volume is nonzero and the `exp` image is the
+    # `cartpow(posreals, n)` gate.
+    Base("mvnormal", ((0.1, -0.2, 0.3),
+                      ((1.0, 0.3, 0.0), (0.3, 2.0, 0.4), (0.0, 0.4, 1.5)))),
 ]
 
 # The point inside each vector base's own SUPPORT, played by `INNER`'s role for the
@@ -211,6 +216,8 @@ VECTOR_BASES = [
 VECTOR_INNER = {
     "multinomial": (1.0, 2.0, 2.0),
     "dirichlet": (0.2, 0.3, 0.5),
+    # Any real vector is in `cartpow(reals, 3)`; off the mean so no term vanishes.
+    "mvnormal": (0.4, -0.1, 0.2),
 }
 
 # Whether each vector base's SUPPORT is a lower-dimensional manifold of the variate
@@ -231,6 +238,8 @@ VECTOR_SUPPORT_IS_MANIFOLD = {
     # density w.r.t. `iid(Counting(integers), k)`), which a bijection does not
     # distort whatever shape the support has, so the manifold question never arises.
     "multinomial": False,
+    # §08: support `cartpow(reals, n)`, full-dimensional.
+    "mvnormal": False,
 }
 
 # The curated wrap list. Four entries, each for a stated reason:
@@ -248,7 +257,9 @@ VECTOR_SUPPORT_IS_MANIFOLD = {
 #                  is singular against ambient Lebesgue and is not one of §06's
 #                  affine embedded sets, so the law has no density (§06 "Singular
 #                  laws"). The determiniser refuses and the oracle withholds: a
-#                  conformant refusal (`table._spec_justified`).
+#                  conformant refusal (`table._spec_justified`). Over `MvNormal` it
+#                  reaches the `in cartpow(posreals, n)` image gate and carries the
+#                  family's one nonzero cell-wise volume, −Σ log y.
 # * `truncate`   — a SCALAR `interval` against a vector variate: the set-kind
 #                  mismatch the determiniser refuses. A conformant refusal, not a
 #                  capability gap (`table._spec_justified`).
@@ -932,7 +943,7 @@ def in_support(base: Base, x: float | tuple[float, ...] | list[float]) -> bool:
         # DIVERGES at a zero cell rather than vanishing.
         cells = list(x)
         return all(c >= 0.0 for c in cells) and abs(sum(cells) - 1.0) < 1e-9
-    if base.kind == "normal":
+    if base.kind in ("normal", "mvnormal"):
         return True
     if base.kind == "gamma":
         return x > 0.0
