@@ -6,7 +6,7 @@ base densities — the ones the probe space generates: `weighted`, `logweighted`
 spellings), plus `joint` and `iid` over the LINEAR-GAUSSIAN family only
 (`linear_gaussian_logpdf`). §13's remaining rules are **not** implemented:
 `superpose`, `jointchain` and `kchain` raise `OracleUnsupported`, as does any
-base outside the four in `space.BASES` and the two in `space.VECTOR_BASES`, and
+base outside the four in `space.BASES` and the three in `space.VECTOR_BASES`, and
 so does a `joint` whose components are not `Normal` draws over `Normal` parents.
 That list is the module's scope, stated here rather than left to be discovered
 at runtime.
@@ -189,6 +189,9 @@ def _vector_base_logpdf(base: Base, x) -> float:
     * §08 `Dirichlet(alpha)` — "Density w.r.t. `Lebesgue(stdsimplex(n))`:
       Gamma(||alpha||_1)/prod_i Gamma(alpha_i) prod_i x_i^{alpha_i - 1}", which is
       `scipy.stats.dirichlet(alpha).logpdf(x)`.
+    * §08 `MvNormal(mu, cov)` — the multivariate normal density w.r.t.
+      `Lebesgue(cartpow(reals, n))`, which is
+      `scipy.stats.multivariate_normal(mu, cov).logpdf(x)`.
 
     ## `Lebesgue(stdsimplex(n))` is the COORDINATE measure — settled, and normative
 
@@ -235,6 +238,9 @@ def _vector_base_logpdf(base: Base, x) -> float:
     if base.kind == "dirichlet":
         (alpha,) = base.params
         return _dirichlet_logpdf(list(alpha), list(x))
+    if base.kind == "mvnormal":
+        mu, cov = base.params
+        return float(stats.multivariate_normal(mean=list(mu), cov=[list(r) for r in cov]).logpdf(list(x)))
     raise OracleUnsupported(f"vector base {base.kind}")
 
 
@@ -336,15 +342,13 @@ def _vector_logpdf(probe: Probe) -> float:
     below the accumulation is how a reader ends up unsure whether a Multinomial
     pushforward carries one.
 
-    **Coverage limitation, stated where the code is:** no probe this family generates
-    exercises a NONZERO vector log-volume. `pushfwd(neg)`'s per-cell term is
-    identically 0, `pushfwd(exp, Multinomial)` is counting-referenced so it takes no
-    term at all, and `pushfwd(exp, Dirichlet)` has no density. The per-cell SUM is
-    therefore not oracle-discriminated by any row: a sign error, or a
-    per-cell/whole-vector confusion, would survive here. An `MvNormal` base would
-    make the arm checkable — §08 gives its support as `cartpow(reals, n)` and its
-    reference as `iid(Lebesgue(reals), n)`, so the volume term is nonzero and
-    unambiguous. Recorded as a follow-up in `flatppl-dev/density-sweep-notes.md`.
+    **The one nonzero vector log-volume is `pushfwd(exp, MvNormal)`.** §08 gives
+    `MvNormal`'s support as `cartpow(reals, n)`, so its reference is
+    `Lebesgue(cartpow(reals, n))` and the per-cell terms sum to Σ log y. That row
+    discriminates a sign error or a per-cell/whole-vector confusion in the sum.
+    `pushfwd(neg)`'s per-cell term is identically 0, `pushfwd(exp, Multinomial)` is
+    counting-referenced so it takes no term at all, and `pushfwd(exp, Dirichlet)` has
+    no density.
     """
     x = list(probe.point)
     logv = 0.0
