@@ -1,0 +1,2 @@
+inputs = (x, alpha, beta)
+outputs = logdensityof(Poisson.(exp.(alpha .+ x * beta)), [0, 2, 3])

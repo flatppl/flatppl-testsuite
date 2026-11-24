@@ -1,0 +1,8 @@
+%%%
+A written Bernoulli regression law Bernoulli.(invlogit.(alpha .+ x * beta)) is the §09 BernoulliLogitGLM. §09 requires finite
+coefficients, so an infinite coefficient is outside the law's declared value set.
+%%%
+flatppl_compat = "0.1"
+x = elementof(cartpow(reals, [3, 2]))
+alpha = elementof(reals)
+beta = elementof(cartpow(reals, 2))

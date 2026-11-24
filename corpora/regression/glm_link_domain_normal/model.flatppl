@@ -1,0 +1,9 @@
+%%%
+A written Normal regression law Normal.(alpha .+ x * beta, sigma) is the §09 NormalGLM. §09 requires finite coefficients, so an infinite
+coefficient is outside the law's declared value set.
+%%%
+flatppl_compat = "0.1"
+x = elementof(cartpow(reals, [3, 2]))
+alpha = elementof(reals)
+beta = elementof(cartpow(reals, 2))
+sigma = elementof(posreals)

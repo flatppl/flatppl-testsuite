@@ -1,0 +1,9 @@
+%%%
+A written Poisson regression law Poisson.(exp.(alpha .+ x * beta)) is the §09 PoissonLogGLM. §09 requires finite coefficients, so an
+infinite coefficient is outside the law's declared value set. At alpha = 800 every rate overflows: the log density is
+about -8.18e347, which rounds to -inf.
+%%%
+flatppl_compat = "0.1"
+x = elementof(cartpow(reals, [3, 2]))
+alpha = elementof(reals)
+beta = elementof(cartpow(reals, 2))
