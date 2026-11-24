@@ -10,6 +10,7 @@ from scipy import integrate, stats
 
 from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.sweep.oracle import (
+    _MANIFOLD_SAFE_FORWARDS,
     OracleUnsupported,
     _frozen,
     _interval,
@@ -710,12 +711,12 @@ def test_a_vector_pushfwd_neg_is_volume_preserving_cell_wise():
 
 
 def test_a_vector_pushfwd_over_a_manifold_support_withholds_a_value():
-    """`pushfwd(exp, Dirichlet)` is the shape whose reference measure §06 and §08 do
-    not name (see `oracle._MANIFOLD_SAFE_FORWARDS`): the ambient R^3 Jacobian, the
-    2-D Hausdorff element on the image surface and the (y1, y2) chart give 1.0,
-    0.6816 and 0.5 for the same volume term. The oracle must withhold rather than
-    pick one — supplying a value would make it the authority for semantics nobody
-    wrote down."""
+    """`pushfwd(exp, Dirichlet)` has no density (see
+    `oracle._MANIFOLD_SAFE_FORWARDS`): `exp`'s image of the simplex is curved, so it
+    is singular against ambient Lebesgue and is not one of §06's affine embedded
+    sets (§06 "Singular laws"). The ambient R^3 Jacobian, the 2-D Hausdorff element
+    and the (y1, y2) chart give 1.0, 0.6816 and 0.5 for its volume term. The oracle
+    withholds, and the determiniser refuses."""
     y = [math.exp(c) for c in (0.2, 0.3, 0.5)]
     with pytest.raises(OracleUnsupported):
         true_logpdf(_probe(_DIRICHLET, Wrap("pushfwd", ("exp",)), y))
@@ -770,7 +771,7 @@ def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
     "A sign error in a per-cell volume term cannot survive the mass invariant" is
     FALSE for this family: every shape it reaches has a log-volume that is identically
     zero (`pushfwd(neg)`'s per-cell term is 0; `pushfwd(exp, Multinomial)` is
-    counting-referenced so takes no term; `pushfwd(exp, Dirichlet)` is withheld), and
+    counting-referenced so takes no term; `pushfwd(exp, Dirichlet)` has no density), and
     a sign error on 0 is invisible. What these rows DO establish is that the inverse
     map is applied at all — a missing inversion evaluates Dirichlet off the simplex
     and gives -inf. The per-cell log-volume MAGNITUDE has no oracle-checked row
@@ -787,6 +788,10 @@ def test_every_vector_measure_carries_the_mass_the_algebra_requires(base, wrap):
     if wrap.kind == "truncate":
         pytest.skip("the oracle withholds a value for this shape, so there is "
                     "no density to integrate (see the test above)")
+    if (VECTOR_SUPPORT_IS_MANIFOLD[base.kind] and wrap.kind == "pushfwd"
+            and wrap.args[0] not in _MANIFOLD_SAFE_FORWARDS):
+        pytest.skip("a non-affine map of a simplex law has no density to integrate "
+                    "(test_a_vector_pushfwd_over_a_manifold_support_withholds_a_value)")
 
     fwd = {"exp": math.exp, "neg": lambda x: -x}.get(
         wrap.args[0] if wrap.kind == "pushfwd" else None, lambda x: x)

@@ -15,16 +15,14 @@ the failing-when-fixed crash pins fired as designed, and the two
 `multinomial + pushfwd` shapes are back in the generated family with real
 verdict-table rows checked against §08's pmf.
 
-One hold-out remains, and its cause is NOT an engine gap:
-`dirichlet + pushfwd(exp)` scores fine — the sweep has nothing to check the number
-against, because §06 scopes `Lebesgue` to lower-dimensional embedded **affine**
-sets and `exp`'s image of the simplex is curved. It retires on a spec ruling
-(an open spec question for `flatppl-design` §06), not on an engine release, and the pin
-here fails if the emitted value, the oracle's withhold, or the recorded category
-moves. The distinction matters: an engine-gap hold-out and an oracle-gap hold-out
-retire on different events, so `space._HELD_OUT` records the category per shape.
+No hold-out remains. `dirichlet + pushfwd(exp)` was held out while no §06 rule
+said which measure its number was a density against. By §03 and §06 a law
+on `stdsimplex(n)` keeps a density only under a uniform affine map. `exp`'s image
+of the simplex is curved, so the law has no density, the determiniser refuses,
+and the shape is a generated row with a conformant refusal. It was the family's
+only probe of the `in cartpow(posreals, n)` image gate, so that arm now has no
+probe here: Multinomial's support tightens `exp`'s image to `ge(1.0)`.
 """
-import math
 import re
 import subprocess
 import tempfile
@@ -47,6 +45,7 @@ from flatppl_testsuite.sweep.space import (
     _vector_point_for,
     enumerate_vector_probes,
 )
+from flatppl_testsuite.sweep.table import _spec_justified
 
 pytestmark = pytest.mark.skipif(
     not CONFIG.flatppl_bin.exists(), reason="needs the flatppl binary"
@@ -116,21 +115,15 @@ _ARM = {
 
 
 @pytest.mark.parametrize("spelling", VECTOR_SPELLINGS)
-def test_the_cartpow_membership_gate_fires_where_it_is_claimed(spelling):
-    """`pushfwd(exp, ·)` over a vector variate is the family's route to the gate:
-    `exp`'s image is a §03 SET (`posreals`), which over a vector becomes
-    `cartpow(posreals, n)`. Asserted for both bases, because the gate comes off the
-    forward map's image and must not depend on the base's reference measure, and over
-    every spelling in the family, because the emitted-text invariant should not be
-    pinned for only the rows that happen to use `direct`.
+def test_the_image_gate_fires_where_it_is_claimed(spelling):
+    """`pushfwd(fn(exp.(_)), ·)` over a vector variate is the family's route to the
+    image gate. Asserted over every spelling in the family, because the emitted-text
+    invariant should not be pinned for only the rows that happen to use `direct`.
 
-    Multinomial's claim moved with the support-aware images (determinizer 48899b0):
-    its resolved support tightens exp's image to ge(y, 1.0), emitted as a
-    minimum-reduce, so the cartpow spelling now fires only for Dirichlet."""
-    text = _emitted(_probe("dirichlet", Wrap("pushfwd", ("exp",)), spelling))
-    assert _cartpow_gate("dirichlet") in text, (
-        f"dirichlet + pushfwd(exp) [{spelling}]: the cartpow membership gate did "
-        f"not fire, so nothing here covers it:\n{text}")
+    Multinomial's resolved support tightens exp's image to ge(y, 1.0), emitted as a
+    minimum-reduce (determinizer 48899b0), so the `cartpow` spelling does not fire.
+    Dirichlet used to carry that spelling; its map now has no density and refuses
+    (`test_a_non_affine_map_of_a_simplex_law_refuses`)."""
     text = _emitted(_probe("multinomial", Wrap("pushfwd", ("exp",)), spelling))
     for part in _GE_ONE_GATE:
         assert part in text, (
@@ -147,12 +140,13 @@ def test_the_lattice_snap_fires_only_over_a_counting_reference(spelling):
     `iid(Counting(integers), k)`, and §06 line 28's counting measure is what puts a
     pushforward of it on the snap path. Dirichlet's Lebesgue reference must not
     reach it — that direction is what makes this assertion discriminating rather
-    than trivially true."""
+    than trivially true. The Dirichlet side uses `neg`, the one map of a simplex law
+    that keeps a density."""
     text = _emitted(_probe("multinomial", Wrap("pushfwd", ("exp",)), spelling))
     assert _ARM["lattice_snap"] in text, f"lattice snap absent:\n{text}"
     assert _ARM["broadcast_round"] in text, f"broadcast round absent:\n{text}"
 
-    text = _emitted(_probe("dirichlet", Wrap("pushfwd", ("exp",)), spelling))
+    text = _emitted(_probe("dirichlet", Wrap("pushfwd", ("neg",)), spelling))
     assert _ARM["lattice_snap"] not in text, (
         f"a Lebesgue-reference base reached the lattice snap:\n{text}")
 
@@ -198,7 +192,7 @@ def test_a_multinomial_pushfwd_scores_the_counting_reference_value(op, spelling)
     """The two arms this family exists for, now checked against a number rather than
     against a crash.
 
-    `pushfwd(exp, Multinomial)` emits BOTH the `cartpow` image gate and the discrete
+    `pushfwd(fn(exp.(_)), Multinomial)` emits BOTH the image gate and the discrete
     lattice snap; `pushfwd(neg, Multinomial)` emits the snap alone (`neg` is onto, so
     it has no image gate). Both were held out while `flatppl-js` could evaluate
     neither `real` over an integer array nor `in` over a `cartpow` set. Both now score,
@@ -238,81 +232,54 @@ def test_the_engine_gap_category_is_empty():
 
 
 # --------------------------------------------------------------------------
-# The one remaining hold-out, and why it is NOT an engine gap
+# A non-affine map of a simplex law: no density
 # --------------------------------------------------------------------------
 
-# The bare Dirichlet log-density at the family's point, under §08's formula.
-_DIRICHLET_BARE = 2.0228711901914425
-# The ambient-R^3 Jacobian the determiniser subtracts for `pushfwd(exp, ·)` over a
-# vector variate: `sum(log y)` at `y = exp(x)` is `sum(x)`, and on `stdsimplex(n)`
-# that is exactly 1. So the emitted value is the bare law minus 1, to the bit.
-_DIRICHLET_AMBIENT_LOGVOL = 1.0
-_DIRICHLET_PUSHFWD_EXP_EMITTED = _DIRICHLET_BARE - _DIRICHLET_AMBIENT_LOGVOL
+# The determiniser's refusal for the image of a law on a lower-dimensional support.
+_NO_DENSITY = "the image of a law on a lower-dimensional support has no density"
 
 
-def test_the_dirichlet_pushfwd_exp_holdout_is_an_oracle_gap_not_an_engine_gap():
-    """The hold-out that survived wave J, re-pinned on its actual cause.
+def _determinize(probe: Probe) -> subprocess.CompletedProcess:
+    with tempfile.TemporaryDirectory() as tmp:
+        model = Path(tmp) / "probe.flatppl"
+        model.write_text(render(probe).source)
+        return subprocess.run(
+            [str(CONFIG.flatppl_bin), "determinize", str(model),
+             "-o", str(Path(tmp) / "out.flatppl")],
+            capture_output=True, text=True,
+        )
 
-    It is no longer blocked on the engine: `flatppl-js` scores this shape now. It is
-    held out because §06 scopes `Lebesgue` to lower-dimensional embedded **affine**
-    sets, and `exp`'s image of `stdsimplex(n)` is a CURVED 2-manifold — so no §06 rule
-    says which measure the emitted number is a density against. The ambient Jacobian,
-    the Hausdorff area element and the coordinate chart give 1.0, 0.6816 and 0.5 for
-    the same volume term. Generating the probe would add a `LOWERS` row with
-    `oracle = None`: a row no gate compares, which looks covered and is not.
 
-    Three assertions, so the pin fails on any of the three ways this can move:
+@pytest.mark.parametrize("spelling", VECTOR_SPELLINGS)
+def test_a_non_affine_map_of_a_simplex_law_refuses(spelling):
+    """`exp` maps `stdsimplex(n)` onto a curved surface. §06 gives `Lebesgue` on an
+    embedded set only for an affine one, and the curved image is singular against
+    ambient Lebesgue, so the law has no density (§06 "Singular laws"). The engine
+    used to score it as the bare law minus an ambient-R^3 Jacobian of 1.0, while the
+    Hausdorff element and the (y1, y2) chart give 0.6816 and 0.5 for the same term.
 
-    1. the engine still evaluates it, and to the AMBIENT reading (a different reading
-       would mean the determiniser changed its mind about the volume term);
-    2. the oracle still withholds (if it stops, the spec question was ruled on and the
-       shape must be reinstated with a real oracle value);
-    3. the shape is still out of the generated family.
-
-    It retires on a SPEC RULING in `flatppl-design` §06, not on an engine release.
-    """
-    probe = _probe("dirichlet", Wrap("pushfwd", ("exp",)))
-
-    verdict = classify(probe)
-    assert verdict.outcome == Outcome.LOWERS, (
-        f"the engine stopped scoring this shape ({verdict.outcome}, "
-        f"marker={verdict.marker}). It scored at flatppl-js e9803b6; a regression "
-        "here is an engine bug, not a reason to re-record the hold-out")
-    assert verdict.value == pytest.approx(_DIRICHLET_PUSHFWD_EXP_EMITTED, abs=1e-12), (
-        f"the determiniser now emits {verdict.value} for pushfwd(exp, Dirichlet), not "
-        f"the ambient-Jacobian {_DIRICHLET_PUSHFWD_EXP_EMITTED}. If it moved to the "
-        "Hausdorff (0.6816) or chart (0.5) volume term, the manifold question has "
-        "been decided somewhere -- check flatppl-design §06 and reinstate this "
-        "shape with the matching oracle rule")
+    Four assertions: the determiniser refuses with the lower-dimensional text (exit 3,
+    a refusal rather than an inference error), the oracle withholds, the shape is in
+    the generated family, and its refusal row is conformant."""
+    probe = _probe("dirichlet", Wrap("pushfwd", ("exp",)), spelling)
+    proc = _determinize(probe)
+    assert proc.returncode == 3 and _NO_DENSITY in proc.stderr, (
+        f"dirichlet + pushfwd(exp) [{spelling}] no longer refuses as having no "
+        f"density: exit {proc.returncode}: {proc.stderr.strip()}")
 
     with pytest.raises(OracleUnsupported, match="affine"):
         true_logpdf(probe)
 
     generated = {(p.base.kind, p.wraps[0]) for p in enumerate_vector_probes()}
-    assert ("dirichlet", Wrap("pushfwd", ("exp",))) not in generated
+    assert ("dirichlet", Wrap("pushfwd", ("exp",))) in generated
 
-    category, reason = _HELD_OUT[("dirichlet", Wrap("pushfwd", ("exp",)))]
-    assert category == "oracle", (
-        "the recorded category still says the engine is at fault; it is not, the "
-        "engine scores this shape")
-    assert "affine" in reason.lower(), (
-        "the reason no longer names the §06 affine scoping that justifies the "
-        "withhold")
-    assert "open spec question" in reason, (
-        "the reason no longer says this is an unruled spec question rather than a bug")
+    assert _spec_justified(probe, Outcome.REFUSES) is True
 
 
-def test_the_emitted_ambient_volume_term_is_exactly_one_on_the_simplex():
-    """Why the pinned value is `bare - 1.0` rather than an opaque constant: for
-    `pushfwd(exp, ·)` the per-cell forward log-volume at the preimage is `log y_i`, so
-    the sum is `sum(x_i)`, and every point of `stdsimplex(n)` sums to 1. Derived here
-    so the literal above cannot drift from its own justification."""
-    x = VECTOR_INNER["dirichlet"]
-    assert sum(x) == pytest.approx(1.0, abs=1e-15)
-    ambient = math.fsum(math.log(math.exp(c)) for c in x)
-    assert ambient == pytest.approx(_DIRICHLET_AMBIENT_LOGVOL, abs=1e-12)
-    bare = true_logpdf(_probe("dirichlet", Wrap("identity", ())))
-    assert bare == pytest.approx(_DIRICHLET_BARE, abs=1e-12)
+def test_no_shape_is_held_out():
+    """Both hold-out categories are empty. A future entry must be a deliberate
+    addition with a category and a reason."""
+    assert _HELD_OUT == {}, f"held-out shapes: {sorted(_HELD_OUT)}"
 
 
 def test_no_held_out_shape_reached_the_generated_family():
