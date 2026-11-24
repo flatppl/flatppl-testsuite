@@ -1,0 +1,4 @@
+y = elementof(cartpow(reals, 3))
+lp = logdensityof(lawof(record(a = a)), record(a = y))
+inputs = (y)
+outputs = (lp)
