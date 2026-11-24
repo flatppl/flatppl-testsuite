@@ -1,0 +1,145 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "js",
+    "det-js",
+    "stablehlo"
+  ],
+  "inputs": [
+    "x",
+    "alpha",
+    "beta",
+    "sigma"
+  ],
+  "matrix_inputs": [
+    "x"
+  ],
+  "points": [
+    {
+      "x": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "alpha": 0.1,
+      "beta": [
+        0.2,
+        -0.3
+      ],
+      "sigma": 1.0
+    },
+    {
+      "x": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "alpha": 0.1,
+      "beta": [
+        "inf",
+        0.0
+      ],
+      "sigma": 1.0
+    }
+  ],
+  "oracle": "mpmath at 50 digits, rounded to f64.",
+  "expected": [
+    -5.5468155996140185,
+    {
+      "error": "outside its declared value set"
+    }
+  ],
+  "tolerance": {
+    "atol": 1e-11,
+    "rtol": 0,
+    "value_atol_f32": 1e-05
+  },
+  "det-js": {
+    "inputs": [
+      "x",
+      "alpha",
+      "beta",
+      "sigma"
+    ],
+    "points": [
+      {
+        "x": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "alpha": 0.1,
+        "beta": [
+          0.2,
+          -0.3
+        ],
+        "sigma": 1.0
+      }
+    ],
+    "expected": [
+      -5.5468155996140185
+    ]
+  },
+  "js": {
+    "inputs": [
+      "x",
+      "alpha",
+      "beta",
+      "sigma"
+    ],
+    "points": [
+      {
+        "x": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "alpha": 0.1,
+        "beta": [
+          0.2,
+          -0.3
+        ],
+        "sigma": 1.0
+      }
+    ],
+    "expected": [
+      -5.5468155996140185
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+inputs = (x, alpha, beta, sigma)
+outputs = logdensityof(Normal.(alpha .+ x * beta, sigma), [1.0, 2.0, 0.5])

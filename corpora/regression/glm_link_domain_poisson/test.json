@@ -1,0 +1,160 @@
+{
+  "test_type": "logdensity",
+  "engines": [
+    "js",
+    "det-js",
+    "stablehlo"
+  ],
+  "inputs": [
+    "x",
+    "alpha",
+    "beta"
+  ],
+  "matrix_inputs": [
+    "x"
+  ],
+  "points": [
+    {
+      "x": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "alpha": 0.1,
+      "beta": [
+        0.2,
+        -0.3
+      ]
+    },
+    {
+      "x": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "alpha": 0.1,
+      "beta": [
+        "inf",
+        0.0
+      ]
+    },
+    {
+      "x": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "alpha": 800.0,
+      "beta": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "oracle": "mpmath at 50 digits, rounded to f64. At alpha = 800 the exact value is -8.18e347, below the f64 range, so it rounds to -inf; scipy gives nan there because exp(800) overflows.",
+  "expected": [
+    -6.053496210441986,
+    {
+      "error": "outside its declared value set"
+    },
+    "-inf"
+  ],
+  "tolerance": {
+    "atol": 1e-11,
+    "rtol": 0,
+    "value_atol_f32": 1e-05
+  },
+  "det-js": {
+    "inputs": [
+      "x",
+      "alpha",
+      "beta"
+    ],
+    "points": [
+      {
+        "x": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "alpha": 0.1,
+        "beta": [
+          0.2,
+          -0.3
+        ]
+      }
+    ],
+    "expected": [
+      -6.053496210441986
+    ]
+  },
+  "js": {
+    "inputs": [
+      "x",
+      "alpha",
+      "beta"
+    ],
+    "points": [
+      {
+        "x": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "alpha": 0.1,
+        "beta": [
+          0.2,
+          -0.3
+        ]
+      }
+    ],
+    "expected": [
+      -6.053496210441986
+    ]
+  }
+}

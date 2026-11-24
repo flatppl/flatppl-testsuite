@@ -1,0 +1,2 @@
+inputs = (x, alpha, beta)
+outputs = logdensityof(Bernoulli.(invlogit.(alpha .+ x * beta)), [1, 0, 1])
