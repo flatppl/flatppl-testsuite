@@ -12,8 +12,8 @@ That list is the module's scope, stated here rather than left to be discovered
 at runtime.
 
 The vector family (`space.VECTOR_BASES`) has its own fold, `_vector_logpdf`:
-the same rules applied cell-wise, with `pushfwd` over a manifold support
-withheld rather than guessed (`_MANIFOLD_SAFE_FORWARDS`).
+the same rules applied cell-wise, with a non-affine `pushfwd` over a manifold
+support withheld, because that image has no density (`_MANIFOLD_SAFE_FORWARDS`).
 
 The shared-latent family (`space.SharedLatentProbe`) is not a fold at all:
 `_shared_latent_logpdf` assembles the multivariate normal the draw graph
@@ -288,29 +288,18 @@ def _dirichlet_logpdf(alpha: list[float], x: list[float]) -> float:
 # lower-dimensional MANIFOLD of the ambient variate space — `Dirichlet`'s
 # `stdsimplex(n)` (§08), which is an (n-1)-manifold inside `cartpow(reals, n)`.
 #
-# **Only a map that preserves the manifold's own volume element qualifies, and of
-# the maps this family generates that is `neg` alone.** `neg` is an isometry of R^n
-# (it reflects the simplex onto a congruent copy), so its restricted volume element
-# is 1 and the log-volume is 0 whichever reference is meant. `exp` is not, and there
-# the reference measure of the IMAGE is genuinely not determined by §06 or §08:
-# three defensible readings of `pushfwd(exp, Dirichlet(2, 3, 4))`'s volume term at
-# (e^0.2, e^0.3, e^0.5) disagree —
-#
-#   * 1.0     — the ambient R^3 Jacobian log-det, `sum_i log y_i` (which on the
-#               simplex is just `sum_i x_i` = 1);
-#   * 0.6816  — the 2-D Hausdorff element on the image surface,
-#               `0.5 * log det(U^T diag(y)^2 U)` for an orthonormal basis U of the
-#               simplex's tangent space {v : sum v_i = 0};
-#   * 0.5     — the (y_1, y_2) coordinate chart's `log|d(y_1,y_2)/d(x_1,x_2)|`.
-#
-# They differ by 0.32 and 0.5 in log-density, so no reading is a rounding detail.
-# §06 says `logvolume` "generalizes the log-absolute-determinant of the Jacobian to
-# mappings between spaces of different dimension"; this map is R^3 -> R^3 while the
-# MEASURE lives on a 2-manifold, which is a case §06 does not name. Per
-# `flatppl-dev/density-sweep-notes.md` ("the oracle must not assume semantics the
-# spec does not give"), withhold: supplying one of the three would make this module
-# the authority for semantics nobody wrote down, and would report a spec gap as a
-# determiniser bug.
+# **Only a uniform affine map keeps a density, and of the maps this family
+# generates that is `neg` alone.** §06 gives `Lebesgue` on an embedded AFFINE set
+# such as `stdsimplex(n)` as the coordinate Lebesgue measure of its free
+# coordinates. A uniform scale `a` maps the simplex onto another affine set and
+# scales each free coordinate by `a`, so its volume term is `(n - 1) * log|a|`;
+# `neg` is `a = -1`, a log-volume of 0. `exp` maps the simplex onto a CURVED
+# surface. That image is singular against ambient Lebesgue and is not an affine
+# set, so `pushfwd(exp, Dirichlet)` has no density (§06 "Singular laws") and the
+# determiniser refuses it. The three volume terms one could write for it at
+# (e^0.2, e^0.3, e^0.5), 1.0 (ambient R^3 Jacobian), 0.6816 (2-D Hausdorff
+# element) and 0.5 (the (y_1, y_2) chart), differ by up to 0.5 in log-density,
+# which is why none of them is a density. The oracle withholds.
 _MANIFOLD_SAFE_FORWARDS = {"neg"}
 
 
@@ -350,7 +339,7 @@ def _vector_logpdf(probe: Probe) -> float:
     **Coverage limitation, stated where the code is:** no probe this family generates
     exercises a NONZERO vector log-volume. `pushfwd(neg)`'s per-cell term is
     identically 0, `pushfwd(exp, Multinomial)` is counting-referenced so it takes no
-    term at all, and `pushfwd(exp, Dirichlet)` is withheld below. The per-cell SUM is
+    term at all, and `pushfwd(exp, Dirichlet)` has no density. The per-cell SUM is
     therefore not oracle-discriminated by any row: a sign error, or a
     per-cell/whole-vector confusion, would survive here. An `MvNormal` base would
     make the arm checkable — §08 gives its support as `cartpow(reals, n)` and its
@@ -375,8 +364,8 @@ def _vector_logpdf(probe: Probe) -> float:
                 raise OracleUnsupported(
                     f"pushfwd({op}, {probe.base.kind}): §06 scopes `Lebesgue` to "
                     "lower-dimensional embedded AFFINE sets, and this forward's "
-                    "image of the support is not affine, so no §06 rule gives the "
-                    "reference measure of the image")
+                    "image of the support is not affine, so the image is singular "
+                    "and has no density (§06 \"Singular laws\")")
             if not all(_IN_FORWARD_IMAGE[op](c) for c in x):
                 return -math.inf      # some cell has no preimage
             if any(_PREIMAGE_OVERFLOWS.get(op, lambda _: False)(c) for c in x):

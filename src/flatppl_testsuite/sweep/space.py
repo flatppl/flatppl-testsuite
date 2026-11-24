@@ -241,10 +241,14 @@ VECTOR_SUPPORT_IS_MANIFOLD = {
 #                  element is unambiguous over BOTH supports (see
 #                  `oracle._MANIFOLD_SAFE_FORWARDS`), so it is the one that
 #                  oracle-checks the vector change-of-variables end to end.
-# * `pushfwd(exp)` — the member that reaches the `cartpow` image gate, and over
-#                  `Multinomial` the lattice snap as well. Generated and
-#                  oracle-checked over `Multinomial`; held out over `Dirichlet`,
-#                  where the oracle has no value to check against (`_HELD_OUT`).
+# * `pushfwd(exp)` — written `fn(exp.(_))` over a vector, since `exp` takes a
+#                  scalar (`render._SCALAR_DOMAIN`). Over `Multinomial` it reaches
+#                  the image gate and the lattice snap and is oracle-checked. Over
+#                  `Dirichlet` the image of the simplex is a curved surface, which
+#                  is singular against ambient Lebesgue and is not one of §06's
+#                  affine embedded sets, so the law has no density (§06 "Singular
+#                  laws"). The determiniser refuses and the oracle withholds: a
+#                  conformant refusal (`table._spec_justified`).
 # * `truncate`   — a SCALAR `interval` against a vector variate: the set-kind
 #                  mismatch the determiniser refuses. A conformant refusal, not a
 #                  capability gap (`table._spec_justified`).
@@ -279,29 +283,16 @@ VECTOR_SPELLINGS = ["direct", "stochastic_node"]
 # * `"oracle"` — the engine evaluates the shape and returns a number, but no §06 rule
 #   gives the reference measure of the result, so THIS SWEEP HAS NOTHING TO CHECK IT
 #   AGAINST. Generating it would add a `LOWERS` row with `oracle = None`, which no
-#   gate compares, i.e. a row that looks covered and is not.
+#   gate compares, i.e. a row that looks covered and is not. **This category is
+#   now EMPTY too.** It held `dirichlet + pushfwd(exp)`, which the engine scored
+#   with an ambient-R^3 Jacobian. By §03 and §06 a law on `stdsimplex(n)` keeps
+#   a density only under a uniform affine map: `exp`'s image of the simplex is
+#   curved, so the law has no density (§06 "Singular laws"). The determiniser
+#   refuses it, and the shape is generated as a conformant refusal row.
 #
 # Each reason records what this harness OBSERVES, because that is what a human
 # triaging it will grep for.
-_HELD_OUT = {
-    ("dirichlet", Wrap("pushfwd", ("exp",))): (
-        "oracle",
-        "the engine now scores this shape -- 1.022871190191443, which is the bare "
-        "law's 2.0228711901914425 minus an ambient-R^3 Jacobian of exactly 1.0 "
-        "(`sum(log y)`, which on the simplex is `sum(x)` = 1). But §06 scopes "
-        "`Lebesgue` to lower-dimensional embedded AFFINE sets and `exp`'s image of "
-        "`stdsimplex(n)` is a CURVED 2-manifold, so no §06 rule says which measure "
-        "that number is a density against: the ambient Jacobian, the Hausdorff area "
-        "element and the coordinate chart give 1.0, 0.6816 and 0.5 for the same "
-        "volume term. The oracle withholds (`oracle._MANIFOLD_SAFE_FORWARDS`), so a "
-        "generated row here would carry no checkable value. Tracked as an open spec "
-        "question for flatppl-design §06 (see flatppl-js "
-        "packages/engine/ARCHITECTURE.md, 'Measure-algebra scar zones'); this hold-out "
-        "retires when that question is ruled on, NOT when an engine changes -- "
-        "`tests/sweep/test_vector_arms.py` fails if either the emitted value or the "
-        "oracle's withhold moves",
-    ),
-}
+_HELD_OUT: dict[tuple[str, Wrap], tuple[str, str]] = {}
 
 # The engine-gap category, kept as a named empty set rather than deleted: it records
 # that the category exists and what retires it, so the next engine gap has somewhere

@@ -57,6 +57,23 @@ def test_a_known_probe_renders_the_expected_source():
     assert "logdensityof(m, 1.6487212707001282)" in r.source
 
 
+@pytest.mark.parametrize("spelling,inner", [
+    ("direct", "Multinomial(n = 5, p = [0.2, 0.3, 0.5])"),
+    ("stochastic_node", "lawof(x)"),
+])
+def test_a_scalar_builtin_over_a_vector_renders_its_broadcast(spelling, inner):
+    """`exp` takes a scalar, so over an array variate the bare name is an
+    inference error and the map is written `fn(exp.(_))`. `neg` takes an array
+    and stays bare."""
+    base = VECTOR_BASES[0]
+    assert base.kind == "multinomial"
+    for op, written in (("exp", "fn(exp.(_))"), ("neg", "neg")):
+        p = Probe(id="v", base=base, wraps=(Wrap("pushfwd", (op,)),),
+                  spelling=spelling, ordering="single", consumer=False,
+                  point=(1.0, 2.0, 2.0))
+        assert f"m = pushfwd({written}, {inner})" in render(p).source
+
+
 def _corpus_ctor_keywords() -> dict[str, tuple[str, ...]]:
     """`{constructor: (keyword, ...)}` as spelled in the committed corpus models."""
     out: dict[str, tuple[str, ...]] = {}
@@ -171,12 +188,16 @@ def test_every_vector_probe_point_is_on_its_supports_constraint_surface():
             f"{p.id}: preimage {pre} not in {p.base.kind}'s support")
 
 
-def _wrap_marker(wrap: Wrap) -> str:
+def _wrap_marker(wrap: Wrap, vector: bool = False) -> str:
     """A substring that only appears in the rendered source if this wrap's
     operator was actually applied — used to catch a spelling that silently
     drops a wrap, the general form of the bug where `record` built its law
-    from the unwrapped base while the query point stayed wrap-adjusted."""
+    from the unwrapped base while the query point stayed wrap-adjusted.
+
+    Over a vector base a scalar built-in is written as its broadcast."""
     if wrap.kind == "pushfwd":
+        if vector and wrap.args[0] != "neg":
+            return f"pushfwd(fn({wrap.args[0]}.(_))"
         return f"pushfwd({wrap.args[0]}"
     if wrap.kind == "affine":
         return "x ->"
@@ -201,7 +222,7 @@ def test_every_wrap_is_present_across_all_three_spellings():
         if w.kind == "identity":
             continue
         r = render(p)
-        marker = _wrap_marker(w)
+        marker = _wrap_marker(w, is_vector_base(p.base))
         assert marker in r.source, (
             f"{p.id}: wrap operator {marker!r} missing from the "
             f"{p.spelling!r} spelling's source"

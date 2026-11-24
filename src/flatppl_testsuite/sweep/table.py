@@ -58,13 +58,18 @@ from pathlib import Path
 from flatppl_testsuite.config import CONFIG
 from flatppl_testsuite.scoring.compare import compare_scalar
 from flatppl_testsuite.sweep.classify import Outcome, classify
-from flatppl_testsuite.sweep.oracle import OracleUnsupported, true_logpdf
+from flatppl_testsuite.sweep.oracle import (
+    _MANIFOLD_SAFE_FORWARDS,
+    OracleUnsupported,
+    true_logpdf,
+)
 from flatppl_testsuite.sweep.space import (
     BASES,
     LITERAL_PROBES,
     LiteralProbe,
     ORDERINGS,
     SHARED_LATENT_POINTS,
+    VECTOR_SUPPORT_IS_MANIFOLD,
     WRAPS,
     Probe,
     SharedLatentProbe,
@@ -176,6 +181,17 @@ def _spec_justified(probe: Probe | SharedLatentProbe | LiteralProbe,
         # conformant refusals when only the prose changed. The cost is this blind
         # spot; `tests/sweep/test_vector_arms.py` covers it from the other side by
         # asserting the emitted arm.
+        return True
+    if (is_vector_base(probe.base) and VECTOR_SUPPORT_IS_MANIFOLD[probe.base.kind]
+            and wrap.kind == "pushfwd" and wrap.args[0] not in _MANIFOLD_SAFE_FORWARDS):
+        # The rule, not one shape: a law on a lower-dimensional support
+        # (`stdsimplex(n)`, `zerosum(n)`) under a map that is not uniform affine.
+        # §03 and §06 give `Lebesgue` on such a support as the coordinate measure
+        # of its free coordinates, which a uniform affine map carries to another
+        # affine set. Any other map's image is singular against ambient Lebesgue and
+        # is not an affine set, so no density exists (§06 "Singular laws"), and the
+        # oracle withholds the same shapes. Conformant, not a gap.
+        # `tests/sweep/test_vector_arms.py` pins the refusal text.
         return True
     return False  # an unrecognized refusal: a tracked over-refusal, not a pass
 
@@ -304,11 +320,8 @@ SLICE_EXCLUDED_AXES = {
              "at spelling=direct, covering the known float-roundtrip defect"),
     "consumer": "fixed False (True excluded)",
     "vector_family": ("one probe per (base, wrap) shape space.vector_shapes() "
-                      "generates, at spelling='direct' ordering='single'; the one "
-                      "shape whose reference measure §06 does not give "
-                      "(dirichlet + pushfwd(exp)) is not in the family at all "
-                      "(space._HELD_OUT) and is pinned instead by "
-                      "tests/sweep/test_vector_arms.py"),
+                      "generates, at spelling='direct' ordering='single'; no "
+                      "shape is held out (space._HELD_OUT is empty)"),
     "shared_latent_family": ("one probe per (shape, spelling) pair "
                              "space.shared_latent_shapes() generates, at n=2 "
                              "latent_query='none'; excludes n=3 (the off-diagonal "

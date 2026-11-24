@@ -20,6 +20,7 @@ from flatppl_testsuite.sweep.space import (
     _latent_name,
     is_literal,
     is_shared_latent,
+    is_vector_base,
     shared_latent_graph,
 )
 
@@ -62,12 +63,21 @@ def _base_src(base: Base) -> str:
     return _CTOR[base.kind].format(*(_value_src(p) for p in base.params))
 
 
-def _wrap_src(wrap: Wrap, inner: str) -> str:
+# Built-ins whose domain is a scalar (§07). Over an array variate the map is the
+# broadcast, written `fn(exp.(_))`: the bare name is an inference error there.
+# `neg` takes an array, so it stays bare.
+_SCALAR_DOMAIN = {"exp", "log", "sqrt"}
+
+
+def _wrap_src(wrap: Wrap, inner: str, vector: bool = False) -> str:
     k = wrap.kind
     if k == "identity":
         return inner
     if k == "pushfwd":
-        return f"pushfwd({wrap.args[0]}, {inner})"
+        op = wrap.args[0]
+        if vector and op in _SCALAR_DOMAIN:
+            return f"pushfwd(fn({op}.(_)), {inner})"
+        return f"pushfwd({op}, {inner})"
     if k == "affine":
         return f"pushfwd(x -> {wrap.args[0]} * x + {wrap.args[1]}, {inner})"
     if k == "truncate":
@@ -83,10 +93,10 @@ def _wrap_src(wrap: Wrap, inner: str) -> str:
     raise ValueError(f"unrendered wrap kind: {k}")
 
 
-def _fold(wraps: tuple[Wrap, ...], inner: str) -> str:
+def _fold(wraps: tuple[Wrap, ...], inner: str, vector: bool = False) -> str:
     """Compose every wrap onto `inner`, in order."""
     for w in wraps:
-        inner = _wrap_src(w, inner)
+        inner = _wrap_src(w, inner, vector)
     return inner
 
 
@@ -201,14 +211,15 @@ def render(probe: Probe | SharedLatentProbe | LiteralProbe) -> RenderedProbe:
         return _render_shared_latent(probe)
 
     lines: list[str] = []
+    vector = is_vector_base(probe.base)
     if probe.spelling == "direct":
-        lines.append(f"m = {_fold(probe.wraps, _base_src(probe.base))}")
+        lines.append(f"m = {_fold(probe.wraps, _base_src(probe.base), vector)}")
         query_measure = "m"
     elif probe.spelling == "stochastic_node":
         # §06 declares this equivalent to the direct spelling.
         lines.append(f"mb = {_base_src(probe.base)}")
         lines.append("x = draw(mb)")
-        lines.append(f"m = {_fold(probe.wraps, 'lawof(x)')}")
+        lines.append(f"m = {_fold(probe.wraps, 'lawof(x)', vector)}")
         query_measure = "m"
     elif probe.spelling == "record":
         # Same equivalence, spelled through a record law rather than a bare
