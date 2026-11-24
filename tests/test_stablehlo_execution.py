@@ -226,13 +226,62 @@ def test_complex_projections_preserve_extreme_scales(tmp_path):
 def test_enzyme_mode_refuses_unqualified_derivative_paths(tmp_path):
     _gate_engine("stablehlo")
     query = tmp_path / "query.flatppl"
-    for expression in ("probit.(x)", "cumprod(x)"):
+    for expression in ("probit.(x)", "cumprod(complex.(x, x))"):
         query.write_text('flatppl_compat = "0.1"\n'
                          "x = elementof(cartpow(reals, 3))\ninputs = x\n"
                          f"outputs = {expression}\n")
         ex.emit(query, "logdensity", restrict_enzyme_compatible=False)
-        with pytest.raises(ex.EmitRefused):
+        with pytest.raises(ex.EmitRefused, match="no qualified Enzyme derivative"):
             ex.emit(query, "logdensity")
+
+
+# Without the Enzyme restriction, probit emits, and its value and derivative
+# match scipy: probit(p) = ndtri(p) and probit'(p) = sqrt(2 pi) exp(ndtri(p)^2 / 2).
+@pytest.mark.stablehlo_only
+def test_unrestricted_probit_value_and_derivative_match_scipy(tmp_path):
+    _gate_engine("stablehlo")
+    from scipy.special import ndtri
+
+    query = tmp_path / "query.flatppl"
+    query.write_text('flatppl_compat = "0.1"\n'
+                     "x = elementof(cartpow(reals, 3))\ninputs = x\n"
+                     "outputs = probit.(x)\n")
+    p = np.array([0.02, 0.5, 0.9])
+    # ndtri(0.5) is 0, so an absolute floor of a few ulps of 1 applies there.
+    for dtype, rtol, atol in (("f64", 1e-12, 1e-15), ("f32", 2e-6, 1e-6)):
+        source = ex.emit(query, "logdensity", dtype=dtype, restrict_enzyme_compatible=False)
+        jax, jnp, hlo_call = ex._jax()
+        width = jnp.float64 if dtype == "f64" else jnp.float32
+        evaluate = jax.jit(lambda x: hlo_call(x, source=source)[0])
+        np.testing.assert_allclose(evaluate(jnp.asarray(p, dtype=width)), ndtri(p),
+                                   rtol=rtol, atol=atol)
+        np.testing.assert_allclose(ex.gradient(source, [p.tolist()], [0])[0],
+                                   np.sqrt(2 * np.pi) * np.exp(ndtri(p) ** 2 / 2),
+                                   rtol=rtol, atol=atol)
+
+
+# A real cumprod differentiates under the Enzyme restriction. The prefix
+# products and the gradient of their sum are checked against closed forms:
+# d/dx_j sum_k prod_{i<=k} x_i = sum_{k>=j} prod_{i<=k, i!=j} x_i.
+# The zero entry checks the product rule without a division by x_j.
+@pytest.mark.stablehlo_only
+def test_enzyme_mode_differentiates_a_real_cumprod(tmp_path):
+    _gate_engine("stablehlo")
+    query = tmp_path / "query.flatppl"
+    query.write_text('flatppl_compat = "0.1"\n'
+                     "x = elementof(cartpow(reals, 3))\ninputs = x\n"
+                     "outputs = cumprod(x)\n")
+    source = ex.emit(query, "logdensity")
+    jax, jnp, hlo_call = ex._jax()
+    evaluate = jax.jit(lambda x: hlo_call(x, source=source)[0])
+    for x in ([0.5, 2.0, 1.5], [2.0, 0.0, 3.0], [-1.25, 4.0, -0.5]):
+        x1, x2, x3 = x
+        np.testing.assert_allclose(
+            evaluate(jnp.asarray(x, dtype=jnp.float32)),
+            [x1, x1 * x2, x1 * x2 * x3], rtol=1e-6, atol=0)
+        expected = [1.0 + x2 + x2 * x3, x1 + x1 * x3, x1 * x2]
+        np.testing.assert_allclose(
+            ex.gradient(source, [x], [0])[0], expected, rtol=1e-6, atol=1e-7)
 
 
 @pytest.mark.stablehlo_only
